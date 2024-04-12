@@ -1,0 +1,201 @@
+﻿@model SuperbrainManagement.Models.Product
+
+@{
+    ViewBag.Title = "Delete";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Delete</h2>
+  
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Product</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.ProductCategory.Code)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ProductCategory.Code)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.User.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.User.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Code)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Code)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Image)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Image)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Enable)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Enable)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Active)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Active)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Price)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Price)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DiscountPrice)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DiscountPrice)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.StatusDiscount)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.StatusDiscount)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DateCreate)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DateCreate)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IsCore)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IsCore)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Unit)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Unit)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Quota)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Quota)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.NumberOfPackage)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NumberOfPackage)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.UnitOfPackage)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.UnitOfPackage)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Inventory)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Inventory)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IsFixed)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IsFixed)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IsSale)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IsSale)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IdSupplier)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IdSupplier)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.PowerScore)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.PowerScore)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default" /> |
+            @Html.ActionLink("Back to List", "Index")
+        </div>
+    }
+</div>

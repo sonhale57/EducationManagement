@@ -1,0 +1,103 @@
+﻿@model PagedList.IPagedList<SuperbrainManagement.Models.Student>
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int stt = 1;
+}
+
+<div class="row">
+    <div class="col col-md-4 col-sm-12">
+        <form action="/students" method="get">
+            <div class="input-group mb-3">
+                @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2" })
+                <input type="text" class="form-control" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter ">
+                <button class="input-group-text bg-success" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
+            </div>
+        </form>
+    </div>
+    <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
+        <div class="me-0 btn btn-md p-0">
+            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="ti ti-arrows-sort"></i> Sắp xếp theo
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-ascending"></i> Mới nhất</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Cũ nhất</a></li>
+            </ul>
+        </div>
+        <a href="" class="btn btn-md btn-outline-success"><i class="ti ti-upload"></i></a>
+        <a href="" class="btn btn-md btn-outline-danger"><i class="ti ti-download"></i></a>
+        <a href="/students/create" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
+    </div>
+</div>
+<table class="table fs-3">
+    <thead class="bg-success text-white rounded-1">
+        <tr>
+            <th class="text-center">STT</th>
+            <th>Mã</th>
+            <th>Họ tên</th>
+            <th>Sinh nhật</th>
+            <th>Giới tính</th>
+            <th>Số điện thoại</th>
+            <th>Email</th>
+            <th>Quản lý</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td class="text-center">
+                @stt
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Code)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DateOfBirth)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Sex)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Phone)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.User.Name)
+            </td>
+            <td>
+                <a href="/branches/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
+                <a href="/branches/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
+                <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="ti ti-dots-vertical"></i>
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <li><a class="dropdown-item" href="@Url.Action("AddCourseProgramOfStudents","Students",new {IdStudent = item.Id})"><i class="ti ti-script-plus"></i> Đăng ký khóa học</a></li>
+                    <li><a class="dropdown-item" href="javascript:Exchange_branch(@item.Id)"><i class="ti ti-exchange"></i> Chuyển cơ sở</a></li>
+                </ul>
+            </td>
+        </tr>
+        stt += 1;
+    }
+</table>
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        @Html.PagedListPager(Model, page => Url.Action("Index", new { page }), new PagedListRenderOptions { LiElementClasses = new string[] { "page-item" } })
+    </ul>
+</nav>
+<script>
+    function onchange_active() {
+        //Script Onchange
+        showSuccess("Onchange", 2000);
+    }
+</script>

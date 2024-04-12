@@ -1,0 +1,155 @@
+﻿@model SuperbrainManagement.Models.RegistrationCourse
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Details</h2>
+ 
+<div>
+    <h4>RegistrationCourse</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Course.Code)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Course.Code)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Registration.Description)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Registration.Description)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Price)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Price)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Discount)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Discount)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TotalAmount)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TotalAmount)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Status)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Amount)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Amount)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Enable)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Enable)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.StatusExchangeCourse)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.StatusExchangeCourse)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DateExchangeCourse)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DateExchangeCourse)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.StatusExtend)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.StatusExtend)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DateExtend)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DateExtend)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.StatusReserve)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.StatusReserve)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DateReserve)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DateReserve)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.StatusJoinClass)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.StatusJoinClass)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DateJoinClass)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DateJoinClass)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

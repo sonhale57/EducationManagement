@@ -1,0 +1,10 @@
+diff a/Controllers/ClassesController.cs b/Controllers/ClassesController.cs	(rejected hunks)
+@@ -51,7 +51,7 @@
+             if (ModelState.IsValid)
+             {
+                 @class.DateCreate = DateTime.Now;
+-                @class.IdBranch = CheckUsers.idBranch();
++                @class.IdBranch =int.Parse(CheckUsers.idBranch()) ;
+                 @class.IdUser =int.Parse(CheckUsers.iduser());
+                 db.Classes.Add(@class);
+                 db.SaveChanges();

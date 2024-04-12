@@ -1,0 +1,265 @@
+﻿@model SuperbrainManagement.Models.Branch
+
+@{
+    ViewBag.Title = "Delete";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Branch</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.BranchGroup.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.BranchGroup.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Logo)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Logo)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Code)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Code)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CompanyName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CompanyName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Address)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Address)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.City)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.City)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.District)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.District)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Ward)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Ward)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Map)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Map)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Phone)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Phone)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Email)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Email)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.OtherEmail)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.OtherEmail)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TaxCode)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TaxCode)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.License)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.License)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DisplayOrder)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DisplayOrder)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ContractNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ContractNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ContractExpire)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ContractExpire)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Enable)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Enable)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Active)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Active)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DateExpire)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DateExpire)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.StatusUsageBrand)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.StatusUsageBrand)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DateExpireOnline)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DateExpireOnline)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.StatusActiveOnline)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.StatusActiveOnline)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.NumberInGroup)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NumberInGroup)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FreeTrainning)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FreeTrainning)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DateCreate)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DateCreate)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Unlock)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Unlock)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.GrandOpeningDay)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.GrandOpeningDay)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default" /> |
+            @Html.ActionLink("Back to List", "Index")
+        </div>
+    }
+</div>

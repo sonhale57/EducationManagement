@@ -1,0 +1,103 @@
+﻿@{ 
+    Layout = null;
+}
+<title>Superbrain Management Software</title>
+<link href="~/assets/css/styles.css" rel="stylesheet" />
+<style>
+    @@media print{
+        a:after {
+            content: none !important;
+        }
+        /* Ẩn thời gian khi in */
+        time {
+            display: none !important;
+        }
+    }
+</style>
+<main class="no-print">
+    <h3 class="text-center">PHIẾU THU</h3>
+    <p class="text-center">[ngayphieuthu]</p>
+    <div class="card rounded-0">
+        <div class="card-body">
+            <table class=" w-100 fs-3">
+                <tr>
+                    <td class="w-75">Họ và tên học viên:</td>
+                    <td class="w-25">Số phiếu thu:</td>
+                </tr>
+                <tr>
+                    <td class="w-75">Số điện thoại:</td>
+                    <td class="w-25">Liên  1: Giao cho PH</td>
+                </tr>
+                <tr>
+                    <td class="w-75">Ghi chú:</td>
+                    <td class="w-25">Lần thu:</td>
+                </tr>
+            </table>
+            <table class="table w-100 fs-3 mt-3">
+                <thead class="bg-primary text-white">
+                    <tr class="text-center">
+                        <th>Stt</th>
+                        <th>Nội dung</th>
+                        <th colspan="2">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td rowspan="4" colspan="2">
+                        Viết bằng chữ:<br />
+                        <b>ba triệu ba trăm tám mươi nghìn đồng chẵn</b>
+                    </td>
+                    <td>Tổng tiền:</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>Chiết khấu:</td>
+                    <td>0 </td>
+                </tr>
+                <tr>
+                    <td>Đã thanh toán:</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>Còn lại:</td>
+                    <td>0</td>
+                </tr>
+            </table>
+            <table class="text-center w-100 mt-3 mb-3">
+                <tr>
+                    <td class="w-25">
+                        <h6>Giám đốc</h6>
+                        <i class="fs-2">(Ký & ghi rõ họ tên)</i>
+                    </td>
+                    <td class="w-25">
+                        <h6>Thủ quỹ</h6>
+                        <i class="fs-2">(Ký & ghi rõ họ tên)</i>
+                    </td>
+                    <td class="w-25">
+                        <h6>Người lập</h6>
+                        <i class="fs-2">(Ký & ghi rõ họ tên)</i>
+                    </td>
+                    <td class="w-25">
+                        <h6>Người nộp tiền</h6>
+                        <i class="fs-2">(Ký & ghi rõ họ tên)</i>
+                    </td>
+                </tr>
+            </table>
+            <p class="text-center fs-2 mt-5">
+                (Cần đối chiếu khi <strong>lập, giao, nhận</strong> hoá đơn)<br />
+                Thời gian in: @DateTime.Now
+            </p>
+        </div>
+    </div>
+</main>
+<script>
+    window.print();
+</script>
+
+
+

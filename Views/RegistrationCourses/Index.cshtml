@@ -1,0 +1,130 @@
+﻿@model IEnumerable<SuperbrainManagement.Models.RegistrationCourse>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Index</h2>
+ 
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Course.Code)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Registration.Description)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Price)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Discount)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.TotalAmount)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Status)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Amount)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Enable)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.StatusExchangeCourse)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DateExchangeCourse)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.StatusExtend)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DateExtend)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.StatusReserve)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DateReserve)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Description)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.StatusJoinClass)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DateJoinClass)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Course.Code)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Registration.Description)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Price)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Discount)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.TotalAmount)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Status)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Amount)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Enable)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.StatusExchangeCourse)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.DateExchangeCourse)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.StatusExtend)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.DateExtend)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.StatusReserve)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.DateReserve)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Description)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.StatusJoinClass)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.DateJoinClass)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+            @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+            @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+        </td>
+    </tr>
+}
+
+</table>

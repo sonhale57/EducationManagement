@@ -1,0 +1,203 @@
+﻿@model SuperbrainManagement.Models.Employee
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Employee</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Branch.Logo)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Branch.Logo)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Position.Code)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Position.Code)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Image)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Image)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Phone)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Phone)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Email)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Email)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CertificateNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CertificateNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DateCertificate)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DateCertificate)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.StartWork)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.StartWork)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IsOfficial)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IsOfficial)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Enable)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Enable)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DateOfBirth)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DateOfBirth)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Address)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Address)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Gratuate)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Gratuate)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Sex)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Sex)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DateCreate)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DateCreate)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DateStart)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DateStart)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.BasicSalary)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.BasicSalary)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.BankName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.BankName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.BankAccountName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.BankAccountName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.BankNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.BankNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.BankBranch)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.BankBranch)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>
