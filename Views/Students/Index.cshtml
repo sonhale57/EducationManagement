@@ -82,6 +82,7 @@
                     <i class="ti ti-dots-vertical"></i>
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <li><a class="dropdown-item" href="/students/details/@item.Id"><i class="ti ti-eye-check"></i> Xem chi tiết</a></li>
                     <li><a class="dropdown-item" href="@Url.Action("AddCourseProgramOfStudents","Students",new {IdStudent = item.Id})"><i class="ti ti-script-plus"></i> Đăng ký khóa học</a></li>
                     <li><a class="dropdown-item" href="javascript:Exchange_branch(@item.Id)"><i class="ti ti-exchange"></i> Chuyển cơ sở</a></li>
                 </ul>

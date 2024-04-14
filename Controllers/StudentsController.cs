@@ -401,6 +401,7 @@ namespace SuperbrainManagement.Controllers
         public ActionResult getDataComboxProduct(int? idproduct)
         {
             List<Product> products = Connect.Select<Product>("select * from Product");
+
             var str = "";
             var strTable = "";
             var number = 0;
@@ -416,7 +417,8 @@ namespace SuperbrainManagement.Controllers
             {
                 foreach (var items in products)
                 {
-                    str += "<option value='" + items.Id + "' data-name='" + items.Name + "'>" + items.Name + "</option>";
+
+                    str += "<option value='" + items.Id + "' data-name='" + items.Name + "' data-inventory='" + ProductReceiptionDetailsController.GetInventory(items.Id) + "'>" + items.Name + "</option>";
                 }
                
                 totalamount = Convert.ToInt32(products[0].Price);
