@@ -13,6 +13,8 @@ using Mysqlx.Crud;
 using PagedList.Mvc;
 using PagedList;
 using SuperbrainManagement.Models;
+using System.Configuration;
+using System.Data.SqlClient;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -397,6 +399,58 @@ namespace SuperbrainManagement.Controllers
                 totalamount
             };
             return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Load_profile(int? idStudent) 
+        {  
+            List<object> dskhoadangky = new List<object>();
+            string str = "";
+            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+            int count = 0;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "select s.Id,re.Id as IdRegistration,re.Code as Code,rec.IdCourse,course.Name as NameCourse ,re.DateCreate,rec.Status, rec.TotalAmount,rec.StatusExchangeCourse,rec.StatusJoinClass,rec.StatusExtend,rec.StatusReserve from Student s inner join registration re on re.IdStudent= s.id inner join RegistrationCourse rec on rec.IdRegistration = re.id, Course course where course.id= rec.IdCourse and s.id=" + idStudent;
+                SqlCommand command = new SqlCommand(query, connection);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    var item = new
+                    {
+                        Code = reader["Code"].ToString(),
+                        IdCourse = reader["IdCourse"].ToString(),
+                        NameCourse = reader["NameCourse"].ToString(),
+                        Price = reader["TotalAmount"].ToString(),
+                        DateCreate = reader["DateCreate"].ToString(),
+                        Status = reader["status"],
+                        StatusExchangeCourse = reader["statusexchangecourse"].ToString(),
+                        StatusJoinClass= reader["StatusJoinClass"].ToString(),
+                        StatusExtend = reader["StatusExtend"].ToString()
+                    };
+                    count++;
+
+                    str +="<tr>"
+                        +"<td>"+count+"</td>"
+                        +"<td>"+item.Code+"</td>"
+                        +"<td>"+item.NameCourse+"</td>"
+                        +"<td>"+item.DateCreate+"</td>"
+                        +"<td>"+ item.Price + "</td>"
+                        +"<td class='text-center'>"+ (Convert.ToBoolean(reader["Status"]) ? "<i class='ti ti-circle-check text-success'></i>" : "Chưa thanh toán") + "</td>"
+                        +"<td class='text-center'>"+ (Convert.ToBoolean(reader["StatusJoinClass"]) ? "" : "Chờ xét lớp") + "</td>"
+                        + "<td class='text-end'>"
+                        + "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">"
+                        +"<i class=\"ti ti-dots-vertical\"></i>"
+                        +"</a>"
+                        +"<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">"
+                        +"<li><a class=\"dropdown-item\" href=''><i class=\"ti ti-eye-check\"></i> Xét vào lớp</a></li>"
+                        +"</ul>"
+                        + "</td>"
+                        + "</tr>";
+                    dskhoadangky.Add(item);
+                }
+                reader.Close();
+            }
+            var data = new { dskhoadangky,str};
+            return Json(data,JsonRequestBehavior.AllowGet); 
         }
         public ActionResult getDataComboxProduct(int? idproduct)
         {
