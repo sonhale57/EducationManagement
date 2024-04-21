@@ -203,7 +203,10 @@ namespace SuperbrainManagement.Controllers
                     db.SaveChanges();
                 }
             }
-            return View();
+            var item = new { 
+                str="ok"
+            };
+            return Json(item,JsonRequestBehavior.AllowGet);
         }
 
         // GET: Users

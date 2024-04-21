@@ -222,11 +222,8 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (response) {
-                    // Handle the response from the controller if needed
-                    console.log("Data submitted successfully to the controller.");
-                    console.log("Response from the controller:", response);
-                    
-                    if (response.status == 200) {
+                    if (response.str == "ok") {
+                        $('#exampleModal').modal('hide');
                         showSuccess("Cập nhật thành công!", 3000);
                     }
                 },
