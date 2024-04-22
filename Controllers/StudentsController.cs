@@ -157,10 +157,10 @@ namespace SuperbrainManagement.Controllers
             return newCode;
         }
         
-        public ActionResult Registrations()
+        public ActionResult Registrations(int idStudent,int? idRegistration)
         {
-            ViewBag.IdStudent = "8";
-            ViewBag.IdRegistration = "2";
+            ViewBag.IdStudent = idStudent;
+            ViewBag.IdRegistration = idRegistration;
             return View();
         }
 
@@ -262,12 +262,9 @@ namespace SuperbrainManagement.Controllers
         [HttpPost] 
         public ActionResult SaveRegistration(int? IdRegistration,int type, int? IdObject,int? price,int? totalamount,int? amount,string Description,int? Discount,List<listProduct> listProduct)
         {
-            //get Iduser and Idstudents
-            MD5Hash md5 = new MD5Hash();
-            string iduser = System.Web.HttpContext.Current.Request.Cookies["check"]["iduser"].ToString();
-            iduser = md5.Decrypt(iduser.ToString());
+            string iduser = CheckUsers.iduser();
             Student student = Session["infoUser"] as Student;
-            //check registration 
+
             Registration registration = new Registration();
             registration = Connect.SelectSingle<Registration>("select * from Registration where Id='" + IdRegistration + "'");
              // Create new Registration

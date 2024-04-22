@@ -875,6 +875,8 @@
     <Content Include="Views\Promotions\Details.cshtml" />
     <Content Include="Views\Promotions\Edit.cshtml" />
     <Content Include="Views\Promotions\Index.cshtml" />
+    <Content Include="Views\Students\Registration.cshtml" />
+    <Content Include="Views\Students\Registrations.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
