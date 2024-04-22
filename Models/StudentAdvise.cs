@@ -13,7 +13,7 @@ namespace SuperbrainManagement.Models
 
         public int? IdStudent { get; set; }
 
-        public int? DateCreate { get; set; }
+        public DateTime? DateCreate { get; set; }
 
         public DateTime? AppointmentDate { get; set; }
 
@@ -25,6 +25,7 @@ namespace SuperbrainManagement.Models
 
         public int? IdUser { get; set; }
 
+        public bool Status { get; set; }
         public virtual Student Student { get; set; }
 
         public virtual User User { get; set; }

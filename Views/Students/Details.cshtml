@@ -4,4 +4,479 @@
     ViewBag.Title = "Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) 
+<div class="container">
+    
+</div><div class="row">
+    <div class="col-lg-2">
+        <div class="profile-card-4 z-depth-3">
+            <div class="card">
+                <div class="card-body text-center bg-light rounded-top">
+                    <div class="user-box">
+                        <img src="@(Model.Image==""?Model.Image:"/Assets/images/profile/user-1.jpg")" height="100" alt="user avatar" class="rounded-circle">
+                    </div>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group shadow-none">
+                        <li class="list-group-item text-center">
+                            <div class="list-details">
+                                <span>@Model.Code.ToUpper()</span>
+                            </div>
+                        </li>
+                        <li class="list-group-item text-center">
+                            <div class="list-details">
+                                <span>@Model.Name</span>
+                            </div>
+                        </li>
+                        <li class="list-group-item text-center">
+                            <div class="list-details">
+                                <span>@Model.Sex</span>
+                            </div>
+                        </li>
+                        <li class="list-group-item text-center">
+                            <div class="list-details">
+                                <span>@Model.DateOfBirth.Value.ToShortDateString()</span>
+                            </div>
+                        </li>
+
+                        <li class="list-group-item text-center">
+                            <div class="list-details">
+                                <span class="fw-bold">@Model.Username</span>
+                            </div>
+                        </li>
+                        <li class="list-group-item text-center">
+                            <div class="list-details">
+                                <i>@Model.Password</i>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-10">
+        <div class="card z-depth-3">
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Thông tin học viên</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="tuvan-tab" data-bs-toggle="tab" data-bs-target="#tuvan" type="button" role="tab" aria-controls="tuvan" aria-selected="true">Lịch sử Tư vấn <span class="badge bg-info" id="count_tuvan"></span></button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Khóa học đã đăng ký <span class="badge bg-success">@ViewBag.Count</span></button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Lịch sử học <span class="badge bg-success">@ViewBag.Countlop</span></button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="taikhoan-tab" data-bs-toggle="tab" data-bs-target="#taikhoan" type="button" role="tab" aria-controls="taikhoan" aria-selected="false">Tài khoản <span class="badge bg-info" id="count_taikhoan"></span></button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active p-2" id="home" role="tabpanel" aria-labelledby="home-tab">
+                        <form>
+                            <div class="form-group row mt-2">
+                                <label class="col-lg-2 col-form-label form-control-label">Change profile</label>
+                                <div class="col-lg-10">
+                                    <input class="form-control" type="file">
+                                </div>
+                            </div>
+                            <div class="form-group row mt-2">
+                                <label class="col-lg-2 col-form-label form-control-label">Full name</label>
+                                <div class="col-lg-10">
+                                    @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                            <div class="form-group row mt-2">
+                                <label class="col-lg-2 col-form-label form-control-label">Sinh nhật</label>
+                                <div class="col-lg-10">
+                                    @Html.EditorFor(model => model.DateOfBirth, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                            <div class="form-group row mt-2">
+                                <label class="col-lg-2 col-form-label form-control-label">Email</label>
+                                <div class="col-lg-10">
+                                    <input class="form-control" type="email" value="@Model.Email">
+                                </div>
+                            </div>
+                            <div class="form-group row mt-2">
+                                <label class="col-lg-2 col-form-label form-control-label">Số điện thoại</label>
+                                <div class="col-lg-10">
+                                    <input class="form-control" type="email" value="@Model.Phone">
+                                </div>
+                            </div>
+                            <div class="form-group row mt-2">
+                                <label class="col-lg-2 col-form-label form-control-label">Address</label>
+                                <div class="col-lg-10">
+                                    <input class="form-control" type="text" value="@Model.Address" placeholder="Address">
+                                </div>
+                            </div>
+                            <div class="form-group row mt-2">
+                                <label class="col-lg-2 col-form-label form-control-label"></label>
+                                <div class="col-lg-5">
+                                    <input class="form-control" type="text" value="@Model.District" placeholder="City">
+                                </div>
+                                <div class="col-lg-5">
+                                    <input class="form-control" type="text" value="@Model.City" placeholder="State">
+                                </div>
+                            </div>
+                            <div class="form-group row mt-2">
+                                <label class="col-lg-2 col-form-label form-control-label">Username</label>
+                                <div class="col-lg-10">
+                                    <input class="form-control" type="text" value="@Model.Username">
+                                </div>
+                            </div>
+                            <div class="form-group row mt-2">
+                                <label class="col-lg-2 col-form-label form-control-label">Password</label>
+                                <div class="col-lg-10">
+                                    <input class="form-control" type="password" value="@Model.Password">
+                                </div>
+                            </div>
+                            <div class="form-group row mt-2">
+                                <label class="col-lg-3 col-form-label form-control-label"></label>
+                                <div class="col-lg-9">
+                                    <input type="reset" class="btn btn-outline-danger" value="Cancel">
+                                    <input type="button" class="btn btn-primary" value="Save Changes">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane fade p-2" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                        <table class="table rounded-0">
+                            <thead class="bg-success">
+                                <tr class="text-white">
+                                    <td class="text-center">STT</td>
+                                    <td>Mã đăng ký</td>
+                                    <td>Khóa học</td>
+                                    <td>Thành tiền</td>
+                                    <td>Ngày đăng ký</td>
+                                    <td class="text-center">Thanh toán</td>
+                                    <td class="text-center">Tình trạng</td>
+                                    <td class="text-end">Thao tác</td>
+                                </tr>
+                            </thead>
+                            <tbody id="showlist_dangky"></tbody>
+                        </table>
+                        <a href="/students/AddCourseProgramOfStudents?IdStudent=@Model.Id" class="btn btn-success mt-2"><i class="ti ti-plus"></i> Đăng ký khóa học</a>
+                    </div>
+                    <div class="tab-pane fade p-2 pb-5" id="tuvan" role="tabpanel" aria-labelledby="tuvan-tab">
+                        <div class="form-group">
+                            <label class="text-success">
+                                Ngày hẹn
+                            </label>
+                            <input type="date" name="Ngayhen" value="" class="form-control" id="Ngayhen" />
+                        </div>
+                        <div class="form-group mt-2">
+                            <label class="text-success">
+                                Nội dung tư vấn
+                            </label>
+                            <textarea name="Noidung" value="" class="form-control" id="Noidung" placeholder="Nội dung tư vấn & kết quả"></textarea>
+                        </div>
+                        <a href="javascript:Submit_tuvan()" class="btn btn-success mt-2">Cập nhật tư vấn</a>
+                        <hr />
+                        <ul class="timeline-widget mb-0 position-relative mb-n5" id="showlist_tuvan">
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade p-2" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                        <table class="table rounded-0">
+                            <thead class="bg-success">
+                                <tr class="text-white">
+                                    <td class="text-center">STT</td>
+                                    <td>Mã đăng ký</td>
+                                    <td>Khóa học</td>
+                                    <td>Lớp học</td>
+                                    <td>Ngày bắt đầu</td>
+                                    <td>Ngày kết thúc</td>
+                                    <td class="text-center">Số buổi</td>
+                                    <td>Ngày xét lớp</td>
+                                    <td class="text-center">Tình trạng</td>
+                                </tr>
+                            </thead>
+                            <tbody id="showlist_lophoc"></tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane fade p-2" id="taikhoan" role="tabpanel" aria-labelledby="taikhoan-tab">
+                        <div class="form-group">
+                            <label class="text-success">
+                                Số tiền nạp
+                            </label>
+                            <input type="text" name="Sotien" value="" class="form-control" id="Sotien" />
+                        </div>
+                        <div class="form-group mt-2">
+                            <label class="text-success">
+                                Nội dung
+                            </label>
+                            <textarea name="Noidungnap" value="" class="form-control" id="Noidungnap" placeholder="Nội dung nạp"></textarea>
+                        </div>
+                        <a href="javascript:Submit_taikhoan()" class="btn btn-success mt-2">Nạp tài khoản</a>
+                        <table class="table rounded-0 mt-3">
+                            <thead class="bg-success">
+                                <tr class="text-white">
+                                    <td class="text-center">STT</td>
+                                    <td>Số tiền</td>
+                                    <td>Nội dung</td>
+                                    <td>Thời gian cập nhật</td>
+                                    <td>Người thao tác</td>
+                                    <td class="text-center">Loại</td>
+                                </tr>
+                            </thead>
+                            <tbody id="showlist_taikhoan"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" name="idStudent" value="@Model.Id" id="idStudent" />
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="padding-right: -100px;margin-right: 110px;height: 100vh;">
+        <div class="modal-content rounded-0 h-75" style="width: 600px;">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-white" id="exampleModalLabel">Xét vào lớp học</h5>
+            </div>
+            <div class="modal-body">
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Mã đăng ký</label>
+                    <div class="col-lg-9">
+                        <input type="hidden" class="form-control" name="IdRegistration" id="IdRegistration" />
+                        <input class="form-control" name="RegistrationCode" id="RegistrationCode" disabled />
+                    </div>
+                </div>
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Khóa học</label>
+                    <div class="col-lg-9">
+                        <select id="IdCourse" class="form-control" disabled>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Lớp học</label>
+                    <div class="col-lg-9">
+                        @Html.DropDownList("IdClass", null, htmlAttributes: new { @class = "form-control" })
+                    </div>
+                </div>
+
+
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Ngày bắt đầu</label>
+                    <div class="col-lg-9">
+                        <input type="date" name="fromdate" value="" id="fromdate" class="form-control" onchange="javascript: Onchange_todate()"/>
+                    </div>
+                </div>
+
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Ngày kết thúc</label>
+                    <div class="col-lg-9">
+                        <input type="date" name="todate" value="" id="todate" class="form-control" disabled/>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer text-start">
+                <button type="button" class="btn btn-success" onclick="Submit_xetlop()">
+                    <i class="ti ti-circle-plus"></i> Xét vào lớp học
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    Loadlist_tuvan();
+    function Loadlist_tuvan() {
+        var idStudent = $("#idStudent").val();
+        $.ajax({
+            url: '@Url.Action("Load_tuvan", "Students")',
+            type: "GET",
+            data: { idStudent: idStudent },
+            success: function (data) {
+                $("#count_tuvan").html(data.count);
+                $('#showlist_tuvan').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log("lỗi"+error);
+            }
+        });
+    }
+    Loadlist_khoadangky();
+    function Loadlist_khoadangky() {
+        var idStudent = $("#idStudent").val();
+        $.ajax({
+            url: '@Url.Action("Load_khoadangky", "Students")',
+            type: "GET",
+            data: { idStudent: idStudent },
+            success: function (data) {
+                $('#showlist_dangky').html(data.str);
+            },
+            error: function (xhr, error) {
+
+                console.log("lỗi"+error);
+            }
+        });
+    }
+
+    Loadlist_lophoc();
+    function Loadlist_lophoc() {
+        var idStudent = $("#idStudent").val();
+        $.ajax({
+            url: '@Url.Action("Load_lophoc", "Students")',
+            type: "GET",
+            data: { idStudent: idStudent },
+            success: function (data) {
+                $('#showlist_lophoc').html(data.str);
+            },
+            error: function (xhr, error) {
+
+                console.log("lỗi"+error);
+            }
+        });
+    }
+    Loadlist_taikhoan();
+    function Loadlist_taikhoan() {
+        var idStudent = $("#idStudent").val();
+        $.ajax({
+            url: '@Url.Action("Load_taikhoan", "Students")',
+            type: "GET",
+            data: { idStudent: idStudent },
+            success: function (data) {
+                $("#count_taikhoan").html(data.count);
+                $('#showlist_taikhoan').html(data.str);
+            },
+            error: function (xhr, error) {
+
+                console.log("lỗi"+error);
+            }
+        });
+    }
+
+     function Submit_tuvan() {
+         $.ajax({
+             url: '@Url.Action("Submit_tuvan", "Students")',
+             type: "POST",
+             data: {
+                 Noidung: $("#Noidung").val(),
+                 Ngayhen: $("#Ngayhen").val(),
+                 idStudent: $("#idStudent").val()
+             },
+             success: function (data) {
+                 if (data.status = "ok") {
+                     $("#Noidung").val("");
+                     $("#Ngayhen").val("");
+                     Loadlist_tuvan();
+                     showSuccess("Đã cập nhật tư vấn thành công!", 3000);
+                 }
+             },
+             error: function (xhr, error) {
+
+                 console.log("lỗi"+error);
+             }
+         });
+    }
+     function Submit_taikhoan() {
+     $.ajax({
+         url: '@Url.Action("Submit_taikhoan", "Students")',
+         type: "POST",
+         data: {
+             Noidung: $("#Noidungnap").val(),
+             Sotien: $("#Sotien").val(),
+             idStudent: $("#idStudent").val()
+         },
+         success: function (data) {
+             if (data.status = "ok") {
+                 $("#Sotien").val("");
+                 $("#Noidungnap").val("");
+                 Loadlist_taikhoan();
+                 showSuccess("Đã nạp tài khoản thành công!", 3000);
+             }
+         },
+         error: function (xhr, error) {
+
+             console.log("lỗi"+error);
+         }
+     });
+}
+
+    function Loadlist_xetlop(idregistration, idcourse) {
+        var today = new Date();
+
+        // Định dạng ngày hôm nay thành chuỗi "yyyy-MM-dd" (định dạng của ô nhập ngày)
+        var formattedToday = today.toISOString().split('T')[0];
+        // Đặt giá trị mặc định cho ô nhập ngày bắt đầu là ngày hôm nay
+        document.getElementById('fromdate').value = formattedToday;
+
+        var fromDateValue = document.getElementById('fromdate').value;
+        var fromDate = new Date(fromDateValue);
+
+        fromDate.setMonth(fromDate.getMonth() + 3);
+
+        // Chuyển đổi ngày kết thúc thành chuỗi theo định dạng "yyyy-MM-dd" (để phù hợp với ô nhập ngày)
+        var toDateValue = fromDate.toISOString().slice(0, 10);
+
+        // Gán giá trị của ô nhập ngày kết thúc là ngày sau khi cộng thêm 3 tháng
+        document.getElementById('todate').value = toDateValue;
+
+        $.ajax({
+            url: '@Url.Action("Load_xetlop", "Students")',
+            type: "GET",
+            data: {
+                idCourse: idcourse,
+                idRegistration: idregistration,
+                idStudent: $("#idStudent").val()
+            },
+            success: function (data) {
+                $('#IdRegistration').val(idregistration);
+                $('#RegistrationCode').val(data.registrionCode);
+                $('#IdCourse').html(data.str);
+
+            },
+            error: function (xhr, error) {
+
+                console.log("lỗi"+error);
+            }
+        });
+    }
+    function Onchange_todate() {
+        var fromDateValue = document.getElementById('fromdate').value;
+        var fromDate = new Date(fromDateValue);
+
+        // Cộng thêm 3 tháng vào ngày bắt đầu
+        fromDate.setMonth(fromDate.getMonth() + 3);
+
+        // Chuyển đổi ngày kết thúc thành chuỗi theo định dạng "yyyy-MM-dd" (để phù hợp với ô nhập ngày)
+        var toDateValue = fromDate.toISOString().slice(0, 10);
+
+        // Gán giá trị của ô nhập ngày kết thúc là ngày sau khi cộng thêm 3 tháng
+        document.getElementById('todate').value = toDateValue;
+    }
+    function Submit_xetlop() {
+        $.ajax({
+            url: '@Url.Action("Submit_xetlop", "Students")',
+            type: "POST",
+            data: {
+                idCourse: $("#IdCourse").val(),
+                idRegistration: $("#IdRegistration").val(),
+                idClass: $("#IdClass").val(),
+                fromdate: $("#fromdate").val(),
+                todate: $("#todate").val(),
+                idStudent: $("#idStudent").val()
+            },
+            success: function (data) {
+                if (data.status = "ok") {
+                    $('#exampleModal').modal('hide');
+                    showSuccess("Đã xét lớp thành công!", 3000);
+                }
+            },
+            error: function (xhr, error) {
+
+                console.log("lỗi"+error);
+            }
+        });
+    }
+    function Xetlop_modal(idregistration, idcourse) {
+        Loadlist_xetlop(idregistration, idcourse);
+        // Mở modal
+        $('#exampleModal').modal('show');
+    }
+
+</script>

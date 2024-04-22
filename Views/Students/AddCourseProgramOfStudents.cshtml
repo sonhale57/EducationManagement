@@ -29,7 +29,7 @@
     <div class="col col-6 col-md-6 col-sm-12 mb-2">
         <p>Mã hóa đơn</p>
         <input class="form-control text-box single-line" style="border:none;" data-val="true" data-val-length="The field Name must be a string with a maximum length of 50." data-val-length-max="50" id="Bill" name="Name" type="text" value="" readonly>
-        <input type="text" id="IdRegistration" value="" name="id" hidden />
+        <input type="hidden" id="IdRegistration" value="" name="id" />
     </div>
     <div class="col col-6 col-md-6 col-sm-12 mb-2">
         <p>Ngày tạo</p>
@@ -351,7 +351,7 @@
             var formattedInteger = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
             // Add the currency symbol and decimal part if exists
-            var result = formattedInteger + " VND";
+            var result = formattedInteger + "";
             if (parts.length > 1) {
                 result += "." + parts[1];
             }
@@ -434,6 +434,7 @@
 
           });
         }
+
         function loaddata(idRegistraion) {
             var randomParam = new Date().getTime(); // Tạo một tham số ngẫu nhiên
             $.ajax({
