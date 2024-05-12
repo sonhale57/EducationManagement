@@ -26,7 +26,10 @@
             </ul>
         </div>
         <a href="javascript:Loadlist_nhap()" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">
-            <i class="ti ti-certificate"></i> Nhập vật tư
+            <i class="ti ti-certificate"></i> Nhập kho
+        </a>
+        <a href="javascript:Loadlist_xuat()" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal2">
+            <i class="ti ti-certificate"></i> Xuất kho
         </a>
     </div>
 </div>
@@ -51,59 +54,122 @@
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content rounded-0 h-75">
-            <div class="modal-header bg-primary">
-                <h5 class="modal-title text-white" id="exampleModalLabel">Nhập vật tư vào kho</h5>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col col-4 col-md-4 col-sm-12">
-                        <label class="text-success">Họ tên | Tên nhà cung cấp:</label>
-                        <input type="text" name="Name" id="Name" placeholder="Tên liên hệ hoặc tên nhà cung cấp" value="" class="form-control" />
-                    </div>
-                    <div class="col col-4 col-md-4 col-sm-12">
-                        <label class="text-success">Số điện thoại:</label>
-                        <input type="text" name="Phone" id="Phone" placeholder="Số điện thoại liên hệ" value="" class="form-control" />
-                    </div>
-                    <div class="col col-4 col-md-4 col-sm-12">
-                        <label class="text-success">Địa chỉ:</label>
-                        <input type="text" name="Address" id="Address" placeholder="Địa chỉ liên hệ" value="" class="form-control" />
-                    </div>
-                    <div class="col col-12 col-md-12 col-sm-12 mt-3">
-                        <label class="text-success">Ghi chú:</label>
-                        <input type="text" name="Description" id="Description" placeholder="Mô tả phiếu nhập vật tư" value="" class="form-control" />
-                    </div>
+            <form action="/" method="post" id="form_nhap">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white" id="exampleModalLabel">Nhập vật tư vào kho</h5>
                 </div>
-                <hr />
-                <table class="table mt-3">
-                    <thead class="bg-info">
-                        <tr class="text-white">
-                            <td>STT</td>
-                            <td>Vật tư</td>
-                            <td>Đơn vị</td>
-                            <td>Đơn giá</td>
-                            <td>Số lượng</td>
-                            <td>Thành tiền</td>
-                        </tr>
-                    </thead>
-                    <tbody id="showlist_nhap"></tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="5" class="text-end">
-                                <span class="text-success">
-                                    <input type="hidden" name="countline" value="" id="countline" />
-                                    Tổng tiền:
-                                </span>
-                            </td>
-                            <td><input type="text" name="tongtien" value="" class="form-control" id="tongtien" /></td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-            <div class="modal-footer text-start">
-                <button type="button" class="btn btn-success" onclick="submit_nhap()">
-                    <i class="ti ti-circle-plus"></i> Thêm vào phiếu
-                </button>
-            </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col col-4 col-md-4 col-sm-12">
+                            <label class="text-success">Họ tên | Tên nhà cung cấp:</label>
+                            <input type="text" name="Name" id="Name" placeholder="Tên liên hệ hoặc tên nhà cung cấp" value="" class="form-control" />
+                        </div>
+                        <div class="col col-4 col-md-4 col-sm-12">
+                            <label class="text-success">Số điện thoại:</label>
+                            <input type="text" name="Phone" id="Phone" placeholder="Số điện thoại liên hệ" value="" class="form-control" />
+                        </div>
+                        <div class="col col-4 col-md-4 col-sm-12">
+                            <label class="text-success">Địa chỉ:</label>
+                            <input type="text" name="Address" id="Address" placeholder="Địa chỉ liên hệ" value="" class="form-control" />
+                        </div>
+                        <div class="col col-12 col-md-12 col-sm-12 mt-3">
+                            <label class="text-success">Ghi chú:</label>
+                            <input type="text" name="Description" id="Description" placeholder="Mô tả phiếu nhập vật tư" value="" class="form-control" />
+                        </div>
+                    </div>
+                    <hr />
+                    <table class="table mt-3">
+                        <thead class="bg-info">
+                            <tr class="text-white">
+                                <td>STT</td>
+                                <td>Vật tư</td>
+                                <td>Đơn vị</td>
+                                <td>Đơn giá</td>
+                                <td>Số lượng</td>
+                                <td>Thành tiền</td>
+                            </tr>
+                        </thead>
+                        <tbody id="showlist_nhap"></tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="5" class="text-end">
+                                    <span class="text-success">
+                                        <input type="hidden" name="countline" value="" id="countline" />
+                                        Tổng tiền:
+                                    </span>
+                                </td>
+                                <td><input type="text" name="tongtien" value="0" class="form-control" id="tongtien" /></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="modal-footer text-start">
+                    <button type="button" class="btn btn-success" onclick="submit_nhap()">
+                        <i class="ti ti-circle-plus"></i> Thêm vào phiếu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel2" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content rounded-0 h-75">
+            <form action="/" method="post" id="form_xuat">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white" id="exampleModalLabel2">Xuất vật tư từ kho</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col col-4 col-md-4 col-sm-12">
+                            <label class="text-success">Họ tên | Người nhận:</label>
+                            <input type="text" name="Name" id="Name" placeholder="Tên người nhận" value="" class="form-control" />
+                        </div>
+                        <div class="col col-4 col-md-4 col-sm-12">
+                            <label class="text-success">Số điện thoại:</label>
+                            <input type="text" name="Phone" id="Phone" placeholder="Số điện thoại liên hệ" value="" class="form-control" />
+                        </div>
+                        <div class="col col-4 col-md-4 col-sm-12">
+                            <label class="text-success">Địa chỉ:</label>
+                            <input type="text" name="Address" id="Address" placeholder="Địa chỉ liên hệ" value="" class="form-control" />
+                        </div>
+                        <div class="col col-12 col-md-12 col-sm-12 mt-3">
+                            <label class="text-success">Ghi chú:</label>
+                            <input type="text" name="Description" id="Description" placeholder="Mô tả phiếu xuất kho" value="" class="form-control" />
+                        </div>
+                    </div>
+                    <hr />
+                    <table class="table mt-3">
+                        <thead class="bg-info">
+                            <tr class="text-white">
+                                <td>STT</td>
+                                <td>Vật tư</td>
+                                <td>Đơn vị</td>
+                                <td>Đơn giá</td>
+                                <td>Số lượng</td>
+                                <td>Thành tiền</td>
+                            </tr>
+                        </thead>
+                        <tbody id="showlist_xuat"></tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="5" class="text-end">
+                                    <span class="text-success">
+                                        <input type="hidden" name="countline_xuat" value="" id="countline_xuat" />
+                                        Tổng tiền:
+                                    </span>
+                                </td>
+                                <td><input type="text" name="tongtien_xuat" value="0" class="form-control" id="tongtien_xuat" /></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="modal-footer text-start">
+                    <button type="button" class="btn btn-success" onclick="submit_xuat()">
+                        <i class="ti ti-circle-plus"></i> Thêm vào phiếu
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -138,46 +204,120 @@
              success: function (data) {
                  console.log(data);
                  $('#showlist_nhap').html(data.str);
-                 $('#countline').html(data.count);
+                 $('#countline').val(data.count);
              },
              error: function (xhr, error) {
                  console.log(error);
              }
          });
     }
-    var tongtien = 0;
-    function sum_thanhtien() {
+
+    function Loadlist_xuat() {
+         $.ajax({
+             url: '@Url.Action("Loadlist_xuat", "Warehouses")',
+             type: "GET",
+             data: {
+             },
+             success: function (data) {
+                 console.log(data);
+                 $('#showlist_xuat').html(data.str);
+                 $('#countline_xuat').val(data.count);
+             },
+             error: function (xhr, error) {
+                 console.log(error);
+             }
+         });
+    }
+    function sum_tongtien() {
+        var countline = $("#countline").val();
+        var tongtien = 0;
+        for (var i = 1; i <= countline; i++) {
+            var soluong = Number($("#soluong_" + i).val());
+            if (soluong > 0) {
+                var dongia = parseInt($("#dongia_" + i).val());
+                var thanhtien = dongia * soluong;
+                tongtien += thanhtien;
+            }
+        }
         $("#tongtien").val(tongtien.toLocaleString());
     }
     function update_thanhtien(i) {
         var dongia = parseInt($("#dongia_" + i).val());
         var soluong = parseInt($("#soluong_" + i).val());
         var thanhtien = dongia * soluong;
-        sum_thanhtien();
         $("#thanhtien_" + i).val(thanhtien.toLocaleString());
+        sum_tongtien();
     }
-    function submit_nhap() {
-        jConfirm('Xác nhận nhập vật tư', 'Nhập mã vật tư', function (r) {
-            if (r) {
-                $.ajax({
-                    url: '@Url.Action("Submit_nhap", "Warehouses")',
-                    type: "POST",
-                    data: $("#form_nhap").serialize()
-                    , dataType: "json",
-                    success: function (data) {
-                        if (data.status = "ok") {
-                            showSuccess('Nhập vật tư thành công!', 2000);
-                        }
-                        else {
-                            showError(data.status, 2000);
-                        }
-                    },
-                    error: function () { showError('Lỗi!', 3000); }
-                });
+
+    function update_thanhtienxuat(i) {
+        var max = parseInt($('#soluong_'+i).attr('max'));
+        var dongia = parseInt($("#dongia_" + i).val());
+        var soluong = parseInt($("#soluong_" + i).val());
+        if (soluong > max) {
+            showError("Vui lòng nhập số lượng nhỏ hơn!", 3000);
+            $("#soluong_" + i).val(0);
+        } else {
+            var thanhtien = dongia * soluong;
+            $("#thanhtien_" + i).val(thanhtien.toLocaleString());
+            sum_tongtienxuat();
+        }
+    }
+    function sum_tongtienxuat() {
+        var countline = $("#countline_xuat").val();
+        var tongtien = 0;
+        for (var i = 1; i <= countline; i++) {
+            var soluong = Number($("#soluong_" + i).val());
+            if (soluong > 0) {
+                var dongia = parseInt($("#dongia_" + i).val());
+                var thanhtien = dongia * soluong;
+                tongtien += thanhtien;
             }
+        }
+        $("#tongtien_xuat").val(tongtien.toLocaleString());
+    }
+
+    function submit_nhap() {
+        $.ajax({
+            url: '@Url.Action("Submit_nhap", "Warehouses")',
+            type: "POST",
+            data: $("#form_nhap").serialize()
+            , dataType: "json",
+            success: function (data) {
+                if (data.status == "ok") {
+                    $('#exampleModal').modal('hide');
+                    Loadlist();
+                    showSuccess("Đã nhập thành công!", 3000);
+                }
+                else {
+                    showError(data.status, 3000);
+                }
+            },
+            error: function () { showError('Lỗi!', 3000); }
+        });
+    }
+    function submit_xuat() {
+        $.ajax({
+            url: '@Url.Action("Submit_xuat", "Warehouses")',
+            type: "POST",
+            data: $("#form_xuat").serialize()
+            , dataType: "json",
+            success: function (data) {
+                if (data.status == "ok") {
+                    $('#exampleModal2').modal('hide');
+                    Loadlist();
+                    showSuccess("Đã nhập thành công!", 3000);
+                }
+                else {
+                    showError(data.status, 3000);
+                }
+            },
+            error: function () { showError('Lỗi!', 3000); }
         });
     }
     $('#exampleModal').on('shown.bs.modal', function (e) {
         Loadlist_nhap();
+    });
+    $('#exampleModal2').on('shown.bs.modal', function (e) {
+        Loadlist_xuat();
     });
 </script>

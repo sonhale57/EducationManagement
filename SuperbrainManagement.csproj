@@ -271,6 +271,7 @@
     <Compile Include="Controllers\Language.cs" />
     <Compile Include="Controllers\LogsController.cs" />
     <Compile Include="Controllers\MD5Hash.cs" />
+    <Compile Include="Controllers\OrdersController.cs" />
     <Compile Include="Controllers\ProductReceiptionDetailsController.cs" />
     <Compile Include="Controllers\ProgramsController.cs" />
     <Compile Include="Controllers\MarketingCampaignsController.cs" />
@@ -877,6 +878,9 @@
     <Content Include="Views\Promotions\Index.cshtml" />
     <Content Include="Views\Students\Registration.cshtml" />
     <Content Include="Views\Students\Registrations.cshtml" />
+    <Content Include="Views\Orders\Index.cshtml" />
+    <Content Include="Views\Warehouses\Index.cshtml" />
+    <Content Include="Views\Warehouses\Receiptions.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
