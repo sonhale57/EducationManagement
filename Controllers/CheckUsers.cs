@@ -66,6 +66,7 @@ namespace SuperbrainManagement.Controllers
             }
             catch { return "0"; }
         }
+
         public static bool CheckHQ()
         {
             try
