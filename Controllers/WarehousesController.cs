@@ -1,4 +1,5 @@
 ﻿using Microsoft.Ajax.Utilities;
+using Mysqlx.Crud;
 using PagedList;
 using PagedList.Mvc;
 using SuperbrainManagement.Models;
@@ -46,7 +47,7 @@ namespace SuperbrainManagement.Controllers
             ViewBag.IdBranch = new SelectList(branches, "Id", "Name", idBranch);
             return View();
         }
-        public ActionResult Load_thekho(string idBranch, string sort, string searchString)
+        public ActionResult Load_thekho(string idBranch, string sort, string searchString,DateTime fromdate,DateTime todate)
         {
             string str = "";
             if (string.IsNullOrEmpty(idBranch))
@@ -80,12 +81,10 @@ namespace SuperbrainManagement.Controllers
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "SELECT p.Id,p.Name,p.Unit,p.Price,p.Code,p.Quota,COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '1' AND re.IdBranch = " + idBranch + "), 0) -"
-                                        + " COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '0' AND re.IdBranch = " + idBranch + "), 0) AS Tonkho"
-                                        + " FROM product p"
-                                        + " where p.enable=1 "
-                                        + querysearch
-                                        + querysort;
+                string query = "select vt.Image,vt.Code as ProductCode,vt.name,vt.Unit,pk.Price,pk.Amount,pk.TotalAmount,pk.type,pk.status,rec.Code as ReceiptionCode,rec.DateCreate,us.Name as Username"
+                            + " from ProductReceiptionDetail pk inner join Product vt on vt.id = pk.IdProduct,WarehouseReceiption rec,[User] us"
+                            + " where rec.id = pk.IdReceiption and us.Id = rec.IdUser and rec.DateCreate >= '"+fromdate+"' and rec.DateCreate <= '"+todate+"'"
+                            + " and rec.IdBranch = '"+idBranch+"' order by rec.Id desc";
                 SqlCommand command = new SqlCommand(query, connection);
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
@@ -94,14 +93,17 @@ namespace SuperbrainManagement.Controllers
                 {
                     count++;
                     str += "<tr>"
-                            + "<td class'text-center'>" + count + "</td>"
-                            + "<td class='text-center'>" + reader["code"].ToString() + "</td>"
-                            + "<td>" + reader["Name"].ToString() + "</td>"
+                            + "<td class='text-center'>" + count + "</td>"
+                            + "<td class='text-center'>" + reader["ProductCode"].ToString() + "</td>"
+                            + "<td>" + reader["name"].ToString() + "</td>"
                             + "<td>" + reader["Unit"].ToString() + "</td>"
-                            + "<td>" + reader["Price"].ToString() + "</td>"
-                            + "<td class='text-center'>" + reader["Quota"].ToString() + "</td>"
-                            + "<td class='text-center'>" + reader["Tonkho"].ToString() + "</td>"
-                            + "<td></td>"
+                            + "<td class='text-end'>" + reader["Price"].ToString() + "</td>"
+                            + "<td class='text-center'>" + reader["Amount"].ToString() + "</td>"
+                            + "<td class='text-end'>" + reader["TotalAmount"].ToString() + "</td>"
+                            + "<td class='text-end'>" + (reader["Type"].ToString()=="true"?"Nhập kho":"Xuất kho") + "</td>"
+                            + "<td class='text-end'>" + reader["ReceiptionCode"].ToString() + "</td>"
+                            + "<td class='text-end'>" + reader["DateCreate"].ToString() + "</td>"
+                            + "<td class='text-center'>" + reader["Username"].ToString() + "</td>"
                             + "</tr>";
                 }
                 reader.Close();
