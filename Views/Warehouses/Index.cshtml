@@ -44,7 +44,6 @@
             <th>Đơn giá</th>
             <th class="text-center">Định mức</th>
             <th class="text-center">Tồn kho</th>
-            <th class="text-end">Thao tác</th>
         </tr>
     </thead>
     <tr id="loading">
@@ -256,6 +255,8 @@
         if (soluong > max) {
             showError("Vui lòng nhập số lượng nhỏ hơn!", 3000);
             $("#soluong_" + i).val(0);
+            update_thanhtienxuat(i);
+            sum_tongtienxuat();
         } else {
             var thanhtien = dongia * soluong;
             $("#thanhtien_" + i).val(thanhtien.toLocaleString());

@@ -9,6 +9,44 @@
     <link href="~/assets/css/select2.css" rel="stylesheet" />
     <script src="~/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
     <script src="~/assets/js/main.js"></script>
+    <style>
+        .sidebar-item {
+            position: relative;
+        }
+
+        .nav-flyout {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
+        }
+
+        .sidebar-item:hover .nav-flyout {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .nav-flyout li {
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+        }
+
+            .nav-flyout li a {
+                display: block;
+                padding: 10px;
+                text-decoration: none;
+                color: #333;
+            }
+
+                .nav-flyout li a:hover {
+                    background-color: #f0f0f0;
+                }
+    </style>
     @Scripts.Render("~/bundles/jquery")
 </head>
 <body>
@@ -314,8 +352,26 @@
                                 <span class="hide-menu"> Hệ thống cơ sở</span>
                             </a>
                         </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link " href="#"><i class="ti ti-shopping-cart"></i> <span>Shop</span></a>
+                            <ul class="nav-flyout fly-in">
+                                <li>
+                                    <a href="#"><i class="ion-ios-color-filter-outline"></i>Derps</a>
+                                </li>
+                                <li>
+                                    <a href="#"><i class="ion-ios-clock-outline"></i>Times</a>
+                                </li>
+                                <li>
+                                    <a href="#"><i class="ion-android-star-outline"></i>Hates</a>
+                                </li>
+                                <li>
+                                    <a href="#"><i class="ion-heart-broken"></i>Beat</a>
+                                </li>
+                            </ul>
+                        </li>
                     </ul>
                 </nav>
+                
             </div>
         </aside>    
         <div class="body-wrapper">

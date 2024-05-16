@@ -42,7 +42,7 @@ namespace SuperbrainManagement.Models
         [StringLength(50)]
         public string Email { get; set; }
 
-        [StringLength(50)]
+        [StringLength(250)]
         public string Address { get; set; }
 
         public bool? Enable { get; set; }

@@ -32,7 +32,7 @@ namespace SuperbrainManagement.Models
         public string Description { get; set; }
 
         [Required]
-        [StringLength(50)]
+        [StringLength(250)]
         public string Address { get; set; }
 
         [StringLength(20)]

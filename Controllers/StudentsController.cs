@@ -326,27 +326,6 @@ namespace SuperbrainManagement.Controllers
                         NewregistrationCourse.Discount = Discount;
                         db.RegistrationCourses.Add(NewregistrationCourse);
                         db.SaveChanges();
-                        //if(listProduct.Count > 0)
-                        //{
-                        //    foreach(var itempro in listProduct)
-                        //    {
-                        //        if(itempro.isChecked == 1)
-                        //        {
-                        //            Product product = Connect.SelectSingle<Product>("select * from Product where Id='" + itempro.idpro + "'");
-                        //            ProductCourse NewproductCourse = new ProductCourse();
-                        //            NewproductCourse.Status = true;
-                        //            NewproductCourse.IdCourse = IdObject;
-                        //            NewproductCourse.IdProduct = itempro.idpro;
-                        //            NewproductCourse.Amount = Convert.ToInt32(product.Price);
-                        //            NewproductCourse.DateCreate = DateTime.Now;
-                        //            db.ProductCourses.Add(NewproductCourse);
-                        //            db.SaveChanges();
-
-                        //        }
-                             
-                        //    }
-                           
-                        //}
                         return Json(NewregistrationCourse.IdRegistration);
                     }
                 case 3:
@@ -830,15 +809,19 @@ namespace SuperbrainManagement.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "Id,Name,Image,Code,DateOfBirth,Sex,Username,Password,Enable,School,Class,Description,ParentName,Phone,Email,ParentDateOfBirth,City,District,Address,Relationship,Job,Facebook,Hopeful,Known,IdMKT,IdBranch,PowerScore,Balance,Presenter,Status,Power,StatusStudy")] Student student)
         {
+            int idBranch= Convert.ToInt32(CheckUsers.idBranch());
+            int idUser = Convert.ToInt32(CheckUsers.iduser());
             if (ModelState.IsValid)
             {
+                student.IdBranch = idBranch;
+                student.DateCreate = DateTime.Now;
+                student.IdUser = idUser;
+                student.Enable = true;
                 db.Students.Add(student);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo", student.IdBranch);
-            ViewBag.IdBranch = new SelectList(db.MKTCampaigns, "Id", "Code", student.IdBranch);
             return View(student);
         }
 

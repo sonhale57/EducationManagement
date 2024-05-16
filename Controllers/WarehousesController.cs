@@ -100,7 +100,7 @@ namespace SuperbrainManagement.Controllers
                             + "<td class='text-end'>" + reader["Price"].ToString() + "</td>"
                             + "<td class='text-center'>" + reader["Amount"].ToString() + "</td>"
                             + "<td class='text-end'>" + reader["TotalAmount"].ToString() + "</td>"
-                            + "<td class='text-end'>" + (reader["Type"].ToString()=="true"?"Nhập kho":"Xuất kho") + "</td>"
+                            + "<td class='text-end'>" + (reader["Type"].ToString()=="True"?"Nhập kho":"Xuất kho") + "</td>"
                             + "<td class='text-end'>" + reader["ReceiptionCode"].ToString() + "</td>"
                             + "<td class='text-end'>" + reader["DateCreate"].ToString() + "</td>"
                             + "<td class='text-center'>" + reader["Username"].ToString() + "</td>"
@@ -162,14 +162,13 @@ namespace SuperbrainManagement.Controllers
                 {
                     count++;
                     str += "<tr>"
-                            + "<td class'text-center'>" + count + "</td>"
+                            + "<td class='text-center'>" + count + "</td>"
                             + "<td class='text-center'>" + reader["code"].ToString() + "</td>"
                             + "<td>" + reader["Name"].ToString() + "</td>"
                             + "<td>" + reader["Unit"].ToString() + "</td>"
                             + "<td>" + reader["Price"].ToString() + "</td>"
                             + "<td class='text-center'>" + reader["Quota"].ToString() + "</td>"
                             + "<td class='text-center'>" + reader["Tonkho"].ToString() + "</td>"
-                            +"<td></td>"
                             + "</tr>";
                 }
                 reader.Close();
