@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data.Entity;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -31,12 +33,22 @@ namespace SuperbrainManagement.Controllers
         public ActionResult Loadlist(string idBranch,int status,string sort,string searchString)
         {
             string str = "";
+            string idbranch_hq = db.Branches.SingleOrDefault(x => x.Code.ToLower() == "hq").Id.ToString();
             if (string.IsNullOrEmpty(idBranch))
             {
                 idBranch = CheckUsers.idBranch();
             }
             string querysort = "";
             string querysearch = "";
+            string queryBranch = "";
+            if (idBranch == idbranch_hq)
+            {
+                queryBranch = "";
+            }
+            else
+            {
+                queryBranch = "and o.idbranch = ' "+idBranch+" ' ";
+            }
             if (!string.IsNullOrEmpty(searchString))
             {
                 querysearch = " and p.Name like N'" + searchString + "' or p.Code like N'" + searchString + "'";
@@ -62,9 +74,9 @@ namespace SuperbrainManagement.Controllers
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "select o.Code,o.DateCreate,o.status,o.Phone,o.Address,o.Description,o.Enable,us.Name as Username,(select sum(TotalAmount) from OrderDetail where IdOrder=o.Id) as tongtien "
-                            + " from [Order] o,[User] us"
-                            + " where us.id=o.IdUser and o.Status='"+status+"' and o.idbranch='"+idBranch+"' order by o.Id desc";
+                string query = "select o.Id,o.Code,o.DateCreate,o.status,o.Phone,o.Address,o.Description,o.Enable,us.Name as Username,cs.Name as TenCoSo,(select sum(TotalAmount) from OrderDetail where IdOrder=o.Id) as tongtien "
+                            + " from [Order] o,[User] us,Branch cs"
+                            + " where o.IdBranch = cs.Id and us.id=o.IdUser and o.Status='"+status+"'" +queryBranch+"  order by o.Id desc";
                 SqlCommand command = new SqlCommand(query, connection);
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
@@ -72,18 +84,50 @@ namespace SuperbrainManagement.Controllers
                 while (reader.Read())
                 {
                     count++;
+                    string badgeStatus = "";
+                    if (reader["status"].ToString() == "1")
+                    {
+                        badgeStatus = "<span class='badge text-success bg-light'>Đơn hàng mới</span>";
+                    }else if (reader["status"].ToString() == "2")
+                    {
+                        badgeStatus = "<span class='badge text-info bg-light'>Đã thanh toán</span>";
+                    }
+                    else if (reader["status"].ToString() == "3")
+                    {
+                        badgeStatus = "<span class='badge text-info bg-light'>Đã xác nhận</span>";
+                    }
+                    else if (reader["status"].ToString() == "4")
+                    {
+                        badgeStatus = "<span class='badge text-primary bg-light'>Đã đóng gói</span>";
+                    }
+                    else if (reader["status"].ToString() == "5")
+                    {
+                        badgeStatus = "<span class='badge text-primary bg-light'>Đang giao hàng</span>";
+                    }
+                    else if (reader["status"].ToString() == "6")
+                    {
+                        badgeStatus = "<span class='badge text-white bg-success'>Đã hoàn thành</span>";
+                    }
+                    else if (reader["status"].ToString() == "0")
+                    {
+                        badgeStatus = "<span class='badge text-white bg-light'>Đơn hàng hủy</span>";
+                    }
                     str += "<div class=\"list-group-item list-group-item-action mt-2\" aria-current=\"true\">"
                                     +"<div class=\"d-flex w-100 justify-content-between\">"
-                                        +"<p class=\"mb-1\"><i class=\"ti ti-shopping-cart\"></i> <b>" + reader["Code"] +"</b> - <small>" + DateTime.Parse(reader["DateCreate"].ToString())+"</small></p>"
+                                        +"<p class=\"mb-1\"><i class=\"ti ti-shopping-cart\"></i> <a href='javascript:Status_Order(" + reader["Id"] +")' class='text-dark fw-bolder'>" + reader["Code"] +"</a> "+badgeStatus+"</p>"
                                         +"<div>"
-                                            +"<a href=\"#\" class=\"btn btn-danger btn-sm\"><i class=\"ti ti-trash\"></i></a>"
-                                            +"<a href=\"#\" class=\"btn btn-success btn-sm\"><i class=\"ti ti-printer\"></i></a>"
+                                            +"<a href=\"#\" class=\"btn btn-danger btn-sm ms-1\"><i class=\"ti ti-trash\"></i></a>"
+                                            +"<a href=\"#\" class=\"btn btn-success btn-sm ms-1\"><i class=\"ti ti-printer\"></i></a>"
                                         +"</div>"
                                     +"</div>"
-                                    +"<p class=\"mb-1\">Người đặt: " + reader["Username"] +"</p>"
-                                    +"<p class=\"mb-1\">Số điện thoại: " + reader["Phone"] +"</p>"
-                                    + (reader["Address"].ToString()==""?"":"<p class=\"mb-1\">Địa chỉ giao hàng: " + reader["Address"] +"</p>")
-                                    +"<p class=\"mb-1\">Tổng tiền: " + reader["tongtien"] +"</p>"
+                                    + "<p class=\"mb-1\">Cơ sở: <b>" + reader["TenCoSo"] + "</b></p>"
+                                     + "<div class=\"d-flex w-100 justify-content-between\">"
+                                    + "<p class=\"mb-1\">Người đặt: <b>" + reader["Username"] +"</b></p>"
+                                    + "<small>" + DateTime.Parse(reader["DateCreate"].ToString()) + "</small>"
+                                    + "</div>"
+                                    + (reader["Phone"].ToString()==""?"":"<p class=\"mb-1\">Số điện thoại: <b>" + reader["Phone"] +"</b></p>")
+                                    + (reader["Address"].ToString()==""?"":"<p class=\"mb-1\">Địa chỉ giao hàng: <b>" + reader["Address"] +"</b></p>")
+                                    + "<p class=\"mb-1\">Tổng tiền: <b>" + reader["tongtien"] +"</b></p>"
                                 +"</div>";
                 }
                 reader.Close();
@@ -132,6 +176,50 @@ namespace SuperbrainManagement.Controllers
             var item = new
             {
                 str,
+                count
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult LoadStatus_Order(int id)
+        {
+            string idbranch_hq = db.Branches.SingleOrDefault(x => x.Code.ToLower() == "hq").Id.ToString();
+            string str = ""; int count = 0;
+            string strCode = "",strTongtien="";
+            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "select p.Code as CodeProduct,p.Name,p.Unit,p.Image,od.Amount,od.Price,od.TotalAmount,o.Code as CodeOrder,o.Address,o.Phone,o.Description,o.Status,us.Name as Username,o.DateCreate,(select sum(TotalAmount) from OrderDetail where IdOrder=o.Id) as tongtien "
+                                    + " from OrderDetail od inner join [Order] o on o.id = od.IdOrder, Product p,[User] us"
+                                    +" where p.id=od.IdProduct and us.Id=o.IdUser and o.Id="+id;
+                SqlCommand command = new SqlCommand(query, connection);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                double tongtien = 0;
+                while (reader.Read())
+                {
+                    count++;
+
+                    double thanhtien = Double.Parse(reader["TotalAmount"].ToString());
+                    tongtien += thanhtien;
+                    str += "<tr>"
+                            + "<td class='text-center align-content-center'>" + count + "</td>"
+                            + "<td class=''> <img src='" + reader["Image"].ToString() + "' alt='" + reader["Name"].ToString() + "' class='rounded-2 me-2' height='40'><span class='text-success'>" + reader["CodeProduct"].ToString() + "</span> - " + reader["Name"].ToString() + "</td>"
+                            + "<td class='align-content-center'>" + reader["Unit"].ToString() + "</td>"
+                            + "<td class='align-content-end'>" + reader["Price"].ToString() + "</td>"
+                            + "<td class='align-content-center'>" + reader["Amount"].ToString() + "</td>"
+                            + "<td class='align-content-end'>" + reader["TotalAmount"].ToString() + "</td>"
+                           + "</tr>";
+                    strCode = reader["CodeOrder"].ToString();
+                    strTongtien  = reader["tongtien"].ToString();
+                }
+                str += "<tr><td colspan=5 class='text-end'>Tổng tiền: </td><td>"+tongtien+"</td></tr>";
+                reader.Close();
+            }
+            var item = new
+            {
+                str,
+                strCode,
+                strTongtien,
                 count
             };
             return Json(item, JsonRequestBehavior.AllowGet);
@@ -209,6 +297,7 @@ namespace SuperbrainManagement.Controllers
                     DateCreate = DateTime.Now,
                 };
                 db.Orders.Add(order);
+                db.WarehouseReceiptions.Add(receiption);
                 db.SaveChanges();
                 int OrderId = order.Id;
                 int ReceiptionId = receiption.Id;
@@ -248,6 +337,36 @@ namespace SuperbrainManagement.Controllers
             {
                 status = "Không tìm thấy vật tư cần đặt";
             }
+            var item = new
+            {
+                status = status
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public ActionResult Submit_StatusOrder(int IdOrder,int Status,string Description,HttpPostedFileBase file)
+        {
+            string status = "ok";
+            var order = db.Orders.Find(IdOrder);
+            var orderStatus = new OrderStatus() { 
+                IdOrder =IdOrder,
+                Status = Status,
+                Updatetime = DateTime.Now, 
+                Description = Description,
+                IdUser = int.Parse(CheckUsers.iduser()),
+            };
+            if (file != null && file.ContentLength > 0)
+            {
+                string _FileName = Path.GetFileName(file.FileName);
+                string _path = Path.Combine(Server.MapPath("~/Uploads"), _FileName);
+                file.SaveAs(_path);
+                orderStatus.Image = "/Uploads/" + _FileName;
+            }
+            db.OrderStatus.Add(orderStatus);
+            order.Status = Status;
+            db.Entry(order).State = EntityState.Modified;
+            db.SaveChanges();
+
             var item = new
             {
                 status = status

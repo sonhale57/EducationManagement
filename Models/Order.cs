@@ -13,7 +13,7 @@ namespace SuperbrainManagement.Models
         public Order()
         {
             OrderDetails = new HashSet<OrderDetail>();
-            OrderStatus = new HashSet<OrderStatu>();
+            OrderStatus = new HashSet<OrderStatus>();
             Transactions = new HashSet<Transaction>();
         }
 
@@ -56,7 +56,7 @@ namespace SuperbrainManagement.Models
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<OrderStatu> OrderStatus { get; set; }
+        public virtual ICollection<OrderStatus> OrderStatus { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Transaction> Transactions { get; set; }

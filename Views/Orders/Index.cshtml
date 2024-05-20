@@ -121,6 +121,67 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="modalStatus" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content rounded-0 h-75">
+            <form action="/" method="post" id="form_status">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white" id="exampleModalLabel">Cập nhật đơn hàng</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                            <div class="col col-4 col-md-4 col-sm-12">
+                                <label class="text-success">Mã đơn hàng:</label>
+                                <input type="hidden" name="IdOrder" id="IdOrder" placeholder="Tên liên hệ" value="" class="form-control" />
+                                <input type="text" name="Name" id="strCode" placeholder="Tên liên hệ" value="" class="form-control" disabled />
+                            </div>
+                            <div class="col col-4 col-md-4 col-sm-12">
+                                <label class="text-success">Tổng tiền thanh toán:</label>
+                                <input type="text" name="Tongtien" id="strTongtien" placeholder="Số điện thoại nhận hàng" value="" class="form-control" disabled />
+                            </div>
+                            <div class="col col-4 col-md-4 col-sm-12">
+                                <label class="text-success">Cập nhật:</label>
+                                <select class="form-control" name="Status" id="Status">
+                                    <option value="2">Thanh toán đơn hàng</option>
+                                    <option value="3">Xác nhận đơn hàng</option>
+                                    <option value="4">Đóng gói đơn hàng</option>
+                                    <option value="5">Đang vận chuyển</option>
+                                    <option value="6">Đã hoàn thành</option>
+                                </select>
+                            </div>
+                            <div class="col col-4 col-md-4 col-sm-12 mt-3">
+                                <label class="text-success">Hình ảnh:</label>
+                                <input class="form-control" id="File" name="File" type="file" placeholder="Hình ảnh chứng tử" required>
+                            </div>
+                            <div class="col col-8 col-md-8 col-sm-12 mt-3">
+                                <label class="text-success">Ghi chú cập nhật:</label>
+                                <input type="text" name="Description" id="Description" placeholder="Ghi chú cập nhật" value="" class="form-control" />
+                            </div>
+                    </div>
+                    <hr />
+                    <table class="table mt-3">
+                        <thead class="bg-info">
+                            <tr class="text-white">
+                                <td>STT</td>
+                                <td>Vật tư</td>
+                                <td>Đơn vị</td>
+                                <td>Đơn giá</td>
+                                <td>Số lượng</td>
+                                <td>Thành tiền</td>
+                            </tr>
+                        </thead>
+                        <tbody id="showlist_statusorder"></tbody>
+                    </table>
+                </div>
+                <div class="modal-footer text-start">
+                    <button type="button" class="btn btn-success" onclick="submit_statusorder()">
+                        <i class="ti ti-plus"></i> Cập nhật đơn hàng
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <script>
     Loadlist(1);
     function Loadlist(i) {
@@ -137,6 +198,27 @@
                 console.log(data);
                 $("#loading").html("");
                 $('#showlist').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function LoadStatus_Order(id) {
+        $.ajax({
+            url: '@Url.Action("LoadStatus_Order", "Orders")',
+            type: "GET",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                console.log(data);
+                $('#showlist_statusorder').html(data.str);
+                $('#IdOrder').val(id);
+                $('#strCode').val(data.strCode);
+                $('#strTongtien').val(data.strTongtien);
+                $('#countline').val(data.count);
             },
             error: function (xhr, error) {
                 console.log(error);
@@ -203,8 +285,36 @@
         },
         error: function () { showError('Lỗi!', 3000); }
     });
-}
+    }
+    function submit_statusorder() {
+        $.ajax({
+            url: '@Url.Action("Submit_StatusOrder", "Orders")',
+            type: "POST",
+            data: {
+                IdOrder: $("#IdOrder").val(),
+                Status: $("#Status").val(),
+                Image: $("#Image").val(),
+                Description: $("#Description").val()
+            }
+            , dataType: "json",
+            success: function (data) {
+                if (data.status == "ok") {
+                    $('#modalStatus').modal('hide');
+                    Loadlist(1);
+                    showSuccess("Đã cập nhật thành công!", 3000);
+                }
+                else {
+                    showError(data.status, 3000);
+                }
+            },
+            error: function () { showError('Lỗi!', 3000); }
+        });
+    }
     $('#exampleModal').on('shown.bs.modal', function (e) {
         Loadlist_order();
     });
+    function Status_Order(i) {
+        $('#modalStatus').modal('show');
+        LoadStatus_Order(i);
+    }
 </script>
