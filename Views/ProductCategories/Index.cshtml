@@ -1,13 +1,13 @@
-﻿@model PagedList.IPagedList<SuperbrainManagement.Models.Product>
-@using PagedList.Mvc;
+﻿@model IEnumerable<SuperbrainManagement.Models.ProductCategory>
+
 @{
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    int stt = 1;
+    int STT = 1;
 }
 <div class="row">
     <div class="col col-md-6 col-sm-12">
-        <form action="/products" method="get" id="formload">
+        <form action="/ProductCategories" method="get" id="formload">
             <div class="input-group mb-3">
                 <input type="text" class="form-control" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
                 <button class="input-group-text bg-success" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
@@ -26,65 +26,29 @@
                 <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
             </ul>
         </div>
-        <a href="/products/create" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
-        <a href="/ProductCategories" class="btn btn-md btn-success ms-0"><i class="ti ti-archive"></i> Danh mục</a>
+        <a href="/ProductCategories/create" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
     </div>
 </div>
-
 <table class="table fs-3">
     <thead class="bg-success text-white rounded-1">
         <tr>
-            <th rowspan="2" class="text-center align-content-center">STT</th>
-            <th rowspan="2" class="align-content-center">Mã vật tư</th>
-            <th rowspan="2" class="align-content-center">Tên vật tư</th>
-            <th rowspan="2" class="align-content-center">Đơn giá</th>
-            <th rowspan="2" class="align-content-center">Đơn vị</th>
-            <th rowspan="2" class="align-content-center text-center">Tồn kho</th>
-            <th rowspan="2" class="align-content-center">Định mức</th>
-            <th colspan="2" class="text-center align-content-center">Cài đặt bán</th>
-            <th rowspan="2" class="text-center align-content-center">Trạng thái</th>
-            <th rowspan="2" class="text-end align-content-center">Thao tác</th>
-        </tr>
-        <tr>
-            <th class="text-center">Đơn vị</th>
-            <th class="text-center">Số lượng</th>
+            <th class="text-center align-content-center">STT</th>
+            <th class="align-content-center">Mã danh mục</th>
+            <th class="align-content-center">Tên danh mục</th>
+            <th class="align-content-center">Thứ tự hiển thị</th>
+            <th class="text-center align-content-center">Trạng thái</th>
+            <th class="text-end align-content-center">Thao tác</th>
         </tr>
     </thead>
     <tbody id="showlist"></tbody>
     @foreach (var item in Model)
     {
+
         <tr>
-            <td class="text-center">
-                @stt
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Code)
-            </td>
-            <td>
-                <img src="@item.Image" alt="@item.Name" class="rounded-2 me-2" height="40">
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Price)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Unit)
-            </td>
-            <td class="text-center">
-                @SuperbrainManagement.Controllers.ProductReceiptionDetailsController.GetInventory(item.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Quota)
-            </td>
-
-            <td class="text-center">
-                @Html.DisplayFor(modelItem => item.UnitOfPackage)
-            </td>
-
-            <td class="text-center">
-                @Html.DisplayFor(modelItem => item.NumberOfPackage)
-            </td>
-
+            <td>@STT</td>
+            <td>@item.Code</td>
+            <td>@item.Name</td>
+            <td>@item.DisplayOrder</td>
             <td class="text-center">
                 @if (item.Active != null && item.Active == true)
                 {
@@ -102,30 +66,19 @@
                 }
             </td>
             <td class="text-end">
-                <a href="/products/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
-                <a href="/products/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
-                <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="ti ti-dots-vertical"></i>
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <li><a href="javascript:void(0)" data-id="@item.Id" class="dropdown-item"><i class="ti ti-user-plus"></i> Cài đặt bán</a></li>
-                </ul>
+                <a href="/ProductCategories/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
+                <a href="/ProductCategories/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
             </td>
         </tr>
-        stt += 1;
     }
 </table>
 <script>
-    Loadlist();
-    function Loadlist() {
-
-    }
     function ChangeStatus(button) {
         var id = parseInt(button.getAttribute("data-id")); // Chuyển đổi id thành một số nguyên
         var status = button.value; // Sử dụng button.value thay vì lấy từ tất cả các button
         $.ajax({
             type: "POST",
-            url: '/Products/updateStatus',
+            url: '/ProductCategories/updateStatus',
             data: JSON.stringify({ id: id, status: status }),
             contentType: "application/json; charset=utf-8",
             dataType: "json",

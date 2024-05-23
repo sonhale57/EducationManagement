@@ -1,4 +1,4 @@
-namespace SuperbrainManagement.Models
+﻿namespace SuperbrainManagement.Models
 {
     using System;
     using System.Collections.Generic;
@@ -19,16 +19,21 @@ namespace SuperbrainManagement.Models
         public int Id { get; set; }
 
         [StringLength(50)]
+        [Display(Name = "Mã chương trình")]
         public string Code { get; set; }
 
         [StringLength(50)]
+        [Display(Name="Tên chương trình")]
         public string Name { get; set; }
 
         [StringLength(50)]
+        [Display(Name="Mô tả")]
         public string Description { get; set; }
 
+        [Display(Name="Thứ tự hiển thị")]
         public int? DisplayOrder { get; set; }
 
+        [Display(Name="Bài test đầu vào")]
         public bool? IsTest { get; set; }
 
         public bool? Enable { get; set; }

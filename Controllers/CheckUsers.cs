@@ -3,6 +3,7 @@ using Org.BouncyCastle.Asn1.Ocsp;
 using SuperbrainManagement.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Web;
 
@@ -139,6 +140,33 @@ namespace SuperbrainManagement.Controllers
                                 }
                             }
                         }
+                    }
+                    return "hideof"; // Trả về chuỗi "hideof" nếu không có quyền truy cập
+                }
+            }
+            catch
+            {
+                return "";
+            }
+        }
+        /// <summary>
+        /// Code check phân quyền của user
+        /// </summary>
+        public static string CheckHQ_Css()
+        {
+            ModelDbContext db = new ModelDbContext();
+            int idbranch_hq =db.Branches.SingleOrDefault(x=>x.Code.ToLower()=="hq").Id;
+            try
+            {
+                MD5Hash md5 = new MD5Hash();
+                string iduser = System.Web.HttpContext.Current.Request.Cookies["check"]["iduser"].ToString();
+                if (iduser == "") { return iduser; }
+                else
+                {
+                    var idbranch_user = db.Users.Find(int.Parse(iduser)).IdBranch;
+                    if (idbranch_user == idbranch_hq)
+                    {
+                        return "";
                     }
                     return "hideof"; // Trả về chuỗi "hideof" nếu không có quyền truy cập
                 }

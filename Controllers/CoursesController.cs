@@ -82,7 +82,15 @@ namespace SuperbrainManagement.Controllers
             ViewBag.PagedListRenderOptions = pagedListRenderOptions;
             return View(pagedData);
         }
-    
+        public ActionResult Loadlist(string sortOrder, string currentFilter, string searchString, int? page, int idBranch)
+        {
+            string str = "";
+
+            var item = new {
+            str
+            };
+            return Json(item,JsonRequestBehavior.AllowGet);
+        }
         // GET: Courses/Details/5
         public ActionResult Details(int? id)
         {

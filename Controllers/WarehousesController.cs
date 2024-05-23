@@ -186,7 +186,7 @@ namespace SuperbrainManagement.Controllers
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 string query = "SELECT p.Id,p.Name,p.Unit,p.Price,p.Code,p.Quota,p.Image FROM product p"
-                                        + " where p.enable=1 ";
+                                        + " where p.enable=1 and p.active=1 ";
                 SqlCommand command = new SqlCommand(query, connection);
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
@@ -222,14 +222,10 @@ namespace SuperbrainManagement.Controllers
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                /*
-                string query = "SELECT p.Id,p.Name,p.Unit,p.Price,p.Code,p.Quota,p.Image FROM product p"
-                                        + " where p.enable=1 ";
-                */
                 string query = "SELECT p.Id,p.Image, p.Name,p.Unit,p.Price,p.Code,p.Quota,COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '1' AND re.IdBranch = " + idBranch + "), 0) -"
                                         + " COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '0' AND re.IdBranch = " + idBranch + "), 0) AS Tonkho"
                                         + " FROM product p"
-                                        + " where p.enable=1 "
+                                        + " where p.enable=1 and p.active=1 "
                                         + " order by p.Name";
                 SqlCommand command = new SqlCommand(query, connection);
                 connection.Open();

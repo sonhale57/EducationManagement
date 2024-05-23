@@ -153,7 +153,7 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "Id,Name,Description,Code,Image,Enable,Active,Price,DiscountPrice,StatusDiscount,DateCreate,IdUser,IdCategory,IsCore,Unit,Quota,NumberOfPackage,UnitOfPackage,Inventory,IsFixed,IsSale,IdSupplier,PowerScore")] Product product)
+        public async Task<ActionResult> Edit([Bind(Include = "Id,Name,Description,Code,Image,Price,DiscountPrice,StatusDiscount,DateCreate,IdUser,IdCategory,IsCore,Unit,Quota,NumberOfPackage,UnitOfPackage,Inventory,IsFixed,IsSale,IdSupplier,PowerScore")] Product product)
         {
             if (ModelState.IsValid)
             {
@@ -191,7 +191,21 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
-
+        [HttpPost]
+        public ActionResult updateStatus(int id, int status)
+        {
+            Product product = db.Products.Find(id);
+            if (product != null)
+            {
+                product.Active = status == 1;
+                db.SaveChanges();
+                return Json(product.Active);
+            }
+            else
+            {
+                return Json(false);
+            }
+        }
         protected override void Dispose(bool disposing)
         {
             if (disposing)
