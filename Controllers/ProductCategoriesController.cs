@@ -15,9 +15,40 @@ namespace SuperbrainManagement.Controllers
         private ModelDbContext db = new ModelDbContext();
 
         // GET: ProductCategories
-        public ActionResult Index()
+        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
-            return View(db.ProductCategories.ToList());
+            if (searchString != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+            ViewBag.CurrentFilter = searchString;
+
+            var products = db.ProductCategories.ToList();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                products = db.ProductCategories.Where(x => x.Name.ToLower().Contains(searchString.ToLower())).ToList();
+            }
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    products = products.OrderByDescending(s => s.Name).ToList();
+                    break;
+                case "date":
+                    products = products.OrderBy(s => s.Id).ToList();
+                    break;
+                case "name":
+                    products = products.OrderBy(s => s.Name).ToList();
+                    break;
+                default:
+                    products = products.OrderByDescending(s => s.Id).ToList();
+                    break;
+            }
+            return View(products);
         }
 
         // GET: ProductCategories/Details/5
