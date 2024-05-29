@@ -1,0 +1,109 @@
+﻿
+@{
+    ViewBag.Title = "Receiptions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col col-md-6 col-sm-12">
+        <div class="input-group mb-3">
+            @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
+            {
+                @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", @onchange = "Loadlist()" })
+            }
+            <input type="date" class="form-control" name="fromdate" id="fromdate" placeholder="Tìm kiếm" value="">
+            <input type="date" class="form-control" name="todate" id="todate" placeholder="Tìm kiếm" value="">
+            <input type="text" class="form-control" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
+            <a class="input-group-text bg-success" id="basic-addon2" href="javascript:Loadlist()"><i class="ti ti-search text-white"></i></a>
+        </div>
+    </div>
+    <div class="col col-md-6 col-sm-12 text-right" style="text-align:right;">
+        <div class="me-0 btn btn-md p-0">
+            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="ti ti-arrows-sort"></i> Sắp xếp theo
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <li><a class="dropdown-item" href="javascript:Loadlist('name')"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
+                <li><a class="dropdown-item" href="javascript:Loadlist('name_desc')"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
+                <li><a class="dropdown-item" href="javascript:Loadlist('date')"><i class="ti ti-sort-ascending"></i> Cũ nhất</a></li>
+                <li><a class="dropdown-item" href="javascript:Loadlist('date_desc')"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
+            </ul>
+        </div>
+        <a href="javascript:Loadlist_nhap()" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <i class="ti ti-file-download"></i> Xuất file
+        </a>
+    </div>
+</div>
+<table class="table fs-3">
+    <thead class="bg-success text-white rounded-1">
+        <tr>
+            <th class="text-center">STT</th>
+            <th class="text-center">Mã vật tư</th>
+            <th>Tên vật tư</th>
+            <th>Đơn vị</th>
+            <th class="text-end">Đơn giá</th>
+            <th class="text-center">Số lượng</th>
+            <th class="text-end">Thành tiền</th>
+            <th class="text-center">Loại</th>
+            <th>Lý do</th>
+            <th class="text-center">Thời gian</th>
+            <th class="text-center">Người thao tác</th>
+        </tr>
+    </thead>
+    <tr id="loading">
+    </tr>
+    <tbody id="showlist"></tbody>
+</table>
+<script>
+    
+    $(document).ready(function () {
+        var currentDate = new Date();
+
+        // Lấy ngày, tháng và năm hiện tại
+        var currentDay = currentDate.getDate();
+        var currentMonth = currentDate.getMonth() + 1; // Tháng bắt đầu từ 0, nên cần cộng thêm 1
+        var currentYear = currentDate.getFullYear();
+
+        // Định dạng chuỗi ngày, tháng và năm để đặt giá trị cho phần tử "todate"
+        var formattedToday = currentYear + '-' + ('0' + currentMonth).slice(-2) + '-' + ('0' + currentDay).slice(-2);
+
+        // Đặt giá trị mới cho phần tử có id là "todate"
+        $("#todate").val(formattedToday);
+
+
+        // Tính toán ngày và tháng trước đó
+        var lastMonthDate = new Date(currentDate.getFullYear(), currentMonth - 2, currentDay); // Giảm đi 2 để lấy tháng trước đó
+
+        // Lấy ngày và tháng sau khi tính toán
+        var lastMonth = lastMonthDate.getMonth() + 1; // Tháng bắt đầu từ 0, nên cần cộng thêm 1
+        var lastMonthYear = lastMonthDate.getFullYear();
+
+        // Định dạng chuỗi ngày và tháng để đặt giá trị cho phần tử "fromdate"
+        var formattedLastMonth = lastMonthYear + '-' + ('0' + lastMonth).slice(-2) + '-' + ('0' + currentDay).slice(-2);
+
+        // Đặt giá trị mới cho phần tử có id là "fromdate"
+        $("#fromdate").val(formattedLastMonth);
+        Loadlist();
+    });
+    function Loadlist(sort) {
+        $("#loading").html("<td colspan=11 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
+         $.ajax({
+             url: '@Url.Action("Load_thekho", "Warehouses")',
+             type: "GET",
+             data: {
+                 idBranch: $("#IdBranch").val(),
+                 fromdate: $("#fromdate").val(),
+                 todate: $("#todate").val(),
+                 sort: sort,
+                 searchString: $("#searchString").val()
+             },
+             success: function (data) {
+                 console.log(data);
+                $("#loading").html("");
+                 $('#showlist').html(data.str);
+             },
+             error: function (xhr, error) {
+                 console.log(error);
+             }
+         });
+    }
+</script>

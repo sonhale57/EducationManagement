@@ -1,9 +1,8 @@
-﻿@model SuperbrainManagement.Models.Student
+﻿
 @{
-    ViewBag.Title = "AddCourseProgramOfStudents";
+    ViewBag.Title = "Registrations";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
 <table class="table">
     <thead class="bg-success">
         <tr>
@@ -14,7 +13,7 @@
                         <i class="ti ti-dots text-success"></i>
                     </a>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <a class="dropdown-item" href="@Url.Action("RegistrationPrints","Students")">In phiếu đăng ký tổng</a>
+                        <a class="dropdown-item" href="/students/registrationprints">In phiếu đăng ký tổng</a>
                         <a class="dropdown-item" href="#">In phiếu đăng ký chi tiết</a>
                         <a class="dropdown-item" href="#">Thu tiền</a>
                         <a class="dropdown-item" href="#">Xét vào lớp</a>
@@ -25,26 +24,27 @@
         </tr>
     </thead>
 </table>
-<div class="row ps-3">
+<div class="row p-2">
     <div class="col col-6 col-md-6 col-sm-12 mb-2">
-        <p>Mã hóa đơn</p>
-        <input class="form-control text-box single-line" style="border:none;" data-val="true" data-val-length="The field Name must be a string with a maximum length of 50." data-val-length-max="50" id="Bill" name="Name" type="text" value="" readonly>
-        <input type="hidden" id="IdRegistration" value="" name="id" />
+        <label>Mã hóa đơn</label>
+        <input class="form-control text-box single-line" style="border:none;" data-val="true" data-val-length="The field Name must be a string with a maximum length of 50." data-val-length-max="50" id="Bill" name="Name" type="text" value="" disabled>
+        <input type="hidden" id="idRegistration" value="@ViewBag.IdRegistration" name="idRegistration" />
+        <input type="hidden" id="idStudent" value="@ViewBag.IdStudent" name="idStudent" />
     </div>
     <div class="col col-6 col-md-6 col-sm-12 mb-2">
-        <p>Ngày tạo</p>
-        <input class="form-control text-box single-line" style="border:none;" data-val="true" data-val-length="The field Username must be a string with a maximum length of 50." data-val-length-max="50" id="Datecreate" name="Username" type="text" value="" readonly>
+        <label>Ngày tạo</label>
+        <input class="form-control text-box single-line" style="border:none;" data-val="true" data-val-length="The field Username must be a string with a maximum length of 50." data-val-length-max="50" id="Datecreate" name="Username" type="text" value="" disabled>
     </div>
     <div class="col col-6 col-md-6 col-sm-12 mb-2">
-        <p>Họ tên học viên</p>
-        <input class="form-control text-box single-line" style="border:none;" data-val="true" data-val-length="The field Name must be a string with a maximum length of 50." data-val-length-max="50" id="Name" name="Name" type="text" value="@Model.Name" readonly>
+        <label>Họ tên học viên</label>
+        <input class="form-control text-box single-line" style="border:none;" data-val="true" data-val-length="The field Name must be a string with a maximum length of 50." data-val-length-max="50" id="Name" name="Name" type="text" value="" disabled>
     </div>
     <div class="col col-6 col-md-6 col-sm-12 mb-2">
-        <p>Mã học viên</p>
-        <input class="form-control text-box single-line" style="border:none;" data-val="true" data-val-length="The field Username must be a string with a maximum length of 50." data-val-length-max="50" id="Username" name="Username" type="text" value="@Model.Code" readonly>
+        <label>Mã học viên</label>
+        <input class="form-control text-box single-line" style="border:none;" data-val="true" data-val-length="The field Username must be a string with a maximum length of 50." data-val-length-max="50" id="Username" name="Username" type="text" value="" disabled>
     </div>
     <div class="col col-12 col-md-12 col-sm-12 mb-2">
-        <p>Ghi chú</p>
+        <label>Ghi chú</label>
         <input class="form-control text-box single-line" id="description" placeholder="Ghi chú dành cho phiếu đăng ký" name="description" type="text" value="">
     </div>
 </div>
@@ -118,7 +118,7 @@
 <button type="button" class="btn btn-success" onclick="getDataComboboxOther(0)" data-bs-toggle="modal" data-bs-target="#exampleModalRevenueReferences">
     <i class="ti ti-checklist"></i> Thu khác
 </button>
-<!-- Modal -->
+
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" style="padding-right: -100px;margin-right: 110px;height: 100vh;">
         <div class="modal-content rounded-0 h-75" style="width: 600px;">
@@ -140,7 +140,6 @@
                         </select>
                     </div>
                 </div>
-
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Học phí</label>
                     <div class="col-lg-9">
@@ -187,7 +186,6 @@
         </div>
     </div>
 </div>
-@*modal*@
 <div class="modal fade" id="exampleModalProduct" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" style="padding-right: -100px;margin-right: 110px;height: 100%;">
         <div class="modal-content rounded-0 h-75" style="width: 600px;">
@@ -211,7 +209,7 @@
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Số lượng</label>
                     <div class="col-lg-9">
-                        <input class="form-control" type="email" value="0" id="numberProduct" readonly>
+                        <input class="form-control" type="email" value="1" id="numberProduct" readonly>
                     </div>
                 </div>
                 <div class="form-group row mt-2">
@@ -283,11 +281,9 @@
         </div>
     </div>
 </div>
-
 @section scripts {
     <script>
         function prints() {
-
        var totalamount = $('#totalamount').val();
         var code = $('#Bill').val();
             $.ajax({
@@ -308,18 +304,14 @@
         function updateCheckboxValue(checkbox) {
             // Kiểm tra xem checkbox có được chọn hay không
             var value = checkbox.checked ? 1 : 0;
-
             // Gán giá trị cho checkbox
             checkbox.value = value;
-
             // In giá trị của checkbox ra console để kiểm tra
             console.log("Checkbox value updated to: " + value);
         }
+
         function deleteitem(courseId, registrationId) {
-
-
             var $row = $(this).closest('tr'); // Tìm hàng chứa nút xóa đã được click
-
             $.ajax({
                 url: '@Url.Action("Deletes", "Students")', // Thay thế bằng URL xóa của bạn
                 type: 'POST',
@@ -329,27 +321,21 @@
                 },
                 success: function (data) {
                     loaddata(data);
-
                     // Xóa hàng từ bảng sau khi xóa thành công
                     $row.remove();
-
                 },
                 error: function (xhr, status, error) {
                     console.error('Error deleting cart item:', error);
-
                 }
             });
         }
         function formatVND(number) {
             // Convert number to string
             var strNumber = number.toString();
-
             // Split the number into integer and decimal parts
             var parts = strNumber.split(".");
-
             // Format the integer part with dots
             var formattedInteger = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-
             // Add the currency symbol and decimal part if exists
             var result = formattedInteger + "";
             if (parts.length > 1) {
@@ -434,14 +420,14 @@
 
           });
         }
-
-        function loaddata(idRegistraion) {
+        Load_danhsach();
+        function Load_danhsach() {
             var randomParam = new Date().getTime(); // Tạo một tham số ngẫu nhiên
             $.ajax({
                 url: '@Url.Action("getData", "Students")',
                 type: 'GET',
                 data: {
-                    IdRegistration: idRegistraion,
+                    IdRegistration: $("#idRegistration").val(),
                     randomParam: randomParam
                 },
                 success: function (data) {
@@ -449,22 +435,18 @@
                     var i = 0, total = 0;
                     console.log(data)
                     $('#dataBody').empty();
-                    // Tạo một hàng mới cho bảng
-
-
-                    // Thêm hàng mới vào phần tử <tbody> của bảng
                     $('#dataBody').html(data.datalist);
-                    document.getElementById("IdRegistration").value = data.idRegistrations;
+                    //document.getElementById("IdRegistration").value = data.idRegistrations;
                     document.getElementById("Bill").value = data.Code;
                     document.getElementById("Datecreate").value = data.DateCreate;
                     $(".total").text(formatVND(data.TotalAmount));
                 },
                 error: function (xhr, status, error) {
-                    alert("san pham da ton tai");
                     console.error('Error saving cart item:', error);
                 }
             })
         }
+
         function SaveRegistration(type) {
             // Get values from form inputs
             var IdObject = 0;
@@ -474,25 +456,18 @@
             var discount = 0;
             var isChecked = [];
             var promotionId = $('#promotionSelect').val();
-            var IdRegistration = document.getElementById("IdRegistration").value;
+            var IdRegistration = document.getElementById("idRegistration").value;
             var description = $('#description').val();
             $(".listproduct").each(function () {
                 // Within each iteration, 'this' refers to the current DOM element
                 // Wrap 'this' with jQuery to access jQuery methods
-
-
                 // Làm bất cứ điều gì bạn muốn với trạng thái kiểm tra isChecked ở đây
-
                 var item = {
                          isChecked: $(this).find('.idproduct').val(),
                          idpro: $(this).find('.idpro').val(),
                     };
                     isChecked.push(item);
-
-
-
                  // Check if the checkbox is checked
-
             });
             console.log("Checkbox value:", isChecked);
 
@@ -519,7 +494,6 @@
                 amount = $('#priceOther').val();
             }
 
-
             // Make AJAX request with collected data
             $.ajax({
                 url: '@Url.Action("SaveRegistration", "Students")',
@@ -538,11 +512,9 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (data) {
-                    loaddata(data);
-
+                    Load_danhsach(data);
                 },
                 error: function (xhr, status, error) {
-
                      showError("san pham da ton tai", 3000);
                     console.error('Error saving cart item:', error);
                 }

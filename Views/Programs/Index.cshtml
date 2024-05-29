@@ -6,67 +6,64 @@
     int stt = 1;
 }
 
-<div class="card shadow rounded-0">
-    <div class="card-body">
-        <div class="row mb-3">
-            <div class="col col-md-4 col-sm-12">
-            </div>
-            <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
-                <a href="/programs/create" class="btn btn-md btn-success ms-0"><i class="ti ti-coffee"></i> Thêm mới chương trình</a>
-                <a href="/courses/create" class="btn btn-md btn-primary ms-0"><i class="ti ti-certificate-2"></i> Thêm mới khóa học</a>
-            </div>
-        </div>
-        <table class="table fs-3">
-            <thead class="bg-success text-white rounded-1">
-                <tr>
-                    <th class="text-center">STT</th>
-                    <th>Mã</th>
-                    <th>Tên</th>
-                    <th>Học phí</th>
-                    <th>Số buổi</th>
-                    <th class="text-center">Thao tác</th>
-                </tr>
-            </thead>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td class="bg-info text-white text-center">@Html.DisplayFor(modelItem => item.Code)</td>
-                    <td colspan="5" class="bg-info text-white">
-                        @Html.DisplayFor(modelItem => item.Name)
-                    </td>
-                </tr>
-                foreach (var c in item.Courses)
-                {
-                    <tr>
-                        <td class="text-center">
-                            @stt
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => c.Code)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => c.Name)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => c.Price)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => c.Sessions)
-                        </td>
-                        <td class="text-center">
-                            <a href="/courses/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
-                            <a href="/courses/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
-                            <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="ti ti-dots-vertical"></i>
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <!-- Thêm các mục dropdown nếu cần -->
-                            </ul>
-                        </td>
-                    </tr>
-                    stt += 1;
-                }
-            }
-        </table>
+<div class="row mb-3">
+    <div class="col col-md-4 col-sm-12">
+    </div>
+    <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
+        <a href="/programs/create" class="btn btn-md btn-success ms-0"><i class="ti ti-coffee"></i> Thêm mới chương trình</a>
+        <a href="/courses/create" class="btn btn-md btn-primary ms-0"><i class="ti ti-certificate-2"></i> Thêm mới khóa học</a>
     </div>
 </div>
+<table class="table fs-3">
+    <thead class="bg-success text-white rounded-1">
+        <tr>
+            <th class="text-center">STT</th>
+            <th>Mã</th>
+            <th>Tên</th>
+            <th>Học phí</th>
+            <th>Số buổi</th>
+            <th class="text-center">Thao tác</th>
+        </tr>
+    </thead>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td class="text-success text-center fw-bolder">@Html.DisplayFor(modelItem => item.Code)</td>
+            <td colspan="5" class="text-success fw-bolder">
+                @Html.DisplayFor(modelItem => item.Name)
+                <a href="/programs/edit/@item.Id" class="ms-2"><i class="ti ti-edit text-success fw-bolder"></i></a>
+            </td>
+        </tr>
+        foreach (var c in item.Courses)
+        {
+            <tr>
+                <td class="text-center">
+                    @stt
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => c.Code)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => c.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => c.Price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => c.Sessions)
+                </td>
+                <td class="text-center">
+                    <a href="/courses/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
+                    <a href="/courses/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
+                    <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="ti ti-dots-vertical"></i>
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <!-- Thêm các mục dropdown nếu cần -->
+                    </ul>
+                </td>
+            </tr>
+            stt += 1;
+        }
+    }
+</table>

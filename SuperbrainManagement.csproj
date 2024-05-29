@@ -271,6 +271,8 @@
     <Compile Include="Controllers\Language.cs" />
     <Compile Include="Controllers\LogsController.cs" />
     <Compile Include="Controllers\MD5Hash.cs" />
+    <Compile Include="Controllers\OrdersController.cs" />
+    <Compile Include="Controllers\ProductCategoriesController.cs" />
     <Compile Include="Controllers\ProductReceiptionDetailsController.cs" />
     <Compile Include="Controllers\ProgramsController.cs" />
     <Compile Include="Controllers\MarketingCampaignsController.cs" />
@@ -288,6 +290,7 @@
     <Compile Include="Controllers\StudentsController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Controllers\VacationSchedulesController.cs" />
+    <Compile Include="Controllers\WarehousesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -343,7 +346,7 @@
     <Compile Include="Models\Notification.cs" />
     <Compile Include="Models\Order.cs" />
     <Compile Include="Models\OrderDetail.cs" />
-    <Compile Include="Models\OrderStatu.cs" />
+    <Compile Include="Models\OrderStatus.cs" />
     <Compile Include="Models\Permission.cs" />
     <Compile Include="Models\PermissionCategory.cs" />
     <Compile Include="Models\Position.cs" />
@@ -412,6 +415,7 @@
     <Content Include="assets\css\select2.min.css" />
     <Content Include="assets\css\styles.css" />
     <Content Include="assets\images\backgrounds\rocket.png" />
+    <Content Include="assets\images\loading.gif" />
     <Content Include="assets\images\logos\icon web.png" />
     <Content Include="assets\images\logos\logo.png" />
     <Content Include="assets\images\products\s1.jpg" />
@@ -873,6 +877,15 @@
     <Content Include="Views\Promotions\Details.cshtml" />
     <Content Include="Views\Promotions\Edit.cshtml" />
     <Content Include="Views\Promotions\Index.cshtml" />
+    <Content Include="Views\Students\Registration.cshtml" />
+    <Content Include="Views\Students\Registrations.cshtml" />
+    <Content Include="Views\Warehouses\Index.cshtml" />
+    <Content Include="Views\Orders\Index.cshtml" />
+    <Content Include="Views\ProductCategories\Create.cshtml" />
+    <Content Include="Views\ProductCategories\Delete.cshtml" />
+    <Content Include="Views\ProductCategories\Details.cshtml" />
+    <Content Include="Views\ProductCategories\Edit.cshtml" />
+    <Content Include="Views\ProductCategories\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -892,6 +905,9 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Uploads\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

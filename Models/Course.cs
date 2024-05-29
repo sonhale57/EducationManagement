@@ -1,4 +1,4 @@
-namespace SuperbrainManagement.Models
+﻿namespace SuperbrainManagement.Models
 {
     using System;
     using System.Collections.Generic;
@@ -22,49 +22,64 @@ namespace SuperbrainManagement.Models
         public int Id { get; set; }
 
         [StringLength(50)]
+        [Display(Name="Mã khóa học")]
         public string Code { get; set; }
 
         [StringLength(50)]
+        [Display(Name="Tên khóa học")]
         public string Name { get; set; }
 
+        [Display(Name="Số giờ")]
         public int? Hour { get; set; }
 
         [StringLength(50)]
+        [Display(Name="Cấp độ")]
         public string Levels { get; set; }
 
+        [Display(Name="Thứ tự hiển thị")]
         public int? DisplayOrder { get; set; }
 
         [Column(TypeName = "numeric")]
+        [Display(Name="Đơn giá")]
         public decimal? Price { get; set; }
 
         public int? IdProgram { get; set; }
 
         [StringLength(250)]
+        [Display(Name="Mô tả")]
         public string Description { get; set; }
 
         [StringLength(250)]
+        [Display(Name="Công thức giữa kì")]
         public string FormulaMidterm { get; set; }
 
         [StringLength(50)]
+        [Display(Name="Tốc độ giữa kì")]
         public string SpeedMidterm { get; set; }
 
         [StringLength(250)]
+        [Display(Name="Công thức cuối kì")]
         public string FormulaEndterm { get; set; }
 
         [StringLength(50)]
+        [Display(Name="Tốc độ cuối kì")]
         public string SpeedEndterm { get; set; }
 
         [StringLength(500)]
+        [Display(Name="Địn hướng phát triển")]
         public string DevelopRoute { get; set; }
 
+        [Display(Name="Điểm đạt")]
         public int? ScorePass { get; set; }
 
         public DateTime? DateCreate { get; set; }
 
         public int? IdUser { get; set; }
 
+        [Display(Name="Số buổi")]
         public int? Sessions { get; set; }
 
+        [Display(Name="Số giờ")]
         public int? Hours { get; set; }
 
         public virtual Program Program { get; set; }

@@ -56,7 +56,7 @@ namespace SuperbrainManagement.Models
         public virtual DbSet<Notification> Notifications { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<OrderDetail> OrderDetails { get; set; }
-        public virtual DbSet<OrderStatu> OrderStatus { get; set; }
+        public virtual DbSet<OrderStatus> OrderStatus { get; set; }
         public virtual DbSet<Permission> Permissions { get; set; }
         public virtual DbSet<PermissionCategory> PermissionCategories { get; set; }
         public virtual DbSet<Position> Positions { get; set; }

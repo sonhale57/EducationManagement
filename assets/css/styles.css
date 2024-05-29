@@ -6,8 +6,6 @@
 */
 @import "../libs/simplebar/dist/simplebar.css";
 @import "icons/tabler-icons/tabler-icons.css";
-@import "https://cdnjs.cloudflare.com/ajax/libs/boxicons/2.1.0/css/boxicons.min.css";
-@import "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css";
 
 :root, [data-bs-theme=light] {
     --bs-blue: #51A347;
@@ -19134,10 +19132,14 @@ textarea.form-control-lg {
 }
 
 .sidebar-nav ul .sidebar-item.selected > .sidebar-link, .sidebar-nav ul .sidebar-item.selected > .sidebar-link.active, .sidebar-nav ul .sidebar-item > .sidebar-link.active {
-    background-color: #51A347;
-    color: #fff
+    
 }
+.sidebar-nav ul .sidebar-item.selected > .sidebar-link, .sidebar-nav ul .sidebar-item.selected > .sidebar-link.active, .sidebar-nav ul .sidebar-item > .sidebar-link.active :before {
 
+}
+.sidebar-nav ul .sidebar-item.selected > .sidebar-link, .sidebar-nav ul .sidebar-item.selected > .sidebar-link.active, .sidebar-nav ul .sidebar-item > .sidebar-link.active :before {
+
+}
 .sidebar-nav .sidebar-list .sidebar-list-item {
     padding: 8px 0
 }

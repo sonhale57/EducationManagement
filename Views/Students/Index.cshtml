@@ -39,8 +39,8 @@
             <th class="text-center">STT</th>
             <th>Mã</th>
             <th>Họ tên</th>
-            <th>Sinh nhật</th>
-            <th>Giới tính</th>
+            <th class="text-center">Sinh nhật</th>
+            <th class="text-center">Giới tính</th>
             <th>Số điện thoại</th>
             <th>Email</th>
             <th>Quản lý</th>
@@ -51,19 +51,19 @@
     @foreach (var item in Model)
     {
         <tr>
-            <td class="text-center">
+            <td class="text-center fw-bold">
                 @stt
             </td>
-            <td>
+            <td class="fw-bold">
                 @Html.DisplayFor(modelItem => item.Code)
             </td>
-            <td>
+            <td class="fw-bold">
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DateOfBirth)
+            <td class="text-center">
+                @item.DateOfBirth.Value.ToShortDateString()
             </td>
-            <td>
+            <td class="text-center">
                 @Html.DisplayFor(modelItem => item.Sex)
             </td>
             <td>
@@ -76,8 +76,8 @@
                 @Html.DisplayFor(modelItem => item.User.Name)
             </td>
             <td>
-                <a href="/branches/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
-                <a href="/branches/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
+                <a href="/students/details/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
+                <a href="/students/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
                 <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="ti ti-dots-vertical"></i>
                 </a>

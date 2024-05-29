@@ -13,6 +13,9 @@ using Mysqlx.Crud;
 using PagedList.Mvc;
 using PagedList;
 using SuperbrainManagement.Models;
+using System.Configuration;
+using System.Data.SqlClient;
+using System.Globalization;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -153,7 +156,13 @@ namespace SuperbrainManagement.Controllers
 
             return newCode;
         }
-   
+        
+        public ActionResult Registrations(int idStudent,int? idRegistration)
+        {
+            ViewBag.IdStudent = idStudent;
+            ViewBag.IdRegistration = idRegistration;
+            return View();
+        }
 
         public ActionResult getData(string IdRegistration)
         {
@@ -253,12 +262,9 @@ namespace SuperbrainManagement.Controllers
         [HttpPost] 
         public ActionResult SaveRegistration(int? IdRegistration,int type, int? IdObject,int? price,int? totalamount,int? amount,string Description,int? Discount,List<listProduct> listProduct)
         {
-            //get Iduser and Idstudents
-            MD5Hash md5 = new MD5Hash();
-            string iduser = System.Web.HttpContext.Current.Request.Cookies["check"]["iduser"].ToString();
-            iduser = md5.Decrypt(iduser.ToString());
+            string iduser = CheckUsers.iduser();
             Student student = Session["infoUser"] as Student;
-            //check registration 
+
             Registration registration = new Registration();
             registration = Connect.SelectSingle<Registration>("select * from Registration where Id='" + IdRegistration + "'");
              // Create new Registration
@@ -320,27 +326,6 @@ namespace SuperbrainManagement.Controllers
                         NewregistrationCourse.Discount = Discount;
                         db.RegistrationCourses.Add(NewregistrationCourse);
                         db.SaveChanges();
-                        //if(listProduct.Count > 0)
-                        //{
-                        //    foreach(var itempro in listProduct)
-                        //    {
-                        //        if(itempro.isChecked == 1)
-                        //        {
-                        //            Product product = Connect.SelectSingle<Product>("select * from Product where Id='" + itempro.idpro + "'");
-                        //            ProductCourse NewproductCourse = new ProductCourse();
-                        //            NewproductCourse.Status = true;
-                        //            NewproductCourse.IdCourse = IdObject;
-                        //            NewproductCourse.IdProduct = itempro.idpro;
-                        //            NewproductCourse.Amount = Convert.ToInt32(product.Price);
-                        //            NewproductCourse.DateCreate = DateTime.Now;
-                        //            db.ProductCourses.Add(NewproductCourse);
-                        //            db.SaveChanges();
-
-                        //        }
-                             
-                        //    }
-                           
-                        //}
                         return Json(NewregistrationCourse.IdRegistration);
                     }
                 case 3:
@@ -398,38 +383,297 @@ namespace SuperbrainManagement.Controllers
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
+
+        public ActionResult Load_lophoc(int? idStudent)
+        {
+            string str = "";
+            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+            int count = 0;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "select course.Id as IdCourse,re.id as IdRegistration,re.Code,course.Name as NameCourse,c.Name as NameClass,joinclass.Sessions,joinclass.DateCreate,joinclass.Fromdate,joinclass.Todate,us.Name as NameUser from StudentJoinClass joinclass inner join Registration re on re.id=joinclass.IdRegistration,Course course,Class c,[User] us where course.Id = joinclass.IdCourse and c.id=joinclass.IdClass and us.id=joinclass.IdUser and re.IdStudent=" + idStudent;
+                SqlCommand command = new SqlCommand(query, connection);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    count++;
+                    str +="<tr>"
+                        + "<td>" + count + "</td>"
+                        + "<td>" + reader["Code"].ToString() + "</td>"
+                        + "<td>" + reader["NameCourse"].ToString() + "</td>"
+                        + "<td>" + reader["NameClass"].ToString() + "</td>"
+                        + "<td>" + DateTime.Parse(reader["Fromdate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
+                        + "<td>" + DateTime.Parse(reader["Todate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
+                        + "<td class='text-center'>0/" + reader["Sessions"].ToString() + "</td>"
+                        + "<td>" + DateTime.Parse(reader["DateCreate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
+                        + "<td class='text-center'>"+(DateTime.Parse(reader["DateCreate"].ToString())>DateTime.Now?"<i class='ti ti-circle-check text-danger' title='Đã kết khóa'></i>": "<i class='ti ti-circle-check text-success' title='Đang học'></i>") +"</td>"
+                        + "</tr>";
+                }
+                reader.Close();
+            }
+            var data = new { str };
+            return Json(data, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Load_khoadangky(int? idStudent) 
+        {
+            string str = "";
+            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+            int count = 0;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "select s.Id,re.Id as IdRegistration,re.Code as Code,rec.IdCourse,course.Name as NameCourse ,re.DateCreate,rec.Status, rec.TotalAmount,rec.StatusExchangeCourse,rec.StatusJoinClass,rec.StatusExtend,rec.StatusReserve from Student s inner join registration re on re.IdStudent= s.id inner join RegistrationCourse rec on rec.IdRegistration = re.id, Course course where course.id= rec.IdCourse and s.id=" + idStudent;
+                SqlCommand command = new SqlCommand(query, connection);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                { 
+                   // Status = reader["status"],
+                   // StatusExchangeCourse = reader["statusexchangecourse"].ToString(),
+                   // StatusJoinClass= reader["StatusJoinClass"].ToString(),
+                   // StatusExtend = reader["StatusExtend"].ToString()
+                    count++;
+                    str +="<tr>"
+                        +"<td>"+count+"</td>"
+                        +"<td>"+ reader["Code"].ToString() + "</td>"
+                        +"<td>"+reader["NameCourse"].ToString() + "</td>"
+                        +"<td>"+ reader["TotalAmount"].ToString() + "</td>"
+                        +"<td>"+ reader["DateCreate"].ToString() + "</td>"
+                        +"<td class='text-center'>"+ (Convert.ToBoolean(reader["Status"]) ? "<i class='ti ti-circle-check text-success'></i>" : "Chưa thanh toán") + "</td>"
+                        +"<td class='text-center'>"+ (Convert.ToBoolean(reader["StatusJoinClass"]) ? "<span class='text-success fw-bolder'>Đã xét lớp</span>" : "Chờ xét lớp") + "</td>"
+                        + "<td class='text-end'>"
+                        + "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">"
+                        +"<i class=\"ti ti-dots-vertical\"></i>"
+                        +"</a>"
+                        +"<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">"
+                        +"<li><a class=\"dropdown-item\" href='javascript:Xetlop_modal(" + reader["IdRegistration"] + "," + reader["IdCourse"] +")'><i class=\"ti ti-eye-check\"></i> Xét vào lớp</a></li>"
+                        +"</ul>"
+                        + "</td>"
+                        + "</tr>";
+                }
+                reader.Close();
+            }
+            var data = new {str};
+            return Json(data,JsonRequestBehavior.AllowGet); 
+        }
+        public ActionResult Load_xetlop(int idRegistration,string idCourse,int idStudent) {
+            string str = "";
+            string registrionCode =db.Registrations.Find(idRegistration).Code;
+            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "select rec.IdCourse,c.Name,rec.Status from RegistrationCourse rec inner join Registration re on re.id= rec.IdRegistration, Course c where c.id=rec.IdCourse and re.IdStudent = "+idStudent;
+                SqlCommand command = new SqlCommand(query, connection);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    if (reader["IdCourse"].ToString()==idCourse)
+                    {
+                        str += "<option value='" + reader["IdCourse"] +"' data-status='" + reader["Status"] +"' selected>" + reader["Name"] +"</option>";
+                    }
+                    else
+                    {
+                        str += "<option value='" + reader["IdCourse"] +"' data-status='" + reader["Status"] +"'>" + reader["Name"] +"</option>";
+                    }
+                    
+                }
+                reader.Close();
+            }
+            var item = new { 
+                str,registrionCode
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+       
+
+        public ActionResult Submit_xetlop(int idRegistration,int idCourse,int idStudent,int idClass,DateTime fromdate,DateTime todate)
+        {
+            int idBranch = int.Parse(CheckUsers.idBranch());
+            var sessions = db.CourseBranches.Where(x=>x.IdCourse==idCourse&&x.IdBranch==idBranch).First().Sessons;
+            int month =DateTime.Now.Month+1;
+            int year = DateTime.Now.Year;
+            if (DateTime.Now.Day > 25) {
+                month += 1;
+            }
+            if (DateTime.Now.Year > 12)
+            {
+                year += 1;
+            }
+            var joinclass = new StudentJoinClass()
+            {
+                DateCreate = DateTime.Now,
+                IdClass = idClass,
+                IdRegistration = idRegistration,
+                IdStudent = idStudent,
+                IdCourse = idCourse,
+                Fromdate = fromdate, // DateTime.ParseExact(fromdate, "MM/dd/yyyy", CultureInfo.InvariantCulture),
+                Todate = todate, // DateTime.ParseExact(todate,"MM/dd/yyyy",CultureInfo.InvariantCulture),
+                IdUser =int.Parse(CheckUsers.iduser()),
+                MonthFee = month,
+                YearFee = year,
+                Enable = true,
+                Sessions = sessions
+            };
+            db.StudentJoinClasses.Add(joinclass);
+            var registrionCourse = db.RegistrationCourses.SingleOrDefault(x => x.IdCourse == idCourse && x.IdRegistration == idRegistration);
+            registrionCourse.StatusJoinClass = true;
+            db.Entry(registrionCourse);
+            db.SaveChanges();
+            var item = new { status="ok"};
+            return Json(item,JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Load_tuvan(int idStudent)
+        {
+            string str = "";int count = 0;
+            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "select us.Name,s.DateCreate,s.AppointmentDate,s.Description,s.Result,s.Status from StudentAdvise s,[User] us where us.id=s.idUser and s.IdStudent = " + idStudent;
+                SqlCommand command = new SqlCommand(query, connection);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                
+                while (reader.Read())
+                {
+                    count++;
+                    str += "<li class='timeline-item d-flex position-relative overflow-hidden'>"
+                                + "<div class='timeline-time text-dark flex-shrink-0 text-end'>" + DateTime.Parse(reader["DateCreate"].ToString()).ToString("dd/MM/yyyy hh:mm tt")
+                                + "<span class='text-primary d-block fw-bold'>" + reader["Name"] +"</span>"
+                                +"</div>"
+                                + "<div class='timeline-badge-wrap d-flex flex-column align-items-center'>"
+                                    + "<span class='timeline-badge border-2 border border-primary flex-shrink-0 my-8'></span>"
+                                    + "<span class='timeline-badge-border d-block flex-shrink-0'></span>"
+                                + "</div>"
+                                + "<div class=timeline-desc fs-3 text-dark mt-n1>" + reader["Description"] 
+                                +"<span class='text-primary d-block fw-bold'>"+ DateTime.Parse(reader["AppointmentDate"].ToString()).ToString("dd/MM/yyyy") + "</span>"
+                                +"</div>"
+                            + "</li>";
+                }
+                    reader.Close();
+            }
+                var item = new
+                {
+                    str,count
+                };
+                return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Load_taikhoan(int idStudent)
+        {
+            string str = ""; int count = 0;
+            decimal nhap = 0,xuat=0;
+            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "select us.Name,s.DateCreate,s.Voucher,s.Description,s.Type,s.Enable,s.Active from StudentVoucher s,[User] us where us.id=s.idUser and s.IdStudent = " + idStudent;
+                SqlCommand command = new SqlCommand(query, connection);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    count++;
+                    if (Convert.ToBoolean(reader["Type"]))
+                    {
+                        nhap += Convert.ToDecimal(reader["Voucher"]);
+                    }
+                    else
+                    {
+                        xuat += Convert.ToDecimal(reader["Voucher"]);
+                    }
+                    str += "<tr>"
+                        +"<td>"+count+"</td>"
+                        +"<td>"+ reader["Voucher"] + "</td>"
+                        +"<td>"+ reader["Description"] + "</td>"
+                        +"<td>" + DateTime.Parse(reader["DateCreate"].ToString()).ToString("dd/MM/yyyy hh:mm tt") + "</td>"
+                        +"<td>"+ reader["Name"] + "</td>"
+                        + "<td class='text-center'>" + (Convert.ToBoolean(reader["Type"])?"Nạp":"Xuất")+"</td>"
+                        + "</tr>";
+                }
+                str += "<tr class='bg-light'><td colspan=5 class='text-end'>Số dư:</td><td class='text-end'>"+(nhap-xuat)+"</td></tr>";
+                reader.Close();
+            }
+            var item = new
+            {
+                str,
+                count
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Submit_taikhoan(int idStudent, Decimal Sotien, string Noidung)
+        {
+            var st = new StudentVoucher()
+            {
+                Voucher = Sotien,
+                IdStudent = idStudent,
+                DateCreate = DateTime.Now,
+                Description = Noidung,
+                IdUser = int.Parse(CheckUsers.iduser()),
+                Active = true,
+                Type =true,
+                Enable = true,
+            };
+            db.StudentVouchers.Add(st);
+            db.SaveChanges();
+            var item = new
+            {
+                status = "ok"
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Submit_tuvan(int idStudent,DateTime Ngayhen,string Noidung)
+        {
+            var st = new StudentAdvise() { 
+                AppointmentDate = Ngayhen,
+                IdStudent = idStudent,
+                DateCreate = DateTime.Now,
+                Description = Noidung,
+                IdUser = int.Parse(CheckUsers.iduser()),
+                Status = true
+            };
+            db.StudentAdvises.Add(st);
+            db.SaveChanges();
+            var item = new
+            {
+                status="ok"
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
         public ActionResult getDataComboxProduct(int? idproduct)
         {
             List<Product> products = Connect.Select<Product>("select * from Product");
+
             var str = "";
             var strTable = "";
             var number = 0;
             var totalamount = 0;
-            if(idproduct != 0)
+            if (idproduct != 0)
             {
-               Product product = Connect.SelectSingle<Product>("select * from Product where Id = '"+idproduct+"'");
+                Product product = Connect.SelectSingle<Product>("select * from Product where Id = '" + idproduct + "'");
                 totalamount = Convert.ToInt32(product.Price);
                 number = Convert.ToInt32(product.NumberOfPackage);
-              
+
             }
             else
             {
                 foreach (var items in products)
                 {
-                    str += "<option value='" + items.Id + "' data-name='" + items.Name + "'>" + items.Name + "</option>";
+
+                    str += "<option value='" + items.Id + "' data-name='" + items.Name + "' data-inventory='" + ProductReceiptionDetailsController.GetInventory(items.Id) + "'>" + items.Name + "</option>";
                 }
-               
+
                 totalamount = Convert.ToInt32(products[0].Price);
                 number = Convert.ToInt32(products[0].NumberOfPackage);
             }
-           
+
             var item = new
             {
                 str,
                 totalamount,
                 number
             };
-            return Json(item,JsonRequestBehavior.AllowGet);
+            return Json(item, JsonRequestBehavior.AllowGet);
         }
         public ActionResult GetDataCombobox(int? IdProgram,int? IdCourse,int? type)
         {
@@ -534,6 +778,19 @@ namespace SuperbrainManagement.Controllers
             {
                 return HttpNotFound();
             }
+            int idBranch = Convert.ToInt32(CheckUsers.idBranch());
+
+            // Sử dụng giá trị số nguyên đã chuyển đổi trong truy vấn LINQ
+            var countkhoadangky = (from rec in db.RegistrationCourses
+                                  join re in db.Registrations on rec.IdRegistration equals re.Id
+                                  where re.IdStudent==id 
+                                  select rec).Count();
+            var countlophoc = (from rec in db.StudentJoinClasses
+                               where rec.IdStudent ==id
+                               select rec).Count();
+            ViewBag.Count = countkhoadangky;
+            ViewBag.Countlop = countlophoc;
+            ViewBag.IdClass = new SelectList(db.Classes.Where(x => x.IdBranch == idBranch).ToList(), "Id", "Name");
             return View(student);
         }
 
@@ -552,15 +809,19 @@ namespace SuperbrainManagement.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "Id,Name,Image,Code,DateOfBirth,Sex,Username,Password,Enable,School,Class,Description,ParentName,Phone,Email,ParentDateOfBirth,City,District,Address,Relationship,Job,Facebook,Hopeful,Known,IdMKT,IdBranch,PowerScore,Balance,Presenter,Status,Power,StatusStudy")] Student student)
         {
+            int idBranch= Convert.ToInt32(CheckUsers.idBranch());
+            int idUser = Convert.ToInt32(CheckUsers.iduser());
             if (ModelState.IsValid)
             {
+                student.IdBranch = idBranch;
+                student.DateCreate = DateTime.Now;
+                student.IdUser = idUser;
+                student.Enable = true;
                 db.Students.Add(student);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo", student.IdBranch);
-            ViewBag.IdBranch = new SelectList(db.MKTCampaigns, "Id", "Code", student.IdBranch);
             return View(student);
         }
 

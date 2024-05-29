@@ -1,0 +1,320 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col col-md-6 col-sm-12">
+        <div class="input-group mb-3">
+            @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
+            {
+                @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", @onchange = "Loadlist(1)" })
+            }
+            <input type="text" class="form-control" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
+            <a class="input-group-text bg-success" id="basic-addon2" href="javascript:Loadlist()"><i class="ti ti-search text-white"></i></a>
+        </div>
+    </div>
+    <div class="col col-md-6 col-sm-12 text-right" style="text-align:right;">
+        <div class="me-0 btn btn-md p-0">
+            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="ti ti-arrows-sort"></i> Sắp xếp theo
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <li><a class="dropdown-item" href="javascript:Loadlist('name')"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
+                <li><a class="dropdown-item" href="javascript:Loadlist('name_desc')"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
+                <li><a class="dropdown-item" href="javascript:Loadlist('date')"><i class="ti ti-sort-ascending"></i> Cũ nhất</a></li>
+                <li><a class="dropdown-item" href="javascript:Loadlist('date_desc')"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
+            </ul>
+        </div>
+        <a href="javascript:Loadlist_orders()" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <i class="ti ti-plus"></i> Đặt hàng
+        </a>
+    </div>
+</div>
+<div class="mt-3">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" href="javascript:Loadlist(1)">Đơn hàng mới</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" href="javascript:Loadlist(2)">Đã thanh toán</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" href="javascript:Loadlist(3)">Đã xác nhận</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" href="javascript:Loadlist(4)">Đã đóng gói</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" href="javascript:Loadlist(5)">Đang giao hàng</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" href="javascript:Loadlist(6)">Đã hoàn thành</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" href="javascript:Loadlist(0)">Đơn hàng hủy</a>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <div id="loading"></div>
+        <div class="list-group" id="showlist">
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content rounded-0 h-75">
+            <form action="/" method="post" id="form_dathang">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white" id="exampleModalLabel">Thêm đơn hàng mới</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col col-4 col-md-4 col-sm-12">
+                            <label class="text-success">Tên liên hệ:</label>
+                            <input type="text" name="Name" id="Name" placeholder="Tên liên hệ" value="" class="form-control" />
+                        </div>
+                        <div class="col col-4 col-md-4 col-sm-12">
+                            <label class="text-success">Số điện thoại:</label>
+                            <input type="text" name="Phone" id="Phone" placeholder="Số điện thoại nhận hàng" value="" class="form-control" />
+                        </div>
+                        <div class="col col-4 col-md-4 col-sm-12">
+                            <label class="text-success">Địa chỉ:</label>
+                            <input type="text" name="Address" id="Address" placeholder="Địa chỉ nhận hàng" value="" class="form-control" />
+                        </div>
+                        <div class="col col-12 col-md-12 col-sm-12 mt-3">
+                            <label class="text-success">Ghi chú:</label>
+                            <input type="text" name="Description" id="Description" placeholder="Ghi chú đơn hàng" value="" class="form-control" />
+                        </div>
+                    </div>
+                    <hr />
+                    <table class="table mt-3">
+                        <thead class="bg-info">
+                            <tr class="text-white">
+                                <td>STT</td>
+                                <td>Vật tư</td>
+                                <td>Đơn vị</td>
+                                <td>Đơn giá</td>
+                                <td>Số lượng</td>
+                                <td>Thành tiền</td>
+                            </tr>
+                        </thead>
+                        <tbody id="showlist_order"></tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="5" class="text-end">
+                                    <span class="text-success">
+                                        <input type="hidden" name="countline" value="" id="countline" />
+                                        Tổng tiền:
+                                    </span>
+                                </td>
+                                <td><input type="text" name="tongtien" value="0" class="form-control" id="tongtien" /></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="modal-footer text-start">
+                    <button type="button" class="btn btn-success" onclick="submit_order()">
+                        <i class="ti ti-plus"></i> Xác nhận đặt hàng
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalStatus" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content rounded-0 h-75">
+            <form action="/" method="post" id="form_status">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white" id="exampleModalLabel">Cập nhật đơn hàng</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                            <div class="col col-4 col-md-4 col-sm-12">
+                                <label class="text-success">Mã đơn hàng:</label>
+                                <input type="hidden" name="IdOrder" id="IdOrder" placeholder="Tên liên hệ" value="" class="form-control" />
+                                <input type="text" name="Name" id="strCode" placeholder="Tên liên hệ" value="" class="form-control" disabled />
+                            </div>
+                            <div class="col col-4 col-md-4 col-sm-12">
+                                <label class="text-success">Tổng tiền thanh toán:</label>
+                                <input type="text" name="Tongtien" id="strTongtien" placeholder="Số điện thoại nhận hàng" value="" class="form-control" disabled />
+                            </div>
+                            <div class="col col-4 col-md-4 col-sm-12">
+                                <label class="text-success">Cập nhật:</label>
+                                <select class="form-control" name="Status" id="Status">
+                                    <option value="2">Thanh toán đơn hàng</option>
+                                    <option value="3">Xác nhận đơn hàng</option>
+                                    <option value="4">Đóng gói đơn hàng</option>
+                                    <option value="5">Đang vận chuyển</option>
+                                    <option value="6">Đã hoàn thành</option>
+                                </select>
+                            </div>
+                            <div class="col col-4 col-md-4 col-sm-12 mt-3">
+                                <label class="text-success">Hình ảnh:</label>
+                                <input class="form-control" id="File" name="File" type="file" placeholder="Hình ảnh chứng tử" required>
+                            </div>
+                            <div class="col col-8 col-md-8 col-sm-12 mt-3">
+                                <label class="text-success">Ghi chú cập nhật:</label>
+                                <input type="text" name="Description" id="Description" placeholder="Ghi chú cập nhật" value="" class="form-control" />
+                            </div>
+                    </div>
+                    <hr />
+                    <table class="table mt-3">
+                        <thead class="bg-info">
+                            <tr class="text-white">
+                                <td>STT</td>
+                                <td>Vật tư</td>
+                                <td>Đơn vị</td>
+                                <td>Đơn giá</td>
+                                <td>Số lượng</td>
+                                <td>Thành tiền</td>
+                            </tr>
+                        </thead>
+                        <tbody id="showlist_statusorder"></tbody>
+                    </table>
+                </div>
+                <div class="modal-footer text-start">
+                    <button type="button" class="btn btn-success" onclick="submit_statusorder()">
+                        <i class="ti ti-plus"></i> Cập nhật đơn hàng
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    Loadlist(1);
+    function Loadlist(i) {
+        $("#loading").html("<span class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></span>");
+        $.ajax({
+            url: '@Url.Action("Loadlist", "Orders")',
+            type: "GET",
+            data: {
+                idBranch: $("#IdBranch").val(),
+                status: i,
+                searchString: $("#searchString").val()
+            },
+            success: function (data) {
+                console.log(data);
+                $("#loading").html("");
+                $('#showlist').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function LoadStatus_Order(id) {
+        $.ajax({
+            url: '@Url.Action("LoadStatus_Order", "Orders")',
+            type: "GET",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                console.log(data);
+                $('#showlist_statusorder').html(data.str);
+                $('#IdOrder').val(id);
+                $('#strCode').val(data.strCode);
+                $('#strTongtien').val(data.strTongtien);
+                $('#countline').val(data.count);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+    function Loadlist_order() {
+        $.ajax({
+            url: '@Url.Action("Loadlist_order", "Orders")',
+            type: "GET",
+            data: {
+            },
+            success: function (data) {
+                console.log(data);
+                $('#showlist_order').html(data.str);
+                $('#countline').val(data.count);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+    function update_thanhtien(i) {
+        var max = parseInt($('#soluong_' + i).attr('max'));
+        var dongia = parseInt($("#dongia_" + i).val());
+        var soluong = parseInt($("#soluong_" + i).val());
+        if (soluong > max) {
+            showError("Vui lòng nhập số lượng nhỏ hơn!", 3000);
+            $("#soluong_" + i).val(0);
+        } else {
+            var thanhtien = dongia * soluong;
+            $("#thanhtien_" + i).val(thanhtien.toLocaleString());
+            sum_tongtien();
+        }
+    }
+    function sum_tongtien() {
+        var countline = $("#countline").val();
+        var tongtien = 0;
+        for (var i = 1; i <= countline; i++) {
+            var soluong = Number($("#soluong_" + i).val());
+            if (soluong > 0) {
+                var dongia = parseInt($("#dongia_" + i).val());
+                var thanhtien = dongia * soluong;
+                tongtien += thanhtien;
+            }
+        }
+        $("#tongtien").val(tongtien.toLocaleString());
+    }
+    function submit_order() {
+    $.ajax({
+        url: '@Url.Action("Submit_order", "Orders")',
+        type: "POST",
+        data: $("#form_dathang").serialize()
+        , dataType: "json",
+        success: function (data) {
+            if (data.status == "ok") {
+                $('#exampleModal').modal('hide');
+                Loadlist(1);
+                showSuccess("Đã nhập thành công!", 3000);
+            }
+            else {
+                showError(data.status, 3000);
+            }
+        },
+        error: function () { showError('Lỗi!', 3000); }
+    });
+    }
+    function submit_statusorder() {
+        $.ajax({
+            url: '@Url.Action("Submit_StatusOrder", "Orders")',
+            type: "POST",
+            data: {
+                IdOrder: $("#IdOrder").val(),
+                Status: $("#Status").val(),
+                Image: $("#Image").val(),
+                Description: $("#Description").val()
+            }
+            , dataType: "json",
+            success: function (data) {
+                if (data.status == "ok") {
+                    $('#modalStatus').modal('hide');
+                    Loadlist(1);
+                    showSuccess("Đã cập nhật thành công!", 3000);
+                }
+                else {
+                    showError(data.status, 3000);
+                }
+            },
+            error: function () { showError('Lỗi!', 3000); }
+        });
+    }
+    $('#exampleModal').on('shown.bs.modal', function (e) {
+        Loadlist_order();
+    });
+    function Status_Order(i) {
+        $('#modalStatus').modal('show');
+        LoadStatus_Order(i);
+    }
+</script>
