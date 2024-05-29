@@ -9,6 +9,9 @@ using System.Web.Mvc;
 using PagedList.Mvc;
 using PagedList;
 using SuperbrainManagement.Models;
+using System.Web.Services.Description;
+using System.Configuration;
+using System.Data.SqlClient;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -82,15 +85,114 @@ namespace SuperbrainManagement.Controllers
             ViewBag.PagedListRenderOptions = pagedListRenderOptions;
             return View(pagedData);
         }
-        public ActionResult Loadlist(string sortOrder, string currentFilter, string searchString, int? page, int idBranch)
+        public ActionResult Loadlist(string sortOrder, string searchString, string IdBranch)
         {
             string str = "";
-
+            string querysort = "";
+            string querysearch = "";
+            if (string.IsNullOrEmpty(IdBranch))
+            {
+                IdBranch = CheckUsers.idBranch();
+            }
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                querysearch = " and p.Name like N'" + searchString + "' or p.Code like N'" + searchString + "'";
+            }
+            if (!string.IsNullOrEmpty(sortOrder))
+            {
+                switch (sortOrder)
+                {
+                    case "name":
+                        querysort = " order by p.Name";
+                        break;
+                    case "name_desc":
+                        querysort = " order by p.Name desc";
+                        break;
+                    case "date_desc":
+                        querysort = " order by p.Id desc";
+                        break;
+                    default:
+                        querysort = " order by p.Id";
+                        break;
+                }
+            }
+            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string queryCat = "SELECT * from Program where enable=1";
+                SqlCommand commandCat = new SqlCommand(queryCat, connection);
+                connection.Open();
+                SqlDataReader readerCat = commandCat.ExecuteReader();
+                int count = 0;
+                while (readerCat.Read())
+                {
+                    str += "<tr>"
+                            + "<td class='text-center text-success fw-bolder'>" + readerCat["Code"].ToString() + "</td>"
+                            + "<td class='text-success fw-bolder' colspan=7>" + readerCat["Name"].ToString() + "</td>"
+                            + "</tr>";
+                    string query = "select c.Id,c.Code,c.Name,cb.PriceCourse,cb.PriceTest,cb.PriceAccount,DiscountPrice,cb.StatusDiscount,cb.Sessons"
+                                        +" from Course c inner join CourseBranch cb on c.Id = cb.IdCourse" 
+                                        +" where c.IdProgram=" + readerCat["Id"] +" and cb.IdBranch="+IdBranch +querysearch +querysort;
+                    SqlCommand command = new SqlCommand(query, connection);
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        count++;
+                        str += "<tr>"
+                            + "<td class='text-center'>" +count+ "</td>"
+                            + "<td class=''>" + reader["Code"].ToString() + "</td>"
+                            + "<td class=''>" + reader["Name"].ToString() + "</td>"
+                            + "<td class='text-center'>" + reader["PriceCourse"].ToString() + "</td>"
+                            + "<td class='text-center'>" + reader["PriceTest"].ToString() + "</td>"
+                            + "<td class='text-center'>" + reader["PriceAccount"].ToString() + "</td>"
+                            + "<td class='text-center'>" + reader["Sessons"].ToString() + "</td>"
+                            +"<td class='text-end'>" 
+                            + "<a href=\"/courses/edit?IdBranch=" + IdBranch + "&IdCourse=" + reader["Id"] +"\" class=\"me-1\"><i class=\"ti ti-edit text-primary\"></i></a>"
+                            + "</td>"
+                            + "</tr>";
+                    }
+                }
+                readerCat.Close();
+            }
             var item = new {
             str
             };
             return Json(item,JsonRequestBehavior.AllowGet);
         }
+
+        public ActionResult Loadlist_vattu(string IdCourse) 
+        {
+            string str = "";
+            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string queryCat = "select pc.Id,p.Code,p.Name,pc.Amount,p.Unit,p.Price from ProductCourse pc inner join Product p on pc.IdProduct = p.Id where pc.IdCourse="+IdCourse;
+                SqlCommand commandCat = new SqlCommand(queryCat, connection);
+                connection.Open();
+                SqlDataReader readerCat = commandCat.ExecuteReader();
+                int count = 0;
+                while (readerCat.Read())
+                {
+                    count++;
+                    str += "<tr>"
+                            + "<td class='text-center '>" + count + "</td>"
+                            + "<td class='' >" + readerCat["Name"].ToString() + "</td>"
+                            + "<td class='' >" + readerCat["Unit"].ToString() + "</td>"
+                            + "<td class='' >" + readerCat["Amount"].ToString() + "</td>"
+                            + "<td class=''>" + readerCat["Price"].ToString() + "</td>"
+                            + "<td class='text-end'><a href=\"/ProductCourses/delete/" + readerCat["Id"] +"\" class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a></td>"
+                            + "</tr>";
+                    
+                }
+                readerCat.Close();
+            }
+            var item = new
+            {
+                str
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+
         // GET: Courses/Details/5
         public ActionResult Details(int? id)
         {

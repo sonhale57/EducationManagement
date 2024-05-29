@@ -20,9 +20,9 @@
             <th class="text-center">STT</th>
             <th>Mã</th>
             <th>Tên</th>
-            <th>Học phí</th>
-            <th>Số buổi</th>
-            <th class="text-center">Thao tác</th>
+            <th class="text-center">Học phí</th>
+            <th class="text-center">Số buổi</th>
+            <th class="text-end">Thao tác</th>
         </tr>
     </thead>
     @foreach (var item in Model)
@@ -46,13 +46,13 @@
                 <td>
                     @Html.DisplayFor(modelItem => c.Name)
                 </td>
-                <td>
+                <td class="text-center">
                     @Html.DisplayFor(modelItem => c.Price)
                 </td>
-                <td>
+                <td class="text-center">
                     @Html.DisplayFor(modelItem => c.Sessions)
                 </td>
-                <td class="text-center">
+                <td class="text-end">
                     <a href="/courses/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
                     <a href="/courses/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
                     <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
@@ -60,6 +60,9 @@
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <!-- Thêm các mục dropdown nếu cần -->
+                        <li>
+                            <a href="javascript:Load_VattuCourse(@c.Id)" class="me-1  dropdown-item"><i class="ti ti-trash text-danger"></i> Cài đặt vật tư</a>
+                        </li>
                     </ul>
                 </td>
             </tr>
@@ -67,3 +70,67 @@
         }
     }
 </table>
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content rounded-0 h-75">
+            <form action="/" method="post" id="form_nhap">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white" id="exampleModalLabel">Cài đặt vật tư khóa học</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col col-12 col-md-12 col-sm-12">
+                            <label class="text-success">Vật tư:</label>
+                            <input type="text" name="Name" id="Name" placeholder="Tên liên hệ hoặc tên nhà cung cấp" value="" class="form-control" />
+                        </div>
+                        <div class="col col-12 col-md-12 col-sm-12">
+                            <label class="text-success">Số lượng:</label>
+                            <input type="text" name="Phone" id="Phone" placeholder="Số điện thoại liên hệ" value="" class="form-control" />
+                        </div>
+                    </div>
+                    <hr />
+                    <table class="table mt-3">
+                        <thead class="bg-info">
+                            <tr class="text-white">
+                                <td class="text-center">STT</td>
+                                <td>Vật tư</td>
+                                <td>Đơn vị</td>
+                                <td>Đơn giá</td>
+                                <td>Số lượng</td>
+                                <td class="text-end">Thao tác</td>
+                            </tr>
+                        </thead>
+                        <tbody id="showlist_vattu"></tbody>
+                    </table>
+                </div>
+                <div class="modal-footer text-start">
+                    <button type="button" class="btn btn-success" onclick="submit_nhap()">
+                        <i class="ti ti-circle-plus"></i> Cập nhật
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    function Load_VattuCourse(id) {
+        Loadlist_vattu(id);
+        $('#exampleModal').modal('show');
+    }
+    function Loadlist_vattu(id) {
+        $.ajax({
+            url: '@Url.Action("Loadlist_vattu", "Courses")',
+            type: "GET",
+            data: {
+                IdCourse: id
+            },
+            success: function (data) {
+                console.log(data);
+                $('#showlist_vattu').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+</script>
