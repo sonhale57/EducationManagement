@@ -126,7 +126,7 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
             ProductCourse productCourse = await db.ProductCourses.FindAsync(id);
             db.ProductCourses.Remove(productCourse);
             await db.SaveChangesAsync();
-            return RedirectToAction("Index");
+            return Redirect("/Programs");
         }
 
         protected override void Dispose(bool disposing)

@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using SuperbrainManagement.Models;
@@ -17,7 +18,8 @@ namespace SuperbrainManagement.Controllers
         // GET: Programs
         public ActionResult Index()
         {
-            var programs = db.Programs.Include(p => p.User);
+            ViewBag.IdProduct = new SelectList(db.Products.Where(x=>x.Enable==true && x.Active==true), "Id", "Name");
+            var programs = db.Programs.Include(p => p.User).OrderBy(x=>x.DisplayOrder);
             return View(programs.ToList());
         }
 
@@ -52,6 +54,8 @@ namespace SuperbrainManagement.Controllers
         {
             if (ModelState.IsValid)
             {
+                program.DateCreate = DateTime.Now;
+                program.IdUser = int.Parse(CheckUsers.iduser());
                 db.Programs.Add(program);
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -94,30 +98,19 @@ namespace SuperbrainManagement.Controllers
             return View(program);
         }
 
-        // GET: Programs/Delete/5
-        public ActionResult Delete(int? id)
+        [HttpPost]
+        public async Task<ActionResult> Delete(int id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Program program = db.Programs.Find(id);
-            if (program == null)
+            var c = await db.Programs.FindAsync(id);
+            if (c == null)
             {
                 return HttpNotFound();
             }
-            return View(program);
-        }
 
-        // POST: Programs/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
-        {
-            Program program = db.Programs.Find(id);
-            db.Programs.Remove(program);
-            db.SaveChanges();
-            return RedirectToAction("Index");
+            db.Programs.Remove(c);
+            await db.SaveChangesAsync();
+
+            return Json(new { success = true });
         }
 
         protected override void Dispose(bool disposing)
