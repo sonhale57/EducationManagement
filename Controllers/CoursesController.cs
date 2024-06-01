@@ -12,6 +12,7 @@ using SuperbrainManagement.Models;
 using System.Web.Services.Description;
 using System.Configuration;
 using System.Data.SqlClient;
+using System.Threading.Tasks;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -20,70 +21,11 @@ namespace SuperbrainManagement.Controllers
         private ModelDbContext db = new ModelDbContext();
 
         // GET: Courses
-        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page,string idBranch)
+        public ActionResult Index()
         {
-            var branches = db.Branches.ToList();
-            int idbranch = int.Parse(CheckUsers.idBranch());
-            if (!CheckUsers.CheckHQ())
-            {
-                branches = db.Branches.Where(x => x.Id == idbranch).ToList();
-            }
-            if (string.IsNullOrEmpty(idBranch))
-            {
-                idBranch = branches.First().Id.ToString();
-            }
-
-            ViewBag.IdBranch = new SelectList(branches, "Id", "Name", idBranch);
+            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Name");
             ViewBag.IdCourse = new SelectList(db.Courses, "Id", "Name");
-
-            if (searchString != null)
-            {
-                page = 1;
-            }
-            else
-            {
-                searchString = currentFilter;
-            }
-            ViewBag.CurrentFilter = searchString;
-
-            var courses = db.CourseBranches.ToList();
-
-            if (!string.IsNullOrEmpty(idBranch))
-            {
-                courses = courses.Where(x => x.IdBranch == int.Parse(idBranch)).ToList();
-            }
-
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                courses = courses.Where(x => x.Course.Name.ToLower().Contains(searchString.ToLower()) || x.Course.Code.ToLower().Contains(searchString.ToLower()) || x.Course.Program.Name.ToLower().Contains(searchString.ToLower())).ToList();
-            }
-            switch (sortOrder)
-            {
-                case "name_desc":
-                    courses = courses.OrderByDescending(s => s.Course.Name).ToList();
-                    break;
-                case "date":
-                    courses = courses.OrderBy(s => s.Course.Id).ToList();
-                    break;
-                case "name":
-                    courses = courses.OrderBy(s => s.Course.Name).ToList();
-                    break;
-                default:
-                    courses = courses.OrderByDescending(s => s.Course.Id).ToList();
-                    break;
-            }
-            int pageSize = 20;
-            int pageNumber = (page ?? 1);
-            var pagedData = courses.ToPagedList(pageNumber, pageSize);
-            var pagedListRenderOptions = new PagedListRenderOptions();
-            pagedListRenderOptions.FunctionToTransformEachPageLink = (liTag, aTag) =>
-            {
-                liTag.AddCssClass("page-item");
-                aTag.AddCssClass("page-link");
-                return liTag;
-            };
-            ViewBag.PagedListRenderOptions = pagedListRenderOptions;
-            return View(pagedData);
+            return View();
         }
         public ActionResult Loadlist(string sortOrder, string searchString, string IdBranch)
         {
@@ -147,7 +89,7 @@ namespace SuperbrainManagement.Controllers
                             + "<td class='text-center'>" + reader["PriceAccount"].ToString() + "</td>"
                             + "<td class='text-center'>" + reader["Sessons"].ToString() + "</td>"
                             +"<td class='text-end'>" 
-                            + "<a href=\"/courses/edit?IdBranch=" + IdBranch + "&IdCourse=" + reader["Id"] +"\" class=\"me-1\"><i class=\"ti ti-edit text-primary\"></i></a>"
+                            + "<a href='javascript:void(0)' class=\"me-1\"><i class=\"ti ti-edit text-primary\"></i></a>"
                             + "</td>"
                             + "</tr>";
                     }
@@ -159,8 +101,33 @@ namespace SuperbrainManagement.Controllers
             };
             return Json(item,JsonRequestBehavior.AllowGet);
         }
-
-        public ActionResult Loadlist_vattu(string IdCourse) 
+        public ActionResult Submit_ProductCourse(int IdCourse,int IdProduct) 
+        {
+            string status = "ok";
+            var productCourse = db.ProductCourses.SingleOrDefault(x=>x.IdCourse == IdCourse&&x.IdProduct==IdProduct);
+            if (productCourse == null)
+            {
+                var pc = new ProductCourse()
+                {
+                    DateCreate = DateTime.Now,
+                    IdCourse = IdCourse,
+                    IdProduct = IdProduct,
+                    IdUser = int.Parse(CheckUsers.iduser()),
+                    Amount = 1,
+                    Enable = true,
+                    Status = true
+                };
+                db.ProductCourses.Add(pc);
+                db.SaveChanges();
+                status = "ok";
+            }
+            else
+            {
+                status = "Đã tồn tại vật tư này!";
+            }
+            return Json(status, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Loadlist_ProductCourse(string IdCourse) 
         {
             string str = "";
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
@@ -177,10 +144,8 @@ namespace SuperbrainManagement.Controllers
                     str += "<tr>"
                             + "<td class='text-center '>" + count + "</td>"
                             + "<td class='' >" + readerCat["Name"].ToString() + "</td>"
-                            + "<td class='' >" + readerCat["Unit"].ToString() + "</td>"
                             + "<td class='' >" + readerCat["Amount"].ToString() + "</td>"
-                            + "<td class=''>" + readerCat["Price"].ToString() + "</td>"
-                            + "<td class='text-end'><a href=\"/ProductCourses/delete/" + readerCat["Id"] +"\" class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a></td>"
+                            + "<td class='text-end'><a href=\"javascript:Delete_ProductCourse(" + readerCat["Id"] +","+IdCourse+")\" class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a></td>"
                             + "</tr>";
                     
                 }
@@ -192,26 +157,39 @@ namespace SuperbrainManagement.Controllers
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
-
-        // GET: Courses/Details/5
-        public ActionResult Details(int? id)
+        [HttpPost]
+        public async Task<ActionResult> Delete_ProductCourse(int id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Course course = db.Courses.Find(id);
-            if (course == null)
+            var pc = await db.ProductCourses.FindAsync(id);
+            if (pc == null)
             {
                 return HttpNotFound();
             }
-            return View(course);
+
+            db.ProductCourses.Remove(pc);
+            await db.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
+        [HttpPost]
+        public async Task<ActionResult> Delete_Course(int id)
+        {
+            var c = await db.Courses.FindAsync(id);
+            if (c == null)
+            {
+                return HttpNotFound();
+            }
+
+            db.Courses.Remove(c);
+            await db.SaveChangesAsync();
+
+            return Json(new { success = true });
         }
 
         // GET: Courses/Create
         public ActionResult Create()
         {
-            ViewBag.IdProgram = new SelectList(db.Programs, "Id", "Code");
+            ViewBag.IdProgram = new SelectList(db.Programs, "Id", "Name");
             ViewBag.IdUser = new SelectList(db.Users, "Id", "Name");
             return View();
         }
@@ -225,31 +203,46 @@ namespace SuperbrainManagement.Controllers
         {
             if (ModelState.IsValid)
             {
+                course.DateCreate = DateTime.Now;
+                course.IdUser = int.Parse(CheckUsers.iduser());
                 db.Courses.Add(course);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return Redirect("/Programs");
             }
 
-            ViewBag.IdProgram = new SelectList(db.Programs, "Id", "Code", course.IdProgram);
+            ViewBag.IdProgram = new SelectList(db.Programs, "Id", "Name", course.IdProgram);
             ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", course.IdUser);
             return View(course);
         }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult CreateCourseBranches([Bind(Include = "IdBranch,IdCourse,PriceCourse,PriceAccount,PriceTest,Hour,Sessons,DiscountPrice,StatusDiscount,FromdateDiscount,TodateDiscount")] CourseBranch courseBranch)
+        public ActionResult Submit_CourseBranch(int IdBranch, int IdCourse, decimal PriceCourse, decimal PriceOnline, decimal PriceTest, int Sessons)
         {
-            if (ModelState.IsValid)
+            string status = "ok";
+            var cb = db.CourseBranches.SingleOrDefault(x => x.IdBranch == IdBranch && x.IdCourse == IdCourse);
+            if (cb == null)
             {
+                var courseBranch = new CourseBranch()
+                {
+                    IdCourse = IdCourse,
+                    IdBranch = IdBranch,
+                    PriceCourse = PriceCourse,
+                    PriceAccount = PriceOnline,
+                    PriceTest = PriceTest,
+                    Sessons = Sessons
+                };
                 db.CourseBranches.Add(courseBranch);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                status = "ok";
             }
-
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo", courseBranch.IdBranch);
-            ViewBag.IdCourse = new SelectList(db.Courses, "Id", "Code", courseBranch.IdCourse);
-            return View("Index");
+            else
+            {
+                status = "Cơ sở đã tồn tại khóa học này.";
+            }
+            var item = new
+            {
+                status
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
         }
-
         // GET: Courses/Edit/5
         public ActionResult Edit(int? id)
         {
@@ -262,7 +255,7 @@ namespace SuperbrainManagement.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.IdProgram = new SelectList(db.Programs, "Id", "Code", course.IdProgram);
+            ViewBag.IdProgram = new SelectList(db.Programs, "Id", "Name", course.IdProgram);
             ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", course.IdUser);
             return View(course);
         }
@@ -278,37 +271,11 @@ namespace SuperbrainManagement.Controllers
             {
                 db.Entry(course).State = EntityState.Modified;
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return Redirect("/Programs");
             }
-            ViewBag.IdProgram = new SelectList(db.Programs, "Id", "Code", course.IdProgram);
+            ViewBag.IdProgram = new SelectList(db.Programs, "Id", "Name", course.IdProgram);
             ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", course.IdUser);
             return View(course);
-        }
-
-        // GET: Courses/Delete/5
-        public ActionResult Delete(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Course course = db.Courses.Find(id);
-            if (course == null)
-            {
-                return HttpNotFound();
-            }
-            return View(course);
-        }
-
-        // POST: Courses/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
-        {
-            Course course = db.Courses.Find(id);
-            db.Courses.Remove(course);
-            db.SaveChanges();
-            return RedirectToAction("Index");
         }
 
         protected override void Dispose(bool disposing)

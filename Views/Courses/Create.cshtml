@@ -124,22 +124,6 @@
         </div>
 
         <div class="form-group col-md-6 mt-2">
-            @Html.LabelFor(model => model.DateCreate, htmlAttributes: new { @class = "control-label col-md-12" })
-            <div class="col-md-12">
-                @Html.EditorFor(model => model.DateCreate, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.DateCreate, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group col-md-6 mt-2">
-            @Html.LabelFor(model => model.IdUser, "IdUser", htmlAttributes: new { @class = "control-label col-md-12" })
-            <div class="col-md-12">
-                @Html.DropDownList("IdUser", null, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.IdUser, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group col-md-6 mt-2">
             @Html.LabelFor(model => model.Sessions, htmlAttributes: new { @class = "control-label col-md-12" })
             <div class="col-md-12">
                 @Html.EditorFor(model => model.Sessions, new { htmlAttributes = new { @class = "form-control" } })

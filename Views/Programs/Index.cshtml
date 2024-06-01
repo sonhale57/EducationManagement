@@ -31,10 +31,11 @@
             <td class="text-success text-center fw-bolder">@Html.DisplayFor(modelItem => item.Code)</td>
             <td colspan="5" class="text-success fw-bolder">
                 @Html.DisplayFor(modelItem => item.Name)
-                <a href="/programs/edit/@item.Id" class="ms-2"><i class="ti ti-edit text-success fw-bolder"></i></a>
+                <a href="/programs/edit/@item.Id" class="ms-2"><i class="ti ti-edit text-primary fw-bolder"></i></a>
+                <a href="javascript:Delete_Program(@item.Id)" class="me-1"><i class="ti ti-trash text-danger"></i></a>
             </td>
         </tr>
-        foreach (var c in item.Courses)
+        foreach (var c in item.Courses.OrderBy(x=>x.DisplayOrder))
         {
             <tr>
                 <td class="text-center">
@@ -53,15 +54,15 @@
                     @Html.DisplayFor(modelItem => c.Sessions)
                 </td>
                 <td class="text-end">
-                    <a href="/courses/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
-                    <a href="/courses/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
+                    <a href="/courses/edit/@c.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
+                    <a href="javascript:Delete_Course(@c.Id)" class="me-1"><i class="ti ti-trash text-danger"></i></a>
                     <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="ti ti-dots-vertical"></i>
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <!-- Thêm các mục dropdown nếu cần -->
                         <li>
-                            <a href="javascript:Load_VattuCourse(@c.Id)" class="me-1  dropdown-item"><i class="ti ti-trash text-danger"></i> Cài đặt vật tư</a>
+                            <a href="javascript:Load_ProductCourse(@c.Id)" class="me-1  dropdown-item"><i class="ti ti-trash text-danger"></i> Cài đặt vật tư</a>
                         </li>
                     </ul>
                 </td>
@@ -71,8 +72,8 @@
     }
 </table>
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content rounded-0 h-75">
+    <div class="modal-dialog" style="padding-right: -100px;margin-right: 0px;height: 100%;">
+        <div class="modal-content rounded-0 h-100">
             <form action="/" method="post" id="form_nhap">
                 <div class="modal-header bg-primary">
                     <h5 class="modal-title text-white" id="exampleModalLabel">Cài đặt vật tư khóa học</h5>
@@ -81,11 +82,12 @@
                     <div class="row">
                         <div class="col col-12 col-md-12 col-sm-12">
                             <label class="text-success">Vật tư:</label>
-                            <input type="text" name="Name" id="Name" placeholder="Tên liên hệ hoặc tên nhà cung cấp" value="" class="form-control" />
+                            <input type="hidden" name="IdCourse" value="" id="IdCourse" />
+                            @Html.DropDownList("IdProduct", null, htmlAttributes: new { @class = "form-control" })
                         </div>
-                        <div class="col col-12 col-md-12 col-sm-12">
+                        <div class="col col-12 col-md-12 col-sm-12 mt-2">
                             <label class="text-success">Số lượng:</label>
-                            <input type="text" name="Phone" id="Phone" placeholder="Số điện thoại liên hệ" value="" class="form-control" />
+                            <input type="text" name="Phone" id="Phone" placeholder="Số lượng" value="1" class="form-control" />
                         </div>
                     </div>
                     <hr />
@@ -94,17 +96,15 @@
                             <tr class="text-white">
                                 <td class="text-center">STT</td>
                                 <td>Vật tư</td>
-                                <td>Đơn vị</td>
-                                <td>Đơn giá</td>
                                 <td>Số lượng</td>
                                 <td class="text-end">Thao tác</td>
                             </tr>
                         </thead>
-                        <tbody id="showlist_vattu"></tbody>
+                        <tbody id="showlist_product"></tbody>
                     </table>
                 </div>
                 <div class="modal-footer text-start">
-                    <button type="button" class="btn btn-success" onclick="submit_nhap()">
+                    <button type="button" class="btn btn-success" onclick="Submit_ProductCourse()">
                         <i class="ti ti-circle-plus"></i> Cập nhật
                     </button>
                 </div>
@@ -113,24 +113,105 @@
     </div>
 </div>
 <script>
-    function Load_VattuCourse(id) {
-        Loadlist_vattu(id);
+    function Load_ProductCourse(id) {
+        Loadlist_ProductCourse(id);
+        $("#IdCourse").val(id);
         $('#exampleModal').modal('show');
     }
-    function Loadlist_vattu(id) {
+    function Loadlist_ProductCourse(id) {
         $.ajax({
-            url: '@Url.Action("Loadlist_vattu", "Courses")',
+            url: '@Url.Action("Loadlist_ProductCourse", "Courses")',
             type: "GET",
             data: {
                 IdCourse: id
             },
             success: function (data) {
                 console.log(data);
-                $('#showlist_vattu').html(data.str);
+                $('#showlist_product').html(data.str);
             },
             error: function (xhr, error) {
                 console.log(error);
             }
         });
     }
+    function Submit_ProductCourse() {
+        $.ajax({
+            url: '@Url.Action("Submit_ProductCourse", "Courses")',
+            type: "GET",
+            data: {
+                IdCourse: $("#IdCourse").val(),
+                IdProduct: $("#IdProduct").val()
+            },
+            success: function (data) {
+                if (data.status == "ok") {
+                    Loadlist_ProductCourse($("#IdCourse").val());
+                } else {
+                    showError(data.status,3000);
+                }
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+    function Delete_ProductCourse(Id,IdCourse) {
+        if (confirm('Are you sure you want to delete this product?')) {
+            $.ajax({
+                url: '@Url.Action("Delete_ProductCourse", "Courses")',
+                type: 'POST',
+                data: { id: Id },
+                success: function (response) {
+                    if (response.success) {
+                        showSuccess("Đã xóa thành công!", 3000);
+                        Loadlist_ProductCourse(IdCourse);
+                    } else {
+                        showError('Error deleting product',3000);
+                    }
+                },
+                error: function () {
+                    showError('Error deleting product',3000);
+                }
+            });
+        }
+    }
+    function Delete_Course(Id) {
+        if (confirm('Are you sure you want to delete this course?')) {
+            $.ajax({
+                url: '@Url.Action("Delete_Course", "Courses")',
+                type: 'POST',
+                data: { id: Id },
+                success: function (response) {
+                    if (response.success) {
+                        location.reload();
+                        showSuccess("Đã xóa thành công!", 3000);
+                    } else {
+                        showError('Error deleting course', 3000);
+                    }
+                },
+                error: function () {
+                    showError('Error deleting course', 3000);
+                }
+            });
+        }
+    }
+    function Delete_Program(Id) {
+    if (confirm('Are you sure you want to delete this program?')) {
+        $.ajax({
+            url: '@Url.Action("Delete", "Programs")',
+            type: 'POST',
+            data: { id: Id },
+            success: function (response) {
+                if (response.success) {
+                    location.reload();
+                    showSuccess("Đã xóa thành công!", 3000);
+                } else {
+                    showError('Error deleting program', 3000);
+                }
+            },
+            error: function () {
+                showError('Error deleting program', 3000);
+            }
+        });
+    }
+}
 </script>

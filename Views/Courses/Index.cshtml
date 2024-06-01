@@ -55,7 +55,7 @@
                     <i class="ti ti-x"></i>
                 </button>
             </div>
-            <form action="/Courses/CreateCourseBranches" method="post">
+            <form action="/" method="post">
                 @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <label class="text-success">Cơ sở</label>
@@ -77,7 +77,7 @@
                     <input type="text" class="form-control" id="PriceTest" name="PriceTest" value="0" placeholder="Số buổi khóa học" />
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success"> Lưu cập nhật</button>
+                    <a href="javascript:Submit_CourseBranch()" class="btn btn-success"> Lưu cập nhật</a>
                 </div>
             </form>
         </div>
@@ -104,5 +104,32 @@
                  console.log(error);
              }
          });
+    }
+
+    function Submit_CourseBranch() {
+        $.ajax({
+            url: '@Url.Action("Submit_CourseBranch", "Courses")',
+            type: "POST",
+            data: {
+                IdCourse: $("#IdCourse").val(),
+                IdBranch: $("#IdBranch").val(),
+                PriceCourse: $("#PriceCourse").val(),
+                Sessons: $("#Sessons").val(),
+                PriceOnline: $("#PriceOnline").val(),
+                PriceTest: $("#PriceTest").val()
+            },
+            success: function (data) {
+                if (data.status == "ok") {
+                    showSuccess("Đã thêm thành công", 3000);
+                    Loadlist();
+                    $('#exampleModal').modal('hide');
+                } else {
+                    showError(data.status,3000);
+                }
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
     }
 </script>
