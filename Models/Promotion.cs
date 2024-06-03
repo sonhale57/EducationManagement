@@ -1,4 +1,4 @@
-namespace SuperbrainManagement.Models
+﻿namespace SuperbrainManagement.Models
 {
     using System;
     using System.Collections.Generic;
@@ -28,17 +28,21 @@ namespace SuperbrainManagement.Models
 
         public int? IdBranch { get; set; }
 
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
         public DateTime? DateCreate { get; set; }
 
         public int? IdUser { get; set; }
 
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
         public DateTime? Fromdate { get; set; }
 
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
         public DateTime? Todate { get; set; }
 
         public bool? Active { get; set; }
 
         [Column(TypeName = "numeric")]
+        [DisplayFormat(DataFormatString = "{0:N0} đ")]
         public decimal? Value { get; set; }
 
         public virtual Branch Branch { get; set; }

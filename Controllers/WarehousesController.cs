@@ -91,13 +91,14 @@ namespace SuperbrainManagement.Controllers
                 int count = 0;
                 while (reader.Read())
                 {
+                    double amount = Double.Parse(reader["Price"].ToString(), 0);
                     count++;
                     str += "<tr>"
                             + "<td class='text-center'>" + count + "</td>"
                             + "<td class='text-center'>" + reader["ProductCode"].ToString() + "</td>"
                             + "<td>" + reader["name"].ToString() + "</td>"
                             + "<td>" + reader["Unit"].ToString() + "</td>"
-                            + "<td class='text-end'>" + reader["Price"].ToString() + "</td>"
+                            + "<td class='text-end'>" + string.Format("{0:N0} đ", amount) + "</td>"
                             + "<td class='text-center'>" + reader["Amount"].ToString() + "</td>"
                             + "<td class='text-end'>" + reader["TotalAmount"].ToString() + "</td>"
                             + "<td class='text-end'>" + (reader["Type"].ToString() == "True" ? "Nhập kho" : "Xuất kho") + "</td>"

@@ -1,4 +1,4 @@
-namespace SuperbrainManagement.Models
+﻿namespace SuperbrainManagement.Models
 {
     using System;
     using System.Collections.Generic;
@@ -19,6 +19,7 @@ namespace SuperbrainManagement.Models
 
         public int? IdProduct { get; set; }
 
+        [DisplayFormat(DataFormatString = "{0:N0} đ")]
         public int? Amount { get; set; }
 
         public bool? Enable { get; set; }
