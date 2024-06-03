@@ -156,7 +156,16 @@ namespace SuperbrainManagement.Controllers
 
             return newCode;
         }
-        
+        string Getcode_Student()
+        {
+            int idBranch = int.Parse(CheckUsers.idBranch());
+            int nextCode = db.Students.Where(x=>x.IdBranch==idBranch).Count() + 1;
+            string code = nextCode.ToString().PadLeft(5, '0');
+            var cn = db.Branches.Find(idBranch);
+            string str = cn.Code +"-"+ code;
+            return str;
+        }
+
         public ActionResult Registrations(int idStudent,int? idRegistration)
         {
             ViewBag.IdStudent = idStudent;
@@ -324,6 +333,10 @@ namespace SuperbrainManagement.Controllers
                         NewregistrationCourse.IdRegistration = registration.Id;
                         NewregistrationCourse.IdCourse  = Convert.ToInt32(IdObject);
                         NewregistrationCourse.Discount = Discount;
+                        NewregistrationCourse.StatusExchangeCourse = false;
+                        NewregistrationCourse.StatusExtend = false;
+                        NewregistrationCourse.StatusJoinClass=false;
+                        NewregistrationCourse.StatusReserve=false;
                         db.RegistrationCourses.Add(NewregistrationCourse);
                         db.SaveChanges();
                         return Json(NewregistrationCourse.IdRegistration);
@@ -427,17 +440,18 @@ namespace SuperbrainManagement.Controllers
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
                 while (reader.Read())
-                { 
-                   // Status = reader["status"],
-                   // StatusExchangeCourse = reader["statusexchangecourse"].ToString(),
-                   // StatusJoinClass= reader["StatusJoinClass"].ToString(),
-                   // StatusExtend = reader["StatusExtend"].ToString()
+                {
+                    // Status = reader["status"],
+                    // StatusExchangeCourse = reader["statusexchangecourse"].ToString(),
+                    // StatusJoinClass= reader["StatusJoinClass"].ToString(),
+                    // StatusExtend = reader["StatusExtend"].ToString()
+                    double amount = Double.Parse(reader["TotalAmount"].ToString());
                     count++;
                     str +="<tr>"
                         +"<td>"+count+"</td>"
                         +"<td>"+ reader["Code"].ToString() + "</td>"
                         +"<td>"+reader["NameCourse"].ToString() + "</td>"
-                        +"<td>"+ reader["TotalAmount"].ToString() + "</td>"
+                        +"<td>"+ string.Format("{0:N0} đ", amount) + "</td>"
                         +"<td>"+ reader["DateCreate"].ToString() + "</td>"
                         +"<td class='text-center'>"+ (Convert.ToBoolean(reader["Status"]) ? "<i class='ti ti-circle-check text-success'></i>" : "Chưa thanh toán") + "</td>"
                         +"<td class='text-center'>"+ (Convert.ToBoolean(reader["StatusJoinClass"]) ? "<span class='text-success fw-bolder'>Đã xét lớp</span>" : "Chờ xét lớp") + "</td>"
@@ -813,6 +827,7 @@ namespace SuperbrainManagement.Controllers
             int idUser = Convert.ToInt32(CheckUsers.iduser());
             if (ModelState.IsValid)
             {
+                student.Code = Getcode_Student();
                 student.IdBranch = idBranch;
                 student.DateCreate = DateTime.Now;
                 student.IdUser = idUser;
@@ -837,8 +852,8 @@ namespace SuperbrainManagement.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo", student.IdBranch);
-            ViewBag.IdBranch = new SelectList(db.MKTCampaigns, "Id", "Code", student.IdBranch);
+            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Name", student.IdBranch);
+            ViewBag.IdMKT = new SelectList(db.MKTCampaigns, "Id", "Name", student.IdMKT);
             return View(student);
         }
 

@@ -83,13 +83,13 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
                     SqlDataReader reader = command.ExecuteReader();
                     while (reader.Read())
                     {
+                        double amount = Double.Parse(reader["Price"].ToString(), 0);
                         count++;
                         str += "<tr>"
                                 + "<td class='text-center'>" + count + "</td>"
                                 + "<td>" + reader["code"].ToString() + "</td>"
                                 + "<td><img src='" + reader["Image"] + "' all='" + reader["Name"] + "' class=\"rounded-2 me-2\" height=\"40\"/>" + reader["Name"].ToString() + "</td>"
-
-                                + "<td>" + reader["Price"].ToString() + "</td>"
+                                + "<td>" + string.Format("{0:N0} đ", amount) + "</td>"
                                 + "<td>" + reader["Unit"].ToString() + "</td>"
                                 + "<td class='text-center'>" + reader["Tonkho"].ToString() + "</td>"
                                 + "<td class='text-center'>" + reader["Quota"].ToString() + "</td>"

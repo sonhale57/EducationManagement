@@ -79,14 +79,21 @@ namespace SuperbrainManagement.Controllers
                     SqlDataReader reader = command.ExecuteReader();
                     while (reader.Read())
                     {
+                        double amount = Double.Parse(reader["PriceCourse"].ToString(), 0);
+                        double amountTest = Double.Parse(reader["PriceTest"].ToString(),0);
+                        double amountAccount = Double.Parse(reader["PriceAccount"].ToString(),0);
+
+                        //double priceCourse = Double.Parse(reader["PriceCourse"].ToString());
+                        //double priceTest = Double.Parse(reader["PriceTest"].ToString());
+                        //double priceAccount = Double.Parse(reader["PriceAccount"].ToString());
                         count++;
                         str += "<tr>"
                             + "<td class='text-center'>" +count+ "</td>"
                             + "<td class=''>" + reader["Code"].ToString() + "</td>"
                             + "<td class=''>" + reader["Name"].ToString() + "</td>"
-                            + "<td class='text-center'>" + reader["PriceCourse"].ToString() + "</td>"
-                            + "<td class='text-center'>" + reader["PriceTest"].ToString() + "</td>"
-                            + "<td class='text-center'>" + reader["PriceAccount"].ToString() + "</td>"
+                            + "<td class='text-center'>" + string.Format("{0:N0} đ", amount) + "</td>"
+                            + "<td class='text-center'>" + string.Format("{0:N0} đ", amountTest) + "</td>"
+                            + "<td class='text-center'>" + string.Format("{0:N0} đ", amountAccount) + "</td>"
                             + "<td class='text-center'>" + reader["Sessons"].ToString() + "</td>"
                             +"<td class='text-end'>" 
                             + "<a href='javascript:void(0)' class=\"me-1\"><i class=\"ti ti-edit text-primary\"></i></a>"

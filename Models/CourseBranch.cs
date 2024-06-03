@@ -1,4 +1,4 @@
-namespace SuperbrainManagement.Models
+﻿namespace SuperbrainManagement.Models
 {
     using System;
     using System.Collections.Generic;
@@ -20,12 +20,15 @@ namespace SuperbrainManagement.Models
         public int IdCourse { get; set; }
 
         [Column(TypeName = "numeric")]
+        [DisplayFormat(DataFormatString = "{0:N0} đ")]
         public decimal? PriceCourse { get; set; }
 
         [Column(TypeName = "numeric")]
+        [DisplayFormat(DataFormatString = "{0:N0} đ")]
         public decimal? PriceAccount { get; set; }
 
         [Column(TypeName = "numeric")]
+        [DisplayFormat(DataFormatString = "{0:N0} đ")]
         public decimal? PriceTest { get; set; }
 
         public int? Hour { get; set; }
@@ -33,6 +36,7 @@ namespace SuperbrainManagement.Models
         public int? Sessons { get; set; }
 
         [Column(TypeName = "numeric")]
+        [DisplayFormat(DataFormatString = "{0:N0} đ")]
         public decimal? DiscountPrice { get; set; }
 
         public bool? StatusDiscount { get; set; }
