@@ -875,8 +875,8 @@ namespace SuperbrainManagement.Models
                 .IsUnicode(false);
 
             modelBuilder.Entity<Student>()
-                .Property(e => e.IdMKT)
-                .IsFixedLength();
+                .Property(s => s.IdMKT)
+                .IsRequired();
 
             modelBuilder.Entity<Student>()
                 .Property(e => e.Balance)
