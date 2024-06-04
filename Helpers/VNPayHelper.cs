@@ -12,7 +12,7 @@ namespace SuperbrainManagement.Helpers
         private readonly string vnp_TmnCode = "TC9BD52B";
         private readonly string vnp_HashSecret = "3U9X5YKOLEBTOHVMWT4ZHH52E66NZO6U";
         private readonly string vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        private readonly string vnp_ReturnUrl = "https://localhost:44338/Payment/VnPayReturn";
+        private readonly string vnp_ReturnUrl = "/Payment/VnPayReturn";
 
         public string CreatePaymentUrl(decimal amount, string orderId, string orderInfo)
         {

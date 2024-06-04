@@ -92,7 +92,7 @@
         [Display(Name = "Quận/Huyện")]
         public string District { get; set; }
 
-        [StringLength(50)]
+        [StringLength(250)]
         [Display(Name = "Địa chỉ")]
         public string Address { get; set; }
 
@@ -115,8 +115,7 @@
         [Display(Name = "Biết Superbrain qua")]
         public string Known { get; set; }
 
-        [StringLength(10)]
-        public string IdMKT { get; set; }
+        public int? IdMKT { get; set; }
             
         public int? IdBranch { get; set; }
 
