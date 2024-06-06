@@ -41,6 +41,7 @@
 
         [Column(TypeName = "numeric")]
         [Display(Name="Đơn giá")]
+        [DisplayFormat(DataFormatString = "{0:N0} đ")]
         public decimal? Price { get; set; }
 
         public int? IdProgram { get; set; }

@@ -42,10 +42,12 @@
 
         [Column(TypeName = "numeric")]
         [Display(Name="Đơn giá")]
+        [DisplayFormat(DataFormatString = "{0:N0} đ")]
         public decimal? Price { get; set; }
 
         [Column(TypeName = "numeric")]
         [Display(Name="Đơn giá giảm")]
+        [DisplayFormat(DataFormatString = "{0:N0} đ")]
         public decimal? DiscountPrice { get; set; }
 
         [Display(Name="Trạng thái giảm giá")]

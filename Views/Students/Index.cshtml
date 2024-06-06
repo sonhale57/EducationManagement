@@ -28,8 +28,6 @@
                 <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Cũ nhất</a></li>
             </ul>
         </div>
-        <a href="" class="btn btn-md btn-outline-success"><i class="ti ti-upload"></i></a>
-        <a href="" class="btn btn-md btn-outline-danger"><i class="ti ti-download"></i></a>
         <a href="/students/create" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
     </div>
 </div>
@@ -39,12 +37,12 @@
             <th class="text-center">STT</th>
             <th>Mã</th>
             <th>Họ tên</th>
-            <th class="text-center">Sinh nhật</th>
+            <th class="text-center">Năm sinh</th>
             <th class="text-center">Giới tính</th>
             <th>Số điện thoại</th>
             <th>Email</th>
             <th>Quản lý</th>
-            <th>Thao tác</th>
+            <th class="text-end">Thao tác</th>
         </tr>
     </thead>
 
@@ -61,7 +59,7 @@
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td class="text-center">
-                @item.DateOfBirth.Value.ToShortDateString()
+                @item.DateOfBirth.Value.Year
             </td>
             <td class="text-center">
                 @Html.DisplayFor(modelItem => item.Sex)
@@ -75,7 +73,7 @@
             <td>
                 @Html.DisplayFor(modelItem => item.User.Name)
             </td>
-            <td>
+            <td class="text-end">
                 <a href="/students/details/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
                 <a href="/students/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
                 <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">

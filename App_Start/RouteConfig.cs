@@ -18,6 +18,12 @@ namespace SuperbrainManagement
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
             );
+            // Thêm route cho Payment
+            routes.MapRoute(
+            name: "Payment",
+            url: "payment/{action}/{id}",
+            defaults: new { controller = "Payment", action = "Index", id = UrlParameter.Optional }
+        );
         }
     }
 }

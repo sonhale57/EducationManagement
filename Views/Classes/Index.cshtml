@@ -4,119 +4,143 @@
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
     int stt = 1;
+    var employees = ViewBag.EmployeeDDData as List<SelectListItem>;
+    var rooms = ViewBag.RoomDDData as List<SelectListItem>;    
 }
-<div class="card shadow">
-    <div class="card-body">
-        <div class="row">
-            <div class="col col-md-6 col-sm-12">
-                <form action="/classes" method="get" id="formload">
-                    <div class="input-group mb-3">
-                        @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2" })
-                        <input type="text" class="form-control" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
-                        <button class="input-group-text bg-success" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
-                    </div>
-                </form>
-            </div>
-            <div class="col col-md-6 col-sm-12 text-right" style="text-align:right;">
-                <div class="me-0 btn btn-md p-0">
-                    <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="ti ti-arrows-sort"></i> Sắp xếp theo
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-ascending"></i> Cũ nhất</a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
-                    </ul>
-                </div>
-                <a href="/classes/create" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
-            </div>
-        </div>
 
-        <table class="table fs-3">
-            <thead class="bg-success text-white rounded-1">
-                <tr>
-                    <th class="text-center">STT</th>
-                    <th>Tên lớp</th>
-                    <th>Mô tả ngắn</th>
-                    <th>Người tạo</th>
-                    <th>Ngày tạo</th>
-                    <th class="text-center">Trạng thái</th>
-                    <th class="text-center">Thao tác</th>
-                </tr>
-            </thead>
+@functions {
+    public string GetDayName(int dayNumber)
+    {
+        switch (dayNumber)
+        {
+            case 0:
+                return "Chủ Nhật";
+            case 1:
+                return "Thứ 2";
+            case 2:
+                return "Thứ 3";
+            case 3:
+                return "Thứ 4";
+            case 4:
+                return "Thứ 5";
+            case 5:
+                return "Thứ 6";
+            case 6:
+                return "Thứ 7";
+            default:
+                return "Không hợp lệ";
+        }
+    }
+}
 
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td class="text-center">
-                        @stt
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Name)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Description)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.User.Name)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.DateCreate)
-                    </td>
-                    <td class="text-center">
-                        @if (item.Active != null && item.Active == true)
-                        {
-                            <label class="custom-control ios-switch">
-                                <input type="checkbox" class="ios-switch-control-input" onchange="javascript: ChangeStatus(this)" data-id="@item.Id" value="0" checked>
-                                <span class="ios-switch-control-indicator"></span>
-                            </label>
-                        }
-                        else
-                        {
-                            <label class="custom-control ios-switch">
-                                <input type="checkbox" class="ios-switch-control-input" onchange="javascript: ChangeStatus(this)" data-id="@item.Id" value="1">
-                                <span class="ios-switch-control-indicator"></span>
-                            </label>
-                        }
-                    </td>
-                    <td class="text-center">
-                        <a href="/classes/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
-                        <a href="/classes/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
-                        <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="ti ti-dots-vertical"></i>
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <li><button type="button" class="confirmButton dropdown-item" onclick="getDataPermission(@item.Id)" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="ti ti-calendar-event"></i> Thời khóa biểu</button></li>
-                        </ul>
-                    </td>
-                </tr>
-                stt += 1;
-            }
-        </table>
-        <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
-                @Html.PagedListPager(Model, page => Url.Action("Index", new { page }), new PagedListRenderOptions { LiElementClasses = new string[] { "page-item" } })
+<div class="row">
+    <div class="col col-md-6 col-sm-12">
+        <form action="/classes" method="get" id="formload">
+            <div class="input-group mb-3">
+                @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2" })
+                <input type="text" class="form-control" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
+                <button class="input-group-text bg-success" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
+            </div>
+        </form>
+    </div>
+    <div class="col col-md-6 col-sm-12 text-right" style="text-align:right;">
+        <div class="me-0 btn btn-md p-0">
+            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="ti ti-arrows-sort"></i> Sắp xếp theo
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-ascending"></i> Cũ nhất</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
             </ul>
-        </nav>
+        </div>
+        <a href="/classes/create" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
     </div>
 </div>
 
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content" style="width:800px;">
+<table class="table fs-3">
+    <thead class="bg-success text-white rounded-1">
+        <tr>
+            <th class="text-center">STT</th>
+            <th>Tên lớp</th>
+            <th>Mô tả ngắn</th>
+            <th>Người tạo</th>
+            <th>Ngày tạo</th>
+            <th class="text-center">Trạng thái</th>
+            <th class="text-center">Thao tác</th>
+        </tr>
+    </thead>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td class="text-center">
+                @stt
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.User.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DateCreate)
+            </td>
+            <td class="text-center">
+                @if (item.Active != null && item.Active == true)
+                {
+                    <label class="custom-control ios-switch">
+                        <input type="checkbox" class="ios-switch-control-input" onchange="javascript: ChangeStatus(this)" data-id="@item.Id" value="0" checked>
+                        <span class="ios-switch-control-indicator"></span>
+                    </label>
+                }
+                else
+                {
+                    <label class="custom-control ios-switch">
+                        <input type="checkbox" class="ios-switch-control-input" onchange="javascript: ChangeStatus(this)" data-id="@item.Id" value="1">
+                        <span class="ios-switch-control-indicator"></span>
+                    </label>
+                }
+            </td>
+            <td class="text-center">
+                <a href="/classes/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
+                <a href="/classes/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
+                <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="ti ti-dots-vertical"></i>
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <li><button type="button" class="confirmButton dropdown-item" onclick="getSelectedClassId(@item.Id)" data-bs-toggle="modal" data-bs-target="#scheduleModal"><i class="ti ti-calendar-event"></i> Thời khóa biểu</button></li>
+                </ul>
+            </td>
+        </tr>
+        stt += 1;
+    }
+</table>
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        @Html.PagedListPager(Model, page => Url.Action("Index", new { page }), new PagedListRenderOptions { LiElementClasses = new string[] { "page-item" } })
+    </ul>
+</nav>
+
+<div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width:none!important" role="document">
+        <div class="modal-content" style="width:auto;">
             <div class="modal-header">
                 <h5 class="modal-fullscreen" id="exampleModalLabel">Thời khóa biểu</h5>
-                <button type="button" class="btn btn-sm" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="btn btn-sm" onclick="Close()" data-dismiss="modal" aria-label="Close">
                     <i class="ti ti-x"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <form id="vehicleForm">
+                <form id="scheduleForm" action=@Url.Action("UpdateScheduleBulk", "Classes") method="post">
                     <table cellpadding="0" cellspacing="0" border="0" class="table" id="datatable">
                         <thead>
                             <tr>
-                                <th class="text-center">..</th>
+                                <th class="text-center">Kích hoạt</th>
                                 <th class="text-center"> Tên</th>
                                 <th class="text-center"> Từ giờ</th>
                                 <th class="text-center"> Đến giờ</th>
@@ -124,21 +148,54 @@
                                 <th class="text-center"> Phòng học</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="schedulerTable">
+                            @if (ViewBag.Schedule != null)
+                            {
+                                foreach (var item in ViewBag.Schedule)
+                                {
+                                    <tr id="test+@item.IdClass">
+                                        <input type="hidden" id="selectedClassId" name="selectedClassId" />
+                                        <input type="hidden" id="scheduleData" name="scheduleData" />
+                                        <input type="hidden" id="idWeek" name="idWeek" value="@item.IdWeek" />
+                                        <input type="hidden" id="idClass" name="idClass" value="@item.IdClass" />
+
+                                        <td class="text-center">
+                                            <input type="checkbox" id="myCheckbox" name="myCheckbox" @(item.Active ? "checked" : "") />
+                                        </td>
+                                        <td class="text-center">@GetDayName(item.IdWeek)</td>
+                                        <td class="text-center">
+                                            <input type="text" name="fromHourtxt" value="@item.FromHour.ToString("hh:mm tt")" />
+                                        </td>
+                                        <td class="text-center">
+                                            <input type="text" name="toHourtxt" value="  @item.ToHour.ToString("hh:mm tt")" />
+                                        </td>
+                                        <td class="text-center">
+                                            @Html.DropDownList("employeeId", new SelectList(employees, "Value", "Text", item.IdEmployee))
+                                        </td>
+                                        <td class="text-center">
+                                            @Html.DropDownList("roomId", new SelectList(rooms, "Value", "Text", item.IdRoom))
+                                        </td>
+                                    </tr>
+                                }
+                            }
                         </tbody>
-                    </table>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal">Close</button>
-                        <button type="submit" id="submitButton" value="Submit" onclick="saveChange()" class="btn btn-sm btn-primary" data-dismiss="modal">Lưu thay đổi</button>
-                    </div>
-                </form>
-            </div>
+                            </table>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="Close()" data-dismiss="modal">Close</button>
+                                <button type="submit" id="submitButton" value="Submit" onclick="saveChange()" class="btn btn-sm btn-primary" data-dismiss="modal">Lưu thay đổi</button>
+                            </div>
+                            </form>
+                        </div>
         </div>
     </div>
 </div>
 @section Scripts
  {
     <script>
+        var selectedClassId;
+
+        var scheduleData = [];
+
         function ChangeStatus(button) {
             var id = parseInt(button.getAttribute("data-id")); // Chuyển đổi id thành một số nguyên
             var status = button.value; // Sử dụng button.value thay vì lấy từ tất cả các button
@@ -156,5 +213,49 @@
                 }
             });
         }
-    </script>    
+
+        function Close() {
+            var element = document.getElementById("scheduleModal");
+            element.classList.remove("show");
+
+            window.location.reload();
+        }
+
+        function getSelectedClassId(idInput) {
+            selectedClassId = idInput;
+
+            document.getElementById("selectedClassId").value = selectedClassId;
+
+            $(document).ready(function () {
+                $("#schedulerTable tr[id!='test+" + idInput + "']").remove();
+            });
+        }
+
+        function saveChange() {
+            $("#datatable tbody tr").each(function () {
+                var id = $(this).find("input[name='selectedClassId']").val();
+                var idWeek = $(this).find("input[name='idWeek']").val();
+                var idClass = $(this).find("input[name='idClass']").val();
+                var active = $(this).find("input[name='myCheckbox']").is(":checked");
+                var fromHour = $(this).find("input[name='fromHourtxt']").val();
+                var toHour = $(this).find("input[name='toHourtxt']").val();
+                var employeeId = $("#employeeId").val();
+                var roomId = $("#roomId").val();
+
+                scheduleData.push({
+                    id: id,
+                    active: active,
+                    fromHour: fromHour,
+                    toHour: toHour,
+                    employeeId: employeeId,
+                    roomId: roomId,
+                    idWeek: idWeek,
+                    idClass: idClass,
+                    idUser: @ViewBag.UserId
+                });
+            });
+
+            document.getElementById("scheduleData").value = JSON.stringify(scheduleData);;
+        }
+    </script>
 }
