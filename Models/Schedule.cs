@@ -11,8 +11,7 @@ namespace SuperbrainManagement.Models
     {
         [Key]
         [Column(Order = 0)]
-        [StringLength(10)]
-        public string IdWeek { get; set; }
+        public int IdWeek { get; set; }
 
         [Key]
         [Column(Order = 1)]
