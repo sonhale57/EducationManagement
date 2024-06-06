@@ -848,8 +848,7 @@ namespace SuperbrainManagement.Models
                 .HasPrecision(18, 0);
 
             modelBuilder.Entity<Schedule>()
-                .Property(e => e.IdWeek)
-                .IsFixedLength();
+                .Property(e => e.IdWeek);
 
             modelBuilder.Entity<Schoolarship>()
                 .Property(e => e.Value)

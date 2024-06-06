@@ -9,12 +9,24 @@ using System.Web.Mvc;
 using PagedList.Mvc;
 using PagedList;
 using SuperbrainManagement.Models;
+using SuperbrainManagement.DTOs;
+using Microsoft.Ajax.Utilities;
+using Google.Protobuf.Compiler;
+using Newtonsoft.Json;
+using System.Data.SqlClient;
+using System.Web.UI;
+using System.Web.Helpers;
+using static SuperbrainManagement.MvcApplication;
+using System.Data.Entity.Migrations;
+using SuperbrainManagement.Helpers;
 
 namespace SuperbrainManagement.Controllers
 {
     public class ClassesController : Controller
     {
         private ModelDbContext db = new ModelDbContext();
+
+        private ScheduleHelper scheduleHelper = new ScheduleHelper();
 
         // GET: Classes
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, string idBranch)
@@ -39,7 +51,16 @@ namespace SuperbrainManagement.Controllers
             {
                 searchString = currentFilter;
             }
+
             ViewBag.CurrentFilter = searchString;
+
+            ViewBag.Schedule = db.Schedules.Include(x => x.Employee).Include(x => x.Class).Include(x => x.User).ToList();
+
+            ViewBag.EmployeeDDData = db.Employees.Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name }).ToList();
+
+            ViewBag.RoomDDData = db.Rooms.Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name }).ToList();
+
+            ViewBag.UserId = int.Parse(CheckUsers.iduser());
 
             var classes = db.Classes.ToList();
 
@@ -81,7 +102,34 @@ namespace SuperbrainManagement.Controllers
             };
 
             ViewBag.PagedListRenderOptions = pagedListRenderOptions;
+
             return View(pagedData);
+        }
+
+        [HttpPost]
+        public ActionResult UpdateScheduleBulk(
+            string selectedClassId,
+            string scheduleData)
+        {
+            if (ModelState.IsValid)
+            {
+                var updatedData = JsonConvert.DeserializeObject<List<ScheduleViewDTO>>(scheduleData);
+
+                var scheduleDataUpdated = AutoMapperConfig.Mapper.Map<List<Schedule>>(updatedData);
+
+                //db.Schedules.AddRange(scheduleDataUpdated);
+                scheduleDataUpdated.ForEach(x => 
+                {
+                    db.Entry(x).State = EntityState.Modified;
+                });
+
+                db.SaveChanges();
+
+                return RedirectToAction("Index");
+            }
+
+            // If ModelState is not valid, return the view with validation errors
+            return View();
         }
 
         [HttpPost]
@@ -132,8 +180,17 @@ namespace SuperbrainManagement.Controllers
                 @class.DateCreate = DateTime.Now;
                 @class.IdBranch =int.Parse(CheckUsers.idBranch()) ;
                 @class.IdUser =int.Parse(CheckUsers.iduser());
+
                 db.Classes.Add(@class);
+
                 db.SaveChanges();
+
+                var scheduleDefault = scheduleHelper.GetScheduleDefault(@class.Id);
+
+                db.Schedules.AddRange(scheduleDefault);
+
+                db.SaveChanges();
+
                 return RedirectToAction("Index");
             }
 
