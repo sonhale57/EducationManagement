@@ -153,6 +153,8 @@
                             {
                                 foreach (var item in ViewBag.Schedule)
                                 {
+                                    string employeeIdDynamic = "employeeId" + item.IdWeek + @item.IdClass;
+                                    string roomIdDynamic = "roomId" + item.IdWeek + @item.IdClass;
                                     <tr id="test+@item.IdClass">
                                         <input type="hidden" id="selectedClassId" name="selectedClassId" />
                                         <input type="hidden" id="scheduleData" name="scheduleData" />
@@ -170,10 +172,10 @@
                                             <input type="text" name="toHourtxt" value="  @item.ToHour.ToString("hh:mm tt")" />
                                         </td>
                                         <td class="text-center">
-                                            @Html.DropDownList("employeeId", new SelectList(employees, "Value", "Text", item.IdEmployee))
+                                            @Html.DropDownList(employeeIdDynamic, new SelectList(employees, "Value", "Text", item.IdEmployee))
                                         </td>
                                         <td class="text-center">
-                                            @Html.DropDownList("roomId", new SelectList(rooms, "Value", "Text", item.IdRoom))
+                                            @Html.DropDownList(roomIdDynamic, new SelectList(rooms, "Value", "Text", item.IdRoom))
                                         </td>
                                     </tr>
                                 }
@@ -239,8 +241,8 @@
                 var active = $(this).find("input[name='myCheckbox']").is(":checked");
                 var fromHour = $(this).find("input[name='fromHourtxt']").val();
                 var toHour = $(this).find("input[name='toHourtxt']").val();
-                var employeeId = $("#employeeId").val();
-                var roomId = $("#roomId").val();
+                var employeeId = $("#employeeId" + idWeek + idClass).val();
+                var roomId = $("#roomId" + idWeek + idClass).val();
 
                 scheduleData.push({
                     id: id,

@@ -16,12 +16,15 @@ using SuperbrainManagement.Models;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Globalization;
+using SuperbrainManagement.DTOs;
+using SuperbrainManagement.Helpers;
 
 namespace SuperbrainManagement.Controllers
 {
     public class StudentsController : Controller
     {
         private ModelDbContext db = new ModelDbContext();
+        private ScheduleHelper scheduleHelper = new ScheduleHelper();
 
         // GET: Students
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, string idBranch)
@@ -410,6 +413,7 @@ namespace SuperbrainManagement.Controllers
                 SqlDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
+                    Console.WriteLine("test:" +reader["NameClass"].ToString());   
                     count++;
                     str +="<tr>"
                         + "<td>" + count + "</td>"
@@ -888,6 +892,53 @@ namespace SuperbrainManagement.Controllers
                 return HttpNotFound();
             }
             return View(student);
+        }
+
+        public ActionResult GetSchedule(int idClass, string fromDate, string toDate)
+        {
+            var schedulesbyClass = db.Schedules
+                .Where(x => x.IdClass == idClass).Include(x => x.Employee).ToList()
+                .Select(x => new ClassAssignmentDTO
+                {
+                    DayOfWeek = scheduleHelper.GetDayName(x.IdWeek),
+                    TeacherName = x.Employee.Name,
+                    TimeSlot = scheduleHelper.GetTimeSlot((DateTime)x.FromHour, (DateTime)x.ToHour),
+                    HourQuantity = scheduleHelper.GetHourQuantity((DateTime)x.FromHour, (DateTime)x.ToHour).ToString(),
+                });
+
+            List<TimeTableDTO> timeTableData = new List<TimeTableDTO>();
+
+            if (!string.IsNullOrEmpty(fromDate) || !string.IsNullOrEmpty(toDate))
+            {
+                DateTime fromDateTime = DateTime.ParseExact(fromDate, "yyyy-MM-dd", null);
+
+                DateTime toDateTime = DateTime.ParseExact(toDate, "yyyy-MM-dd", null);
+
+                for (DateTime date = fromDateTime; date <= toDateTime; date = date.AddDays(1))
+                {
+                    var DayOfWeekVNCompared = scheduleHelper.ConvertEnglishDayToVietnamese(date.DayOfWeek.ToString());
+                    var scheduleMatched = schedulesbyClass.FirstOrDefault(x => x.DayOfWeek == DayOfWeekVNCompared);
+
+                    if (scheduleMatched != null)
+                    {
+                        timeTableData.Add(new TimeTableDTO
+                        {
+                            DayOfWeek = DayOfWeekVNCompared,
+                            Date = date.ToString("dd/MM/yyyy"),
+                            TimeSlot = scheduleMatched.TimeSlot,
+                            HourQuantity = scheduleMatched.HourQuantity
+                        }); ;
+                    }
+                }
+            }
+
+            var item = new
+            {
+                schedulesbyClass,
+                timeTableData
+            };
+
+            return Json(item, JsonRequestBehavior.AllowGet);
         }
 
         // POST: Students/Delete/5

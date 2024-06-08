@@ -299,7 +299,9 @@
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Controllers\VacationSchedulesController.cs" />
     <Compile Include="Controllers\WarehousesController.cs" />
+    <Compile Include="DTOs\ClassAssignmentDTO.cs" />
     <Compile Include="DTOs\ScheduleViewDTO.cs" />
+    <Compile Include="DTOs\TimeTableDTO.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

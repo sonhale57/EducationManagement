@@ -214,7 +214,7 @@
 <input type="hidden" name="idStudent" value="@Model.Id" id="idStudent" />
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" style="padding-right: -100px;margin-right: 110px;height: 100vh;">
-        <div class="modal-content rounded-0 h-75" style="width: 600px;">
+        <div class="modal-content rounded-0" style="width: 600px;">
             <div class="modal-header bg-info">
                 <h5 class="modal-title text-white" id="exampleModalLabel">Xét vào lớp học</h5>
             </div>
@@ -236,21 +236,52 @@
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Lớp học</label>
                     <div class="col-lg-9">
-                        @Html.DropDownList("IdClass", null, htmlAttributes: new { @class = "form-control" })
+                        @Html.DropDownList("IdClass", null, htmlAttributes: new { @class = "form-control", onchange = "loadSchedule()" })
                     </div>
                 </div>
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Ngày bắt đầu</label>
                     <div class="col-lg-9">
-                        <input type="date" name="fromdate" value="" id="fromdate" class="form-control" onchange="javascript: Onchange_todate()"/>
+                        <input type="date" name="fromdate" value="" id="fromdate" class="form-control" onchange="javascript: Onchange_todate()" />
                     </div>
                 </div>
 
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Ngày kết thúc</label>
                     <div class="col-lg-9">
-                        <input type="date" name="todate" value="" id="todate" class="form-control" disabled/>
+                        <input type="date" name="todate" value="" id="todate" class="form-control" disabled />
                     </div>
+                </div><br />
+                <b>Thời khóa biểu</b>
+                <div class="form-group row mt-2">
+                    <table cellpadding="0" cellspacing="0" border="0" class="table">
+                        <thead>
+                            <tr>
+                                <th class="text-center">STT</th>
+                                <th class="text-center"> Thứ</th>
+                                <th class="text-center"> Giờ Học</th>
+                                <th class="text-center"> Số Giờ</th>
+                                <th class="text-center"> Giáo viên</th>
+                            </tr>
+                        </thead>
+                        <tbody id="datarow">
+                        </tbody>
+                    </table>
+                </div>
+                <b>Lịch học</b>
+                <div class="form-group row mt-2">
+                    <table cellpadding="0" cellspacing="0" border="0" class="table">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Ngày</th>
+                                <th class="text-center"> Thứ</th>
+                                <th class="text-center"> Giờ Học</th>
+                                <th class="text-center"> Số Giờ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="timetable_datarow">
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <div class="modal-footer text-start">
@@ -452,10 +483,49 @@
             }
         });
     }
+
     function Xetlop_modal(idregistration, idcourse) {
         Loadlist_xetlop(idregistration, idcourse);
         // Mở modal
         $('#exampleModal').modal('show');
+    }
+    loadSchedule();
+    function loadSchedule() {
+        const idClass = $("#IdClass").val();
+        const fromDate = $("#fromdate").val();
+        const toDate = $("#todate").val();
+
+        $('#datarow').find('tr').remove();
+        $('#timetable_datarow').find('tr').remove();
+
+        $.ajax({
+            url: '@Url.Action("GetSchedule", "Students")',
+            type: "GET",
+            data: {
+                idClass: idClass,
+                fromDate: fromDate,
+                toDate: toDate
+            },
+            success: function (data) {
+                if (data.status = "ok") {
+                    let index = 1;
+                    $.each(data.schedulesbyClass, function (key, value) {
+                        $('#datarow')
+                            .append('<tr><td>' + index++ + '</td><td>' + value.DayOfWeek + '</td><td>' + value.TimeSlot + '</td><td>' + value.HourQuantity + '</td><td>' + value.TeacherName +'</td></tr>');
+                     
+                    });
+
+                    $.each(data.timeTableData, function (index, value) {
+                        $('#timetable_datarow')
+                            .append('<tr><td>' + value.Date + '</td><td>' + value.DayOfWeek + '</td><td>' + value.TimeSlot + '</td><td>' + value.HourQuantity + '</td></tr>');
+                    });                   
+                }
+            },
+            error: function (xhr, error) {
+
+                console.log("error: " + error);
+            }
+        });
     }
 
 </script>
