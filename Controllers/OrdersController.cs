@@ -146,7 +146,7 @@ namespace SuperbrainManagement.Controllers
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "SELECT p.Id,p.Image, p.Name,p.Unit,p.Price,p.Code,p.Quota,COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '1' AND re.IdBranch ="+idbranch_hq+"), 0) -"
+                string query = "SELECT p.Id,p.Image, p.Name,p.Unit,p.Price,p.NumberOfPackage,p.UnitOfPackage,p.Code,p.Quota,COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '1' AND re.IdBranch =" + idbranch_hq+"), 0) -"
                                         + " COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '0' AND re.IdBranch ="+idbranch_hq+"), 0) AS Tonkho"
                                         + " FROM product p"
                                         + " where p.enable=1 "
@@ -159,13 +159,16 @@ namespace SuperbrainManagement.Controllers
                 {
                     count++;
                     int tonkho = int.Parse(reader["Tonkho"].ToString());
+                    double dongia = Double.Parse(reader["Price"].ToString());
+                    double heso = int.Parse(reader["NumberOfPackage"].ToString());
+                    double dongiaban = dongia * heso;
                     str += "<tr>"
                             + "<td class='text-center align-content-center'>" + count + "</td>"
                             + "<td class='w-25 align-content-center'> <img src='" + reader["Image"].ToString() + "' alt='" + reader["Name"].ToString() + "' class='rounded-2 me-2' height='40'><span class='text-success'>" + reader["code"].ToString() + "</span> - " + reader["Name"].ToString() + "</td>"
-                            + "<td class='w-25 align-content-center'>" + reader["Unit"].ToString() + "</td>"
+                            + "<td class='w-25 align-content-center'>" + reader["UnitOfPackage"].ToString() + "</td>"
                             + "<td class='w-10 align-content-center'>"
                             + "<input type='hidden' name='IdProduct_" + count + "' id='idproduct_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + reader["Id"].ToString() + "' class='form-control' onchange='javascript:update_thanhtien(" + count + ")'>"
-                            + "<input type='text' name='Price_" + count + "' id='dongia_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + reader["Price"].ToString() + "' class='form-control' onchange='javascript:update_thanhtien(" + count + ")'>"
+                            + "<input type='text' name='Price_" + count + "' id='dongia_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + string.Format("{0:N0}", dongiaban) + "' class='form-control' onchange='javascript:update_thanhtien(" + count + ")'>"
                             + "</td>"
                             + "<td class='text-center w-5 align-content-center'><input type='text' name='Amount_" + count + "'  id='soluong_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' max='" + reader["Tonkho"].ToString() + "' class='form-control soluong' onchange='javascript:update_thanhtien(" + count + ")' " + (tonkho > 0 ? "" : "Disabled") + "></td>"
                             + "<td class='text-center w-10 align-content-center'><input type='text' name='TotalAmount_" + count + "'  id='thanhtien_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' class='form-control' readonly></td>"

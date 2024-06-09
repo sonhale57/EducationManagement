@@ -199,24 +199,24 @@ namespace SuperbrainManagement.Controllers
                 var idobject = 0;
                 if (row.Table == dataTableCourse)
                 {
-                    amountString = string.Format("{0:N0} VND", row["TotalAmount"]);
-                    discount = string.Format("{0:N0} VND", row["Discount"]);
+                    amountString = string.Format("{0:N0} đ", row["TotalAmount"]);
+                    discount = string.Format("{0:N0} đ", row["Discount"]);
                     name = row["NameProgram"].ToString() + "<hr>" + row["NameCourse"].ToString();
                     idobject = Convert.ToInt32(row["IdCourse"]);
                     total = amountString;
                 }
                 else if (row.Table == dataTableProduct)
                 {
-                    amountString = string.Format("{0:N0} VND", row["Price"]);
-                    discount = string.Format("{0:N0} VND", row["Discount"]);
-                    total = string.Format("{0:N0} VND", row["TotalAmount"]);
+                    amountString = string.Format("{0:N0} đ", row["Price"]);
+                    discount = string.Format("{0:N0} đ", row["Discount"]);
+                    total = string.Format("{0:N0} đ", row["TotalAmount"]);
                     idobject = Convert.ToInt32(row["IdProduct"]);
                     name = row["Name"].ToString();
                 }else if(row.Table == dataTableOther)
                 {
-                    amountString = string.Format("{0:N0} VND", row["Price"]);
-                    discount = string.Format("{0:N0} VND", row["Discount"]);
-                    total = string.Format("{0:N0} VND", row["TotalAmount"]);
+                    amountString = string.Format("{0:N0} đ", row["Price"]);
+                    discount = string.Format("{0:N0} đ", row["Discount"]);
+                    total = string.Format("{0:N0} đ", row["TotalAmount"]);
                     idobject = Convert.ToInt32(row["IdReference"]);
                     name = row["Name"].ToString();
                 }

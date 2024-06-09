@@ -88,4 +88,25 @@
             }
         });
     }
+    
+    function Delete_Program(Id) {
+        if (confirm('Are you sure you want to delete this program?')) {
+            $.ajax({
+                url: '@Url.Action("Delete_Category", "Products")',
+                type: 'POST',
+                data: { id: Id },
+                success: function (response) {
+                    if (response.success) {
+                        Loadlist();
+                        showSuccess("Đã xóa thành công!", 3000);
+                    } else {
+                        showError('Error deleting program', 3000);
+                    }
+                },
+                error: function () {
+                    showError('Error deleting program', 3000);
+                }
+            });
+        }
+    }
 </script>

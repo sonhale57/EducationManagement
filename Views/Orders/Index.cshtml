@@ -243,7 +243,7 @@
     }
     function update_thanhtien(i) {
         var max = parseInt($('#soluong_' + i).attr('max'));
-        var dongia = parseInt($("#dongia_" + i).val());
+        var dongia = parseInt($("#dongia_" + i).val().replace(',',''));
         var soluong = parseInt($("#soluong_" + i).val());
         if (soluong > max) {
             showError("Vui lòng nhập số lượng nhỏ hơn!", 3000);
@@ -260,7 +260,7 @@
         for (var i = 1; i <= countline; i++) {
             var soluong = Number($("#soluong_" + i).val());
             if (soluong > 0) {
-                var dongia = parseInt($("#dongia_" + i).val());
+                var dongia = parseInt($("#dongia_" + i).val().replace(',',''));
                 var thanhtien = dongia * soluong;
                 tongtien += thanhtien;
             }

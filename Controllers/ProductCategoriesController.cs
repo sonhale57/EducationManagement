@@ -81,9 +81,13 @@ namespace SuperbrainManagement.Controllers
         {
             if (ModelState.IsValid)
             {
+                productCategory.Enable = true;
+                productCategory.Active = true;
+                productCategory.IdUser = int.Parse(CheckUsers.iduser());
+                productCategory.DateCreate = DateTime.Now;
                 db.ProductCategories.Add(productCategory);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return Redirect("/products");
             }
 
             return View(productCategory);
@@ -115,7 +119,7 @@ namespace SuperbrainManagement.Controllers
             {
                 db.Entry(productCategory).State = EntityState.Modified;
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return Redirect("/products");
             }
             return View(productCategory);
         }

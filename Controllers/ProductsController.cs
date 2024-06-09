@@ -71,7 +71,11 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
                 {
                     str += "<tr>"
                         + "<td class='text-center text-success fw-bolder'>" + readerCat["Code"] + "</td>"
-                        + "<td class='text-success fw-bolder' colspan=10>" + readerCat["Name"] + "</td>"
+                        + "<td class='text-success fw-bolder' colspan=10>" 
+                        + readerCat["Name"] 
+                        +"<a href=\"/productcategories/edit/" + readerCat["Id"] +"\" class=\"ms-2\"><i class=\"ti ti-edit text-primary fw-bolder\"></i></a>"
+                        +"<a href=\"javascript:Delete_category(" + readerCat["Id"] +")\" class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a>"
+                        + "</td>"
                         + "</tr>";
                     string query = "SELECT p.Id,p.Name,p.Image,p.Unit,p.Price,p.Code,p.UnitOfPackage,NumberOfPackage,p.Active,p.Quota,COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '1' AND re.IdBranch = " + IdBrand_HQ + "), 0) -"
                                         + " COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '0' AND re.IdBranch = " + IdBrand_HQ + "), 0) AS Tonkho"
@@ -117,6 +121,20 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
                 str
             };
             return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public async Task<ActionResult> Delete_Category(int id)
+        {
+            var pc = await db.ProductCategories.FindAsync(id);
+            if (pc == null)
+            {
+                return HttpNotFound();
+            }
+
+            db.ProductCategories.Remove(pc);
+            await db.SaveChangesAsync();
+
+            return Json(new { success = true });
         }
         // GET: Products/Details/5
         public async Task<ActionResult> Details(int? id)
