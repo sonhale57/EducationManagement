@@ -7,6 +7,16 @@
 @import "../libs/simplebar/dist/simplebar.css";
 @import "icons/tabler-icons/tabler-icons.css";
 
+#datarow td {
+    padding: 0px 0px !important;
+    text-align: center;
+}
+
+#timetable_datarow td {
+    padding: 0px 0px !important;
+    text-align: center;
+}
+
 :root, [data-bs-theme=light] {
     --bs-blue: #51A347;
     --bs-indigo: #6610f2;
