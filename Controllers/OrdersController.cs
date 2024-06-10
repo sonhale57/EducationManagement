@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.UI.WebControls;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -112,23 +113,30 @@ namespace SuperbrainManagement.Controllers
                     {
                         badgeStatus = "<span class='badge text-white bg-light'>Đơn hàng hủy</span>";
                     }
-                    str += "<div class=\"list-group-item list-group-item-action mt-2\" aria-current=\"true\">"
-                                    +"<div class=\"d-flex w-100 justify-content-between\">"
-                                        +"<p class=\"mb-1\"><i class=\"ti ti-shopping-cart\"></i> <a href='javascript:Status_Order(" + reader["Id"] +")' class='text-dark fw-bolder'>" + reader["Code"] +"</a> "+badgeStatus+"</p>"
-                                        +"<div>"
-                                            +"<a href=\"#\" class=\"btn btn-danger btn-sm ms-1\"><i class=\"ti ti-trash\"></i></a>"
-                                            +"<a href=\"#\" class=\"btn btn-success btn-sm ms-1\"><i class=\"ti ti-printer\"></i></a>"
-                                        +"</div>"
-                                    +"</div>"
-                                    + "<p class=\"mb-1\">Cơ sở: <b>" + reader["TenCoSo"] + "</b></p>"
-                                     + "<div class=\"d-flex w-100 justify-content-between\">"
-                                    + "<p class=\"mb-1\">Người đặt: <b>" + reader["Username"] +"</b></p>"
-                                    + "<small>" + DateTime.Parse(reader["DateCreate"].ToString()) + "</small>"
+                    double tongtien = Double.Parse(reader["tongtien"].ToString());
+                    str += "<div class=\"card-header mt-2\" style='padding:5px 20px!important;'>"
+                                    + "<div class=\"d-flex w-100 justify-content-between\">"
+                                        + "<p class=\"mb-1\"><i class=\"ti ti-shopping-cart\"></i> <a href='javascript:Status_Order(" + reader["Id"] + ")' class='text-dark fw-bolder'>" + reader["Code"] + "</a> " + badgeStatus + "</p>"
+                                        + "<div>"
+                                            + "<a href=\"#\" class=\"btn btn-danger btn-sm ms-1\"><i class=\"ti ti-trash\"></i></a>"
+                                            + "<a href=\"#\" class=\"btn btn-success btn-sm ms-1\"><i class=\"ti ti-printer\"></i></a>"
+                                        + "</div>"
                                     + "</div>"
-                                    + (reader["Phone"].ToString()==""?"":"<p class=\"mb-1\">Số điện thoại: <b>" + reader["Phone"] +"</b></p>")
-                                    + (reader["Address"].ToString()==""?"":"<p class=\"mb-1\">Địa chỉ giao hàng: <b>" + reader["Address"] +"</b></p>")
-                                    + "<p class=\"mb-1\">Tổng tiền: <b>" + reader["tongtien"] +"</b></p>"
-                                +"</div>";
+                                + "</div>"
+                                + "<div class='card-body' style='padding:5px 20px!important;'>"
+                                    + "<p class=\"mb-1\">Cơ sở: <b>" + reader["TenCoSo"] + "</b></p>"
+                                    + "<div class=\"justify-content-between\">"
+                                    + "<p class=\"mb-1\">Người đặt: <b>" + reader["Username"] + "</b></p>"
+                                    + "</div>"
+                                    + (reader["Phone"].ToString() == "" ? "" : "<p class=\"mb-1\">Số điện thoại: <b>" + reader["Phone"] + "</b></p>")
+                                    + (reader["Address"].ToString() == "" ? "" : "<p class=\"mb-1\">Địa chỉ giao hàng: <b>" + reader["Address"] + "</b></p>")
+                                 + "</div>"
+                                 + "<div class='card-footer'  style='padding:5px 20px!important;'>"
+                                    + "<div class='d-flex w-100 justify-content-between'>"
+                                        + "<p>Thời gian đặt hàng: <i>" + DateTime.Parse(reader["DateCreate"].ToString()) + "</i></p>"
+                                        + "<p>Tổng tiền: <b>" + string.Format("{0:N0} đ",tongtien) + "</b></p>"
+                                    +"</div>"
+                                + "</div>";
                 }
                 reader.Close();
             }
@@ -137,6 +145,72 @@ namespace SuperbrainManagement.Controllers
                 str
             };
             return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        public string Status_timeline(int IdOrder)
+        {
+            var orderStatus = db.OrderStatus.Where(x=>x.IdOrder == IdOrder);
+            var order = db.Orders.Find(IdOrder);   
+            string str = "<div class=\"text_circle done\">" 
+                                +"<div class=\"circle\">" 
+                                +"<h4>Đơn hàng mới</h4>" 
+                                +"<p>"+order.DateCreate.Value.ToString("dd/MM/yyyy")+"</p>" 
+                                +"</div>" 
+                                +"<a href=\"javascript:void(0)\" class=\"tvar\"><span data-toggle=\"popover\" title=\"Đơn hàng mới\" data-trigger=\"hover\" data-placement=\"top\" data-content=\""+order.Description+"\"></span></a>"
+                                +"</div>";
+            foreach(var item in orderStatus)
+            {
+                if (item.Status == 2)
+                {
+                    str += "<div class=\"text_circle done\">"
+                                + "<div class=\"circle\">"
+                                + "<h4>Đã thanh toán</h4>"
+                                + "<p>"+item.Updatetime.Value.ToString("dd/MM/yyyy")+"</p>"
+                                + "</div>"
+                                + "<a href=\""+item.Image+"\" class=\"tvar\" target='_blank'><span data-toggle=\"popover\" title=\"Đã thanh toán\" data-trigger=\"hover\" data-placement=\"top\" data-content=\""+item.Description+"\"></span></a>"
+                                + "</div>";
+                }
+                if(item.Status == 3)
+                {
+                    str += "<div class=\"text_circle done\">"
+                                + "<div class=\"circle\">"
+                                + "<h4>Đã xác nhận</h4>"
+                                + "<p>" + item.Updatetime.Value.ToString("dd/MM/yyyy") + "</p>"
+                                + "</div>"
+                                + "<a href=\""+item.Image+ "\" class=\"tvar\" target='_blank'><span data-toggle=\"popover\" title=\"Đã thanh toán\" data-trigger=\"hover\" data-placement=\"top\" data-content=\"" + item.Description + "\"></span></a>"
+                                + "</div>";
+                }
+                if (item.Status == 4)
+                {
+                    str += "<div class=\"text_circle done\">"
+                                + "<div class=\"circle\">"
+                                + "<h4>Đã đóng gói</h4>"
+                                + "<p>" + item.Updatetime.Value.ToString("dd/MM/yyyy") + "</p>"
+                                + "</div>"
+                                + "<a href=\""+item.Image+ "\" class=\"tvar\" target='_blank'><span data-toggle=\"popover\" title=\"Đã đóng gói\" data-trigger=\"hover\" data-placement=\"top\" data-content=\"" + item.Description + "\"></span></a>"
+                                + "</div>";
+                }
+                if (item.Status == 5)
+                {
+                    str += "<div class=\"text_circle done\">"
+                                + "<div class=\"circle\">"
+                                + "<h4>Đang giao hàng</h4>"
+                                + "<p>" + item.Updatetime.Value.ToString("dd/MM/yyyy") + "</p>"
+                                + "</div>"
+                                + "<a href=\""+item.Image+ "\" class=\"tvar\" target='_blank'><span data-toggle=\"popover\" title=\"Đang giao hàng\" data-trigger=\"hover\" data-placement=\"top\" data-content=\"" + item.Description + "\"></span></a>"
+                                + "</div>";
+                }
+                if (item.Status == 6)
+                {
+                    str += "<div class=\"text_circle done\">"
+                                + "<div class=\"circle\">"
+                                + "<h4>Đã hoàn thành</h4>"
+                                + "<p>" + item.Updatetime.Value.ToString("dd/MM/yyyy") + "</p>"
+                                + "</div>"
+                                + "<a href=\""+item.Image+ "\" class=\"tvar\" target='_blank'><span data-toggle=\"popover\" title=\"Đã hoàn thành\" data-trigger=\"hover\" data-placement=\"top\" data-content=\"" + item.Description + "\"></span></a>"
+                                + "</div>";
+                }
+            }
+            return str;
         }
         public ActionResult Loadlist_order()
         {
@@ -167,6 +241,7 @@ namespace SuperbrainManagement.Controllers
                             + "<td class='w-25 align-content-center'> <img src='" + reader["Image"].ToString() + "' alt='" + reader["Name"].ToString() + "' class='rounded-2 me-2' height='40'><span class='text-success'>" + reader["code"].ToString() + "</span> - " + reader["Name"].ToString() + "</td>"
                             + "<td class='w-25 align-content-center'>" + reader["UnitOfPackage"].ToString() + "</td>"
                             + "<td class='w-10 align-content-center'>"
+                            + "<input type='hidden' name='NumberOfPackage_" + count + "' id='NumberOfPackage_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + reader["NumberOfPackage"].ToString() + "' class='form-control'>"
                             + "<input type='hidden' name='IdProduct_" + count + "' id='idproduct_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + reader["Id"].ToString() + "' class='form-control' onchange='javascript:update_thanhtien(" + count + ")'>"
                             + "<input type='text' name='Price_" + count + "' id='dongia_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + string.Format("{0:N0}", dongiaban) + "' class='form-control' onchange='javascript:update_thanhtien(" + count + ")'>"
                             + "</td>"
@@ -201,28 +276,30 @@ namespace SuperbrainManagement.Controllers
                 while (reader.Read())
                 {
                     count++;
-
+                    double dongia = Double.Parse(reader["Price"].ToString());
                     double thanhtien = Double.Parse(reader["TotalAmount"].ToString());
                     tongtien += thanhtien;
                     str += "<tr>"
                             + "<td class='text-center align-content-center'>" + count + "</td>"
-                            + "<td class=''> <img src='" + reader["Image"].ToString() + "' alt='" + reader["Name"].ToString() + "' class='rounded-2 me-2' height='40'><span class='text-success'>" + reader["CodeProduct"].ToString() + "</span> - " + reader["Name"].ToString() + "</td>"
-                            + "<td class='align-content-center'>" + reader["Unit"].ToString() + "</td>"
-                            + "<td class='align-content-end'>" + reader["Price"].ToString() + "</td>"
-                            + "<td class='align-content-center'>" + reader["Amount"].ToString() + "</td>"
-                            + "<td class='align-content-end'>" + reader["TotalAmount"].ToString() + "</td>"
+                            + "<td class='align-content-center'> <img src='" + reader["Image"].ToString() + "' alt='" + reader["Name"].ToString() + "' class='rounded-2 me-2' height='40'><span class='text-success'>" + reader["CodeProduct"].ToString() + "</span> - " + reader["Name"].ToString() + "</td>"
+                            + "<td class='text-center align-content-center'>" + reader["Unit"].ToString() + "</td>"
+                            + "<td class='align-content-center'>" + string.Format("{0:N0}", dongia) + "</td>"
+                            + "<td class='text-center align-content-center'>" + reader["Amount"].ToString() + "</td>"
+                            + "<td class='align-content-center'>" + string.Format("{0:N0}", thanhtien) + "</td>"
                            + "</tr>";
                     strCode = reader["CodeOrder"].ToString();
                     strTongtien  = reader["tongtien"].ToString();
                 }
-                str += "<tr><td colspan=5 class='text-end'>Tổng tiền: </td><td>"+tongtien+"</td></tr>";
+                str += "<tr><td colspan=5 class='text-end'>Tổng tiền: </td><td>"+ string.Format("{0:N0}", tongtien) + "</td></tr>";
                 reader.Close();
             }
+            string strTimeline = Status_timeline(id);
             var item = new
             {
                 str,
                 strCode,
                 strTongtien,
+                strTimeline,
                 count
             };
             return Json(item, JsonRequestBehavior.AllowGet);
@@ -306,6 +383,7 @@ namespace SuperbrainManagement.Controllers
                 int ReceiptionId = receiption.Id;
                 for (int i = 1; i <= Count; i++)
                 {
+                    int heso = int.Parse(Form["NumberOfPackage_" + i].ToString());
                     int idproduct = int.Parse(Form["IdProduct_" + i].ToString());
                     decimal dongia = Decimal.Parse(Form["Price_" + i].ToString());
                     int soluong = int.Parse(Form["Amount_" + i].ToString());
@@ -324,7 +402,7 @@ namespace SuperbrainManagement.Controllers
                         var product = new ProductReceiptionDetail() {
                             IdProduct = idproduct,
                             IdReceiption = ReceiptionId,
-                            Amount = soluong,
+                            Amount = (soluong*heso),
                             Price= dongia,
                             TotalAmount = thanhtien,
                             Discount = 0,
@@ -360,10 +438,14 @@ namespace SuperbrainManagement.Controllers
             };
             if (file != null && file.ContentLength > 0)
             {
-                string _FileName = Path.GetFileName(file.FileName);
-                string _path = Path.Combine(Server.MapPath("~/Uploads"), _FileName);
+                // Generate a unique file name
+                string fileName = Path.GetFileNameWithoutExtension(file.FileName);
+                string extension = Path.GetExtension(file.FileName);
+                fileName = $"{fileName}_{DateTime.Now:yyyyMMddHHmmssfff}{extension}";
+                // Specify the path to save the file
+                string _path = Path.Combine(Server.MapPath("~/Uploads/Orders"), fileName);
                 file.SaveAs(_path);
-                orderStatus.Image = "/Uploads/" + _FileName;
+                orderStatus.Image = "/Uploads/Orders/" + fileName;
             }
             db.OrderStatus.Add(orderStatus);
             order.Status = Status;
