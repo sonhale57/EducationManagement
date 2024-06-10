@@ -2,6 +2,124 @@
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<style>
+    .line_box {
+     display: flex;
+     margin-bottom: 40px;
+}
+ .text_circle {
+     flex: 1;
+     text-align: center;
+     position: relative;
+}
+ .text_circle:after {
+     background-color: grey;
+     bottom: 1.25em;
+     content: "";
+     display: block;
+     height: 3px;
+     position: absolute;
+     right: 0;
+     width: 50%;
+     z-index: 0;
+}
+ .stav_projektu .text_circle:after,.stav_projektu .text_circle:before {background-color: grey;}
+ .line_box h4 {
+     color: #189599;
+     font-weight: bold;
+}
+ .line_box h4,.line_box p {
+     font-size: 12px;
+     margin-bottom: 0;
+     padding: 0 5px;
+}
+ .subline {
+     position: absolute;
+     right: -25px;
+     bottom: -43%;
+}
+ .subline:before {
+     content: "";
+     position: absolute;
+     height: 15px;
+     width: 15px;
+     bottom: 14px;
+     right: 15px;
+     background-color: #189599;
+     border-radius: 50%;
+     top: -25px;
+     z-index:2;
+}
+ .subline h6 {margin-bottom: 0;}
+ .timeline {margin: 40px 0;}
+ .text_circle.done:after,.text_circle.done + .text_circle:before,.stav_projektu .text_circle.done:after,.stav_projektu .text_circle.done + .text_circle:before {background-color: #189599;}
+ .text_circle.sub:after {background-color: #189599;}
+ .text_circle:not(:first-child):before {
+     bottom: 1.25em;
+     content: "";
+     display: block;
+     height: 3px;
+     position: absolute;
+     left: 0;
+     width: 50%;
+     z-index: 0;
+     background-color: grey;
+}
+ .stav_projektu .text_circle:not(:first-child):before {background-color: grey;}
+ .text_circle:last-child:after {width: 0;}
+ .circle {height: 100%;}
+ .tvar {
+     height: 40px;
+     width: 40px;
+     border: 2px solid #189599;
+     display: flex;
+     position: relative;
+     border-radius: 100%;
+     top: -43px;
+     margin: 3px auto;
+     background-color: #fff;
+     z-index:2;
+}
+ .tvar span {
+     margin: 25% auto;
+     height: 20px;
+     width: 20px;
+     background-color: #189599;
+     border-radius: 100%;
+     color: #fff;
+}
+ .stav_projektu .tvar {border: 2px solid grey;}
+ .stav_projektu .done .tvar,.stav_projektu .sub .tvar {border: 2px solid #189599;}
+ .subline h6 {color: #189599;}
+ .timeline .card-header:hover {
+     background-color: #ececec;
+     cursor: pointer;
+}
+/* iPhone X ----------------------------------- */
+ @@media only screen and (device-width : 375px) and (device-height : 812px) and (-webkit-device-pixel-ratio : 3) {
+    .subline:before {top: -43px;}
+}
+ @@media only screen and (device-width : 812px) and (device-height : 375px) and (orientation : landscape) and (-webkit-device-pixel-ratio : 3) {
+    .subline:before {top: -31px;}
+}
+/* iPad portrait ----------------------------------- */
+ @@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) and (orientation : portrait) {
+    .subline:before {top: -29px;}
+}
+/* mobile width till 767px ----------------------------------- */
+ @@media (max-width: 767px){
+    .subline:before {top: -30px;}
+}
+/* Portrait iPad Pro */
+ @@media only screen and (min-width: 1024px) and (max-height: 1366px) and (orientation: portrait) and (-webkit-min-device-pixel-ratio: 1.5) {
+    .subline:before {top: -23px;}
+}
+/* mobile width till 480px ----------------------------------- */
+ @@media (max-width: 480px){
+    .subline:before {top: -43px;}
+}
+
+</style>
 <div class="row">
     <div class="col col-md-6 col-sm-12">
         <div class="input-group mb-3">
@@ -26,7 +144,7 @@
             </ul>
         </div>
         <a href="javascript:Loadlist_orders()" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">
-            <i class="ti ti-plus"></i> Đặt hàng
+            <i class="ti ti-shopping-cart-plus"></i> Đặt hàng
         </a>
     </div>
 </div>
@@ -56,7 +174,7 @@
     </ul>
     <div class="tab-content" id="myTabContent">
         <div id="loading"></div>
-        <div class="list-group" id="showlist">
+        <div class="card" id="showlist">
         </div>
     </div>
 </div>
@@ -124,39 +242,41 @@
 <div class="modal fade" id="modalStatus" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content rounded-0 h-75">
-            <form action="/" method="post" id="form_status">
+            <form action="/" method="post" id="form_status" enctype="multipart/form-data">
                 <div class="modal-header bg-primary">
                     <h5 class="modal-title text-white" id="exampleModalLabel">Cập nhật đơn hàng</h5>
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                            <div class="col col-4 col-md-4 col-sm-12">
-                                <label class="text-success">Mã đơn hàng:</label>
-                                <input type="hidden" name="IdOrder" id="IdOrder" placeholder="Tên liên hệ" value="" class="form-control" />
-                                <input type="text" name="Name" id="strCode" placeholder="Tên liên hệ" value="" class="form-control" disabled />
-                            </div>
-                            <div class="col col-4 col-md-4 col-sm-12">
-                                <label class="text-success">Tổng tiền thanh toán:</label>
-                                <input type="text" name="Tongtien" id="strTongtien" placeholder="Số điện thoại nhận hàng" value="" class="form-control" disabled />
-                            </div>
-                            <div class="col col-4 col-md-4 col-sm-12">
-                                <label class="text-success">Cập nhật:</label>
-                                <select class="form-control" name="Status" id="Status">
-                                    <option value="2">Thanh toán đơn hàng</option>
-                                    <option value="3">Xác nhận đơn hàng</option>
-                                    <option value="4">Đóng gói đơn hàng</option>
-                                    <option value="5">Đang vận chuyển</option>
-                                    <option value="6">Đã hoàn thành</option>
-                                </select>
-                            </div>
-                            <div class="col col-4 col-md-4 col-sm-12 mt-3">
-                                <label class="text-success">Hình ảnh:</label>
-                                <input class="form-control" id="File" name="File" type="file" placeholder="Hình ảnh chứng tử" required>
-                            </div>
-                            <div class="col col-8 col-md-8 col-sm-12 mt-3">
-                                <label class="text-success">Ghi chú cập nhật:</label>
-                                <input type="text" name="Description" id="Description" placeholder="Ghi chú cập nhật" value="" class="form-control" />
-                            </div>
+                        <div class="col col-4 col-md-4 col-sm-12">
+                            <label class="text-success">Mã đơn hàng:</label>
+                            <input type="hidden" name="IdOrder" id="IdOrder" placeholder="Tên liên hệ" value="" class="form-control" />
+                            <input type="text" name="Name" id="strCode" placeholder="Tên liên hệ" value="" class="form-control" disabled />
+                        </div>
+                        <div class="col col-4 col-md-4 col-sm-12">
+                            <label class="text-success">Tổng tiền thanh toán:</label>
+                            <input type="text" name="Tongtien" id="strTongtien" placeholder="Số điện thoại nhận hàng" value="" class="form-control" disabled />
+                        </div>
+                        <div class="col col-4 col-md-4 col-sm-12">
+                            <label class="text-success">Cập nhật:</label>
+                            <select class="form-control" name="Status" id="Status">
+                                <option value="2">Thanh toán đơn hàng</option>
+                                <option value="3">Xác nhận đơn hàng</option>
+                                <option value="4">Đóng gói đơn hàng</option>
+                                <option value="5">Đang vận chuyển</option>
+                                <option value="6">Đã hoàn thành</option>
+                            </select>
+                        </div>
+                        <div class="col col-4 col-md-4 col-sm-12 mt-3">
+                            <label class="text-success">Hình ảnh:</label>
+                            <input type="file" id="Image" name="Image" accept="image/*" class="form-control">
+                        </div>
+                        <div class="col col-8 col-md-8 col-sm-12 mt-3">
+                            <label class="text-success">Ghi chú cập nhật:</label>
+                            <input type="text" name="Description" id="Description" placeholder="Ghi chú cập nhật" value="" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="line_box stav_projektu" style="margin: 40px 0 40px 0;" id="showlist_status">
                     </div>
                     <hr />
                     <table class="table mt-3">
@@ -185,6 +305,7 @@
 <script>
     Loadlist(1);
     function Loadlist(i) {
+        $('#showlist').html("");
         $("#loading").html("<span class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></span>");
         $.ajax({
             url: '@Url.Action("Loadlist", "Orders")',
@@ -218,6 +339,7 @@
                 $('#IdOrder').val(id);
                 $('#strCode').val(data.strCode);
                 $('#strTongtien').val(data.strTongtien);
+                $('#showlist_status').html(data.strTimeline);
                 $('#countline').val(data.count);
             },
             error: function (xhr, error) {
@@ -245,9 +367,12 @@
         var max = parseInt($('#soluong_' + i).attr('max'));
         var dongia = parseInt($("#dongia_" + i).val().replace(',',''));
         var soluong = parseInt($("#soluong_" + i).val());
-        if (soluong > max) {
+        var heso = parseInt($("#NumberOfPackage_" + i).val());
+        if ((soluong * heso) > max) {
             showError("Vui lòng nhập số lượng nhỏ hơn!", 3000);
             $("#soluong_" + i).val(0);
+            $("#thanhtien_" + i).val(0);
+            sum_tongtien();
         } else {
             var thanhtien = dongia * soluong;
             $("#thanhtien_" + i).val(thanhtien.toLocaleString());
@@ -287,6 +412,47 @@
     });
     }
     function submit_statusorder() {
+        var idOrder = $("#IdOrder").val();
+        var status = $("#Status").val();
+        var description = $("#Description").val();
+        var fileInput = $("#Image")[0];
+        var file = fileInput.files[0]; // Lấy tệp từ input
+
+        if (!idOrder || !status) {
+            showError('IdOrder và Status không được để trống!', 3000);
+            return;
+        }
+
+        var formData = new FormData();
+        formData.append("IdOrder", idOrder);
+        formData.append("Status", status);
+        formData.append("Description", description);
+        formData.append("file", file);
+
+        $.ajax({
+            url: '@Url.Action("Submit_StatusOrder", "Orders")',
+            type: "POST",
+            data: formData,
+            contentType: false, // Không đặt loại nội dung
+            processData: false, // Không xử lý dữ liệu
+            dataType: "json",
+            success: function (data) {
+                if (data.status === "ok") {
+                    $('#modalStatus').modal('hide');
+                    Loadlist(1);
+                    showSuccess("Đã cập nhật thành công!", 3000);
+                } else {
+                    showError(data.status, 3000);
+                }
+            },
+            error: function (xhr, status, error) {
+                var errorMessage = xhr.status + ': ' + xhr.statusText;
+                showError('Lỗi! ' + errorMessage, 3000);
+            }
+        });
+    }
+
+    @*function submit_statusorder() {
         $.ajax({
             url: '@Url.Action("Submit_StatusOrder", "Orders")',
             type: "POST",
@@ -309,7 +475,7 @@
             },
             error: function () { showError('Lỗi!', 3000); }
         });
-    }
+    }*@
     $('#exampleModal').on('shown.bs.modal', function (e) {
         Loadlist_order();
     });
@@ -317,4 +483,7 @@
         $('#modalStatus').modal('show');
         LoadStatus_Order(i);
     }
+    $(function () {
+        $('[data-toggle="popover"]').popover();
+    });
 </script>
