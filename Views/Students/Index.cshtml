@@ -10,7 +10,10 @@
     <div class="col col-md-4 col-sm-12">
         <form action="/students" method="get">
             <div class="input-group mb-3">
-                @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2" })
+                @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
+                {
+                    @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2" })
+                }
                 <input type="text" class="form-control" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter ">
                 <button class="input-group-text bg-success" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
             </div>

@@ -909,6 +909,11 @@
     <Content Include="Views\Transactions\Edit.cshtml" />
     <Content Include="Views\Transactions\Index.cshtml" />
     <Content Include="Views\Warehouses\Receiptions.cshtml" />
+    <Content Include="Views\Feeds\Create.cshtml" />
+    <Content Include="Views\Feeds\Delete.cshtml" />
+    <Content Include="Views\Feeds\Details.cshtml" />
+    <Content Include="Views\Feeds\Edit.cshtml" />
+    <Content Include="Views\Feeds\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

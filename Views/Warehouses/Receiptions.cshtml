@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewBag.Title = "Receiptions";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -54,32 +53,23 @@
     <tbody id="showlist"></tbody>
 </table>
 <script>
-    
     $(document).ready(function () {
         var currentDate = new Date();
-
         // Lấy ngày, tháng và năm hiện tại
         var currentDay = currentDate.getDate();
         var currentMonth = currentDate.getMonth() + 1; // Tháng bắt đầu từ 0, nên cần cộng thêm 1
         var currentYear = currentDate.getFullYear();
-
         // Định dạng chuỗi ngày, tháng và năm để đặt giá trị cho phần tử "todate"
         var formattedToday = currentYear + '-' + ('0' + currentMonth).slice(-2) + '-' + ('0' + currentDay).slice(-2);
-
         // Đặt giá trị mới cho phần tử có id là "todate"
         $("#todate").val(formattedToday);
-
-
         // Tính toán ngày và tháng trước đó
         var lastMonthDate = new Date(currentDate.getFullYear(), currentMonth - 2, currentDay); // Giảm đi 2 để lấy tháng trước đó
-
         // Lấy ngày và tháng sau khi tính toán
         var lastMonth = lastMonthDate.getMonth() + 1; // Tháng bắt đầu từ 0, nên cần cộng thêm 1
         var lastMonthYear = lastMonthDate.getFullYear();
-
         // Định dạng chuỗi ngày và tháng để đặt giá trị cho phần tử "fromdate"
         var formattedLastMonth = lastMonthYear + '-' + ('0' + lastMonth).slice(-2) + '-' + ('0' + currentDay).slice(-2);
-
         // Đặt giá trị mới cho phần tử có id là "fromdate"
         $("#fromdate").val(formattedLastMonth);
         Loadlist();
@@ -97,7 +87,6 @@
                  searchString: $("#searchString").val()
              },
              success: function (data) {
-                 console.log(data);
                 $("#loading").html("");
                  $('#showlist').html(data.str);
              },
