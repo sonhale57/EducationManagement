@@ -914,6 +914,7 @@
     <Content Include="Views\Feeds\Details.cshtml" />
     <Content Include="Views\Feeds\Edit.cshtml" />
     <Content Include="Views\Feeds\Index.cshtml" />
+    <Content Include="Views\Students\ShowTimeTableData.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

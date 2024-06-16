@@ -4,8 +4,7 @@
     ViewBag.Title = "Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div class="container">
-    
+<div class="container">   
 </div><div class="row">
     <div class="col-lg-2">
         <div class="profile-card-4 z-depth-3">
@@ -285,9 +284,19 @@
                 </div>
             </div>
             <div class="modal-footer text-start">
+                <form action="/Students/ShowTimeTableData" method="get" target="_blank">
+                    <input type="hidden" id="idClassShowTimeTbl" name="idClassShowTimeTbl"/>
+                    <input type="hidden" id="fromDateShowTimeTbl"  name="fromDate" />
+                    <input type="hidden" id="toDateShowTimeTbl"  name="toDate"/>
+                    <input type="hidden" id="studentId"  name="studentId" value="@Model.Id"/>
+                    <button type="submit" class="btn btn-info">
+                        <i class="ti ti-calendar"></i> Xem thời khoá biểu
+                    </button>
+                </form>
                 <button type="button" class="btn btn-success" onclick="Submit_xetlop()">
                     <i class="ti ti-circle-plus"></i> Xét vào lớp học
                 </button>
+
             </div>
         </div>
     </div>
@@ -495,6 +504,10 @@
         const fromDate = $("#fromdate").val();
         const toDate = $("#todate").val();
 
+        $("#idClassShowTimeTbl").val(parseInt(idClass));
+        $("#fromDateShowTimeTbl").val(fromDate);
+        $("#toDateShowTimeTbl").val(toDate);
+
         $('#datarow').find('tr').remove();
         $('#timetable_datarow').find('tr').remove();
 
@@ -512,13 +525,13 @@
                     $.each(data.schedulesbyClass, function (key, value) {
                         $('#datarow')
                             .append('<tr><td>' + index++ + '</td><td>' + value.DayOfWeek + '</td><td>' + value.TimeSlot + '</td><td>' + value.HourQuantity + '</td><td>' + value.TeacherName +'</td></tr>');
-                     
+
                     });
 
                     $.each(data.timeTableData, function (index, value) {
                         $('#timetable_datarow')
                             .append('<tr><td>' + value.Date + '</td><td>' + value.DayOfWeek + '</td><td>' + value.TimeSlot + '</td><td>' + value.HourQuantity + '</td></tr>');
-                    });                   
+                    });
                 }
             },
             error: function (xhr, error) {
@@ -527,5 +540,4 @@
             }
         });
     }
-
 </script>
