@@ -9,6 +9,7 @@ using System.Web.Mvc;
 using PagedList.Mvc;
 using PagedList;
 using SuperbrainManagement.Models;
+using System.Threading.Tasks;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -185,7 +186,33 @@ namespace SuperbrainManagement.Controllers
             db.SaveChanges();
             return RedirectToAction("Index");
         }
+        [HttpPost]
+        public async Task<ActionResult> Delete_Room(int id)
+        {
+            var status = "ok";
+            var message = "Phòng đã được xóa thành công.";
 
+            var room = await db.Rooms.FindAsync(id);
+            if (room == null)
+            {
+                return HttpNotFound();
+            }
+
+            // Kiểm tra khóa ngoại
+            var hasSchedules = db.Schedules.Any(s => s.IdRoom == id);
+
+            if (hasSchedules)
+            {
+                status = "error";
+                message = "Không thể xóa phòng này vì đang có lớp đang xét vào phòng này.";
+                return Json(new { status = status, message = message }, JsonRequestBehavior.AllowGet);
+            }
+
+            db.Rooms.Remove(room);
+            await db.SaveChangesAsync();
+
+            return Json(new { status = status, message = message }, JsonRequestBehavior.AllowGet);
+        }
         protected override void Dispose(bool disposing)
         {
             if (disposing)

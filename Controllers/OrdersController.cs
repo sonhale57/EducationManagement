@@ -1,4 +1,6 @@
-﻿using SuperbrainManagement.Models;
+﻿using Microsoft.AspNet.SignalR.Hubs;
+using Microsoft.Owin.BuilderProperties;
+using SuperbrainManagement.Models;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -9,6 +11,8 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.UI.WebControls;
+using System.Xml.Linq;
+using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -18,18 +22,25 @@ namespace SuperbrainManagement.Controllers
         // GET: Orders
         public ActionResult Index(string idBranch)
         {
-            var branches = db.Branches.ToList();
-            int idbranch = int.Parse(CheckUsers.idBranch());
-            if (!CheckUsers.CheckHQ())
+            if (CheckUsers.iduser() == "")
             {
-                branches = db.Branches.Where(x => x.Id == idbranch).ToList();
+                return Redirect("/authentication");
             }
-            if (string.IsNullOrEmpty(idBranch))
+            else
             {
-                idBranch = branches.First().Id.ToString();
+                var branches = db.Branches.ToList();
+                int idbranch = int.Parse(CheckUsers.idBranch());
+                if (!CheckUsers.CheckHQ())
+                {
+                    branches = db.Branches.Where(x => x.Id == idbranch).ToList();
+                }
+                if (string.IsNullOrEmpty(idBranch))
+                {
+                    idBranch = branches.First().Id.ToString();
+                }
+                ViewBag.IdBranch = new SelectList(branches, "Id", "Name", idBranch);
+                return View();
             }
-            ViewBag.IdBranch = new SelectList(branches, "Id", "Name", idBranch);
-            return View();
         }
         public ActionResult Loadlist(string idBranch,int status,string sort,string searchString)
         {
@@ -157,57 +168,60 @@ namespace SuperbrainManagement.Controllers
                                 +"</div>" 
                                 +"<a href=\"javascript:void(0)\" class=\"tvar\"><span data-toggle=\"popover\" title=\"Đơn hàng mới\" data-trigger=\"hover\" data-placement=\"top\" data-content=\""+order.Description+"\"></span></a>"
                                 +"</div>";
-            foreach(var item in orderStatus)
+            if (orderStatus.Count() >0)
             {
-                if (item.Status == 2)
+                foreach (var item in orderStatus)
                 {
-                    str += "<div class=\"text_circle done\">"
-                                + "<div class=\"circle\">"
-                                + "<h4>Đã thanh toán</h4>"
-                                + "<p>"+item.Updatetime.Value.ToString("dd/MM/yyyy")+"</p>"
-                                + "</div>"
-                                + "<a href=\""+item.Image+"\" class=\"tvar\" target='_blank'><span data-toggle=\"popover\" title=\"Đã thanh toán\" data-trigger=\"hover\" data-placement=\"top\" data-content=\""+item.Description+"\"></span></a>"
-                                + "</div>";
-                }
-                if(item.Status == 3)
-                {
-                    str += "<div class=\"text_circle done\">"
-                                + "<div class=\"circle\">"
-                                + "<h4>Đã xác nhận</h4>"
-                                + "<p>" + item.Updatetime.Value.ToString("dd/MM/yyyy") + "</p>"
-                                + "</div>"
-                                + "<a href=\""+item.Image+ "\" class=\"tvar\" target='_blank'><span data-toggle=\"popover\" title=\"Đã thanh toán\" data-trigger=\"hover\" data-placement=\"top\" data-content=\"" + item.Description + "\"></span></a>"
-                                + "</div>";
-                }
-                if (item.Status == 4)
-                {
-                    str += "<div class=\"text_circle done\">"
-                                + "<div class=\"circle\">"
-                                + "<h4>Đã đóng gói</h4>"
-                                + "<p>" + item.Updatetime.Value.ToString("dd/MM/yyyy") + "</p>"
-                                + "</div>"
-                                + "<a href=\""+item.Image+ "\" class=\"tvar\" target='_blank'><span data-toggle=\"popover\" title=\"Đã đóng gói\" data-trigger=\"hover\" data-placement=\"top\" data-content=\"" + item.Description + "\"></span></a>"
-                                + "</div>";
-                }
-                if (item.Status == 5)
-                {
-                    str += "<div class=\"text_circle done\">"
-                                + "<div class=\"circle\">"
-                                + "<h4>Đang giao hàng</h4>"
-                                + "<p>" + item.Updatetime.Value.ToString("dd/MM/yyyy") + "</p>"
-                                + "</div>"
-                                + "<a href=\""+item.Image+ "\" class=\"tvar\" target='_blank'><span data-toggle=\"popover\" title=\"Đang giao hàng\" data-trigger=\"hover\" data-placement=\"top\" data-content=\"" + item.Description + "\"></span></a>"
-                                + "</div>";
-                }
-                if (item.Status == 6)
-                {
-                    str += "<div class=\"text_circle done\">"
-                                + "<div class=\"circle\">"
-                                + "<h4>Đã hoàn thành</h4>"
-                                + "<p>" + item.Updatetime.Value.ToString("dd/MM/yyyy") + "</p>"
-                                + "</div>"
-                                + "<a href=\""+item.Image+ "\" class=\"tvar\" target='_blank'><span data-toggle=\"popover\" title=\"Đã hoàn thành\" data-trigger=\"hover\" data-placement=\"top\" data-content=\"" + item.Description + "\"></span></a>"
-                                + "</div>";
+                    if (item.Status == 2)
+                    {
+                        str += "<div class=\"text_circle done\">"
+                                    + "<div class=\"circle\">"
+                                    + "<h4>Đã thanh toán</h4>"
+                                    + "<p>" + item.Updatetime.Value.ToString("dd/MM/yyyy") + "</p>"
+                                    + "</div>"
+                                    + "<a href=\"" + item.Image + "\" class=\"tvar\" target='_blank'><span data-toggle=\"popover\" title=\"Đã thanh toán\" data-trigger=\"hover\" data-placement=\"top\" data-content=\"" + item.Description + "\"></span></a>"
+                                    + "</div>";
+                    }
+                    if (item.Status == 3)
+                    {
+                        str += "<div class=\"text_circle done\">"
+                                    + "<div class=\"circle\">"
+                                    + "<h4>Đã xác nhận</h4>"
+                                    + "<p>" + item.Updatetime.Value.ToString("dd/MM/yyyy") + "</p>"
+                                    + "</div>"
+                                    + "<a href=\"" + item.Image + "\" class=\"tvar\" target='_blank'><span data-toggle=\"popover\" title=\"Đã thanh toán\" data-trigger=\"hover\" data-placement=\"top\" data-content=\"" + item.Description + "\"></span></a>"
+                                    + "</div>";
+                    }
+                    if (item.Status == 4)
+                    {
+                        str += "<div class=\"text_circle done\">"
+                                    + "<div class=\"circle\">"
+                                    + "<h4>Đã đóng gói</h4>"
+                                    + "<p>" + item.Updatetime.Value.ToString("dd/MM/yyyy") + "</p>"
+                                    + "</div>"
+                                    + "<a href=\"" + item.Image + "\" class=\"tvar\" target='_blank'><span data-toggle=\"popover\" title=\"Đã đóng gói\" data-trigger=\"hover\" data-placement=\"top\" data-content=\"" + item.Description + "\"></span></a>"
+                                    + "</div>";
+                    }
+                    if (item.Status == 5)
+                    {
+                        str += "<div class=\"text_circle done\">"
+                                    + "<div class=\"circle\">"
+                                    + "<h4>Đang giao hàng</h4>"
+                                    + "<p>" + item.Updatetime.Value.ToString("dd/MM/yyyy") + "</p>"
+                                    + "</div>"
+                                    + "<a href=\"" + item.Image + "\" class=\"tvar\" target='_blank'><span data-toggle=\"popover\" title=\"Đang giao hàng\" data-trigger=\"hover\" data-placement=\"top\" data-content=\"" + item.Description + "\"></span></a>"
+                                    + "</div>";
+                    }
+                    if (item.Status == 6)
+                    {
+                        str += "<div class=\"text_circle done\">"
+                                    + "<div class=\"circle\">"
+                                    + "<h4>Đã hoàn thành</h4>"
+                                    + "<p>" + item.Updatetime.Value.ToString("dd/MM/yyyy") + "</p>"
+                                    + "</div>"
+                                    + "<a href=\"" + item.Image + "\" class=\"tvar\" target='_blank'><span data-toggle=\"popover\" title=\"Đã hoàn thành\" data-trigger=\"hover\" data-placement=\"top\" data-content=\"" + item.Description + "\"></span></a>"
+                                    + "</div>";
+                    }
                 }
             }
             return str;
@@ -245,7 +259,7 @@ namespace SuperbrainManagement.Controllers
                             + "<input type='hidden' name='IdProduct_" + count + "' id='idproduct_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + reader["Id"].ToString() + "' class='form-control' onchange='javascript:update_thanhtien(" + count + ")'>"
                             + "<input type='text' name='Price_" + count + "' id='dongia_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + string.Format("{0:N0}", dongiaban) + "' class='form-control' onchange='javascript:update_thanhtien(" + count + ")'>"
                             + "</td>"
-                            + "<td class='text-center w-5 align-content-center'><input type='text' name='Amount_" + count + "'  id='soluong_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' max='" + reader["Tonkho"].ToString() + "' class='form-control soluong' onchange='javascript:update_thanhtien(" + count + ")' " + (tonkho > 0 ? "" : "Disabled") + "></td>"
+                            + "<td class='text-center w-5 align-content-center'><input type='text' name='Amount_" + count + "'  id='soluong_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' max='" + reader["Tonkho"].ToString() + "' class='form-control soluong' onchange='javascript:update_thanhtien(" + count + ")' ></td>"
                             + "<td class='text-center w-10 align-content-center'><input type='text' name='TotalAmount_" + count + "'  id='thanhtien_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' class='form-control' readonly></td>"
                             + "</tr>";
                 }
@@ -293,11 +307,33 @@ namespace SuperbrainManagement.Controllers
                 str += "<tr><td colspan=5 class='text-end'>Tổng tiền: </td><td>"+ string.Format("{0:N0}", tongtien) + "</td></tr>";
                 reader.Close();
             }
+            string strSelect = "";
+            var status = db.Orders.Find(id).Status + 1;
+            switch (status)
+            {
+                case 2:
+                    strSelect += "<option value='2' selected>Thanh toán đơn hàng</option>";
+                    break;
+                case 3:
+                    strSelect += "<option value='3' selected>Xác nhận đơn hàng</option>";
+                    break;
+                case 4:
+                    strSelect += "<option value='4' selected>Đã đóng gói</option>";
+                    break;
+                case 5:
+                    strSelect += "<option value='5' selected>Đang giao hàng</option>";
+                    break;
+                case 6:
+                    strSelect += "<option value='6' selected>Đã hoàn thành</option>";
+                    break;
+            }
             string strTimeline = Status_timeline(id);
             var item = new
             {
+                status,
                 str,
                 strCode,
+                strSelect,
                 strTongtien,
                 strTimeline,
                 count
@@ -314,11 +350,15 @@ namespace SuperbrainManagement.Controllers
 
             return str;
         }
+        /// <summary>
+        /// Mã xuất kho của HEAD QUATER
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         string Getcode_receiption(bool type)
         {
             string loai = "";
             int idbranch_hq = db.Branches.SingleOrDefault(x => x.Code.ToLower() == "hq").Id;
-            int idBranch = int.Parse(CheckUsers.idBranch());
             int nextCode = 0;
             if (type == false)
             {
@@ -331,7 +371,27 @@ namespace SuperbrainManagement.Controllers
                 nextCode = db.WarehouseReceiptions.Where(x => x.IdBranch == idbranch_hq && x.Type == true).Count() + 1;
             }
             string code = nextCode.ToString().PadLeft(7, '0');
-            var cn = db.Branches.Find(int.Parse(CheckUsers.idBranch()));
+            var cn = db.Branches.Find(idbranch_hq);
+            string str = cn.Code + loai + code;
+
+            return str;
+        }
+        string Getcode_receiption(bool type,int IdBranch)
+        {
+            string loai = "";
+            int nextCode = 0;
+            if (type == false)
+            {
+                loai = "XK";
+                nextCode = db.WarehouseReceiptions.Where(x => x.IdBranch == IdBranch && x.Type == false).Count() + 1;
+            }
+            else if (type == true)
+            {
+                loai = "NK";
+                nextCode = db.WarehouseReceiptions.Where(x => x.IdBranch == IdBranch && x.Type == true).Count() + 1;
+            }
+            string code = nextCode.ToString().PadLeft(7, '0');
+            var cn = db.Branches.Find(IdBranch);
             string str = cn.Code + loai + code;
 
             return str;
@@ -387,6 +447,7 @@ namespace SuperbrainManagement.Controllers
                     int idproduct = int.Parse(Form["IdProduct_" + i].ToString());
                     decimal dongia = Decimal.Parse(Form["Price_" + i].ToString());
                     int soluong = int.Parse(Form["Amount_" + i].ToString());
+                    int soluongxuat = soluong * heso;
                     Decimal thanhtien = Decimal.Parse(Form["TotalAmount_" + i].ToString().Replace(",", ""));
                     if (soluong > 0)
                     {
@@ -402,7 +463,7 @@ namespace SuperbrainManagement.Controllers
                         var product = new ProductReceiptionDetail() {
                             IdProduct = idproduct,
                             IdReceiption = ReceiptionId,
-                            Amount = (soluong*heso),
+                            Amount = soluongxuat,
                             Price= dongia,
                             TotalAmount = thanhtien,
                             Discount = 0,
@@ -427,8 +488,9 @@ namespace SuperbrainManagement.Controllers
         [HttpPost]
         public ActionResult Submit_StatusOrder(int IdOrder,int Status,string Description,HttpPostedFileBase file)
         {
-            string status = "ok";
+            string status = "ok";string fileName = "";
             var order = db.Orders.Find(IdOrder);
+            
             var orderStatus = new OrderStatus() { 
                 IdOrder =IdOrder,
                 Status = Status,
@@ -439,7 +501,7 @@ namespace SuperbrainManagement.Controllers
             if (file != null && file.ContentLength > 0)
             {
                 // Generate a unique file name
-                string fileName = Path.GetFileNameWithoutExtension(file.FileName);
+                fileName = Path.GetFileNameWithoutExtension(file.FileName);
                 string extension = Path.GetExtension(file.FileName);
                 fileName = $"{fileName}_{DateTime.Now:yyyyMMddHHmmssfff}{extension}";
                 // Specify the path to save the file
@@ -447,16 +509,101 @@ namespace SuperbrainManagement.Controllers
                 file.SaveAs(_path);
                 orderStatus.Image = "/Uploads/Orders/" + fileName;
             }
+            if(Status == 2)
+            {
+                Update_Transaction(IdOrder,fileName);
+            }
+            if (Status == 6)
+            {
+                Update_inventory(IdOrder);
+            }
             db.OrderStatus.Add(orderStatus);
             order.Status = Status;
             db.Entry(order).State = EntityState.Modified;
             db.SaveChanges();
 
+            
             var item = new
             {
-                status = status
+                status
             };
             return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        public void Update_Transaction(int IdOrder,string Image)
+        {
+            var tongtien =db.OrderDetails.Where(x=>x.IdOrder == IdOrder).Sum(x=>x.TotalAmount);
+            int IdUser = int.Parse(CheckUsers.iduser());
+            int IdBranch = int.Parse(CheckUsers.idBranch());
+            string code = db.Orders.Find(IdOrder).Code;
+            var transaction = new Transaction() {
+                Type = false,
+                IdUser = IdUser,
+                DateCreate = DateTime.Now,
+                Amount = tongtien,
+                IdBranch = IdBranch,
+                Status = true,
+                Description = "Thanh toán đơn hàng " + code,
+                IdOrder = IdOrder,
+                Name ="Head Quater",
+                Image = Image,
+                Discount = 0,
+                TotalAmount = tongtien
+            };
+            db.Transactions.Add(transaction);
+            db.SaveChanges();
+        }
+        public void Update_inventory(int IdOrder)
+        {
+            var order = db.Orders.Find(IdOrder);
+            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "select o.IdBranch,o.Id as IdOrder,o.Code,od.IdProduct,p.Name,p.NumberOfPackage,od.Amount,(od.Amount * p.NumberOfPackage) as Soluong,p.Price,od.TotalAmount" +
+                            " from [Order] o inner join OrderDetail od on o.Id = od.IdOrder,Product p" +
+                            " where p.Id = od.IdProduct and o.id =" + IdOrder;
+                SqlCommand command = new SqlCommand(query, connection);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                var receiption = new WarehouseReceiption()
+                {
+                    Name = "Head Quater",
+                    Phone = "",
+                    Address = "",
+                    Description = "Nhập từ đơn hàng "+order.Code,
+                    Code = Getcode_receiption(false,order.IdBranch.Value),
+                    Status = true,
+                    Type = true,
+                    Enable = true,
+                    IdUser = int.Parse(CheckUsers.iduser()),
+                    IdBranch = order.IdBranch,
+                    Credit = 0,
+                    Debit = 0,
+                    DateCreate = DateTime.Now,
+                };
+                db.WarehouseReceiptions.Add(receiption);
+                db.SaveChanges();
+                int ReceiptionId = receiption.Id;
+                while (reader.Read())
+                {
+                    int soluong = int.Parse(reader["Soluong"].ToString());
+                    decimal dongia = Decimal.Parse(reader["Price"].ToString());
+                    decimal thanhtien = decimal.Parse(reader["TotalAmount"].ToString());
+
+                    var product = new ProductReceiptionDetail()
+                    {
+                        IdProduct = int.Parse(reader["IdProduct"].ToString()),
+                        IdReceiption = ReceiptionId,
+                        Amount = soluong,
+                        Price = dongia,
+                        TotalAmount = thanhtien,
+                        Discount = 0,
+                        Type = true
+                    };
+                    db.ProductReceiptionDetails.Add(product);
+                    db.SaveChanges();
+                }
+                reader.Close();
+            }
         }
     }
 }

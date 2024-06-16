@@ -17,35 +17,41 @@ namespace SuperbrainManagement.Controllers
     public class WarehousesController : Controller
     {
         public ModelDbContext db = new ModelDbContext();
-        public ActionResult Index(string idBranch)
+        public ActionResult Index()
         {
-            var branches = db.Branches.ToList();
-            int idbranch = int.Parse(CheckUsers.idBranch());
-            if (!CheckUsers.CheckHQ())
+            if (CheckUsers.iduser() == "")
             {
-                branches = db.Branches.Where(x => x.Id == idbranch).ToList();
+                return Redirect("/authentication");
             }
-            if (string.IsNullOrEmpty(idBranch))
+            else
             {
-                idBranch = branches.First().Id.ToString();
+                var branches = db.Branches.ToList();
+                int idbranch = int.Parse(CheckUsers.idBranch());
+                if (!CheckUsers.CheckHQ())
+                {
+                    branches = db.Branches.Where(x => x.Id == idbranch).ToList();
+                }
+                ViewBag.IdBranch = new SelectList(branches, "Id", "Name");
+                return View();
             }
-            ViewBag.IdBranch = new SelectList(branches, "Id", "Name", idBranch);
-            return View();
         }
         public ActionResult Receiptions(string idBranch)
         {
-            var branches = db.Branches.ToList();
-            int idbranch = int.Parse(CheckUsers.idBranch());
-            if (!CheckUsers.CheckHQ())
+            if (CheckUsers.iduser() == "")
             {
-                branches = db.Branches.Where(x => x.Id == idbranch).ToList();
+                return Redirect("/authentication");
             }
-            if (string.IsNullOrEmpty(idBranch))
+            else
             {
-                idBranch = branches.First().Id.ToString();
+                var branches = db.Branches.ToList();
+                int idbranch = int.Parse(CheckUsers.idBranch());
+                if (!CheckUsers.CheckHQ())
+                {
+                    branches = db.Branches.Where(x => x.Id == idbranch).ToList();
+                }
+                ViewBag.IdBranch = new SelectList(branches, "Id", "Name");
+                return View();
             }
-            ViewBag.IdBranch = new SelectList(branches, "Id", "Name", idBranch);
-            return View();
         }
         public ActionResult Load_thekho(string idBranch, string sort, string searchString, DateTime fromdate, DateTime todate)
         {
@@ -169,7 +175,6 @@ namespace SuperbrainManagement.Controllers
                                         + querysearch
                                         + querysort;
                     SqlCommand command = new SqlCommand(query, connection);
-                    //connection.Open();
                     SqlDataReader reader = command.ExecuteReader();
                     while (reader.Read())
                     {

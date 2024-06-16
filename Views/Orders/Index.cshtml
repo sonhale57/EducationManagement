@@ -260,11 +260,6 @@
                         <div class="col col-4 col-md-4 col-sm-12">
                             <label class="text-success">Cập nhật:</label>
                             <select class="form-control" name="Status" id="Status">
-                                <option value="2">Thanh toán đơn hàng</option>
-                                <option value="3">Xác nhận đơn hàng</option>
-                                <option value="4">Đóng gói đơn hàng</option>
-                                <option value="5">Đang vận chuyển</option>
-                                <option value="6">Đã hoàn thành</option>
                             </select>
                         </div>
                         <div class="col col-4 col-md-4 col-sm-12 mt-3">
@@ -294,8 +289,8 @@
                     </table>
                 </div>
                 <div class="modal-footer text-start">
-                    <button type="button" class="btn btn-success" onclick="submit_statusorder()">
-                        <i class="ti ti-plus"></i> Cập nhật đơn hàng
+                    <button type="button" class="btn btn-success" onclick="submit_statusorder()" id="btn_submit">
+                        <i class="ti ti-status-change"></i> Cập nhật đơn hàng
                     </button>
                 </div>
             </form>
@@ -340,6 +335,7 @@
                 $('#strCode').val(data.strCode);
                 $('#strTongtien').val(data.strTongtien);
                 $('#showlist_status').html(data.strTimeline);
+                $('#Status').html(data.strSelect);
                 $('#countline').val(data.count);
             },
             error: function (xhr, error) {

@@ -296,6 +296,7 @@
     <Compile Include="Controllers\RoomsController.cs" />
     <Compile Include="Controllers\Sendmail.cs" />
     <Compile Include="Controllers\StudentsController.cs" />
+    <Compile Include="Controllers\TransactionsController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Controllers\VacationSchedulesController.cs" />
     <Compile Include="Controllers\WarehousesController.cs" />
@@ -902,6 +903,17 @@
     <Content Include="Views\Donhang\Index.cshtml" />
     <Content Include="Views\Donhang\Payment.cshtml" />
     <Content Include="Views\Payment\Payment.cshtml" />
+    <Content Include="Views\Transactions\Create.cshtml" />
+    <Content Include="Views\Transactions\Delete.cshtml" />
+    <Content Include="Views\Transactions\Details.cshtml" />
+    <Content Include="Views\Transactions\Edit.cshtml" />
+    <Content Include="Views\Transactions\Index.cshtml" />
+    <Content Include="Views\Warehouses\Receiptions.cshtml" />
+    <Content Include="Views\Feeds\Create.cshtml" />
+    <Content Include="Views\Feeds\Delete.cshtml" />
+    <Content Include="Views\Feeds\Details.cshtml" />
+    <Content Include="Views\Feeds\Edit.cshtml" />
+    <Content Include="Views\Feeds\Index.cshtml" />
     <Content Include="Views\Students\ShowTimeTableData.cshtml" />
   </ItemGroup>
   <ItemGroup>

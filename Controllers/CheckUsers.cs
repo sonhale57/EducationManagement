@@ -45,6 +45,7 @@ namespace SuperbrainManagement.Controllers
             }
             catch { return ""; }
         }
+
         /// <summary>
         /// Lấy IdUser đăng nhập
         /// </summary>
@@ -58,7 +59,8 @@ namespace SuperbrainManagement.Controllers
                 if(idUser == "")
                 {
                     return "0";
-                }else
+                }
+                else
                 {
                     ModelDbContext db = new ModelDbContext();
                     var us = db.Users.Find(int.Parse(idUser));

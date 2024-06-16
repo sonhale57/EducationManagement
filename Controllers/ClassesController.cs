@@ -19,6 +19,7 @@ using System.Web.Helpers;
 using static SuperbrainManagement.MvcApplication;
 using System.Data.Entity.Migrations;
 using SuperbrainManagement.Helpers;
+using System.Threading.Tasks;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -116,8 +117,6 @@ namespace SuperbrainManagement.Controllers
                 var updatedData = JsonConvert.DeserializeObject<List<ScheduleViewDTO>>(scheduleData);
 
                 var scheduleDataUpdated = AutoMapperConfig.Mapper.Map<List<Schedule>>(updatedData);
-
-                //db.Schedules.AddRange(scheduleDataUpdated);
                 scheduleDataUpdated.ForEach(x => 
                 {
                     db.Entry(x).State = EntityState.Modified;
@@ -232,6 +231,33 @@ namespace SuperbrainManagement.Controllers
             ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo", @class.IdBranch);
             ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", @class.IdUser);
             return View(@class);
+        }
+        [HttpPost]
+        public async Task<ActionResult> Delete_Classes(int id)
+        {
+            var status = "ok";
+            var message = "Phòng đã được xóa thành công.";
+
+            var room = await db.Classes.FindAsync(id);
+            if (room == null)
+            {
+                return HttpNotFound();
+            }
+
+            // Kiểm tra khóa ngoại
+            var hasJoinClass = db.StudentJoinClasses.Any(s => s.IdClass == id);
+
+            if (hasJoinClass)
+            {
+                status = "error";
+                message = "Không thể xóa lớp này vì đang có học viên tham gia lớp học này.";
+                return Json(new { status = status, message = message }, JsonRequestBehavior.AllowGet);
+            }
+
+            db.Classes.Remove(room);
+            await db.SaveChangesAsync();
+
+            return Json(new { status = status, message = message }, JsonRequestBehavior.AllowGet);
         }
 
         // GET: Classes/Delete/5
