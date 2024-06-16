@@ -902,6 +902,7 @@
     <Content Include="Views\Donhang\Index.cshtml" />
     <Content Include="Views\Donhang\Payment.cshtml" />
     <Content Include="Views\Payment\Payment.cshtml" />
+    <Content Include="Views\Students\ShowTimeTableData.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

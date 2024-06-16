@@ -908,27 +908,27 @@ namespace SuperbrainManagement.Controllers
 
             List<TimeTableDTO> timeTableData = new List<TimeTableDTO>();
 
-            if (!string.IsNullOrEmpty(fromDate) || !string.IsNullOrEmpty(toDate))
+            fromDate = string.IsNullOrEmpty(fromDate) ? DateTime.Now.ToString("yyyy-MM-dd") : fromDate;
+            toDate = string.IsNullOrEmpty(toDate) ? DateTime.Now.AddMonths(3).ToString("yyyy-MM-dd") : toDate;
+
+            DateTime fromDateTime = DateTime.ParseExact(fromDate, "yyyy-MM-dd", null);
+
+            DateTime toDateTime = DateTime.ParseExact(toDate, "yyyy-MM-dd", null);
+
+            for (DateTime date = fromDateTime; date <= toDateTime; date = date.AddDays(1))
             {
-                DateTime fromDateTime = DateTime.ParseExact(fromDate, "yyyy-MM-dd", null);
+                var DayOfWeekVNCompared = scheduleHelper.ConvertEnglishDayToVietnamese(date.DayOfWeek.ToString());
+                var scheduleMatched = schedulesbyClass.FirstOrDefault(x => x.DayOfWeek == DayOfWeekVNCompared);
 
-                DateTime toDateTime = DateTime.ParseExact(toDate, "yyyy-MM-dd", null);
-
-                for (DateTime date = fromDateTime; date <= toDateTime; date = date.AddDays(1))
+                if (scheduleMatched != null)
                 {
-                    var DayOfWeekVNCompared = scheduleHelper.ConvertEnglishDayToVietnamese(date.DayOfWeek.ToString());
-                    var scheduleMatched = schedulesbyClass.FirstOrDefault(x => x.DayOfWeek == DayOfWeekVNCompared);
-
-                    if (scheduleMatched != null)
+                    timeTableData.Add(new TimeTableDTO
                     {
-                        timeTableData.Add(new TimeTableDTO
-                        {
-                            DayOfWeek = DayOfWeekVNCompared,
-                            Date = date.ToString("dd/MM/yyyy"),
-                            TimeSlot = scheduleMatched.TimeSlot,
-                            HourQuantity = scheduleMatched.HourQuantity
-                        }); ;
-                    }
+                        DayOfWeek = DayOfWeekVNCompared,
+                        Date = date.ToString("dd/MM/yyyy"),
+                        TimeSlot = scheduleMatched.TimeSlot,
+                        HourQuantity = scheduleMatched.HourQuantity
+                    }); ;
                 }
             }
 
@@ -939,6 +939,55 @@ namespace SuperbrainManagement.Controllers
             };
 
             return Json(item, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult ShowTimeTableData(int? idClassShowTimeTbl, string fromDate, string toDate, int studentId)
+        {
+            var schedulesbyClass = db.Schedules
+                .Where(x => x.IdClass == idClassShowTimeTbl).Include(x => x.Employee).ToList()
+                .Select(x => new ClassAssignmentDTO
+                {
+                    DayOfWeek = scheduleHelper.GetDayName(x.IdWeek),
+                    TeacherName = x.Employee.Name,
+                    TimeSlot = scheduleHelper.GetTimeSlot((DateTime)x.FromHour, (DateTime)x.ToHour),
+                    HourQuantity = scheduleHelper.GetHourQuantity((DateTime)x.FromHour, (DateTime)x.ToHour).ToString(),
+                });
+
+            List<TimeTableDTO> timeTableData = new List<TimeTableDTO>();
+
+            fromDate = string.IsNullOrEmpty(fromDate) ? DateTime.Now.ToString("yyyy-MM-dd") : fromDate;
+            toDate = string.IsNullOrEmpty(toDate) ? DateTime.Now.AddMonths(3).ToString("yyyy-MM-dd") : toDate;
+
+            DateTime fromDateTime = DateTime.ParseExact(fromDate, "yyyy-MM-dd", null);
+
+            DateTime toDateTime = DateTime.ParseExact(toDate, "yyyy-MM-dd", null);
+
+            for (DateTime date = fromDateTime; date <= toDateTime; date = date.AddDays(1))
+            {
+                var DayOfWeekVNCompared = scheduleHelper.ConvertEnglishDayToVietnamese(date.DayOfWeek.ToString());
+                var scheduleMatched = schedulesbyClass.FirstOrDefault(x => x.DayOfWeek == DayOfWeekVNCompared);
+
+                if (scheduleMatched != null)
+                {
+                    timeTableData.Add(new TimeTableDTO
+                    {
+                        DayOfWeek = DayOfWeekVNCompared,
+                        Date = date.ToString("dd/MM/yyyy"),
+                        TimeSlot = scheduleMatched.TimeSlot,
+                        HourQuantity = scheduleMatched.HourQuantity
+                    }); ;
+                }
+            }
+
+            var student = db.Students.FirstOrDefault(x=> x.Id == studentId);
+
+            ViewBag.timeTableData = timeTableData;
+            ViewBag.SubTitle = "Ngày" + ":"+ fromDate + " - " + toDate;
+
+            ViewBag.StudentName = student.Name;
+            ViewBag.ClassName = student.Class;
+
+            return View();
         }
 
         // POST: Students/Delete/5

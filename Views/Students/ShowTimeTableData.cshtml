@@ -1,0 +1,65 @@
+﻿@{
+    ViewBag.Title = "ShowTimeTableData";
+    int stt = 1;
+    Layout = "";
+}
+<p>
+    37 Đường 19, Phường An Khánh, TP Thủ Đức
+    <br />090 674 8080 / 090 990 7311<br />
+    contact@superbrain.vn
+</p>
+
+<hr>
+
+<h1 style="font-weight: bold; text-align: center;">THỜI KHOÁ BIỂU</h1>
+<h3 style="text-align: center;">@ViewBag.SubTitle</h3>
+<p>Tên học viên: @ViewBag.StudentName</p>
+<p>Khoá: Pre Basic</p>
+<p>Lớp: @ViewBag.ClassName</p>    
+<style>
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table th,
+    .table td {
+        padding: 8px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+
+    .table thead th {
+        background-color: #f2f2f2;
+    }
+
+    .table tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+</style>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Buổi</th>
+            <th>Ngày</th>
+            <th>Thứ</th>
+            <th>Giờ Học</th>
+            @*<th>Số Giờ</th>*@
+        </tr>
+    </thead>
+    <tbody id="datarow">
+        @foreach (var item in ViewBag.timeTableData)
+        {
+            <tr>
+                <td>@stt</td>
+                <td>@item.Date</td>
+                <td>@item.DayOfWeek</td>
+                <td>@item.TimeSlot</td>
+                @*<td>@item.HourQuantity</td>*@
+            </tr>
+            stt++;
+        }
+    </tbody>
+</table>
+<p>Ghi chú:</p>
