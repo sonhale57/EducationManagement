@@ -4,79 +4,72 @@
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<div class="row">
+    <div class="col col-md-6 col-sm-12">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
+            <a class="input-group-text bg-success" id="basic-addon2" href="javascript:Loadlist()"><i class="ti ti-search text-white"></i></a>
+        </div>
+    </div>
+    <div class="col col-md-6 col-sm-12 text-right" style="text-align:right;">
+        <div class="me-0 btn btn-md p-0">
+            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="ti ti-arrows-sort"></i> Sắp xếp theo
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <li><a class="dropdown-item" href="javascript:Loadlist('name')"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
+                <li><a class="dropdown-item" href="javascript:Loadlist('name_desc')"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
+                <li><a class="dropdown-item" href="javascript:Loadlist('date')"><i class="ti ti-sort-ascending"></i> Cũ nhất</a></li>
+                <li><a class="dropdown-item" href="javascript:Loadlist('date_desc')"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
+            </ul>
+        </div>
+        <a href="/feeds/create" class="btn btn-success">
+            <i class="ti ti-certificate"></i> Thêm mới
+        </a>
+    </div>
+</div>
+<div class="row card">
+    <div id="loading"></div>
+    <div class="row card-body p-1 ps-4 pe-3 pt-3" id="showlist_thongbao">
+    </div>
+</div>
 
-<h2>Index</h2>
+<script>
+    Loadlist();
+    function Loadlist() {
+        $("#loading").html("Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+         $.ajax({
+             url: '@Url.Action("Loadlist_thongbao", "Feeds")',
+             type: "GET",
+             data: {
+             },
+             success: function (data) {
+                 console.log(data);
+                $("#loading").html("");
+                 $('#showlist_thongbao').html(data.str);
+             },
+             error: function (xhr, error) {
+                 console.log(error);
+             }
+         });
+    }
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.User.Name)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Name)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Description)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.DateCreate)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Enable)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Active)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Todate)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.IsPublic)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Type)
-        </th>
-        <th></th>
-    </tr>
-
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.User.Name)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Name)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Description)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.DateCreate)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Enable)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Active)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Todate)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.IsPublic)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Type)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-            @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
-        </td>
-    </tr>
-}
-
-</table>
+    Loadlist_vattu();
+    function Loadlist_vattu() {
+        $("#loading").html("Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+         $.ajax({
+             url: '@Url.Action("Loadlist_vattu", "Home")',
+             type: "GET",
+             data: {
+             },
+             success: function (data) {
+                 console.log(data);
+                $("#loading").html("");
+                 $('#showlist_vattu').html(data.str);
+             },
+             error: function (xhr, error) {
+                 console.log(error);
+             }
+         });
+    }
+</script>
