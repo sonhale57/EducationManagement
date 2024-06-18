@@ -17,6 +17,7 @@ namespace SuperbrainManagement.Controllers
         // GET: TrainingCourses
         public ActionResult Index()
         {
+
             var trainingCourses = db.TrainingCourses.Include(t => t.TrainingType).Include(t => t.User);
             return View(trainingCourses.ToList());
         }
@@ -53,6 +54,10 @@ namespace SuperbrainManagement.Controllers
         {
             if (ModelState.IsValid)
             {
+                trainingCourse.Active = true;
+                trainingCourse.Enable= true;
+                trainingCourse.IdUser = Convert.ToInt32(CheckUsers.iduser());
+                trainingCourse.DateCreate = DateTime.Now;
                 db.TrainingCourses.Add(trainingCourse);
                 db.SaveChanges();
                 return RedirectToAction("Index");

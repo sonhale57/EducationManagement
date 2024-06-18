@@ -117,7 +117,7 @@ namespace SuperbrainManagement.Controllers
             if (ModelState.IsValid)
             {
                 room.DateCreate = DateTime.Now;
-                room.IdUser =int.Parse(CheckUsers.iduser()) ;
+                room.IdUser = int.Parse(CheckUsers.iduser());
                 room.IdBranch = int.Parse(CheckUsers.idBranch());
                 db.Rooms.Add(room);
                 db.SaveChanges();

@@ -1,4 +1,144 @@
 ﻿@{
     ViewBag.Title = "Home Page";
 }
-@SuperbrainManagement.Controllers.CheckUsers.iduser()
+<div class="row">
+    <div class="col-md-3 stretch-card grid-margin">
+        <div class="card bg-light-gray card-img-holder shadow">
+            <div class="card-body p-2 ps-3 pt-3">
+                <h6 class="font-weight-normal mb-3">
+                    Weekly Sales <i class="ti ti-chart-line"></i>
+                </h6>
+                <h3>$ 15,0000</h3>
+                <div class="d-flex align-items-center pb-1">
+                    <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
+                        <i class="ti ti-arrow-down-right text-danger"></i>
+                    </span>
+                    <p class="text-dark me-1 fs-3 mb-0">+9%</p>
+                    <p class="text-muted fs-3 mb-0">last year</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 stretch-card grid-margin">
+        <div class="card bg-gradient-success card-img-holder shadow">
+            <div class="card-body p-2 ps-3 pt-3">
+                <h6 class="font-weight-normal mb-3">
+                    Weekly Orders <i class="ti ti-bookmark"></i>
+                </h6>
+                <h3>45,6334</h3>
+                <div class="d-flex align-items-center pb-1">
+                    <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
+                        <i class="ti ti-arrow-down-right text-danger"></i>
+                    </span>
+                    <p class="text-dark me-1 fs-3 mb-0">+9%</p>
+                    <p class="text-muted fs-3 mb-0">last year</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 stretch-card grid-margin">
+        <div class="card bg-gradient-success card-img-holder shadow">
+            <div class="card-body p-2 ps-3 pt-3">
+                <h6 class="font-weight-normal mb-3">
+                    Visitors Online <i class="ti ti-diamond"></i>
+                </h6>
+                <h3>95,5741</h3>
+                <div class="d-flex align-items-center pb-1">
+                    <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
+                        <i class="ti ti-arrow-down-right text-danger"></i>
+                    </span>
+                    <p class="text-dark me-1 fs-3 mb-0">+9%</p>
+                    <p class="text-muted fs-3 mb-0">last year</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 stretch-card grid-margin">
+        <div class="card bg-gradient-success card-img-holder shadow">
+            <div class="card-body p-2 ps-3 pt-3">
+                <h6 class="font-weight-normal mb-3">
+                    Visitors Online <i class="ti ti-diamond"></i>
+                </h6>
+                <h3>95,5741</h3>
+                <div class="d-flex align-items-center pb-1">
+                    <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
+                        <i class="ti ti-arrow-down-right text-danger"></i>
+                    </span>
+                    <p class="text-dark me-1 fs-3 mb-0">+9%</p>
+                    <p class="text-muted fs-3 mb-0">last year</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-8 d-flex align-items-strech">
+        <div class="card w-100">
+            <div class="card-header p-1 ps-3 pt-3 bg-success">
+                <div class="d-sm-flex d-block align-items-center justify-content-between align-content-center">
+                    <h5 class="text-white fw-bolder"><i class="ti ti-bell-ringing"></i> Thông báo</h5>
+                    <div class="align-content-center pb-2 pe-3">
+                        <a href="/feeds" class="btn btn-sm btn-light"><i class="ti ti-eye"></i> Xem tất cả</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="loading"></div>
+                <div class="row" id="showlist_thongbao">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 card shadow">
+        <div class="card-header p-1 ps-3 pt-3 bg-success">
+            <div class="d-sm-flex d-block align-items-center justify-content-between align-content-center">
+                <h5 class="text-white fw-bolder"><i class="ti ti-bell-ringing"></i> Thông báo vật tư</h5>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="loading"></div>
+            <div class="row" id="showlist_vattu">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    Loadlist();
+    function Loadlist() {
+        $("#loading").html("Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+         $.ajax({
+             url: '@Url.Action("Loadlist_thongbao", "Home")',
+             type: "GET",
+             data: {
+             },
+             success: function (data) {
+                 console.log(data);
+                $("#loading").html("");
+                 $('#showlist_thongbao').html(data.str);
+             },
+             error: function (xhr, error) {
+                 console.log(error);
+             }
+         });
+    }
+
+    Loadlist_vattu();
+    function Loadlist_vattu() {
+        $("#loading").html("Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+         $.ajax({
+             url: '@Url.Action("Loadlist_vattu", "Home")',
+             type: "GET",
+             data: {
+             },
+             success: function (data) {
+                 console.log(data);
+                $("#loading").html("");
+                 $('#showlist_vattu').html(data.str);
+             },
+             error: function (xhr, error) {
+                 console.log(error);
+             }
+         });
+    }
+</script>

@@ -1,4 +1,4 @@
-namespace SuperbrainManagement.Models
+﻿namespace SuperbrainManagement.Models
 {
     using System;
     using System.Collections.Generic;
@@ -19,31 +19,40 @@ namespace SuperbrainManagement.Models
             TraningPayments = new HashSet<TraningPayment>();
         }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
 
         [StringLength(50)]
+        [Display(Name = "Mã")]
         public string Code { get; set; }
 
         [StringLength(50)]
+        [Display(Name = "Tên")]
         public string Name { get; set; }
 
         [StringLength(250)]
         public string Description { get; set; }
 
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
+        [Display(Name = "Ngày bắt đầu")]
         public DateTime? Fromdate { get; set; }
 
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
+        [Display(Name = "Ngày kết thúc")]
         public DateTime? Todate { get; set; }
 
         public bool? Enable { get; set; }
 
         public bool? Active { get; set; }
 
+        [Display(Name = "Hạn đăng ký")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime? ResgistrationDeadline { get; set; }
 
         [Column(TypeName = "numeric")]
+        [Display(Name = "Phí tham gia")]
         public decimal? Price { get; set; }
 
+        [Display(Name = "Số lượng")]
         public int? Number { get; set; }
 
         public int? IdType { get; set; }

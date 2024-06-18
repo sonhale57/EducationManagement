@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.Entity;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using Mysqlx.Crud;
 using SuperbrainManagement.Models;
 
 namespace SuperbrainManagement.Controllers
@@ -17,10 +20,96 @@ namespace SuperbrainManagement.Controllers
         // GET: Transactions
         public ActionResult Index()
         {
-            var transactions = db.Transactions.Include(t => t.Branch).Include(t => t.Order).Include(t => t.Registration).Include(t => t.Student).Include(t => t.User);
-            return View(transactions.ToList());
+            if (CheckUsers.iduser() == "")
+            {
+                return Redirect("/authentication");
+            }
+            else
+            {
+                var branches = db.Branches.ToList();
+                int idbranch = int.Parse(CheckUsers.idBranch());
+                if (!CheckUsers.CheckHQ())
+                {
+                    branches = db.Branches.Where(x => x.Id == idbranch).ToList();
+                }
+                ViewBag.IdBranch = new SelectList(branches, "Id", "Name");
+                return View();
+            }
         }
 
+        public ActionResult Loadlist(string idBranch, string sort,string type, string searchString, DateTime fromdate, DateTime todate)
+        {
+            string str = "";
+            if (string.IsNullOrEmpty(idBranch))
+            {
+                idBranch = CheckUsers.idBranch();
+            }
+            string querysort = "";
+            string querysearch = "";
+            string querytype = "";
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                querysearch = " and trans.Code like N'" + searchString + "' or trans.Description like N'" + searchString + "'";
+            }
+            if (!string.IsNullOrEmpty(type))
+            {
+                querytype = " and trans.Type ='" + type + "'";
+            }
+            if (!string.IsNullOrEmpty(sort))
+            {
+                switch (sort)
+                {
+                    case "name":
+                        querysort = " order by trans.Code";
+                        break;
+                    case "name_desc":
+                        querysort = " order by trans.Code desc";
+                        break;
+                    case "date_desc":
+                        querysort = " order by trans.Id desc";
+                        break;
+                    default:
+                        querysort = " order by trans.Id";
+                        break;
+                }
+            }
+            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query ="select trans.Id,trans.Code,trans.Name,trans.Description,trans.Amount,trans.Discount,trans.TotalAmount,trans.DateCreate,trans.Image,trans.Type,trans.Status,trans.PaymentMethod,us.Name as Username"
+                            +" from [Transaction] trans,[User] us"
+                            +" where us.id = trans.IdUser and trans.IdBranch = "+idBranch + querytype + querysearch+ querysort;
+                SqlCommand command = new SqlCommand(query, connection);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                int count = 0;
+                while (reader.Read())
+                {
+                    double totalamount = Double.Parse(reader["TotalAmount"].ToString(), 0);
+                    count++;
+                    str += "<tr>"
+                            + "<td class='text-center'>" + count + "</td>"
+                            + "<td class='text-center'>" + reader["Code"].ToString() + "</td>"
+                            + "<td class='text-center'>" + reader["Name"].ToString() + "</td>"
+                            + "<td>" + reader["Description"].ToString() + "</td>"
+                            + "<td class='text-end'>" + string.Format("{0:N0} đ", totalamount) + "</td>"
+                            + "<td>" + reader["PaymentMethod"].ToString() + "</td>"
+                            + "<td class='text-center'>" + (reader["Type"].ToString() == "True" ? "Phiếu thu" : "Phiếu chi") + "</td>"
+                            + "<td class='text-center'>" + reader["DateCreate"].ToString() + "</td>"
+                            + "<td class='text-center'>" + reader["Username"].ToString() + "</td>"
+                            + "<td class='text-end'><a href='javascript:Delete(" + reader["Id"] + ")' class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a></td>"
+                            + "</tr>";
+                }
+                reader.Close();
+            }
+            var item = new
+            {
+                str
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+
+        #region Default
         // GET: Transactions/Details/5
         public ActionResult Details(int? id)
         {
@@ -144,5 +233,6 @@ namespace SuperbrainManagement.Controllers
             }
             base.Dispose(disposing);
         }
+        #endregion
     }
 }

@@ -106,7 +106,7 @@
     --bs-black-rgb: 0,0,0;
     --bs-body-color-rgb: 90,106,133;
     --bs-body-bg-rgb: 255,255,255;
-    --bs-font-sans-serif: "Plus Jakarta Sans",sans-serif;
+    --bs-font-sans-serif: 'Libre Franky',"Plus Jakarta Sans",sans-serif;
     --bs-font-monospace: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
     --bs-gradient: linear-gradient(180deg,rgba(255,255,255,0.15),rgba(255,255,255,0));
     --bs-body-font-family: var(--bs-font-sans-serif);
@@ -19248,8 +19248,8 @@ textarea.form-control-lg {
 }
 
 .sidebar-nav ul .sidebar-item.selected > .sidebar-link, .sidebar-nav ul .sidebar-item.selected > .sidebar-link.active, .sidebar-nav ul .sidebar-item > .sidebar-link.active {
-    background-color: #5D87FF;
-    color: #fff
+    color: var(--bs-success-text);
+    font-weight:600;
 }
 
 .sidebar-nav .sidebar-list .sidebar-list-item {
@@ -19470,7 +19470,6 @@ textarea.form-control-lg {
 }
 
     .body-wrapper > .container-fluid, .body-wrapper > .container-lg, .body-wrapper > .container-md, .body-wrapper > .container-sm, .body-wrapper > .container-xl, .body-wrapper > .container-xxl {
-        max-width: 1200px;
         margin: 0 auto;
         padding: 24px;
         -webkit-transition: 0.2s ease-in;

@@ -296,6 +296,7 @@
     <Compile Include="Controllers\RoomsController.cs" />
     <Compile Include="Controllers\Sendmail.cs" />
     <Compile Include="Controllers\StudentsController.cs" />
+    <Compile Include="Controllers\TrainingCoursesController.cs" />
     <Compile Include="Controllers\TransactionsController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Controllers\VacationSchedulesController.cs" />
@@ -917,6 +918,11 @@
     <Content Include="Views\Feeds\Edit.cshtml" />
     <Content Include="Views\Feeds\Index.cshtml" />
     <Content Include="Views\Students\ShowTimeTableData.cshtml" />
+    <Content Include="Views\TrainingCourses\Create.cshtml" />
+    <Content Include="Views\TrainingCourses\Delete.cshtml" />
+    <Content Include="Views\TrainingCourses\Details.cshtml" />
+    <Content Include="Views\TrainingCourses\Edit.cshtml" />
+    <Content Include="Views\TrainingCourses\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
