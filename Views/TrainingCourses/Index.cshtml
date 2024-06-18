@@ -34,8 +34,8 @@
         <tr>
             <th class="text-center">STT</th>
             <th>Khóa đào tạo</th>
-            <th>Ngày bắt đầu</th>
-            <th>Ngày kết thúc</th>
+            <th class="text-center">Ngày bắt đầu</th>
+            <th class="text-center">Ngày kết thúc</th>
             <th class="text-center">Số lượng</th>
             <th class="text-center">Trạng thái</th>
             <th class="text-end">Thao tác</th>
@@ -49,22 +49,28 @@
                 @stt
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Description)
+                @Html.DisplayFor(modelItem => item.Name)
             </td>
-            <td>
+            <td class="text-center">
                 @Html.DisplayFor(modelItem => item.Fromdate)
             </td>
-            <td>
+            <td class="text-center">
                 @Html.DisplayFor(modelItem => item.Todate)
             </td>
             <td class="text-center">
-                <a href="/vacationschedules/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
-                <a href="/vacationschedules/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
+                @Html.DisplayFor(modelItem => item.Number)
+            </td>
+            <td class="text-center">
+                @Html.Raw(item.Fromdate>DateTime.Now?"Chưa diễn ra":(item.Todate<DateTime.Now?"<span class='text-danger'>Đã kết thúc</span>":"<span class='text-success'>Đang diễn ra</span>"))
+            </td>
+            <td class="text-center">
+                <a href="/trainingcourses/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
+                <a href="/trainingcourses/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
                 <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="ti ti-dots-vertical"></i>
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <li><a class="dropdown-item" href=""><i class="ti ti-settings"></i> Thiết lập cơ sở</a></li>
+                    <li><a class="dropdown-item" href=""><i class="ti ti-receipt"></i> Đăng ký tham gia</a></li>
                 </ul>
             </td>
         </tr>

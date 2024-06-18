@@ -56,7 +56,7 @@ namespace SuperbrainManagement.Controllers
             {
                 MD5Hash md5 = new MD5Hash();
                 string idUser = md5.Decrypt(System.Web.HttpContext.Current.Request.Cookies["check"]["iduser"].ToString());
-                if(idUser == "")
+                if (idUser == "")
                 {
                     return "0";
                 }
@@ -65,7 +65,7 @@ namespace SuperbrainManagement.Controllers
                     ModelDbContext db = new ModelDbContext();
                     var us = db.Users.Find(int.Parse(idUser));
                     return us.IdBranch.ToString();
-                }    
+                }
             }
             catch { return "0"; }
         }
@@ -85,8 +85,8 @@ namespace SuperbrainManagement.Controllers
                     ModelDbContext db = new ModelDbContext();
                     var us = db.Users.Find(int.Parse(idUser));
                     if (us.Branch.Code.ToLower() == "hq")
-                    { 
-                        return true; 
+                    {
+                        return true;
                     }
                     else
                     {
@@ -124,7 +124,7 @@ namespace SuperbrainManagement.Controllers
             {
                 MD5Hash md5 = new MD5Hash();
                 string iduser = System.Web.HttpContext.Current.Request.Cookies["check"]["iduser"].ToString();
-                if(iduser=="") { return iduser; }
+                if (iduser == "") { return iduser; }
                 else
                 {
                     iduser = md5.Decrypt(iduser.ToString());
@@ -157,7 +157,7 @@ namespace SuperbrainManagement.Controllers
         public static string CheckHQ_Css()
         {
             ModelDbContext db = new ModelDbContext();
-            int idbranch_hq =db.Branches.SingleOrDefault(x=>x.Code.ToLower()=="hq").Id;
+            int idbranch_hq = db.Branches.SingleOrDefault(x => x.Code.ToLower() == "hq").Id;
             try
             {
                 MD5Hash md5 = new MD5Hash();

@@ -42,7 +42,7 @@ namespace SuperbrainManagement.Controllers
                 return View();
             }
         }
-        public ActionResult Loadlist(string idBranch,int status,string sort,string searchString)
+        public ActionResult Loadlist(string idBranch, int? status, string searchString)
         {
             string str = "";
             string idbranch_hq = db.Branches.SingleOrDefault(x => x.Code.ToLower() == "hq").Id.ToString();
@@ -50,7 +50,6 @@ namespace SuperbrainManagement.Controllers
             {
                 idBranch = CheckUsers.idBranch();
             }
-            string querysort = "";
             string querysearch = "";
             string queryBranch = "";
             if (idBranch == idbranch_hq)
@@ -59,36 +58,22 @@ namespace SuperbrainManagement.Controllers
             }
             else
             {
-                queryBranch = "and o.idbranch = ' "+idBranch+" ' ";
+                queryBranch = "and o.idbranch = ' " + idBranch + " ' ";
             }
             if (!string.IsNullOrEmpty(searchString))
             {
-                querysearch = " and p.Name like N'" + searchString + "' or p.Code like N'" + searchString + "'";
+                querysearch = " and o.Code like N'" + searchString + "'";
             }
-            if (!string.IsNullOrEmpty(sort))
+            else
             {
-                switch (sort)
-                {
-                    case "name":
-                        querysort = " order by p.Name";
-                        break;
-                    case "name_desc":
-                        querysort = " order by p.Name desc";
-                        break;
-                    case "date_desc":
-                        querysort = " order by p.Id desc";
-                        break;
-                    default:
-                        querysort = " order by p.Id";
-                        break;
-                }
+                querysearch = " and o.Status='"+status+"'";
             }
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 string query = "select o.Id,o.Code,o.DateCreate,o.status,o.Phone,o.Address,o.Description,o.Enable,us.Name as Username,cs.Name as TenCoSo,(select sum(TotalAmount) from OrderDetail where IdOrder=o.Id) as tongtien "
                             + " from [Order] o,[User] us,Branch cs"
-                            + " where o.IdBranch = cs.Id and us.id=o.IdUser and o.Status='"+status+"'" +queryBranch+"  order by o.Id desc";
+                            + " where o.IdBranch = cs.Id and us.id=o.IdUser " + queryBranch + querysearch+ " order by o.Id desc";
                 SqlCommand command = new SqlCommand(query, connection);
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
@@ -100,7 +85,8 @@ namespace SuperbrainManagement.Controllers
                     if (reader["status"].ToString() == "1")
                     {
                         badgeStatus = "<span class='badge text-success bg-light'>Đơn hàng mới</span>";
-                    }else if (reader["status"].ToString() == "2")
+                    }
+                    else if (reader["status"].ToString() == "2")
                     {
                         badgeStatus = "<span class='badge text-info bg-light'>Đã thanh toán</span>";
                     }
@@ -145,8 +131,8 @@ namespace SuperbrainManagement.Controllers
                                  + "<div class='card-footer'  style='padding:5px 20px!important;'>"
                                     + "<div class='d-flex w-100 justify-content-between'>"
                                         + "<p>Thời gian đặt hàng: <i>" + DateTime.Parse(reader["DateCreate"].ToString()) + "</i></p>"
-                                        + "<p>Tổng tiền: <b>" + string.Format("{0:N0} đ",tongtien) + "</b></p>"
-                                    +"</div>"
+                                        + "<p>Tổng tiền: <b>" + string.Format("{0:N0} đ", tongtien) + "</b></p>"
+                                    + "</div>"
                                 + "</div>";
                 }
                 reader.Close();
@@ -159,16 +145,16 @@ namespace SuperbrainManagement.Controllers
         }
         public string Status_timeline(int IdOrder)
         {
-            var orderStatus = db.OrderStatus.Where(x=>x.IdOrder == IdOrder);
-            var order = db.Orders.Find(IdOrder);   
-            string str = "<div class=\"text_circle done\">" 
-                                +"<div class=\"circle\">" 
-                                +"<h4>Đơn hàng mới</h4>" 
-                                +"<p>"+order.DateCreate.Value.ToString("dd/MM/yyyy")+"</p>" 
-                                +"</div>" 
-                                +"<a href=\"javascript:void(0)\" class=\"tvar\"><span data-toggle=\"popover\" title=\"Đơn hàng mới\" data-trigger=\"hover\" data-placement=\"top\" data-content=\""+order.Description+"\"></span></a>"
-                                +"</div>";
-            if (orderStatus.Count() >0)
+            var orderStatus = db.OrderStatus.Where(x => x.IdOrder == IdOrder);
+            var order = db.Orders.Find(IdOrder);
+            string str = "<div class=\"text_circle done\">"
+                                + "<div class=\"circle\">"
+                                + "<h4>Đơn hàng mới</h4>"
+                                + "<p>" + order.DateCreate.Value.ToString("dd/MM/yyyy") + "</p>"
+                                + "</div>"
+                                + "<a href=\"javascript:void(0)\" class=\"tvar\"><span data-toggle=\"popover\" title=\"Đơn hàng mới\" data-trigger=\"hover\" data-placement=\"top\" data-content=\"" + order.Description + "\"></span></a>"
+                                + "</div>";
+            if (orderStatus.Count() > 0)
             {
                 foreach (var item in orderStatus)
                 {
@@ -234,8 +220,8 @@ namespace SuperbrainManagement.Controllers
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "SELECT p.Id,p.Image, p.Name,p.Unit,p.Price,p.NumberOfPackage,p.UnitOfPackage,p.Code,p.Quota,COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '1' AND re.IdBranch =" + idbranch_hq+"), 0) -"
-                                        + " COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '0' AND re.IdBranch ="+idbranch_hq+"), 0) AS Tonkho"
+                string query = "SELECT p.Id,p.Image, p.Name,p.Unit,p.Price,p.NumberOfPackage,p.UnitOfPackage,p.Code,p.Quota,COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '1' AND re.IdBranch =" + idbranch_hq + "), 0) -"
+                                        + " COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '0' AND re.IdBranch =" + idbranch_hq + "), 0) AS Tonkho"
                                         + " FROM product p"
                                         + " where p.enable=1 "
                                         + " order by p.Name";
@@ -276,13 +262,13 @@ namespace SuperbrainManagement.Controllers
         {
             string idbranch_hq = db.Branches.SingleOrDefault(x => x.Code.ToLower() == "hq").Id.ToString();
             string str = ""; int count = 0;
-            string strCode = "",strTongtien="";
+            string strCode = "", strTongtien = "";
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 string query = "select p.Code as CodeProduct,p.Name,p.Unit,p.Image,od.Amount,od.Price,od.TotalAmount,o.Code as CodeOrder,o.Address,o.Phone,o.Description,o.Status,us.Name as Username,o.DateCreate,(select sum(TotalAmount) from OrderDetail where IdOrder=o.Id) as tongtien "
                                     + " from OrderDetail od inner join [Order] o on o.id = od.IdOrder, Product p,[User] us"
-                                    +" where p.id=od.IdProduct and us.Id=o.IdUser and o.Id="+id;
+                                    + " where p.id=od.IdProduct and us.Id=o.IdUser and o.Id=" + id;
                 SqlCommand command = new SqlCommand(query, connection);
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
@@ -302,9 +288,9 @@ namespace SuperbrainManagement.Controllers
                             + "<td class='align-content-center'>" + string.Format("{0:N0}", thanhtien) + "</td>"
                            + "</tr>";
                     strCode = reader["CodeOrder"].ToString();
-                    strTongtien  = reader["tongtien"].ToString();
+                    strTongtien = reader["tongtien"].ToString();
                 }
-                str += "<tr><td colspan=5 class='text-end'>Tổng tiền: </td><td>"+ string.Format("{0:N0}", tongtien) + "</td></tr>";
+                str += "<tr><td colspan=5 class='text-end'>Tổng tiền: </td><td>" + string.Format("{0:N0}", tongtien) + "</td></tr>";
                 reader.Close();
             }
             string strSelect = "";
@@ -344,9 +330,9 @@ namespace SuperbrainManagement.Controllers
         {
             int idBranch = int.Parse(CheckUsers.idBranch());
             int nextCode = db.Orders.Count() + 1;
-            string code = nextCode.ToString().PadLeft(7, '0');
+            string code = nextCode.ToString().PadLeft(5, '0');
             var cn = db.Branches.Find(idBranch);
-            string str = cn.Code  + code;
+            string str = cn.Code +DateTime.Now.Year+ code;
 
             return str;
         }
@@ -370,13 +356,13 @@ namespace SuperbrainManagement.Controllers
                 loai = "NK";
                 nextCode = db.WarehouseReceiptions.Where(x => x.IdBranch == idbranch_hq && x.Type == true).Count() + 1;
             }
-            string code = nextCode.ToString().PadLeft(7, '0');
+            string code = nextCode.ToString().PadLeft(5, '0');
             var cn = db.Branches.Find(idbranch_hq);
-            string str = cn.Code + loai + code;
+            string str = cn.Code + loai +DateTime.Now.Year+ code;
 
             return str;
         }
-        string Getcode_receiption(bool type,int IdBranch)
+        string Getcode_receiption(bool type, int IdBranch)
         {
             string loai = "";
             int nextCode = 0;
@@ -421,19 +407,20 @@ namespace SuperbrainManagement.Controllers
                     Code = Getcode_order(),
                     Enable = true,
                 };
-                var receiption =new WarehouseReceiption(){ 
+                var receiption = new WarehouseReceiption()
+                {
                     Name = Name,
                     Phone = Phone,
                     Address = Address,
                     Description = Description,
                     Code = Getcode_receiption(false),
-                    Status= true,
-                    Type=false,
+                    Status = true,
+                    Type = false,
                     Enable = true,
                     IdUser = int.Parse(CheckUsers.iduser()),
                     IdBranch = idbranch_hq,
-                    Credit=0,
-                    Debit=0,
+                    Credit = 0,
+                    Debit = 0,
                     DateCreate = DateTime.Now,
                 };
                 db.Orders.Add(order);
@@ -460,14 +447,15 @@ namespace SuperbrainManagement.Controllers
                             TotalAmount = thanhtien,
                             Status = true
                         };
-                        var product = new ProductReceiptionDetail() {
+                        var product = new ProductReceiptionDetail()
+                        {
                             IdProduct = idproduct,
                             IdReceiption = ReceiptionId,
                             Amount = soluongxuat,
-                            Price= dongia,
+                            Price = dongia,
                             TotalAmount = thanhtien,
                             Discount = 0,
-                            Type= false
+                            Type = false
                         };
                         db.ProductReceiptionDetails.Add(product);
                         db.OrderDetails.Add(details);
@@ -486,15 +474,16 @@ namespace SuperbrainManagement.Controllers
             return Json(item, JsonRequestBehavior.AllowGet);
         }
         [HttpPost]
-        public ActionResult Submit_StatusOrder(int IdOrder,int Status,string Description,HttpPostedFileBase file)
+        public ActionResult Submit_StatusOrder(int IdOrder, int Status, string Description, HttpPostedFileBase file)
         {
-            string status = "ok";string fileName = "";
+            string status = "ok"; string fileName = "";
             var order = db.Orders.Find(IdOrder);
-            
-            var orderStatus = new OrderStatus() { 
-                IdOrder =IdOrder,
+
+            var orderStatus = new OrderStatus()
+            {
+                IdOrder = IdOrder,
                 Status = Status,
-                Updatetime = DateTime.Now, 
+                Updatetime = DateTime.Now,
                 Description = Description,
                 IdUser = int.Parse(CheckUsers.iduser()),
             };
@@ -509,9 +498,9 @@ namespace SuperbrainManagement.Controllers
                 file.SaveAs(_path);
                 orderStatus.Image = "/Uploads/Orders/" + fileName;
             }
-            if(Status == 2)
+            if (Status == 2)
             {
-                Update_Transaction(IdOrder,fileName);
+                Update_Transaction(IdOrder, fileName);
             }
             if (Status == 6)
             {
@@ -522,20 +511,43 @@ namespace SuperbrainManagement.Controllers
             db.Entry(order).State = EntityState.Modified;
             db.SaveChanges();
 
-            
+
             var item = new
             {
                 status
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
-        public void Update_Transaction(int IdOrder,string Image)
+        string Getcode_transaction(bool type,int IdOrder)
         {
-            var tongtien =db.OrderDetails.Where(x=>x.IdOrder == IdOrder).Sum(x=>x.TotalAmount);
+            string loai = "";
+            var idbranch = db.Orders.Find(IdOrder).IdBranch;
+            int nextCode = 0;
+            if (type == false)
+            {
+                loai = "PC";
+                nextCode = db.Transactions.Where(x => x.IdBranch == idbranch && x.Type == false).Count() + 1;
+            }
+            else if (type == true)
+            {
+                loai = "PT";
+                nextCode = db.Transactions.Where(x => x.IdBranch == idbranch && x.Type == true).Count() + 1;
+            }
+            string code = nextCode.ToString().PadLeft(5, '0');
+            var cn = db.Branches.Find(idbranch);
+            string str = cn.Code + loai +DateTime.Now.Year+ code;
+
+            return str;
+        }
+        public void Update_Transaction(int IdOrder, string Image)
+        {
+            var tongtien = db.OrderDetails.Where(x => x.IdOrder == IdOrder).Sum(x => x.TotalAmount);
             int IdUser = int.Parse(CheckUsers.iduser());
             int IdBranch = int.Parse(CheckUsers.idBranch());
             string code = db.Orders.Find(IdOrder).Code;
-            var transaction = new Transaction() {
+            var transaction = new Transaction()
+            {
+                Code = Getcode_transaction(false, IdOrder),
                 Type = false,
                 IdUser = IdUser,
                 DateCreate = DateTime.Now,
@@ -544,7 +556,8 @@ namespace SuperbrainManagement.Controllers
                 Status = true,
                 Description = "Thanh toán đơn hàng " + code,
                 IdOrder = IdOrder,
-                Name ="Head Quater",
+                PaymentMethod ="chuyenkhoan",
+                Name = "Head Quater",
                 Image = Image,
                 Discount = 0,
                 TotalAmount = tongtien
@@ -569,8 +582,8 @@ namespace SuperbrainManagement.Controllers
                     Name = "Head Quater",
                     Phone = "",
                     Address = "",
-                    Description = "Nhập từ đơn hàng "+order.Code,
-                    Code = Getcode_receiption(false,order.IdBranch.Value),
+                    Description = "Nhập từ đơn hàng " + order.Code,
+                    Code = Getcode_receiption(false, order.IdBranch.Value),
                     Status = true,
                     Type = true,
                     Enable = true,

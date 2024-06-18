@@ -17,6 +17,8 @@ namespace SuperbrainManagement.Models
 
         public int Id { get; set; }
 
+        [StringLength(50)]
+        public string Code { get; set; }
         public DateTime? DateCreate { get; set; }
 
         public int? IdUser { get; set; }
@@ -60,6 +62,8 @@ namespace SuperbrainManagement.Models
 
         public int? IdOrder { get; set; }
 
+        [StringLength(50)]
+        public string PaymentMethod { get; set; }
         public virtual Branch Branch { get; set; }
 
         public virtual Order Order { get; set; }

@@ -117,7 +117,7 @@ namespace SuperbrainManagement.Controllers
                 var updatedData = JsonConvert.DeserializeObject<List<ScheduleViewDTO>>(scheduleData);
 
                 var scheduleDataUpdated = AutoMapperConfig.Mapper.Map<List<Schedule>>(updatedData);
-                scheduleDataUpdated.ForEach(x => 
+                scheduleDataUpdated.ForEach(x =>
                 {
                     db.Entry(x).State = EntityState.Modified;
                 });
@@ -177,8 +177,8 @@ namespace SuperbrainManagement.Controllers
             if (ModelState.IsValid)
             {
                 @class.DateCreate = DateTime.Now;
-                @class.IdBranch =int.Parse(CheckUsers.idBranch()) ;
-                @class.IdUser =int.Parse(CheckUsers.iduser());
+                @class.IdBranch = int.Parse(CheckUsers.idBranch());
+                @class.IdUser = int.Parse(CheckUsers.iduser());
 
                 db.Classes.Add(@class);
 
