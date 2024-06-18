@@ -16,12 +16,24 @@ namespace SuperbrainManagement.Controllers
         {
             try
             {
-                string cookie = System.Web.HttpContext.Current.Request.Cookies["check"]["login"].ToString();
-                string iduser = System.Web.HttpContext.Current.Request.Cookies["check"]["iduser"].ToString();
-                string ip = System.Web.HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"].ToString();
+                var checkCookie = System.Web.HttpContext.Current.Request.Cookies["check"];
+                if (checkCookie == null)
+                {
+                    return false;
+                }
+
+                string cookie = checkCookie["login"];
+                string iduser = checkCookie["iduser"];
+
+                if (string.IsNullOrEmpty(cookie) || string.IsNullOrEmpty(iduser))
+                {
+                    return false;
+                }
+
+                string ip = System.Web.HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"];
                 MD5Hash md5h = new MD5Hash();
-                String check = md5h.Decrypt(cookie.ToString());
-                iduser = md5h.Decrypt(iduser.ToString());
+                String check = md5h.Decrypt(cookie);
+                iduser = md5h.Decrypt(iduser);
                 if (check != (("Yvaphatco" + iduser)))
                 {
                     return false;
@@ -40,7 +52,12 @@ namespace SuperbrainManagement.Controllers
             try
             {
                 MD5Hash md5 = new MD5Hash();
-                string idlogin = md5.Decrypt(System.Web.HttpContext.Current.Request.Cookies["check"]["iduser"].ToString());
+               
+                string idlogin = "";
+                if (System.Web.HttpContext.Current.Request.Cookies["check"] != null && System.Web.HttpContext.Current.Request.Cookies["check"]["iduser"] != null)
+                {
+                    idlogin = md5.Decrypt(System.Web.HttpContext.Current.Request.Cookies["check"]["iduser"].ToString());
+                }
                 return idlogin;
             }
             catch { return ""; }
@@ -123,10 +140,11 @@ namespace SuperbrainManagement.Controllers
             try
             {
                 MD5Hash md5 = new MD5Hash();
-                string iduser = System.Web.HttpContext.Current.Request.Cookies["check"]["iduser"].ToString();
-                if(iduser=="") { return iduser; }
-                else
+                string iduser;
+                if (System.Web.HttpContext.Current.Request.Cookies["check"] != null && System.Web.HttpContext.Current.Request.Cookies["check"]["iduser"] != null)
                 {
+                    iduser = System.Web.HttpContext.Current.Request.Cookies["check"]["iduser"].ToString();
+
                     iduser = md5.Decrypt(iduser.ToString());
                     List<Permission> permission = Connect.Select<Permission>("select * from Permission per where per.IdPermissionCategory = '" + IdpermissionCategory + "'");
                     if (permission != null)
@@ -145,6 +163,10 @@ namespace SuperbrainManagement.Controllers
                     }
                     return "hideof"; // Trả về chuỗi "hideof" nếu không có quyền truy cập
                 }
+                else
+                {
+                    return string.Empty;
+                }
             }
             catch
             {
@@ -157,26 +179,31 @@ namespace SuperbrainManagement.Controllers
         public static string CheckHQ_Css()
         {
             ModelDbContext db = new ModelDbContext();
-            int idbranch_hq =db.Branches.SingleOrDefault(x=>x.Code.ToLower()=="hq").Id;
+            int idbranch_hq = db.Branches.SingleOrDefault(x => x.Code.ToLower() == "hq").Id;
             try
             {
                 MD5Hash md5 = new MD5Hash();
-                string iduser = System.Web.HttpContext.Current.Request.Cookies["check"]["iduser"].ToString();
-                if (iduser == "") { return iduser; }
-                else
+                var cookie = System.Web.HttpContext.Current?.Request.Cookies["check"];
+                if (cookie != null)
                 {
-                    var idbranch_user = db.Users.Find(int.Parse(iduser)).IdBranch;
-                    if (idbranch_user == idbranch_hq)
+                    string iduser = cookie["iduser"]?.ToString();
+                    if (!string.IsNullOrEmpty(iduser))
                     {
-                        return "";
+                        var idbranch_user = db.Users.Find(int.Parse(iduser)).IdBranch;
+                        if (idbranch_user == idbranch_hq)
+                        {
+                            return "";
+                        }
+                        return "hideof"; // Trả về chuỗi "hideof" nếu không có quyền truy cập
                     }
-                    return "hideof"; // Trả về chuỗi "hideof" nếu không có quyền truy cập
                 }
             }
             catch
             {
                 return "";
             }
+
+            return "";
         }
     }
 }

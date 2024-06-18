@@ -302,11 +302,13 @@
     <Compile Include="Controllers\WarehousesController.cs" />
     <Compile Include="DTOs\ClassAssignmentDTO.cs" />
     <Compile Include="DTOs\ScheduleViewDTO.cs" />
+    <Compile Include="DTOs\StudentViewDTO.cs" />
     <Compile Include="DTOs\TimeTableDTO.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Helpers\ScheduleHelper.cs" />
+    <Compile Include="Helpers\StudentHelper.cs" />
     <Compile Include="Helpers\VNPayHelper.cs" />
     <Compile Include="Models\AchievementEmployee.cs" />
     <Compile Include="Models\AggregatedCounter.cs" />
