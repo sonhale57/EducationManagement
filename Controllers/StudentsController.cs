@@ -25,9 +25,16 @@ namespace SuperbrainManagement.Controllers
     {
         private ModelDbContext db = new ModelDbContext();
         private ScheduleHelper scheduleHelper = new ScheduleHelper();
+        private StudentHelper studentHelper = new StudentHelper();
+
+        public enum FilterEnum
+        {
+            Potential = 1,
+            Official = 0
+        }
 
         // GET: Students
-        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, string idBranch)
+        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, string idBranch, FilterEnum filterEnum = FilterEnum.Official)
         {
             var branches = db.Branches.ToList();
             int idbranch = int.Parse(CheckUsers.idBranch());
@@ -51,7 +58,9 @@ namespace SuperbrainManagement.Controllers
             }
             ViewBag.CurrentFilter = searchString;
 
-            var students = db.Students.Include(x=>x.User).ToList();
+            var students = filterEnum == FilterEnum.Potential ? studentHelper.GetPotentialStudent() : studentHelper.GetOfficialStudent();
+
+            //var students = db.Students.Include(x=>x.User).ToList();
 
             if (!string.IsNullOrEmpty(idBranch))
             {
@@ -79,8 +88,11 @@ namespace SuperbrainManagement.Controllers
             int pageSize = 20;
             int pageNumber = (page ?? 1);
 
+            var studentsWithStatus = filterEnum == FilterEnum.Potential ?
+                                                    studentHelper.GetOfficialStudentWithStatus(students, true)
+                                                    : studentHelper.GetOfficialStudentWithStatus(students, false);
 
-            var pagedData = students.ToPagedList(pageNumber, pageSize);
+            var pagedData = studentsWithStatus.ToPagedList(pageNumber, pageSize);
 
             var pagedListRenderOptions = new PagedListRenderOptions();
             pagedListRenderOptions.FunctionToTransformEachPageLink = (liTag, aTag) =>
@@ -91,6 +103,7 @@ namespace SuperbrainManagement.Controllers
             };
 
             ViewBag.PagedListRenderOptions = pagedListRenderOptions;
+            ViewBag.SelectedFilter = filterEnum;
             return View(pagedData);
         }
 

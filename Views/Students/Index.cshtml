@@ -1,4 +1,4 @@
-﻿@model PagedList.IPagedList<SuperbrainManagement.Models.Student>
+﻿@model PagedList.IPagedList<SuperbrainManagement.DTOs.StudentViewDTO>
 @using PagedList.Mvc;
 @{
     ViewBag.Title = "Index";
@@ -21,29 +21,47 @@
     </div>
     <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
         <div class="me-0 btn btn-md p-0">
+            <button class="btn btn-md btn-outline-dark" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="ti ti-filter"></i> @{
+                    if (Convert.ToString(ViewBag.SelectedFilter) == "Potential")
+                    {
+                        <text> Tiềm năng</text>
+                    }
+                    else
+                    {
+                        <text> Chính thức</text>
+                    }
+                 }
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = 0, currentFilter =  ""})"> Chính thức</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = 1, currentFilter = "" })"> Tiềm năng</a></li>
+            </ul>
+        </div>
+        <div class="me-0 btn btn-md p-0">
             <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="ti ti-arrows-sort"></i> Sắp xếp theo
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-ascending"></i> Mới nhất</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Cũ nhất</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = ViewBag.SelectedFilter, sortOrder = "name", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = ViewBag.SelectedFilter, sortOrder = "name_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = ViewBag.SelectedFilter, sortOrder = "date", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-ascending"></i> Mới nhất</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = ViewBag.SelectedFilter, sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Cũ nhất</a></li>
             </ul>
         </div>
+
         <a href="/students/create" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
     </div>
-</div>
+    </div>
 <table class="table fs-3">
     <thead class="bg-success text-white rounded-1">
         <tr>
             <th class="text-center">STT</th>
-            <th>Mã</th>
+            <th>Mã học viên</th>
             <th>Họ tên</th>
             <th class="text-center">Năm sinh</th>
             <th class="text-center">Giới tính</th>
-            <th>Số điện thoại</th>
-            <th>Email</th>
+            <th>trạng thái</th>
             <th>Quản lý</th>
             <th class="text-end">Thao tác</th>
         </tr>
@@ -67,14 +85,11 @@
             <td class="text-center">
                 @Html.DisplayFor(modelItem => item.Sex)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Phone)
+            <td class="text-center">
+                @Html.DisplayFor(modelItem => item.Status)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.User.Name)
+                @Html.DisplayFor(modelItem => item.NameOfUser)
             </td>
             <td class="text-end">
                 <a href="/students/details/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
