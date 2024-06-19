@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Data;
 using System.Data.Entity;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Web;
@@ -37,7 +38,7 @@ namespace SuperbrainManagement.Controllers
             }
         }
 
-        public ActionResult Loadlist(string idBranch, string sort,string type, string searchString, DateTime fromdate, DateTime todate)
+        public ActionResult Loadlist(string idBranch, string sort, string type, string searchString, DateTime fromdate, DateTime todate)
         {
             string str = "";
             if (string.IsNullOrEmpty(idBranch))
@@ -76,9 +77,9 @@ namespace SuperbrainManagement.Controllers
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query ="select trans.Id,trans.Code,trans.Name,trans.Description,trans.Amount,trans.Discount,trans.TotalAmount,trans.DateCreate,trans.Image,trans.Type,trans.Status,trans.PaymentMethod,us.Name as Username"
-                            +" from [Transaction] trans,[User] us"
-                            +" where us.id = trans.IdUser and trans.IdBranch = "+idBranch + querytype + querysearch+ querysort;
+                string query = "select trans.Id,trans.Code,trans.Name,trans.Description,trans.Amount,trans.Discount,trans.TotalAmount,trans.DateCreate,trans.Image,trans.Type,trans.Status,trans.PaymentMethod,us.Name as Username"
+                            + " from [Transaction] trans,[User] us"
+                            + " where us.id = trans.IdUser and trans.IdBranch = " + idBranch + querytype + querysearch + querysort;
                 SqlCommand command = new SqlCommand(query, connection);
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
@@ -105,6 +106,69 @@ namespace SuperbrainManagement.Controllers
             var item = new
             {
                 str
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        string Getcode_transaction(bool type)
+        {
+            string loai = "";
+            var idbranch = int.Parse(CheckUsers.iduser());
+            int nextCode = 0;
+            if (type == false)
+            {
+                loai = "PC";
+                nextCode = db.Transactions.Where(x => x.IdBranch == idbranch && x.Type == false).Count() + 1;
+            }
+            else if (type == true)
+            {
+                loai = "PT";
+                nextCode = db.Transactions.Where(x => x.IdBranch == idbranch && x.Type == true).Count() + 1;
+            }
+            string code = nextCode.ToString().PadLeft(5, '0');
+            var cn = db.Branches.Find(idbranch);
+            string str = cn.Code + loai + DateTime.Now.Year + code;
+
+            return str;
+        }
+        [HttpPost]
+        public ActionResult Submit_transaction(bool type,decimal sotien,string lydo,string hoten,string dienthoai,string diachi,string method,  HttpPostedFileBase file)
+        {
+            string status = "ok"; 
+            string fileName = "";
+            var transaction = new Transaction()
+            {
+                Code = Getcode_transaction(type),
+                TotalAmount = sotien,
+                Amount = 0,
+                Name = hoten,
+                Phone =dienthoai,
+                Address = diachi,
+                PaymentMethod = method,
+                Discount = 0,
+                Type = type,
+                Status = true,
+                DateCreate = DateTime.Now,
+                Description = lydo,
+                IdUser = Convert.ToInt32(CheckUsers.iduser()),
+                IdBranch = Convert.ToInt32(CheckUsers.idBranch())
+            };
+            if (file != null && file.ContentLength > 0)
+            {
+                // Generate a unique file name
+                fileName = Path.GetFileNameWithoutExtension(file.FileName);
+                string extension = Path.GetExtension(file.FileName);
+                fileName = $"{fileName}_{DateTime.Now:yyyyMMddHHmmssfff}{extension}";
+                // Specify the path to save the file
+                string _path = Path.Combine(Server.MapPath("~/Uploads/Transaction"), fileName);
+                file.SaveAs(_path);
+                transaction.Image = "/Uploads/Transaction/" + fileName;
+            }
+            db.Transactions.Add(transaction);
+            db.SaveChanges();
+
+            var item = new
+            {
+                status
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
