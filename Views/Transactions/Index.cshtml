@@ -1,4 +1,4 @@
-﻿@model IEnumerable<SuperbrainManagement.Models.Transaction>
+﻿﻿@model IEnumerable<SuperbrainManagement.Models.Transaction>
 
 @{
     ViewBag.Title = "Index";
@@ -39,7 +39,7 @@
             </ul>
         </div>
         <a href="javascript:Loadlist_nhap()" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">
-            <i class="ti ti-file-download"></i> Xuất file
+            <i class="ti ti-receipt-2"></i> Tạo phiếu
         </a>
     </div>
 </div>
@@ -61,6 +61,87 @@
     <tr id="loading"></tr>
     <tbody id="showlist"></tbody>
 </table>
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="margin-right: 110px;">
+        <div class="modal-content rounded-0 " style="width: 600px;">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-white" id="exampleModalLabel">Tạo phiếu</h5>
+            </div>
+            <form action="/" method="post" enctype="multipart/form-data" id="form_transaction">
+                <div class="modal-body row">
+                    <div class="col-md-6 mt-3">
+                        <div class="form-group">
+                            <label class="mb-1">Loại phiếu <span class="text-danger">*</span></label>
+                            <select id="type" class="form-control">
+                                <option value="true">Phiếu thu</option>
+                                <option value="false">Phiếu chi</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mt-3">
+                        <div class="form-group">
+                            <label class="mb-1">Chứng từ (nếu có)</label>
+                            <input type="file" id="Image" name="Image" accept="image/*" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-6 mt-3">
+                        <div class="form-group">
+                            <label class="mb-1">Người (nhận,nộp) tiền <span class="text-danger">*</span></label>
+                            <input type="text" name="hoten" id="hoten" value="" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-md-6 mt-3">
+                        <div class="form-group">
+                            <label class="mb-1">Số điện thoại</label>
+                            <input type="text" id="dienthoai" name="dienthoai" value="" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-md-12 mt-3">
+                        <div class="form-group">
+                            <label class="mb-1">Địa chỉ </label>
+                            <input type="text" id="diachi" name="diachi" value="" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-md-12 mt-3">
+                        <div class="form-group">
+                            <label class="mb-1">Số tiền <span class="text-danger">*</span></label>
+                            <input type="number" id="sotien" name="sotien" value="0" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-md-12 mt-3">
+                        <div class="form-group">
+                            <label class="mb-1">Bằng chữ <span class="text-danger">*</span></label>
+                            <input type="text" name="bangchu" value="" class="form-control" readonly />
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 mt-3">
+                        <div class="form-group">
+                            <label class="mb-1">Phương thức <span class="text-danger">*</span></label>
+                            <select id="method" class="form-control">
+                                <option value="tienmat">Tiền mặt</option>
+                                <option value="chuyenkhoan">Chuyển khoản</option>
+                                <option value="khac">Khác</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 mt-3">
+                        <div class="form-group">
+                            <label class="mb-1">Lý do <span class="text-danger">*</span></label>
+                            <input type="text" id="lydo" name="lydo" value="" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer text-left">
+                    <button type="button" class="btn btn-success text-start" onclick="Submit_transaction()">
+                        <i class="ti ti-circle-plus"></i> Thêm phiếu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <script>
     $(document).ready(function () {
         var currentDate = new Date();
@@ -81,28 +162,80 @@
         var formattedLastMonth = lastMonthYear + '-' + ('0' + lastMonth).slice(-2) + '-' + ('0' + currentDay).slice(-2);
         // Đặt giá trị mới cho phần tử có id là "fromdate"
         $("#fromdate").val(formattedLastMonth);
-        Loadlist();
+        Loadlist(true);
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('openModal') === 'true') {
+            $('#exampleModal').modal('show');
+        }
     });
-    function Loadlist(type,sort) {
-    $("#loading").html("<td colspan=10 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
-     $.ajax({
-         url: '@Url.Action("Loadlist", "Transactions")',
-         type: "GET",
-         data: {
-             idBranch: $("#IdBranch").val(),
-             fromdate: $("#fromdate").val(),
-             todate: $("#todate").val(),
-             sort: sort,
-             type: type,
-             searchString: $("#searchString").val()
-         },
-         success: function (data) {
-            $("#loading").html("");
-             $('#showlist').html(data.str);
-         },
-         error: function (xhr, error) {
-             console.log(error);
-         }
-     });
-}
+    function Loadlist(type, sort) {
+        $("#loading").html("<td colspan=10 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
+        $.ajax({
+            url: '@Url.Action("Loadlist", "Transactions")',
+            type: "GET",
+            data: {
+                idBranch: $("#IdBranch").val(),
+                fromdate: $("#fromdate").val(),
+                todate: $("#todate").val(),
+                sort: sort,
+                type: type,
+                searchString: $("#searchString").val()
+            },
+            success: function (data) {
+                $("#loading").html("");
+                $('#showlist').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+    function Submit_transaction() {
+        var hoten = $("#hoten").val();
+        var dienthoai = $("#dienthoai").val();
+        var diachi = $("#diachi").val();
+        var type = $("#type").val();
+        var method = $("#method").val();
+        var sotien = $("#sotien").val();
+        var lydo = $("#lydo").val();
+        var fileInput = $("#Image")[0];
+        var file = fileInput.files[0]; // Lấy tệp từ input
+
+        //if (!idOrder || !status) {
+        //    showError('IdOrder và Status không được để trống!', 3000);
+        //    return;
+        //}
+
+        var formData = new FormData();
+        formData.append("hoten", hoten);
+        formData.append("dienthoai", dienthoai);
+        formData.append("diachi", diachi);
+        formData.append("type", type);
+        formData.append("lydo", lydo);
+        formData.append("sotien", sotien);
+        formData.append("method", method);
+        formData.append("file", file);
+
+        $.ajax({
+            url: '@Url.Action("Submit_transaction", "Transactions")',
+            type: "POST",
+            data: formData,
+            contentType: false, // Không đặt loại nội dung
+            processData: false, // Không xử lý dữ liệu
+            dataType: "json",
+            success: function (data) {
+                if (data.status === "ok") {
+                    $('#exampleModal').modal('hide');
+                    Loadlist(type);
+                    showSuccess("Đã cập nhật thành công!", 3000);
+                } else {
+                    showError(data.status, 3000);
+                }
+            },
+            error: function (xhr, status, error) {
+                var errorMessage = xhr.status + ': ' + xhr.statusText;
+                showError('Lỗi! ' + errorMessage, 3000);
+            }
+        });
+    }
 </script>

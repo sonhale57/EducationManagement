@@ -946,6 +946,7 @@
   <ItemGroup>
     <Folder Include="Uploads\Images\" />
     <Folder Include="Uploads\Orders\" />
+    <Folder Include="Uploads\Transaction\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

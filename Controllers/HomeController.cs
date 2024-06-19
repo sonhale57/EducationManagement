@@ -81,11 +81,9 @@ namespace SuperbrainManagement.Controllers
                     int tonkho = Convert.ToInt32(reader["tonkho"]);
                     if (tonkho <= dinhmuc)
                     {
-                        str += "<div class=\"col-md-12\">"
-                            + "<div class=\"p-1 border-1\">"
-                            + "<div class=\"row align-items-center\">"
-                            + "<div class=\"col-auto text-end\">"
-                            + "<img src=\"" + reader["Image"] + "\" alt=\"\" width=\"35\" height=\"35\" class=\"rounded-circle\">"
+                        str += "<div class=\"row align-items-center\">"
+                            + "<div class=\"col-auto\">"
+                            + "<img src=\"" + reader["Image"] + "\" alt=\"\" width=\"35\" height=\"35\" class=\"rounded-circle mt-0\">"
                             + "</div>"
                             + "<div class=\"col-10\">"
                             + "<div class=\"overflow-hidden flex-nowrap\">"
@@ -93,8 +91,6 @@ namespace SuperbrainManagement.Controllers
                             + "<a href=\"javascript:void(0)\" class=\"fw-bolder\">" +reader["Name"] + "</a>"
                             + "</h6>"
                             + "<i class=\"text-muted d-block mb-2 small\">Tồn kho: <span class='fw-bolder'>" + tonkho + "</span></i>"
-                            + "</div>"
-                            + "</div>"
                             + "</div>"
                             + "</div>"
                             + "</div> <hr class='bg-light'/>";
