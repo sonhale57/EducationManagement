@@ -4,6 +4,8 @@
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
     int stt = 1;
+
+    int idbranch = Convert.ToInt32(SuperbrainManagement.Controllers.CheckUsers.idBranch());
 }
 <div class="row">
     <div class="col col-md-6 col-sm-12">
@@ -34,6 +36,7 @@
         <tr>
             <th class="text-center">STT</th>
             <th>Khóa đào tạo</th>
+            <th class="text-center">Hạn đăng ký</th>
             <th class="text-center">Ngày bắt đầu</th>
             <th class="text-center">Ngày kết thúc</th>
             <th class="text-center">Số lượng</th>
@@ -41,39 +44,193 @@
             <th class="text-end">Thao tác</th>
         </tr>
     </thead>
-
-    @foreach (var item in Model)
-    {
-        <tr>
-            <td class="text-center">
-                @stt
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td class="text-center">
-                @Html.DisplayFor(modelItem => item.Fromdate)
-            </td>
-            <td class="text-center">
-                @Html.DisplayFor(modelItem => item.Todate)
-            </td>
-            <td class="text-center">
-                @Html.DisplayFor(modelItem => item.Number)
-            </td>
-            <td class="text-center">
-                @Html.Raw(item.Fromdate>DateTime.Now?"Chưa diễn ra":(item.Todate<DateTime.Now?"<span class='text-danger'>Đã kết thúc</span>":"<span class='text-success'>Đang diễn ra</span>"))
-            </td>
-            <td class="text-center">
-                <a href="/trainingcourses/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
-                <a href="/trainingcourses/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
-                <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="ti ti-dots-vertical"></i>
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <li><a class="dropdown-item" href=""><i class="ti ti-receipt"></i> Đăng ký tham gia</a></li>
-                </ul>
-            </td>
-        </tr>
-        stt += 1;
-    }
+        <tbody id="showlist"></tbody>
 </table>
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel2" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content rounded-0 h-75">
+            <form action="/" method="post" id="form_xuat">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white" id="exampleModalLabel2">Đăng ký giáo viên tham gia đào tạo</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col col-6 col-md-6 col-sm-12">
+                            <label class="text-success">Khóa đào tạo:</label>
+                            <input type="hidden" name="IdTrainingCourse" id="IdTrainingCourse" class="form-control" />
+                            <input type="text" name="Name" id="Name" placeholder="Khóa đào tạo" value="" class="form-control" disabled />
+                            <small id="Statusdeadline" class="ms-2 mt-2 text-muted"></small>
+                        </div>
+                        <div class="col col-6 col-md-6 col-sm-12">
+                            <label class="text-success">Phí đào tạo:</label>
+                            <input type="text" name="Price" id="Price" placeholder="Phí đào tạo" value="" class="form-control" disabled />
+                        </div>
+                        <div class="col col-4 col-md-4 col-sm-12 mt-3">
+                            <label class="text-success">Chọn nhân sự:</label>
+                            @Html.DropDownList("IdEmployee", null, htmlAttributes: new { @class = "form-control", @onchange = "javascript:Load_infoByEmployee()" })
+                        </div>
+                        <div class="col col-4 col-md-4 col-sm-12 mt-3">
+                            <label class="text-success">Số điện thoại:</label>
+                            <input type="text" name="Phone" id="Phone" placeholder="Số điện thoại" value="" class="form-control" />
+                        </div>
+                        <div class="col col-4 col-md-4 col-sm-12 mt-3">
+                            <label class="text-success">Địa chỉ Email:</label>
+                            <input type="text" name="Email" id="Email" placeholder="Email" value="" class="form-control" />
+                        </div>
+                        <div class="col col-4 col-md-4 col-sm-12 mt-3">
+                            <label class="text-success">Vị trí công tác:</label>
+                            <input type="text" name="Vitri" id="Vitri" placeholder="Vị trí làm việc" value="" class="form-control" disabled/>
+                        </div>
+                        <div class="col col-4 col-md-4 col-sm-12 mt-3">
+                            <label class="text-success">Thời gian công tác:</label>
+                            <input type="text" name="Thoigian" id="Thoigian" placeholder="Thời gian công tác" value="" class="form-control" disabled/>
+                        </div>
+                        <div class="col col-4 col-md-4 col-sm-12 mt-3">
+                            <label class="text-success">Đăng ký lưu trú:</label>
+                            <select name="Luutru" id="Luutru" class="form-control">
+                                <option value="true">Đăng ký</option>
+                                <option value="false">Không đăng ký</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer text-start">
+                    <button type="button" class="btn btn-success" onclick="Submit_registration()">
+                        <i class="ti ti-registered"></i> Đăng ký tham gia
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalRegistration" tabindex="-1" aria-labelledby="exampleModalLabel2" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content rounded-0 h-75">
+            <form action="/" method="post" id="form_xuat">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white" id="exampleModalLabel2">Danh sách đang ký tham gia đào tạo
+                    
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="IdTraining" id="IdTraining" value="" />
+                    
+                </div>
+                <div class="modal-footer text-start">
+                    <button type="button" class="btn btn-success" onclick="Submit_payment()">
+                        <i class="ti ti-credit-card"></i> Thanh toán phí tham gia
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    Loadlist();
+    function Loadlist() {
+        $.ajax({
+            url: '@Url.Action("Loadlist", "TrainingCourses")',
+            type: "GET",
+            data: {
+            },
+            success: function (data) {
+                console.log(data);
+                $('#showlist').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+    function Load_registration(id) {
+        $.ajax({
+            url: '@Url.Action("Load_registration", "TrainingCourses")',
+            type: "GET",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                $('#showlist').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+    function View_registration(id) {
+        Load_registration(id);
+        $("#IdTraining").val(id);
+        $("#modalRegistration").modal('show');
+    }
+
+    function Load_dangky(id) {
+        Load_infoByTrainingCourse(id);
+        $("#IdTrainingCourse").val(id);
+        $("#exampleModal").modal('show');
+    }
+    Load_infoByEmployee();
+    function Load_infoByTrainingCourse(id) {
+    $.ajax({
+        url: '@Url.Action("Load_infoByTrainingCourse", "TrainingCourses")',
+        type: "GET",
+        data: {
+            id: id
+        },
+        success: function (data) {
+            console.log(data);
+            $('#Name').val(data.name);
+            $('#Price').val(data.price);
+            $('#Statusdeadline').html (data.deadline);
+        },
+        error: function (xhr, error) {
+            console.log(error);
+        }
+    });
+    return false;
+}
+    function Load_infoByEmployee() {
+        $.ajax({
+            url: '@Url.Action("Load_infoByEmployee", "TrainingCourses")',
+            type: "GET",
+            data: {
+                id: $("#IdEmployee").val()
+            },
+            success: function (data) {
+                console.log(data);
+                $('#Phone').val(data.phone);
+                $('#Email').val(data.email);
+                $('#Vitri').val(data.position);
+                $('#Thoigian').val(data.time);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+        return false;
+    }
+    function Submit_registration() {
+        $.ajax({
+            url: '@Url.Action("Submit_registration", "TrainingCourses")',
+            type: "POST",
+            data: {
+                IdEmployee: $("#IdEmployee").val(),
+                IdTrainingCourse: $("#IdTrainingCourse").val(),
+                Luutru: $("#Luutru").val(),
+                Phone: $("#Phone").val(),
+                Email: $("#Email").val(),
+            }
+        , dataType: "json",
+        success: function (data) {
+            if (data.status == "ok") {
+                $('#exampleModal').modal('hide');
+                location.reload();
+                showSuccess("Đã đăng ký tham gia thành công!", 3000);
+            }
+            else {
+                showError(data.status, 3000);
+            }
+        },
+        error: function () { showError('Lỗi!', 3000); }
+    });
+}
+</script>

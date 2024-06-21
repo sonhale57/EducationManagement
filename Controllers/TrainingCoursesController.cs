@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.Entity;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
 using System.Web;
@@ -17,10 +19,164 @@ namespace SuperbrainManagement.Controllers
         // GET: TrainingCourses
         public ActionResult Index()
         {
-
+            int IdBranch = Convert.ToInt32(CheckUsers.idBranch());
+            ViewBag.IdEmployee = new SelectList(db.Employees.Where(x=>x.IdBranch==IdBranch), "Id", "Name");
             var trainingCourses = db.TrainingCourses.Include(t => t.TrainingType).Include(t => t.User);
             return View(trainingCourses.ToList());
         }
+        public ActionResult Loadlist()
+        {
+            string str = "";
+            string querybranch = "";
+            int idbranch = int.Parse(CheckUsers.idBranch());
+            if (!CheckUsers.CheckHQ())
+            {
+                querybranch = " and IdBranch=" + idbranch;
+            }
+            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "select Id,Code,Name,ResgistrationDeadline,Fromdate,Todate,Number,(select COUNT(IdEmployee) from RegistrationTraining where IdTraining=Id "+querybranch+") as Soluongdk"
+                            +" from TrainingCourse"
+                            +" where Enable=1";
+                SqlCommand command = new SqlCommand(query, connection);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                int count = 0;
+                while (reader.Read())
+                {
+                    count++;
+                    string strStatus = "";
+                    string strbtn = "";
+                    if (CheckUsers.CheckHQ())
+                    {
+                        querybranch = " and IdBranch=" + idbranch;
+                        strbtn = "<a href='/trainingcourses/edit/" + reader["Id"] +"' class='me-1'><i class='ti ti-edit text-primary'></i></a>" +
+                                "<a href='javascript:Delete(" + reader["Id"] +")' class='me-1'><i class='ti ti-trash text-danger'></i></a>" +
+                                "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
+                                    "<i class=\"ti ti-dots-vertical\"></i>" +
+                                "</a>" +
+                                "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">" +
+                                    "<li>" +
+                                        "<a href=\"javascript:Load_dangky(" + reader["Id"] +")\" class=\"dropdown-item\">" +
+                                            "<i class=\"ti ti-receipt\"></i> Đăng ký tham gia" +
+                                        "</a>" +
+                                    "</li>" +
+                                "</ul>";
+                    }
+                    if (DateTime.Parse(reader["Fromdate"].ToString()) > DateTime.Now)
+                    {
+                        strStatus = "<span class='text-muted'>Chưa diễn ra</span>";
+                        strbtn = "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
+                                    "<i class=\"ti ti-dots-vertical\"></i>" +
+                                "</a>" +
+                                "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">" +
+                                    "<li>" +
+                                        "<a href=\"javascript:Load_dangky(" + reader["Id"] +")\" class=\"dropdown-item\">" +
+                                            "<i class=\"ti ti-receipt\"></i> Đăng ký tham gia" +
+                                        "</a>" +
+                                    "</li>" +
+                                "</ul>";
+                    }
+                    else
+                    {
+                        if (DateTime.Parse(reader["Todate"].ToString()) < DateTime.Now)
+                        {
+                            strStatus = "<span class='text-danger'>Đã kết thúc</span>";
+                        }
+                        else
+                        {
+                            strStatus = "<span class='text-success'>Đang diễn ra</span>";
+                        }
+                    }
+                    
+                    str += "<tr>"
+                            + "<td class='text-center'>" + count + "</td>"
+                            + "<td>" + reader["name"].ToString() + "</td>"
+                            + "<td class='text-center'>" + DateTime.Parse(reader["ResgistrationDeadline"].ToString()).ToString("dd/MM/yyyy") + "</td>"
+                            + "<td class='text-center'>" + DateTime.Parse(reader["Fromdate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
+                            + "<td class='text-center'>" + DateTime.Parse(reader["Todate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
+                            + "<td class='text-center'><a href='javascript:View_registration(" + reader["Id"] +")' class='fw-bolder'>" + reader["Soluongdk"].ToString() + " / " + reader["Number"].ToString() + "</a></td>"
+                            + "<td class='text-center'>" + strStatus + "</td>"
+                            + "<td class='text-end'>" + strbtn + "</td>"
+                            + "</tr>";
+                }
+                reader.Close();
+            }
+            var item = new
+            {
+                str
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Load_infoByEmployee(int id)
+        {
+            var employee = db.Employees.Find(id);
+            string phone = employee.Phone;
+            string email =employee.Email;
+            string position = (employee.IdPosition ==null ?"":employee.Position.Name);
+            string time = (employee.DateStart ==null?"":employee.DateStart.Value.ToString("dd/MM/yyyy"));
+            var item = new
+            {
+                phone,
+                email,
+                position,
+                time,
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Load_infoByTrainingCourse(int id)
+        {
+            var tra = db.TrainingCourses.Find(id);
+            string name = tra.Name;
+            string price = string.Format("{0:N0}",tra.Price);
+            string deadline = (tra.ResgistrationDeadline==null?"":"Hạn đăng ký: "+tra.ResgistrationDeadline.Value.ToString("dd/MM/yyyy"));
+            var item = new
+            {
+                name,
+                price,
+                deadline
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public ActionResult Submit_registration(int IdEmployee, int IdTrainingCourse, string Phone,string Email,bool Luutru)
+        {
+            string status = "ok";
+            var join = db.RegistrationTrainings.SingleOrDefault(x => x.IdTraining == IdTrainingCourse && x.IdEmployee == IdEmployee);
+            if (join == null)
+            {
+                var emp = db.Employees.Find(IdEmployee);
+                emp.Phone = Phone;
+                emp.Email = Email;
+                var reg = new RegistrationTraining()
+                {
+                    IdEmployee = IdEmployee,
+                    IdTraining = IdTrainingCourse,
+                    Updatetime = DateTime.Now,
+                    IdBranch = emp.IdBranch,
+                    StatusPayment = false,
+                    IsRegisteStay = Luutru,
+                    IdUser = Convert.ToInt32(CheckUsers.iduser())
+                };
+                db.Entry(emp);
+                db.RegistrationTrainings.Add(reg);
+                db.SaveChanges();
+            }
+            else
+            {
+                status = "Nhân sự này đã được đăng ký tham gia!";
+            }
+            var item = new
+            {
+                status
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+
+
+        #region DefaultController
 
         // GET: TrainingCourses/Details/5
         public ActionResult Details(int? id)
@@ -137,5 +293,6 @@ namespace SuperbrainManagement.Controllers
             }
             base.Dispose(disposing);
         }
+        #endregion
     }
 }
