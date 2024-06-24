@@ -100,25 +100,60 @@
         </div>
     </div>
 </div>
-
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content rounded-0 h-75">
+            <form action="/" method="post" id="form_nhap">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white" id="exampleModalLabel"></h5>
+                    <span class="fst-italic text-white" id="ngay"></span>
+                </div>
+                <div class="modal-body">
+                    <div class="container border-info border-1" style="border:1px solid;border-radius:5px; padding:10px;">
+                        <span id="noidung" class="justify-content-center" style="text-align:justify-all;"></span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <script>
+    function View_thongbao(id) {
+        $.ajax({
+            url: '@Url.Action("Load_thongbao", "Home")',
+            type: "GET",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                console.log(data);
+                $("#exampleModalLabel").html(data.tieude);
+                $('#noidung').html(data.str);
+                $('#ngay').html("đăng ngày: "+data.ngay);
+                $('#exampleModal').modal('show');
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
     Loadlist();
     function Loadlist() {
-        $("#loading").html("Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
-         $.ajax({
-             url: '@Url.Action("Loadlist_thongbao", "Home")',
-             type: "GET",
-             data: {
-             },
-             success: function (data) {
-                 console.log(data);
-                $("#loading").html("");
-                 $('#showlist_thongbao').html(data.str);
-             },
-             error: function (xhr, error) {
-                 console.log(error);
-             }
-         });
+            $("#loading").html("Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+             $.ajax({
+                 url: '@Url.Action("Loadlist_thongbao", "Home")',
+                 type: "GET",
+                 data: {
+                 },
+                 success: function (data) {
+                     console.log(data);
+                    $("#loading").html("");
+                     $('#showlist_thongbao').html(data.str);
+                 },
+                 error: function (xhr, error) {
+                     console.log(error);
+                 }
+             });
     }
 
     Loadlist_vattu();

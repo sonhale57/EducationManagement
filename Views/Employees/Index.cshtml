@@ -20,6 +20,24 @@
     </div>
     <div class="col col-md-6 col-sm-12 text-right" style="text-align:right;">
         <div class="me-0 btn btn-md p-0">
+            <button class="btn btn-md btn-outline-dark" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="ti ti-filter"></i> @{
+                    if (Convert.ToString(ViewBag.SelectedFilter) == "Official")
+                    {
+                        <span>Chính thức</span>
+                    }
+                    else
+                    {
+                        <span>Thử việc</span>
+                    }
+                }
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = true, currentFilter =  ViewBag.CurrentFilter})"> Chính thức</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = false, currentFilter =ViewBag.CurrentFilter })"> Thử việc</a></li>
+            </ul>
+        </div>
+        <div class="me-0 btn btn-md p-0">
             <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="ti ti-arrows-sort"></i> Sắp xếp theo
             </button>
@@ -34,21 +52,22 @@
     </div>
 </div>
 
-<table class="table fs-3">
+<table class="table fs-3 table-bordered">
     <thead class="bg-success text-white rounded-1">
         <tr>
-            <th class="text-center">STT</th>
-            <th>Tên</th>
-            <th>Vị trí</th>
-            <th>Năm sinh</th>
-            <th>Giới tính</th>
-            <th>Số điện thoại</th>
-            <th>Email</th>
-            <th class="text-center">Trạng thái</th>
-            <th class="text-center">Thao tác</th>
+            <th class="text-center align-content-center" rowspan="2">STT</th>
+            <th rowspan="2" class="align-content-center">Tên</th>
+            <th rowspan="2" class="align-content-center text-center">Số điện thoại</th>
+            <th rowspan="2" class="align-content-center">Email</th>
+            <th class="text-center align-content-center" colspan="3">Trạng thái</th>
+            <th class="text-center align-content-center" rowspan="2">Thao tác</th>
+        </tr>
+        <tr>
+            <th class="text-center">Số GCN</th>
+            <th class="text-center">Ngày hết hạn</th>
+            <th class="text-center">Thời gian công tác</th>
         </tr>
     </thead>
-
     @foreach (var item in Model)
     {
         <tr>
@@ -58,45 +77,29 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Position.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DateOfBirth)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Sex)
-            </td>
-            <td>
+            <td class="text-center">
                 @Html.DisplayFor(modelItem => item.Phone)
             </td>
-            <td>
+            <td class="text-left">
                 @Html.DisplayFor(modelItem => item.Email)
             </td>
             <td class="text-center">
-                @if (item.Enable != null && item.Enable == true)
-                {
-                    <label class="custom-control ios-switch">
-                        <input type="checkbox" class="ios-switch-control-input" onchange="javascript: ChangeStatus(this)" data-id="@item.Id" value="0" checked>
-                        <span class="ios-switch-control-indicator"></span>
-                    </label>
-                }
-                else
-                {
-                    <label class="custom-control ios-switch">
-                        <input type="checkbox" class="ios-switch-control-input" onchange="javascript: ChangeStatus(this)" data-id="@item.Id" value="1">
-                        <span class="ios-switch-control-indicator"></span>
-                    </label>
-                }
+                @(item.CertificateNumber==null?"-":item.CertificateNumber.ToString())
             </td>
             <td class="text-center">
+                @(item.DateCertificate==null?"-":item.DateCertificate.Value.ToString("dd/MM/yyyy"))
+            </td>
+            <td class="text-center">
+                @Html.DisplayFor(modelItem => item.DateStart)
+            </td>
+            <td class="text-end">
                 <a href="/employees/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
                 <a href="/employees/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
                 <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="ti ti-dots-vertical"></i>
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <li><a href="/users/create?IdEmployee=@item.Id" class="dropdown-item"><i class="ti ti-user-plus"></i> Tạo tài khỏan</a></li>
+                    <li><a href="javascript:Add_userbyEmployee(@item.Id)" class="dropdown-item"><i class="ti ti-user-plus"></i> Tạo tài khỏan</a></li>
                 </ul>
             </td>
         </tr>
@@ -108,3 +111,45 @@
         @Html.PagedListPager(Model, page => Url.Action("Index", new { page }), new PagedListRenderOptions { LiElementClasses = new string[] { "page-item" } })
     </ul>
 </nav>
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content rounded-0 h-75">
+            <form action="/" method="post" id="form_nhap">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white" id="exampleModalLabel">Tạo tài khoản</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col col-md-12">
+                            <label>Họ tên</label>
+                            <input type="hidden" id="IdEmployee" value="" class="form-control" />
+                            <input type="text" id="NameEmployee" value="" class="form-control" />
+                        </div>
+                        <div class="col col-md-12">
+                            <label>Tên đăng nhập</label>
+                            <input type="text" id="Username" value="" class="form-control" />
+                        </div>
+                        <div class="col col-md-12">
+                            <label>Mật khẩu</label>
+                            <input type="text" id="Password" value="" class="form-control" />
+                        </div>
+                        <div class="col col-md-12">
+                            <label>Ghi chú</label>
+                            <input type="text" name="Description" value="" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer text-start">
+                    <button type="button" class="btn btn-success" onclick="submit_nhap()">
+                        <i class="ti ti-circle-plus"></i> Tạo tài khoản
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    function Add_userbyEmployee(id) {
+
+    }
+</script>

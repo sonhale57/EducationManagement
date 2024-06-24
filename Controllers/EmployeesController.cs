@@ -18,7 +18,7 @@ namespace SuperbrainManagement.Controllers
 
         // GET: Employees
 
-        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, string idBranch)
+        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, string idBranch, string filterEnum)
         {
             var branches = db.Branches.ToList();
             int idbranch = int.Parse(CheckUsers.idBranch());
@@ -31,6 +31,8 @@ namespace SuperbrainManagement.Controllers
                 idBranch = branches.First().Id.ToString();
             }
             ViewBag.IdBranch = new SelectList(branches, "Id", "Name", idBranch);
+            
+            
 
             if (searchString != null)
             {
@@ -43,6 +45,16 @@ namespace SuperbrainManagement.Controllers
             ViewBag.CurrentFilter = searchString;
 
             var employees = db.Employees.ToList();
+            if (!string.IsNullOrEmpty(filterEnum))
+            {
+                employees= employees.Where(x=>x.IsOfficial==Boolean.Parse(filterEnum)).ToList();
+                ViewBag.SelectedFilter = (filterEnum=="1"?"Official":"");
+            }
+            else
+            {
+                employees = employees.Where(x => x.IsOfficial == true).ToList();
+                ViewBag.SelectedFilter = "Official";
+            }
 
             if (!string.IsNullOrEmpty(idBranch))
             {

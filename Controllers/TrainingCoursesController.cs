@@ -96,7 +96,7 @@ namespace SuperbrainManagement.Controllers
                             + "<td class='text-center'>" + DateTime.Parse(reader["ResgistrationDeadline"].ToString()).ToString("dd/MM/yyyy") + "</td>"
                             + "<td class='text-center'>" + DateTime.Parse(reader["Fromdate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
                             + "<td class='text-center'>" + DateTime.Parse(reader["Todate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
-                            + "<td class='text-center'><a href='javascript:View_registration(" + reader["Id"] +")' class='fw-bolder'>" + reader["Soluongdk"].ToString() + " / " + reader["Number"].ToString() + "</a></td>"
+                            + "<td class='text-center'><a href='javascript:View_registration(" + reader["Id"] +")' class='fw-bolder'>" + reader["Soluongdk"].ToString() + "</a></td>"
                             + "<td class='text-center'>" + strStatus + "</td>"
                             + "<td class='text-end'>" + strbtn + "</td>"
                             + "</tr>";
@@ -110,6 +110,51 @@ namespace SuperbrainManagement.Controllers
             return Json(item, JsonRequestBehavior.AllowGet);
         }
 
+        public ActionResult Load_registration(int id)
+        {
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            string str = "";
+            var employee = db.Employees.Find(id);
+            string phone = employee.Phone;
+            string email = employee.Email;
+            string position = (employee.IdPosition == null ? "" : employee.Position.Name);
+            string time = (employee.DateStart == null ? "" : employee.DateStart.Value.ToString("dd/MM/yyyy"));
+            var join = db.RegistrationTrainings.Where(x=>x.IdTraining==id);
+            if (!CheckUsers.CheckHQ())
+            {
+                join = db.RegistrationTrainings.Where(x => x.IdTraining == id && x.IdBranch == idbranch);
+            }
+            int count = 0;
+            var train = db.TrainingCourses.Find(id);
+            double tongtien = 0;
+            foreach(var ite in join)
+            {
+                tongtien += Double.Parse(train.Price.ToString());
+                count++;    
+                str += "<tr>"
+                    +"<td class='text-center'>"+count+"</td>"
+                    +"<td class='text-left'>"+ite.Employee.Name+"</td>"
+                    +"<td class='text-center'>"+ite.Employee.Phone+"</td>"
+                    + "<td>" + ite.Employee.Email + "</td>"
+                    + "<td class='text-center'>" + ite.Employee.Branch.Name + "</td>"
+                    + "<td class='text-center'>" + (ite.StatusPayment==true?"<span class='text-success'>Đã thanh toán</span>":"Chưa thanh toán") + "</td>"
+                    + "<td class='text-center'>" + (ite.IsRegisteStay==true?"<span class='text-success'>Đăng ký</span>":"Không đăng ký") + "</td>"
+                    +"</tr>";
+            }
+            str += "<tr><td colspan=7 class='text-end'>Tổng tiền: <b>"+string.Format("{0:N0} đ",tongtien)+"</b></td></tr>";
+            var item = new
+            {
+                str,
+                name = train.Name,
+                price =train.Price,
+                description = train.Description,
+                deadline= train.ResgistrationDeadline.Value.ToString("dd/MM/yyyy"),
+                from = train.Fromdate.Value.ToString("dd/MM/yyyy"),
+                to = train.Todate.Value.ToString("dd/MM/yyyy"),
+                tongtien = tongtien
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
         public ActionResult Load_infoByEmployee(int id)
         {
             var employee = db.Employees.Find(id);

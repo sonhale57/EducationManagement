@@ -47,7 +47,7 @@ namespace SuperbrainManagement.Controllers
                     +"<h6 class=\"mb-1\">" 
                     +"<a href=\"javascript:View_thongbao("+item.Id+")\" class=\"fw-bolder\">"+item.Name+"</a>" 
                     +"</h6>" 
-                    +"<i class=\"text-muted d-block mb-2 small\">đăng bởi <span class='fw-bolder'>"+item.User.Name+"</span> - vào lúc: "+item.DateCreate+"</i>" 
+                    +"<i class=\"text-muted d-block mb-2 small\">đăng bởi <span class='fw-bolder'>"+item.User.Name+"</span> - vào lúc: "+item.DateCreate.Value.ToString("dd/MM/yyyy")+"</i>" 
                     +"</div>" 
                     +"</div>" 
                     +"</div>" 
@@ -57,6 +57,17 @@ namespace SuperbrainManagement.Controllers
             var json = new
             {
                 str
+            };
+            return Json(json, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Load_thongbao(int id)
+        {
+            var list = db.Feeds.Find(id);
+            var json = new
+            {
+                tieude =list.Name,
+                ngay =list.DateCreate.Value.ToString("dd/MM/yyyy"),
+                str = list.Description
             };
             return Json(json, JsonRequestBehavior.AllowGet);
         }
