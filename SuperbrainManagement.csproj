@@ -302,6 +302,7 @@
     <Compile Include="Controllers\VacationSchedulesController.cs" />
     <Compile Include="Controllers\WarehousesController.cs" />
     <Compile Include="DTOs\ClassAssignmentDTO.cs" />
+    <Compile Include="DTOs\ClassFilterDTO.cs" />
     <Compile Include="DTOs\ScheduleViewDTO.cs" />
     <Compile Include="DTOs\StudentViewDTO.cs" />
     <Compile Include="DTOs\TimeTableDTO.cs" />
@@ -923,6 +924,7 @@
     <Content Include="Views\TrainingCourses\Details.cshtml" />
     <Content Include="Views\TrainingCourses\Edit.cshtml" />
     <Content Include="Views\TrainingCourses\Index.cshtml" />
+    <Content Include="Views\Classes\Filter.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -910,7 +910,7 @@ namespace SuperbrainManagement.Controllers
         public ActionResult GetSchedule(int idClass, string fromDate, string toDate)
         {
             var schedulesbyClass = db.Schedules
-                .Where(x => x.IdClass == idClass).Include(x => x.Employee).ToList()
+                .Where(x => x.IdClass == idClass && (bool)x.Active).Include(x => x.Employee).ToList()
                 .Select(x => new ClassAssignmentDTO
                 {
                     DayOfWeek = scheduleHelper.GetDayName(x.IdWeek),
@@ -957,7 +957,7 @@ namespace SuperbrainManagement.Controllers
         public ActionResult ShowTimeTableData(int? idClassShowTimeTbl, string fromDate, string toDate, int studentId)
         {
             var schedulesbyClass = db.Schedules
-                .Where(x => x.IdClass == idClassShowTimeTbl).Include(x => x.Employee).ToList()
+                .Where(x => x.IdClass == idClassShowTimeTbl && (bool)x.Active).Include(x => x.Employee).ToList()
                 .Select(x => new ClassAssignmentDTO
                 {
                     DayOfWeek = scheduleHelper.GetDayName(x.IdWeek),

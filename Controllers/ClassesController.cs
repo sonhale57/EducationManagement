@@ -20,6 +20,7 @@ using static SuperbrainManagement.MvcApplication;
 using System.Data.Entity.Migrations;
 using SuperbrainManagement.Helpers;
 using System.Threading.Tasks;
+using System.Globalization;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -232,7 +233,147 @@ namespace SuperbrainManagement.Controllers
             ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", @class.IdUser);
             return View(@class);
         }
+
+        // GET: Classes/Filter/5
+        public ActionResult Filter(int? id, int? idCourse, string studentName)
+        {
+            var studentJoinedClass = db.StudentJoinClasses.Where(x => x.IdClass == id).ToList();
+
+            if (idCourse != null)
+            {
+                studentJoinedClass = db.StudentJoinClasses.Where(x => x.IdCourse == idCourse).ToList();
+            }     
+
+            if (!string.IsNullOrEmpty(studentName))
+            {
+                studentJoinedClass = db.StudentJoinClasses.Where(x => x.Student.Name.ToLower().Contains(studentName.ToLower())).ToList();
+            }
+
+            var schedulesbyClass = db.Schedules
+                                    .Where(x => x.IdClass == id && (bool)x.Active).Include(x => x.Employee).ToList()
+                                    .Select(x => scheduleHelper.GetDayName(x.IdWeek));
+
+            List<ClassFilterDTO> timeTableData = new List<ClassFilterDTO>();
+
+            var sessionNumber = 0;
+
+            foreach (var item in studentJoinedClass)
+            {
+                ClassFilterDTO classFilterDTO = new ClassFilterDTO
+                {
+                    StudentID = (int)item.IdStudent,
+                    CourseName = item.Course.Name, 
+                    StudentName = item.Student.Name
+                };
+
+                var sessions = new List<Session>();
+
+                for (var date = (DateTime)item.Fromdate; date <= item.Todate; date = date.AddDays(1))
+                {
+                    var DayOfWeekVNCompared = scheduleHelper.ConvertEnglishDayToVietnamese(date.DayOfWeek.ToString());
+                    var scheduleMatched = schedulesbyClass.FirstOrDefault(x => x == DayOfWeekVNCompared);
+
+                    if (scheduleMatched != null)
+                    {
+                        var studentCheckedIn = db.StudentCheckins
+                        .Where(x => x.IdStudent == item.IdStudent &&
+                        x.IdClass == id).ToList();
+
+                        var DateCreate = studentCheckedIn
+                                     .Select(x => new { datetime = (DateTime)x.DateCreate, checkInStatus = x.StatusCheckin })
+                                     .Select(x => new { datetime = x.datetime.ToString("dd:MM:yyyy"), checkInStatus = x.checkInStatus })
+                                     .ToList();
+
+                        var dateChecked = DateCreate.FirstOrDefault(x => x.datetime == date.ToString("dd:MM:yyyy"));
+
+                        bool? isCheckedIn = null;
+
+                        if (studentCheckedIn != null && studentCheckedIn.Any() && dateChecked != null)
+                        {
+                            isCheckedIn = dateChecked.checkInStatus;
+                        }
+
+                        sessions.Add(new Session
+                        {
+                            DayOfWeek = DayOfWeekVNCompared,
+                            Date = date.ToString("dd/MM"),
+                            IsCheckedIn = isCheckedIn
+                        });
+                    }
+                }
+
+                classFilterDTO.Sessions = sessions;
+
+                sessionNumber = sessions.Count;
+
+                timeTableData.Add(classFilterDTO);
+            }
+
+            ViewBag.ClassSelectedId = id;
+            ViewBag.IdClass = new SelectList(db.Classes, "Id", "Name");
+            ViewBag.IdCourse = new SelectList(db.Courses, "Id", "Name");
+            ViewBag.StudentJoinedClass = studentJoinedClass;
+            ViewBag.TimeTableData = timeTableData;
+            ViewBag.SessionNumber = sessionNumber;
+
+            return View();
+        }
+
+
+         // POST: Classes/CheckIn
         [HttpPost]
+        public ActionResult CheckIn(int? classId, 
+            int studentId,
+            bool checkIn,
+            string dateCheckedIn, 
+            string lesson, 
+            string completely, 
+            string exactRate,
+            string textNumber,
+            string row,
+            string second,
+            string home_completely,
+            string home_exactRate,
+            string focusRate,
+            string confidentRate,
+            string rememberRate,
+            string reflexRate,
+            string other,
+            int power,
+            bool isSMS
+            )
+        {
+            var checkInDetail = new StudentCheckin
+            {
+                IdClass = classId,
+                DateCreate = DateTime.ParseExact(dateCheckedIn, "dd/MM/yyyy", CultureInfo.InvariantCulture),
+                IdStudent = studentId,
+                IdUser = int.Parse(CheckUsers.iduser()),
+                Enable = true,
+                Status = true,
+                StatusCheckin = checkIn,
+                Lesson = lesson,
+                Complete = completely,
+                Exactly = exactRate,
+                OnClassNumber = textNumber,
+                OnClassRow = row,
+                OnClassPaper = second,
+                HomeComplete = home_completely,
+                HomeExactly = home_exactRate,
+                Focus = focusRate,
+                Confident = confidentRate,
+                Remember = rememberRate,
+                Reflex = reflexRate,
+                Other = other,
+                Power = power,
+                SendSMS = Convert.ToString(isSMS)
+            };
+            db.StudentCheckins.Add(checkInDetail);
+            db.SaveChanges();
+
+            return RedirectToAction("Filter", new { id = classId });
+        }
+
         public async Task<ActionResult> Delete_Classes(int id)
         {
             var status = "ok";
