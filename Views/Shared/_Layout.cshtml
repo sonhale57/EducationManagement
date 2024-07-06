@@ -12,6 +12,30 @@
     @Scripts.Render("~/bundles/jquery")
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.min.css">
     <script src="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/js/jquery-confirm.min.js"></script>
+
+    <style>
+        .custom-scrollbar {
+            width: 300px;
+            height: 200px;
+            overflow-y: scroll;
+        }
+
+            .custom-scrollbar::-webkit-scrollbar {
+                width: 12px;
+            }
+
+            .custom-scrollbar::-webkit-scrollbar-track {
+                background: #f1f1f1;
+            }
+
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+                background: #888;
+            }
+
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: #555;
+                }
+    </style>
 </head>
 <body>
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
@@ -325,7 +349,7 @@
                     </ul>
                 </nav>
             </div>
-        </aside>    
+        </aside>
         <div class="body-wrapper">
             <header class="app-header shadow">
                 <nav class="navbar navbar-expand-lg navbar-light">
@@ -366,7 +390,7 @@
                                 </div>
                             </li>
                         </ul>
-                        
+
                     </div>
                 </nav>
             </header>
@@ -383,6 +407,11 @@
         </div>
     </div>
     @Scripts.Render("~/bundles/signalR")
+    <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
+    <script>
+        CKEDITOR.replace('editor1');
+    </script>
+
     <script src="~/assets/js/select2.min.js"></script>
     <script src="~/assets/js/sidebarmenu.js" asp-append-version="true"></script>
     <script src="~/assets/js/app.min.js" asp-append-version="true"></script>

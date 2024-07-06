@@ -9,7 +9,7 @@
     <div class="col col-md-4 col-sm-12">
         <form action="/Branches" method="get">
             <div class="input-group mb-3">
-                <input type="text" class="form-control" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter ">
+                <input type="text" class="form-control" id="searchString" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter ">
                 <button class="input-group-text bg-success" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
             </div>
         </form>
@@ -20,11 +20,10 @@
                 <i class="ti ti-arrows-sort"></i> Sắp xếp theo
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "group", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-layers-subtract"></i> Cụm cơ sở</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-ascending"></i> Cũ nhất</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
+                <li><a class="dropdown-item" href="javascript:Loadlist('name')"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
+                <li><a class="dropdown-item" href="javascript:Loadlist('name_desc')"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
+                <li><a class="dropdown-item" href="javascript:Loadlist('date')"><i class="ti ti-sort-ascending"></i> Cũ nhất</a></li>
+                <li><a class="dropdown-item" href="javascript:Loadlist('date_desc')"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
             </ul>
         </div>
         <a href="/branches/create" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
@@ -35,78 +34,33 @@
     <thead class="bg-success text-white rounded-1">
         <tr>
             <th class="text-center">STT</th>
-            <th>Cụm cơ sở</th>
             <th class="text-center">Mã</th>
             <th>Tên cơ sở</th>
-            <th>Số điện thoại</th>
-            <th>Địa chỉ email</th>
-            <th>Tình trạng</th>
-            <th class="text-end">Thao tác</th>
+            <th class="text-left">Số lượng học viên</th>
+            <th class="text-center">Ngày hết hạn</th>
+            <th class="text-center">Tình trạng</th>
+            <th class="text-center">Thao tác</th>
         </tr>
     </thead>
-
-    @foreach (var item in Model)
-    {
-        <tr>
-            <td class="text-center">
-                @stt
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.BranchGroup.Name)
-            </td>
-            <td class="text-center">
-                @Html.DisplayFor(modelItem => item.Code)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Phone)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @if (item.Active == true)
-                {
-                    <label class="custom-control ios-switch">
-                        <input type="checkbox" class="ios-switch-control-input" checked="checked" onchange="javascript: onchange_active()">
-                        <span class="ios-switch-control-indicator"></span>
-                    </label>
-                }
-                else
-                {
-                    <label class="custom-control ios-switch">
-                        <input type="checkbox" class="ios-switch-control-input" onchange="javascript: onchange_active()">
-                        <span class="ios-switch-control-indicator"></span>
-                    </label>
-                }
-            </td>
-            <td class="text-end">
-                <a href="/branches/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
-                <a href="/branches/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
-                <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="ti ti-dots-vertical"></i>
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <li><a class="dropdown-item" href=""><i class="ti ti-settings"></i> Thiết lập cơ sở</a></li>
-                    <li><a class="dropdown-item" href=""><i class="ti ti-brand-paypal"></i> Thanh toán phí</a></li>
-                    <li><a class="dropdown-item" href=""><i class="ti ti-sort-ascending"></i> Xác nhận thanh toán</a></li>
-                    <li><a class="dropdown-item" href=""><i class="ti ti-sort-descending"></i> Thanh lý hợp đồng</a></li>
-                </ul>
-            </td>
-        </tr>
-        stt += 1;
-    }
+    <tbody id="showlist"></tbody>
 </table>
-<nav aria-label="Page navigation">
-    <ul class="pagination justify-content-center">
-        @Html.PagedListPager(Model, page => Url.Action("Index", new { page }), new PagedListRenderOptions { LiElementClasses = new string[] { "page-item" } })
-    </ul>
-</nav>
 <script>
-    function onchange_active() {
-        //Script Onchange
-        showSuccess("Onchange", 2000);
+    Loadlist();
+    function Loadlist(sort) {
+        $.ajax({
+            url: '@Url.Action("Loadlist", "Branches")',
+            type: "GET",
+            data: {
+                searchString: $("#searchString").val(),
+                sort :sort
+            },
+            success: function (data) {
+                console.log(data);
+                $('#showlist').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
     }
 </script>

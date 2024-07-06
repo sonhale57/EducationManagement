@@ -17,8 +17,65 @@ namespace SuperbrainManagement.Controllers
         private ModelDbContext db = new ModelDbContext();
 
         // GET: Branches
-        
-        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
+        public ActionResult Index()
+        {
+            return View();
+        }
+        public ActionResult Loadlist(string searchString,string sort)
+        {
+            var configTimePayment = db.Configurations.OrderByDescending(x => x.Id).FirstOrDefault().TimePayment;
+            string str = "";
+            string querySearch = "", querySort = "";
+            var cum = db.BranchGroups.Where(x=>x.Enable==true).ToList();
+            int count = 0;
+            int countcum = 0;
+            foreach(var c in cum)
+            {
+                countcum++;
+                str += "<tr>" 
+                    +"<td  class='text-success fw-bolder text-center'>"+countcum+"</td>" 
+                    +"<td colspan=6 class='text-success fw-bolder'>"+c.Name+"" 
+                        +"<a href=\"/productcategories/edit/" + c.Id + "\" class=\"ms-2\"><i class=\"ti ti-edit text-primary fw-bolder\"></i></a>"
+                        + "<a href=\"javascript:Delete_category(" + c.Id + ")\" class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a>"
+                    +"</td>" 
+                    +"</tr>";
+                var cn = db.Branches.Where(x => x.IdGroup == c.Id);
+                foreach(var cn2 in cn)
+                {
+                    count++;
+                    str += "<tr>" +
+                        "<td class='text-center align-content-center'>"+count+"</td>" +
+                        "<td class='text-center align-content-center'>" + cn2.Code+"</td>" +
+                        "<td class='text-left align-content-center'>" + cn2.Name+"</td>" +
+                        "<td class='text-left align-content-start'>" +
+                        "Đang học: "+ count_student(cn2.Id) + "<br/>" +
+                        "Tính phí "+configTimePayment.Value.AddMonths(1).ToString("MM/yyyy")+": " + count_student(cn2.Id)  +
+                        "</td>" +
+                        "<td class='text-center align-content-center'>" + cn2.DateExpire+"</td>" +
+                        "<td class='text-center align-content-center'>" + (cn2.StatusActiveOnline==true?"<span class='text-success'>Đã thanh toán</span>":"<span class='text-danger'>Chưa thanh toán</span>") + "</td>" +
+                        "<td class='text-end align-content-center'>" +
+                        "<a href='/branches/edit/"+cn2.Id+"'><i class='ti ti-edit text-primary'></i></a>" +
+                        "</td>" +
+                        "</tr>";
+                }
+            }
+            var item = new {
+                str
+            };
+            return Json(item,JsonRequestBehavior.AllowGet);
+        }
+
+        int count_tinhphi(int idStudent)
+        {
+            var config = db.Configurations.OrderByDescending(x=>x.Id).FirstOrDefault().TimePayment;
+            var join = db.StudentJoinClasses.Where(x => x.IdStudent == idStudent && x.Todate >= DateTime.Now).ToList();
+            return join.Count;
+        }
+        int count_student(int idBranch) {
+            var join = db.StudentJoinClasses.Where(x=>x.Student.Branch.Id == idBranch && x.Todate>=DateTime.Now).ToList();
+            return join.Count;
+        }
+        public ActionResult List(string sortOrder, string currentFilter, string searchString, int? page)
         {
             if (searchString != null)
             {

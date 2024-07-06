@@ -5,6 +5,7 @@ namespace SuperbrainManagement.Models
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.Entity.Spatial;
+    using System.Web.Mvc;
 
     [Table("Feed")]
     public partial class Feed
@@ -14,6 +15,7 @@ namespace SuperbrainManagement.Models
         [StringLength(50)]
         public string Name { get; set; }
 
+        [AllowHtml]
         [Column(TypeName = "ntext")]
         public string Description { get; set; }
 
