@@ -48,11 +48,12 @@
 </table>
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel2" aria-hidden="true">
     <div class="modal-dialog modal-xl">
-        <div class="modal-content rounded-0 h-75">
+        <div class="modal-content">
             <form action="/" method="post" id="form_xuat">
-                <div class="modal-header bg-primary">
-                    <h5 class="modal-title text-white" id="exampleModalLabel2">Đăng ký giáo viên tham gia đào tạo</h5>
+                <div class="modal-header">
+                    <h5 class="modal-title text-success" id="exampleModalLabel2">Đăng ký giáo viên tham gia đào tạo</h5>
                 </div>
+                <hr style="width:90%;margin:0 auto;" />
                 <div class="modal-body">
                     <div class="row">
                         <div class="col col-6 col-md-6 col-sm-12">
@@ -79,11 +80,11 @@
                         </div>
                         <div class="col col-4 col-md-4 col-sm-12 mt-3">
                             <label class="text-success">Vị trí công tác:</label>
-                            <input type="text" name="Vitri" id="Vitri" placeholder="Vị trí làm việc" value="" class="form-control" readonly/>
+                            <input type="text" name="Vitri" id="Vitri" placeholder="Vị trí làm việc" value="" class="form-control" readonly />
                         </div>
                         <div class="col col-4 col-md-4 col-sm-12 mt-3">
                             <label class="text-success">Thời gian công tác:</label>
-                            <input type="text" name="Thoigian" id="Thoigian" placeholder="Thời gian công tác" value="" class="form-control" readonly/>
+                            <input type="text" name="Thoigian" id="Thoigian" placeholder="Thời gian công tác" value="" class="form-control" readonly />
                         </div>
                         <div class="col col-4 col-md-4 col-sm-12 mt-3">
                             <label class="text-success">Đăng ký lưu trú:</label>
@@ -93,25 +94,29 @@
                             </select>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer text-start">
-                    <button type="button" class="btn btn-success" onclick="Submit_registration()">
-                        <i class="ti ti-registered"></i> Đăng ký tham gia
-                    </button>
+                    <div class="text-center mt-4">
+                        <button type="button" class="btn btn-success" onclick="Submit_registration()">
+                            <i class="ti ti-registered"></i> Đăng ký tham gia
+                        </button>
+                        <button type="button" class="btn btn-outline-dark" onclick="close_modal()">
+                            <i class="ti ti-door-exit"></i> Thoát
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
 <div class="modal fade" id="modalRegistration" tabindex="-1" aria-labelledby="exampleModalLabel2" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content rounded-0 h-75">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content" style="">
             <form action="/" method="post" id="form_xuat">
-                <div class="modal-header bg-primary">
-                    <h5 class="modal-title text-white" id="exampleModalLabel2">Danh sách đang ký tham gia đào tạo
-                    
+                <div class="modal-header">
+                    <h5 class="modal-title text-success" id="exampleModalLabel2">
+                        Danh sách đang ký tham gia đào tạo
                     </h5>
                 </div>
+                <hr style="width:90%;margin:0 auto;" />
                 <div class="modal-body">
                     <input type="hidden" name="IdTraining" id="IdTraining" value="" />
                     <div class="row">
@@ -121,15 +126,15 @@
                         </div>
                         <div class="col col-md-6 mt-3">
                             <label class="text-success">Phí đào tạo</label>
-                            <input type="text" id="PriceTraining" value="" class="form-control" readonly/>
+                            <input type="text" id="PriceTraining" value="" class="form-control" readonly />
                         </div>
                         <div class="col col-md-12 mt-3">
                             <label class="text-success">Mô tả</label>
-                            <input type="text" id="DescriptionTraining" value="" class="form-control"  readonly/>
+                            <input type="text" id="DescriptionTraining" value="" class="form-control" readonly />
                         </div>
                         <div class="col col-md-4 mt-3">
                             <label class="text-success">Hạn chót đăng ký</label>
-                            <input type="text" id="DeadlineTraining" value="" class="form-control" readonly/>
+                            <input type="text" id="DeadlineTraining" value="" class="form-control" readonly />
                         </div>
                         <div class="col col-md-4 mt-3">
                             <label class="text-success">Ngày bắt đầu</label>
@@ -137,7 +142,7 @@
                         </div>
                         <div class="col col-md-4 mt-3">
                             <label class="text-success">Ngày kết thúc</label>
-                            <input type="text" id="TodateTraining" value="" class="form-control" readonly/>
+                            <input type="text" id="TodateTraining" value="" class="form-control" readonly />
                         </div>
                     </div>
                     <p class="text-muted fw-light mt-3 text-decoration-underline"><i class="ti ti-file-analytics"></i> Danh sách đính kèm</p>
@@ -153,11 +158,14 @@
                         </tr>
                         <tbody id="showlist_dangky"></tbody>
                     </table>
-                </div>
-                <div class="modal-footer text-start">
-                    <button type="button" class="btn btn-success" onclick="Submit_payment()">
-                        <i class="ti ti-credit-card"></i> Thanh toán phí tham gia
-                    </button>
+                    <div class="text-center">
+                        <button type="button" class="btn btn-success" onclick="Submit_payment()">
+                            <i class="ti ti-credit-card"></i> Thanh toán phí tham gia
+                        </button>
+                        <button type="button" class="btn btn-outline-dark" onclick="close_modal()">
+                            <i class="ti ti-door-exit"></i> Thoát
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -201,6 +209,10 @@
                 console.log(error);
             }
         });
+    }
+    function close_modal() {
+        $("#exampleModal").modal('hide');
+        $("#modalRegistration").modal('hide');
     }
     function View_registration(id) {
         Load_registration(id);

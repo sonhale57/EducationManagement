@@ -22,7 +22,67 @@ namespace SuperbrainManagement.Controllers
             var programs = db.Programs.Include(p => p.User).OrderBy(x=>x.DisplayOrder);
             return View(programs.ToList());
         }
-
+        [HttpPost]
+        public ActionResult Submit_addProgram(string action,int Id,string Code,string Name,int DisplayOrder,string Description)
+        {
+            string status = "ok";
+            string message = "";
+            if(action == "create")
+            {
+                var program = db.Programs.SingleOrDefault(x => x.Code == Code);
+                if (program == null)
+                {
+                    var p = new Program()
+                    {
+                        DateCreate = DateTime.Now,
+                        Code = Code,
+                        Name = Name,
+                        IdUser = int.Parse(CheckUsers.iduser()),
+                        Description = Description,
+                        Enable = true,
+                        DisplayOrder = DisplayOrder,
+                        IsTest = true
+                    };
+                    db.Programs.Add(p);
+                    db.SaveChanges();
+                    status = "ok";
+                    message = "Đã thêm thành công!";
+                }
+                else
+                {
+                    status = "error";
+                    message = "Đã tồn tại mã chương trình này!";
+                }
+            }
+            else if(action == "edit")
+            {
+                var p = db.Programs.Find(Id);
+                p.Description = Description;
+                p.Name = Name;
+                p.Code = Code;
+                p.DisplayOrder = DisplayOrder;
+                db.Entry(p);
+                db.SaveChanges();
+                status = "ok";
+                message = "Đã cập nhật thành công!";
+            }
+            var item = new {
+                message,
+                status
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Loadedit_Program(int id) {
+            var p = db.Programs.Find(id);
+            var item = new { 
+                name = p.Name,
+                code= p.Code,
+                displayorder = p.DisplayOrder,
+                description = p.Description
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        #region default
         // GET: Programs/Details/5
         public ActionResult Details(int? id)
         {
@@ -37,7 +97,6 @@ namespace SuperbrainManagement.Controllers
             }
             return View(program);
         }
-
         // GET: Programs/Create
         public ActionResult Create()
         {
@@ -121,5 +180,7 @@ namespace SuperbrainManagement.Controllers
             }
             base.Dispose(disposing);
         }
+        #endregion
+        
     }
 }

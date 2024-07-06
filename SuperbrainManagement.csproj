@@ -301,12 +301,14 @@
     <Compile Include="Controllers\VacationSchedulesController.cs" />
     <Compile Include="Controllers\WarehousesController.cs" />
     <Compile Include="DTOs\ClassAssignmentDTO.cs" />
+    <Compile Include="DTOs\ClassFilterDTO.cs" />
     <Compile Include="DTOs\ScheduleViewDTO.cs" />
     <Compile Include="DTOs\StudentViewDTO.cs" />
     <Compile Include="DTOs\TimeTableDTO.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\ConvertText.cs" />
     <Compile Include="Helpers\ScheduleHelper.cs" />
     <Compile Include="Helpers\StudentHelper.cs" />
     <Compile Include="Helpers\VNPayHelper.cs" />
@@ -921,6 +923,8 @@
     <Content Include="Views\TrainingCourses\Edit.cshtml" />
     <Content Include="Views\TrainingCourses\Index.cshtml" />
     <Content Include="Views\Branches\List.cshtml" />
+    <Content Include="Views\Classes\Filter.cshtml" />
+
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

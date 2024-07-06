@@ -1,0 +1,275 @@
+﻿<div class="row">
+    <div class="col col-md-12 col-sm-12">
+        <div class="row">
+            @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
+            {
+                <div class="col col-md-2 col-sm-12 text-right">
+                    <div class="me-0 btn btn-md p-0">
+                        <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="ti ti-filter"></i> Filter lớp học
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            @foreach (var item in ViewBag.IdClass)
+                            {
+                                <li><a class="dropdown-item" href="@Url.Action("Filter", new { id = item.Value })"> @item.Text</a></li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <div class="col col-md-2 col-sm-12">
+                    <div class="me-0 btn btn-md p-0">
+                        <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="ti ti-filter"></i> Filter khoá học
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            @foreach (var item in ViewBag.IdCourse)
+                            {
+                                <li><a class="dropdown-item" href="@Url.Action("Filter", new { idCourse = item.Value })"> @item.Text</a></li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col col-md-6 col-sm-12">
+                    <form action="/classes/Filter" method="get">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" name="studentName" />
+                            <button class="input-group-text bg-success" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
+                        </div>
+                    </form>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+<table class="table fs-3">
+    <thead class="bg-success text-white rounded-1">
+        <tr>
+            <th style="padding: 0 0" class="text-center">Học viên</th>
+            <th style="padding: 0 0" class="text-center">Khoá học</th>
+
+            @for (int i = 1; i <= ViewBag.SessionNumber; i++)
+            {
+                <th style="padding: 0 0" class="text-center">Buổi @i</th>
+            }
+        </tr>
+    </thead>
+
+
+    <tbody id="timetable_datarow">
+        @foreach (var item in ViewBag.TimeTableData)
+        {
+            <tr>
+                <td class="text-center">
+                    @item.StudentName
+                </td>
+                <td class="text-center">
+                    @item.CourseName
+                </td>
+                @foreach (var session in item.Sessions)
+                {
+                    <td class="text-center" style="padding: 0 0">
+                        <div class="select-toggle">
+                            @if (session.IsCheckedIn == null)
+                            {
+                                <input type="checkbox" data-bs-toggle="modal" data-bs-target="#scheduleModal" id="selectToggle" onclick="storeSelected(@item.StudentID, '@session.Date')" />
+                            }
+                            else if (session.IsCheckedIn)
+                            {
+                                <input type="checkbox" checked="checked" data-bs-toggle="modal" data-bs-target="#scheduleModal" id="selectToggle" />
+                            }
+                            else
+                            {
+                                <input type="checkbox" data-bs-toggle="modal" data-bs-target="#scheduleModal" id="selectToggle" style="accent-color: red;" checked="checked" />
+                            }
+
+                        </div>
+                        <div>
+                            @session.Date <br />@session.DayOfWeek
+                        </div>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="padding-right: -100px;margin-right: 110px;height: 100vh;">
+        <form action="/Classes/CheckIn" method="post" enctype="multipart/form-data">
+            <div class="modal-content rounded-0" style="width: 600px;">
+                <input type="hidden" name="classId" id="classId" value="@ViewBag.ClassSelectedId" />
+                <input type="hidden" name="studentId" id="studentId"/>
+                <div class="modal-header bg-info">
+                    <h5 class="modal-title text-white" id="exampleModalLabel">Kết quả học tập ngày</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group row md-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Điểm Danh</label>
+                            <div class="col-lg-9">
+                                Có
+                                <input type="radio" name="checkIn" id="checkIn" autocomplete="off" value="True" checked />
+                                Không
+                                <input type="radio" name="checkIn" id="checkIn" autocomplete="off" value="False" />
+                            </div>
+                        </div>
+                        <div class="form-group row md-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Ngày</label>
+                            <div class="col-lg-9">
+                                <input type="text" class="form-control" name="dateCheckedIn" id="dateCheckedIn" />
+                            </div>
+                        </div>
+                        <div class="form-group row md-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Bài Học</label>
+                            <div class="col-lg-9">
+                                <input type="text" class="form-control" name="lesson" id="lesson" />
+                            </div>
+                        </div>
+                        <div class="form-group row md-2">
+                            <p><label style="color:blue" class="col-lg-3 col-form-label form-control-label">BTVN</label></p>
+                            <label class="col-lg-3 col-form-label form-control-label">Hoàn Thành</label>
+                            <div class="col-lg-9">
+                                <select name="completely" id="completely" class="form-control">
+                                    <option value="Excellent">Rất tốt</option>
+                                    <option value="Very Good">Tốt</option>
+                                    <option value="Good">Khá</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row md-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Chính xác</label>
+                            <div class="col-lg-9">
+                                <select name="exactRate" id="exactRate" class="form-control">
+                                    <option value="Excellent">Rất tốt</option>
+                                    <option value="Very Good">Tốt</option>
+                                    <option value="Good">Khá</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row md-2">
+                            <p><label style="color:blue" class="col-lg-3 col-form-label form-control-label">LUYỆN TẬP ONLINE</label></p>
+                            <p><label style="color:blue" class="col-lg-3 col-form-label form-control-label">TRÊN LỚP</label></p>
+                            <label class="col-lg-3 col-form-label form-control-label">Chữ số (D)</label>
+                            <div class="col-lg-9">
+                                <input type="text" class="form-control" name="textNumber" id="textNumber" />
+                            </div>
+                        </div>
+                        <div class="form-group row md-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Hàng</label>
+                            <div class="col-lg-9">
+                                <input type="text" class="form-control" name="row" id="row" />
+                            </div>
+                        </div>
+                        <div class="form-group row md-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Giây (S)</label>
+                            <div class="col-lg-9">
+                                <input type="text" class="form-control" name="second" id="second" />
+                            </div>
+                        </div>
+                        <div class="form-group row md-2">
+                            <p><label style="color:blue" class="col-lg-3 col-form-label form-control-label">Ở NHÀ</label></p>
+                            <label class="col-lg-3 col-form-label form-control-label">Hoàn Thành</label>
+                            <div class="col-lg-9">
+                                <select name="home_completely" id="home_completely" class="form-control">
+                                    <option value="Excellent">Rất tốt</option>
+                                    <option value="Very Good">Tốt</option>
+                                    <option value="Good">Khá</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row md-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Chính xác</label>
+                            <div class="col-lg-9">
+                                <select name="home_exactRate" id="home_exactRate" class="form-control">
+                                    <option value="Excellent">Rất tốt</option>
+                                    <option value="Very Good">Tốt</option>
+                                    <option value="Good">Khá</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row md-2">
+                            <p><label style="color:blue" class="col-lg-3 col-form-label form-control-label">NHẬN XÉT <label></p>
+                            <p><label style="color:blue" class="col-lg-3 col-form-label form-control-label">KỸ NĂNG</label></p>
+                            <label class="col-lg-3 col-form-label form-control-label">Tập Trung</label>
+                            <div class="col-lg-9">
+                                <select name="focusRate" id="focusRate" class="form-control">
+                                    <option value="Excellent">Rất tốt</option>
+                                    <option value="Very Good">Tốt</option>
+                                    <option value="Good">Khá</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row md-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Tự Tin</label>
+                            <div class="col-lg-9">
+                                <select name="confidentRate" id="confidentRate" class="form-control">
+                                    <option value="Excellent">Rất tốt</option>
+                                    <option value="Very Good">Tốt</option>
+                                    <option value="Good">Khá</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row md-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Ghi Nhớ</label>
+                            <div class="col-lg-9">
+                                <select name="rememberRate" id="rememberRate" class="form-control">
+                                    <option value="Excellent">Rất tốt</option>
+                                    <option value="Very Good">Tốt</option>
+                                    <option value="Good">Khá</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row md-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Phản xạ</label>
+                            <div class="col-lg-9">
+                                <select name="reflexRate" id="reflexRate" class="form-control">
+                                    <option value="Excellent">Rất tốt</option>
+                                    <option value="Very Good">Tốt</option>
+                                    <option value="Good">Khá</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row md-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Khác</label>
+                            <div class="col-lg-9">
+                                <input type="text" class="form-control" name="other" id="other" />
+                            </div>
+                        </div>
+                        <div class="form-group row md-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Power</label>
+                            <div class="col-lg-9">
+                                <input type="number" class="form-control" name="power" id="power" />
+                            </div>
+                        </div>
+                        <div class="form-group row md-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Gửi SMS</label>
+                            <div class="col-lg-9">
+                                Có
+                                <input type="radio" name="isSMS" id="isSMS" autocomplete="off" value="True" checked />
+                                Không
+                                <input type="radio" name="isSMS" id="isSMS" autocomplete="off" value="False" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer text-start">
+                    <button type="submit" class="btn btn-info">
+                        <i class="ti ti-calendar"></i> Nhập kết quả
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function storeSelected(studentId, date) {
+            let today = new Date();
+        document.getElementById("studentId").value = studentId;
+        document.getElementById("dateCheckedIn").value = date + "/" + today.getFullYear();
+
+    }
+</script>
