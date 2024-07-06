@@ -77,11 +77,18 @@ namespace SuperbrainManagement.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [ValidateInput(false)]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Name,Description,DateCreate,IdUser,Enable,Active,Todate,IsPublic,Type")] Feed feed)
+        public ActionResult Create([Bind(Include = "Id,Name,Description,DateCreate,IdUser,Enable,Active,Todate,IsPublic,Type")] Feed feed,string editor1)
         {
             if (ModelState.IsValid)
             {
+                feed.Description = editor1;
+                feed.DateCreate = DateTime.Now;
+                feed.IdUser = Convert.ToInt32(CheckUsers.iduser());
+                feed.Enable= true;
+                feed.Active = true;
+                feed.IsPublic = true;
                 db.Feeds.Add(feed);
                 db.SaveChanges();
                 return RedirectToAction("Index");

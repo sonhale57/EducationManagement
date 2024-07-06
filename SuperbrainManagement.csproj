@@ -271,7 +271,6 @@
     <Compile Include="Controllers\Connect.cs" />
     <Compile Include="Controllers\CourseBranchesController.cs" />
     <Compile Include="Controllers\CoursesController.cs" />
-    <Compile Include="Controllers\DonhangController.cs" />
     <Compile Include="Controllers\EmployeesController.cs" />
     <Compile Include="Controllers\FeedsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
@@ -903,8 +902,6 @@
     <Content Include="Views\ProductCategories\Edit.cshtml" />
     <Content Include="Views\ProductCategories\Index.cshtml" />
     <Content Include="Views\Payment\VnPayReturn.cshtml" />
-    <Content Include="Views\Donhang\Index.cshtml" />
-    <Content Include="Views\Donhang\Payment.cshtml" />
     <Content Include="Views\Payment\Payment.cshtml" />
     <Content Include="Views\Transactions\Create.cshtml" />
     <Content Include="Views\Transactions\Delete.cshtml" />
@@ -923,6 +920,7 @@
     <Content Include="Views\TrainingCourses\Details.cshtml" />
     <Content Include="Views\TrainingCourses\Edit.cshtml" />
     <Content Include="Views\TrainingCourses\Index.cshtml" />
+    <Content Include="Views\Branches\List.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
