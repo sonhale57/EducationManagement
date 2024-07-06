@@ -24,44 +24,21 @@ namespace SuperbrainManagement.Controllers
         public ActionResult Index()
         {
             ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Name");
+            ViewBag.IdBranchForm = new SelectList(db.Branches, "Id", "Name");
             ViewBag.IdCourse = new SelectList(db.Courses, "Id", "Name");
             return View();
         }
-        public ActionResult Loadlist(string sortOrder, string searchString, string IdBranch)
+        public ActionResult Loadlist(string IdBranch)
         {
             string str = "";
-            string querysort = "";
-            string querysearch = "";
             if (string.IsNullOrEmpty(IdBranch))
             {
                 IdBranch = CheckUsers.idBranch();
             }
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                querysearch = " and p.Name like N'" + searchString + "' or p.Code like N'" + searchString + "'";
-            }
-            if (!string.IsNullOrEmpty(sortOrder))
-            {
-                switch (sortOrder)
-                {
-                    case "name":
-                        querysort = " order by p.Name";
-                        break;
-                    case "name_desc":
-                        querysort = " order by p.Name desc";
-                        break;
-                    case "date_desc":
-                        querysort = " order by p.Id desc";
-                        break;
-                    default:
-                        querysort = " order by p.Id";
-                        break;
-                }
-            }
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string queryCat = "SELECT * from Program where enable=1";
+                string queryCat = "SELECT * from Program where enable=1 order by DisplayOrder";
                 SqlCommand commandCat = new SqlCommand(queryCat, connection);
                 connection.Open();
                 SqlDataReader readerCat = commandCat.ExecuteReader();
@@ -72,9 +49,9 @@ namespace SuperbrainManagement.Controllers
                             + "<td class='text-center text-success fw-bolder'>" + readerCat["Code"].ToString() + "</td>"
                             + "<td class='text-success fw-bolder' colspan=7>" + readerCat["Name"].ToString() + "</td>"
                             + "</tr>";
-                    string query = "select c.Id,c.Code,c.Name,cb.PriceCourse,cb.PriceTest,cb.PriceAccount,DiscountPrice,cb.StatusDiscount,cb.Sessons"
-                                        +" from Course c inner join CourseBranch cb on c.Id = cb.IdCourse" 
-                                        +" where c.IdProgram=" + readerCat["Id"] +" and cb.IdBranch="+IdBranch +querysearch +querysort;
+                    string query = "select c.Id,c.Code,c.Name,c.Hours,c.Sessions,cb.PriceCourse,cb.PriceTest,cb.PriceAccount,DiscountPrice,cb.StatusDiscount"
+                                        + " from Course c inner join CourseBranch cb on c.Id = cb.IdCourse" 
+                                        +" where c.IdProgram=" + readerCat["Id"] +" and cb.IdBranch="+IdBranch + " order by c.DisplayOrder";
                     SqlCommand command = new SqlCommand(query, connection);
                     SqlDataReader reader = command.ExecuteReader();
                     while (reader.Read())
@@ -82,21 +59,17 @@ namespace SuperbrainManagement.Controllers
                         double amount = Double.Parse(reader["PriceCourse"].ToString(), 0);
                         double amountTest = Double.Parse(reader["PriceTest"].ToString(),0);
                         double amountAccount = Double.Parse(reader["PriceAccount"].ToString(),0);
-
-                        //double priceCourse = Double.Parse(reader["PriceCourse"].ToString());
-                        //double priceTest = Double.Parse(reader["PriceTest"].ToString());
-                        //double priceAccount = Double.Parse(reader["PriceAccount"].ToString());
                         count++;
                         str += "<tr>"
                             + "<td class='text-center'>" +count+ "</td>"
                             + "<td class=''>" + reader["Code"].ToString() + "</td>"
                             + "<td class=''>" + reader["Name"].ToString() + "</td>"
                             + "<td class='text-center'>" + string.Format("{0:N0} đ", amount) + "</td>"
-                            + "<td class='text-center'>" + string.Format("{0:N0} đ", amountTest) + "</td>"
                             + "<td class='text-center'>" + string.Format("{0:N0} đ", amountAccount) + "</td>"
-                            + "<td class='text-center'>" + reader["Sessons"].ToString() + "</td>"
-                            +"<td class='text-end'>" 
-                            + "<a href='javascript:void(0)' class=\"me-1\"><i class=\"ti ti-edit text-primary\"></i></a>"
+                            + "<td class='text-center'>" + reader["Sessions"].ToString() + "</td>"
+                            + "<td class='text-center'>" + reader["Hours"].ToString() + "</td>"
+                            + "<td class='text-end'>" 
+                            + "<a href='javascript:Edit_CourseBranch(" + IdBranch + "," + reader["Id"] +")' class=\"me-1\"><i class=\"ti ti-edit text-primary\"></i></a>"
                             + "</td>"
                             + "</tr>";
                     }
@@ -105,6 +78,16 @@ namespace SuperbrainManagement.Controllers
             }
             var item = new {
             str
+            };
+            return Json(item,JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Load_EditCourseBranch(int IdBranch,int IdCourse) {
+            var c = db.CourseBranches.Where(x=>x.IdBranch==IdBranch&&x.IdCourse==IdCourse).FirstOrDefault();
+            var phi = c.PriceCourse;
+            var phitest = c.PriceTest;
+            var phitk = c.PriceAccount;
+            var item = new {
+                phi, phitest, phitk,
             };
             return Json(item,JsonRequestBehavior.AllowGet);
         }
@@ -132,7 +115,10 @@ namespace SuperbrainManagement.Controllers
             {
                 status = "Đã tồn tại vật tư này!";
             }
-            return Json(status, JsonRequestBehavior.AllowGet);
+            var item = new { 
+                status = status
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
         }
         public ActionResult Loadlist_ProductCourse(string IdCourse) 
         {
@@ -221,7 +207,7 @@ namespace SuperbrainManagement.Controllers
             ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", course.IdUser);
             return View(course);
         }
-        public ActionResult Submit_CourseBranch(int IdBranch, int IdCourse, decimal PriceCourse, decimal PriceOnline, decimal PriceTest, int Sessons)
+        public ActionResult Submit_CourseBranch(int IdBranch, int IdCourse, decimal PriceCourse, decimal PriceOnline, decimal PriceTest)
         {
             string status = "ok";
             var cb = db.CourseBranches.SingleOrDefault(x => x.IdBranch == IdBranch && x.IdCourse == IdCourse);
@@ -233,8 +219,7 @@ namespace SuperbrainManagement.Controllers
                     IdBranch = IdBranch,
                     PriceCourse = PriceCourse,
                     PriceAccount = PriceOnline,
-                    PriceTest = PriceTest,
-                    Sessons = Sessons
+                    PriceTest = PriceTest
                 };
                 db.CourseBranches.Add(courseBranch);
                 db.SaveChanges();

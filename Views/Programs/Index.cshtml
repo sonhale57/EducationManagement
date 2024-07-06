@@ -10,7 +10,7 @@
     <div class="col col-md-4 col-sm-12">
     </div>
     <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
-        <a href="/programs/create" class="btn btn-md btn-success ms-0"><i class="ti ti-coffee"></i> Thêm mới chương trình</a>
+        <a href="javascript:Add_Program()" class="btn btn-md btn-success ms-0"><i class="ti ti-coffee"></i> Thêm mới chương trình</a>
         <a href="/courses/create" class="btn btn-md btn-primary ms-0"><i class="ti ti-certificate-2"></i> Thêm mới khóa học</a>
     </div>
 </div>
@@ -22,16 +22,17 @@
             <th>Tên</th>
             <th class="text-center">Học phí</th>
             <th class="text-center">Số buổi</th>
+            <th class="text-center">Số giờ</th>
             <th class="text-end">Thao tác</th>
         </tr>
     </thead>
-    @foreach (var item in Model)
+    @foreach (var item in Model.OrderBy(x=>x.DisplayOrder))
     {
         <tr>
             <td class="text-success text-center fw-bolder">@Html.DisplayFor(modelItem => item.Code)</td>
-            <td colspan="5" class="text-success fw-bolder">
+            <td colspan="6" class="text-success fw-bolder">
                 @Html.DisplayFor(modelItem => item.Name)
-                <a href="/programs/edit/@item.Id" class="ms-2"><i class="ti ti-edit text-primary fw-bolder"></i></a>
+                <a href="javascript:Edit_Program(@item.Id)" class="ms-2"><i class="ti ti-edit text-primary fw-bolder"></i></a>
                 <a href="javascript:Delete_Program(@item.Id)" class="me-1"><i class="ti ti-trash text-danger"></i></a>
             </td>
         </tr>
@@ -53,6 +54,10 @@
                 <td class="text-center">
                     @Html.DisplayFor(modelItem => c.Sessions)
                 </td>
+
+                <td class="text-center">
+                    @Html.DisplayFor(modelItem => c.Hours)
+                </td>
                 <td class="text-end">
                     <a href="/courses/edit/@c.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
                     <a href="javascript:Delete_Course(@c.Id)" class="me-1"><i class="ti ti-trash text-danger"></i></a>
@@ -71,22 +76,65 @@
         }
     }
 </table>
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" style="padding-right: -100px;margin-right: 0px;height: 100%;">
-        <div class="modal-content rounded-0 h-100">
+<div class="modal fade" id="modaladdProgram" tabindex="-1" aria-labelledby="modaladdProgramLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="width:800px;">
             <form action="/" method="post" id="form_nhap">
-                <div class="modal-header bg-primary">
-                    <h5 class="modal-title text-white" id="exampleModalLabel">Cài đặt vật tư khóa học</h5>
+                <div class="modal-header">
+                    <h5 class="modal-title text-success" id="modaladdProgramLabel">Thêm chương trình</h5>
                 </div>
+                <hr style="width:90%;margin:0 auto;"/>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col-md-12 mt-2">
+                            <label>Mã chương trình</label>
+                            <input type="hidden" name="action" value="" class="form-control" id="action" placeholder="Mã chương trình" />
+                            <input type="hidden" name="IdProgram" value="" class="form-control" id="IdProgram" placeholder="Mã chương trình" />
+                            <input type="text" name="CodeProgram" value="" class="form-control" id="CodeProgram" placeholder="Mã chương trình" />
+                        </div>
+
+                        <div class="form-group col-md-12 mt-2">
+                            <label>Tên chương trình</label>
+                            <input type="text" name="NameProgram" value="" class="form-control" id="NameProgram" placeholder="Tên chương trình" />
+                        </div>
+
+                        <div class="form-group col-md-12 mt-2">
+                            <label>Thứ tự hiển thị</label>
+                            <input type="text" name="DisplayOrderProgram" value="" class="form-control" id="DisplayOrderProgram" placeholder="Thứ tự hiển thị" />
+                        </div>
+
+                        <div class="form-group col-md-12 mt-2">
+                            <label>Mô tả ngắn</label>
+                            <input type="text" name="DescriptionProgram" value="" class="form-control" id="DescriptionProgram" placeholder="Mô tả ngắn" />
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-success text-center" onclick="Submit_AddProgram()" id="btnActionProgram">
+                            <i class="ti ti-circle-plus"></i> Thêm mới
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="width:800px;">
+            <form action="/" method="post" id="form_nhap">
+                <div class="modal-header">
+                    <h5 class="modal-title text-success" id="exampleModalLabel">Cài đặt vật tư khóa học</h5>
+                </div>
+                <hr style="width:90%;margin:0 auto;" />
                 <div class="modal-body">
                     <div class="row">
                         <div class="col col-12 col-md-12 col-sm-12">
-                            <label class="text-success">Vật tư:</label>
+                            <label>Vật tư:</label>
                             <input type="hidden" name="IdCourse" value="" id="IdCourse" />
                             @Html.DropDownList("IdProduct", null, htmlAttributes: new { @class = "form-control" })
                         </div>
                         <div class="col col-12 col-md-12 col-sm-12 mt-2">
-                            <label class="text-success">Số lượng:</label>
+                            <label>Số lượng:</label>
                             <input type="text" name="Phone" id="Phone" placeholder="Số lượng" value="1" class="form-control" />
                         </div>
                     </div>
@@ -102,17 +150,72 @@
                         </thead>
                         <tbody id="showlist_product"></tbody>
                     </table>
-                </div>
-                <div class="modal-footer text-start">
-                    <button type="button" class="btn btn-success" onclick="Submit_ProductCourse()">
-                        <i class="ti ti-circle-plus"></i> Cập nhật
-                    </button>
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-success" onclick="Submit_ProductCourse()">
+                            <i class="ti ti-circle-plus"></i> Cập nhật
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
 <script>
+    function Add_Program() {
+        $('#modaladdProgramLabel').html("Thêm chương trình học");
+        $('#action').val("create");
+        $('#btnActionProgram').html("Thêm mới");
+        $('#modaladdProgram').modal('show');
+    }
+    function Edit_Program(id) {
+        $('#modaladdProgramLabel').html("Chỉnh sửa chương trình học");
+        $('#btnActionProgram').html("Cập nhật");
+        $.ajax({
+            url: '@Url.Action("Loadedit_Program", "Programs")',
+            type: "GET",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                $('#IdProgram').val(id);
+                $('#action').val("edit");
+                $('#CodeProgram').val(data.code);
+                $('#NameProgram').val(data.name);
+                $('#DisplayOrderProgram').val(data.displayorder);
+                $('#DescriptionProgram').val(data.description);
+                $('#modaladdProgram').modal('show');
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+    function Submit_AddProgram() {
+        $.ajax({
+            url: '@Url.Action("Submit_addProgram", "Programs")',
+            type: "POST",
+            data: {
+                Id: $("#IdProgram").val(),
+                action: $("#action").val(),
+                Code: $("#CodeProgram").val(),
+                Name: $("#NameProgram").val(),
+                DisplayOrder: $("#DisplayOrderProgram").val(),
+                Description: $("#DescriptionProgram").val()
+            },
+            success: function (data) {
+                if (data.status == "ok") {
+                    $('#modaladdProgram').modal('hide');
+                    location.reload();
+                } else {
+                    showError(data.message,3000);
+                }
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+
     function Load_ProductCourse(id) {
         Loadlist_ProductCourse(id);
         $("#IdCourse").val(id);
@@ -134,16 +237,19 @@
             }
         });
     }
+    
+
     function Submit_ProductCourse() {
         $.ajax({
             url: '@Url.Action("Submit_ProductCourse", "Courses")',
-            type: "GET",
+            type: "POST",
             data: {
                 IdCourse: $("#IdCourse").val(),
                 IdProduct: $("#IdProduct").val()
             },
             success: function (data) {
                 if (data.status == "ok") {
+                    showSuccess("Đã thêm thành công!",3000);
                     Loadlist_ProductCourse($("#IdCourse").val());
                 } else {
                     showError(data.status,3000);

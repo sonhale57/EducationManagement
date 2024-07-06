@@ -13,24 +13,11 @@
                 {
                     @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", @onchange = "javascript:Loadlist()" })
                 }
-                <input type="text" class="form-control" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
-                <button class="input-group-text bg-success" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
             </div>
         </form>
     </div>
     <div class="col col-md-6 col-sm-12 text-right" style="text-align:right;">
-        <div class="me-0 btn btn-md p-0">
-            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="ti ti-arrows-sort"></i> Sắp xếp theo
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="javascript:Loadlist('name')"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
-                <li><a class="dropdown-item" href="javascript:Loadlist('name_desc')"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
-                <li><a class="dropdown-item" href="javascript:Loadlist('date')"><i class="ti ti-sort-ascending"></i> Cũ nhất</a></li>
-                <li><a class="dropdown-item" href="javascript:Loadlist('date_desc')"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
-            </ul>
-        </div>
-        <a href="javascript:void(0)" class="btn btn-md btn-success ms-0" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="ti ti-circle-plus"></i> Thêm mới</a>
+        <a href="javascript:Add_CourseBranch()" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
     </div>
 </div>
 
@@ -41,9 +28,9 @@
             <th>Mã</th>
             <th>Tên</th>
             <th class="text-center">Học phí</th>
-            <th class="text-center">Phí bài test</th>
             <th class="text-center">Phí tài khoản</th>
             <th class="text-center">Số buổi</th>
+            <th class="text-center">Số giờ</th>
             <th class="text-end">Thao tác</th>
         </tr>
     </thead>
@@ -54,15 +41,13 @@
         <div class="modal-content" style="width:800px;">
             <div class="modal-header">
                 <h5 class="modal-fullscreen" id="exampleModalLabel">Thêm khóa học</h5>
-                <button type="button" class="btn btn-sm text-danger" data-dismiss="modal" aria-label="Close">
-                    <i class="ti ti-x"></i>
-                </button>
             </div>
+            <hr style="width:90%;margin:0 auto;" />
             <form action="/" method="post">
                 @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <label class="text-success">Cơ sở</label>
-                    @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control" })
+                    @Html.DropDownList("IdBranchForm", null, htmlAttributes: new { @class = "form-control" })
 
                     <label class="text-success mt-3">Khóa học</label>
                     @Html.DropDownList("IdCourse", null, htmlAttributes: new { @class = "form-control" })
@@ -70,14 +55,11 @@
                     <label class="text-success mt-3">Học phí</label>
                     <input type="text" class="form-control" id="PriceCourse" name="PriceCourse" value="0" placeholder="Học phí khóa học" />
 
-                    <label class="text-success mt-3">Số buổi</label>
-                    <input type="text" class="form-control" id="Sessons" name="Sessons" value="0" placeholder="Số buổi khóa học" />
-
                     <label class="text-success mt-3">Phí tài khoản Online</label>
-                    <input type="text" class="form-control" id="PriceOnline" name="PriceOnline" value="0" placeholder="Số buổi khóa học" />
+                    <input type="text" class="form-control" id="PriceOnline" name="PriceOnline" value="0" placeholder="Phí tài khoản" />
 
                     <label class="text-success mt-3">Phí test đầu vào</label>
-                    <input type="text" class="form-control" id="PriceTest" name="PriceTest" value="0" placeholder="Số buổi khóa học" />
+                    <input type="text" class="form-control" id="PriceTest" name="PriceTest" value="0" placeholder="Phí test đầu vào" />
                 </div>
                 <div class="modal-footer">
                     <a href="javascript:Submit_CourseBranch()" class="btn btn-success"> Lưu cập nhật</a>
@@ -108,16 +90,44 @@
              }
          });
     }
-
+    function Add_CourseBranch() {
+        $("#exampleModalLabel").html("Thêm khóa học"); 
+        $("#IdBranchForm").removeClass("disabled"); 
+        $("#IdCourse").removeClass("disabled");
+        $('#exampleModal').modal('show');
+    }
+    function Edit_CourseBranch(IdBranch, IdCourse) {
+        $("#exampleModalLabel").html("Chỉnh sửa khóa học"); 
+        $("#IdBranchForm").val(IdBranch);
+        $("#IdBranchForm").addClass("disabled");
+        $("#IdCourse").addClass("disabled");
+        $("#IdCourse").val(IdCourse);
+        $.ajax({
+            url: '@Url.Action("Load_EditCourseBranch", "Courses")',
+            type: "GET",
+            data: {
+                IdBranch: IdBranch,
+                IdCourse: IdCourse
+            },
+            success: function (data) {
+                $('#PriceTest').val(data.phitest);
+                $('#PriceCourse').val(data.phi);
+                $('#PriceOnline').val(data.phitk);
+                $('#exampleModal').modal('show');
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
     function Submit_CourseBranch() {
         $.ajax({
             url: '@Url.Action("Submit_CourseBranch", "Courses")',
             type: "POST",
             data: {
                 IdCourse: $("#IdCourse").val(),
-                IdBranch: $("#IdBranch").val(),
+                IdBranch: $("#IdBranchForm").val(),
                 PriceCourse: $("#PriceCourse").val(),
-                Sessons: $("#Sessons").val(),
                 PriceOnline: $("#PriceOnline").val(),
                 PriceTest: $("#PriceTest").val()
             },

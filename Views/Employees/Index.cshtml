@@ -33,8 +33,8 @@
                 }
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = true, currentFilter =  ViewBag.CurrentFilter})"> Chính thức</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = false, currentFilter =ViewBag.CurrentFilter })"> Thử việc</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = true, currentFilter =  ViewBag.CurrentFilter,IdBranch=ViewBag.CurrentBranch})"> Chính thức</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = false, currentFilter =ViewBag.CurrentFilter,IdBranch=ViewBag.CurrentBranch })"> Thử việc</a></li>
             </ul>
         </div>
         <div class="me-0 btn btn-md p-0">
@@ -42,10 +42,10 @@
                 <i class="ti ti-arrows-sort"></i> Sắp xếp theo
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-ascending"></i> Cũ nhất</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name", currentFilter = ViewBag.CurrentFilter,filterEnum = ViewBag.CurrentEnum, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name_desc", currentFilter = ViewBag.CurrentFilter,filterEnum = ViewBag.CurrentEnum, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date", currentFilter = ViewBag.CurrentFilter,filterEnum = ViewBag.CurrentEnum,IdBranch=ViewBag.CurrentBranch, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-ascending"></i> Cũ nhất</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter,filterEnum = ViewBag.CurrentEnum,IdBranch=ViewBag.CurrentBranch, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
             </ul>
         </div>
         <a href="/employees/create" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
@@ -99,7 +99,7 @@
                     <i class="ti ti-dots-vertical"></i>
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <li><a href="javascript:Add_userbyEmployee(@item.Id)" class="dropdown-item"><i class="ti ti-user-plus"></i> Tạo tài khỏan</a></li>
+                    <li><a href="javascript:Add_userbyEmployee(@item.Id)" class="dropdown-item"><i class="ti ti-lock-access"></i> Tài khoản</a></li>
                 </ul>
             </td>
         </tr>
@@ -112,7 +112,7 @@
     </ul>
 </nav>
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
+    <div class="modal-dialog" style="padding-right: -100px;margin-right: 10px;height: 100%;">
         <div class="modal-content rounded-0 h-75">
             <form action="/" method="post" id="form_nhap">
                 <div class="modal-header bg-primary">
@@ -123,24 +123,18 @@
                         <div class="col col-md-12">
                             <label>Họ tên</label>
                             <input type="hidden" id="IdEmployee" value="" class="form-control" />
-                            <input type="text" id="NameEmployee" value="" class="form-control" />
+                            <input type="text" id="NameEmployee" value="" class="form-control" disabled/>
                         </div>
-                        <div class="col col-md-12">
+                        <div class="col col-md-12 mt-3">
                             <label>Tên đăng nhập</label>
-                            <input type="text" id="Username" value="" class="form-control" />
+                            <input type="text" id="Username" value="" class="form-control" disabled/>
                         </div>
-                        <div class="col col-md-12">
+                        <div class="col col-md-12 mt-3">
                             <label>Mật khẩu</label>
-                            <input type="text" id="Password" value="" class="form-control" />
-                        </div>
-                        <div class="col col-md-12">
-                            <label>Ghi chú</label>
-                            <input type="text" name="Description" value="" class="form-control" />
+                            <input type="password" id="Password" value="" class="form-control" required/>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer text-start">
-                    <button type="button" class="btn btn-success" onclick="submit_nhap()">
+                    <button type="button" class="btn btn-success mt-3" onclick="Submit_adduser()" id="btnAction">
                         <i class="ti ti-circle-plus"></i> Tạo tài khoản
                     </button>
                 </div>
@@ -150,6 +144,53 @@
 </div>
 <script>
     function Add_userbyEmployee(id) {
+        $.ajax({
+            url: '@Url.Action("Load_infoEmployee", "Employees")',
+            type: "GET",
+            data: {
+                id:id
+            },
+            success: function (data) {
+                console.log(data);
+                $('#IdEmployee').val(id);
+                $('#NameEmployee').val(data.name);
+                if (data.action == "create") {
+                    $('#exampleModalLabel').html("Tạo tài khoản");
+                    $('#btnAction').html("Tạo tài khoản");
+                } else {
+                    $('#exampleModalLabel').html("Chỉnh sửa tài khoản");                    
+                    $('#btnAction').html("Chỉnh sửa tài khoản");
+                    $('#Username').val(data.username);
+                }
+                $('#exampleModal').modal('show');
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
 
+    function Submit_adduser() {
+        $.ajax({
+            url: '@Url.Action("Submit_adduser", "Employees")',
+            type: "POST",
+            data: {
+                IdEmployee: $("#IdEmployee").val(),
+                Name: $("#NameEmployee").val(),
+                Username: $("#Username").val(),
+                Password: $("#Password").val()
+            }
+            , dataType: "json",
+            success: function (data) {
+                if (data.message == "ok") {
+                    $('#exampleModal').modal('hide');
+                    showSuccess(data.status, 3000);
+                }
+                else {
+                    showError(data.message, 3000);
+                }
+            },
+            error: function () { showError('Lỗi!', 3000); }
+        });
     }
 </script>
