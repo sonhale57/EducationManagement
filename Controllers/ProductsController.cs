@@ -27,7 +27,7 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
         {
             return View();
         }
-
+        public ActionResult ViewList() { return View(); }
         public ActionResult Loadlist(string sort, string searchString)
         {
             string str = "";

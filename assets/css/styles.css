@@ -20064,11 +20064,11 @@ ul {
 /* Style cho tiêu đề */
 
 /* === CODFE HEADING STYLE #2 === */
-.cf-title-02 h3 {
+.cf-title-02 h5 {
     text-transform: capitalize;
 }
 
-    .cf-title-02 h3:before {
+    .cf-title-02 h5:before {
         position: absolute;
         left: 0;
         bottom: 0;
@@ -20078,7 +20078,7 @@ ul {
         background-color: #c50000;
     }
 
-    .cf-title-02 h3 span {
+    .cf-title-02 h5 span {
         font-size: 13px;
         font-weight: 500;
         text-transform: uppercase;
@@ -20089,12 +20089,12 @@ ul {
         padding-bottom: 10px;
     }
 /* === CODFE HEADING STYLE #1 === */
-.cf-title-01 h3 {
+.cf-title-01 h5 {
     text-transform: uppercase;
     padding-bottom: 5px;
 }
 
-.cf-title-01 h3:before {
+.cf-title-01 h5:before {
     width: 28px;
     height: 5px;
     display: block;
@@ -20107,7 +20107,7 @@ ul {
     background-color: #b80000;
 }
 
-.cf-title-01 h3:after {
+.cf-title-01 h5:after {
     width: 100px;
     height: 1px;
     display: block;
