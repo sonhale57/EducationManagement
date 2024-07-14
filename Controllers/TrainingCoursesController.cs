@@ -83,10 +83,23 @@ namespace SuperbrainManagement.Controllers
                         if (DateTime.Parse(reader["Todate"].ToString()) < DateTime.Now)
                         {
                             strStatus = "<span class='text-danger'>Đã kết thúc</span>";
+                            strbtn = "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
+                                    "<i class=\"ti ti-dots-vertical\"></i>" +
+                                "</a>" +
+                                "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">" +
+                                    "<li>" +
+                                        "<a href=\"javascript:Load_result(" + reader["Id"] + ")\" class=\"dropdown-item\">" +
+                                            "<i class=\"ti ti-receipt\"></i> Đánh giá đào tạo" +
+                                        "</a>" +
+                                    "</li>" +
+                                "</ul>";
                         }
                         else
                         {
                             strStatus = "<span class='text-success'>Đang diễn ra</span>";
+                            strbtn = "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
+                                        "<i class=\"ti ti-dots-vertical\"></i>" +
+                                    "</a>";
                         }
                     }
                     
@@ -114,11 +127,11 @@ namespace SuperbrainManagement.Controllers
         {
             int idbranch = Convert.ToInt32(CheckUsers.idBranch());
             string str = "";
-            var employee = db.Employees.Find(id);
-            string phone = employee.Phone;
-            string email = employee.Email;
-            string position = (employee.IdPosition == null ? "" : employee.Position.Name);
-            string time = (employee.DateStart == null ? "" : employee.DateStart.Value.ToString("dd/MM/yyyy"));
+            //var employee = db.Employees.Find(id);
+            //string phone = employee.Phone;
+            //string email = employee.Email;
+            //string position = (employee.IdPosition == null ? "" : employee.Position.Name);
+            //string time = (employee.DateStart == null ? "" : employee.DateStart.Value.ToString("dd/MM/yyyy"));
             var join = db.RegistrationTrainings.Where(x=>x.IdTraining==id);
             if (!CheckUsers.CheckHQ())
             {
@@ -219,6 +232,36 @@ namespace SuperbrainManagement.Controllers
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
+        [HttpPost]
+        public ActionResult Submit_createtype(string Code, string Name, string Description)
+        {
+            string status = "ok";
+            var type = db.TrainingTypes.SingleOrDefault(x => x.Code == Code);
+            if (type == null)
+            {
+                var emp = new TrainingType()
+                {
+                    Code = Code,
+                    Name =Name, 
+                    Description = Description,
+                    Enable = true,
+                    Active = true,
+                    DateCreate = DateTime.Now,
+                    IdUser = Convert.ToInt32(CheckUsers.iduser())
+                };
+                db.TrainingTypes.Add(emp);
+                db.SaveChanges();
+            }
+            else
+            {
+                status = "Đã tồn tại mã này!";
+            }
+            var item = new
+            {
+                status
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
 
 
         #region DefaultController
@@ -241,7 +284,7 @@ namespace SuperbrainManagement.Controllers
         // GET: TrainingCourses/Create
         public ActionResult Create()
         {
-            ViewBag.IdType = new SelectList(db.TrainingTypes, "Id", "Code");
+            ViewBag.IdType = new SelectList(db.TrainingTypes, "Id", "Name");
             ViewBag.IdUser = new SelectList(db.Users, "Id", "Name");
             return View();
         }
