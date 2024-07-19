@@ -4,20 +4,13 @@ using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
-using System.Web;
 using System.Web.Mvc;
 using PagedList.Mvc;
 using PagedList;
 using SuperbrainManagement.Models;
 using SuperbrainManagement.DTOs;
-using Microsoft.Ajax.Utilities;
-using Google.Protobuf.Compiler;
 using Newtonsoft.Json;
-using System.Data.SqlClient;
-using System.Web.UI;
-using System.Web.Helpers;
 using static SuperbrainManagement.MvcApplication;
-using System.Data.Entity.Migrations;
 using SuperbrainManagement.Helpers;
 using System.Threading.Tasks;
 using System.Globalization;
@@ -319,8 +312,40 @@ namespace SuperbrainManagement.Controllers
             return View();
         }
 
+        public ActionResult GetCheckedSessionDetaiByClass(int idClass, int studentId, string date)
+        {
+            var dateConverted = Convert.ToDateTime(date);
+            var StudentDetailCheckInByClassAndDate = db.StudentCheckins.FirstOrDefault(x => x.IdClass == idClass 
+            && x.IdStudent == studentId 
+            && (DateTime)x.DateCreate == dateConverted);
 
-         // POST: Classes/CheckIn
+            var item = StudentDetailCheckInByClassAndDate == null ? 
+                null
+                : 
+                new
+            {
+                StatusCheckin = StudentDetailCheckInByClassAndDate.StatusCheckin,
+                Lesson = StudentDetailCheckInByClassAndDate.Lesson,
+                Complete = StudentDetailCheckInByClassAndDate.Complete,
+                Exactly = StudentDetailCheckInByClassAndDate.Exactly,
+                OnClassNumber = StudentDetailCheckInByClassAndDate.OnClassNumber,
+                OnClassRow = StudentDetailCheckInByClassAndDate.OnClassRow,
+                OnClassPaper = StudentDetailCheckInByClassAndDate.OnClassPaper,
+                HomeComplete = StudentDetailCheckInByClassAndDate.HomeComplete,
+                HomeExactly = StudentDetailCheckInByClassAndDate.HomeExactly,
+                Focus = StudentDetailCheckInByClassAndDate.Focus,
+                Confident = StudentDetailCheckInByClassAndDate.Confident,
+                Remember = StudentDetailCheckInByClassAndDate.Remember,
+                Reflex = StudentDetailCheckInByClassAndDate.Reflex,
+                Other = StudentDetailCheckInByClassAndDate.Other,
+                Power = StudentDetailCheckInByClassAndDate.Power,
+                SendSMS = StudentDetailCheckInByClassAndDate.SendSMS
+            };
+
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+
+        // POST: Classes/CheckIn
         [HttpPost]
         public ActionResult CheckIn(int? classId, 
             int studentId,
@@ -343,6 +368,18 @@ namespace SuperbrainManagement.Controllers
             bool isSMS
             )
         {
+            var dateConverted = Convert.ToDateTime(dateCheckedIn);
+
+            var checkInExisted = db.StudentCheckins.FirstOrDefault(x => x.IdClass == classId
+            && x.IdStudent == studentId
+            && (DateTime)x.DateCreate == dateConverted);
+
+            if (checkInExisted != null)
+            {
+                db.StudentCheckins.Remove(checkInExisted);
+                db.SaveChanges();
+            }
+
             var checkInDetail = new StudentCheckin
             {
                 IdClass = classId,
