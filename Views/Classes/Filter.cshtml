@@ -74,15 +74,15 @@
                         <div class="select-toggle">
                             @if (session.IsCheckedIn == null)
                             {
-                                <input type="checkbox" data-bs-toggle="modal" data-bs-target="#scheduleModal" id="selectToggle" onclick="storeSelected(@item.StudentID, '@session.Date')" />
+                                <input type="checkbox" data-bs-toggle="modal" data-bs-target="#scheduleModal" id="selectToggle" onclick="storeSelected(@ViewBag.ClassSelectedId, @item.StudentID, '@session.Date')" />
                             }
                             else if (session.IsCheckedIn)
                             {
-                                <input type="checkbox" checked="checked" data-bs-toggle="modal" data-bs-target="#scheduleModal" id="selectToggle" />
+                                <input type="checkbox" checked="checked" data-bs-toggle="modal" onclick="storeSelected(@ViewBag.ClassSelectedId, @item.StudentID, '@session.Date')" data-bs-target="#scheduleModal" id="selectToggle" />
                             }
                             else
                             {
-                                <input type="checkbox" data-bs-toggle="modal" data-bs-target="#scheduleModal" id="selectToggle" style="accent-color: red;" checked="checked" />
+                                <input type="checkbox" data-bs-toggle="modal" data-bs-target="#scheduleModal" onclick="storeSelected(@ViewBag.ClassSelectedId, @item.StudentID, '@session.Date')" id="selectToggle" style="accent-color: red;" checked="checked" />
                             }
 
                         </div>
@@ -266,10 +266,96 @@
 </div>
 
 <script>
-    function storeSelected(studentId, date) {
-            let today = new Date();
-        document.getElementById("studentId").value = studentId;
-        document.getElementById("dateCheckedIn").value = date + "/" + today.getFullYear();
-
+    function GetDropDownIndex(value){
+            switch(value) 
+            {
+              case "Excellent":
+                    return 0;
+                break;
+              case "Very Good":
+                    return 1;
+                break;
+              case "Good":
+                    return 2;
+                break;
+              default:
+                return 0;
+            }
     }
+
+    function storeSelected(classId, studentId, date) {
+            let today = new Date();
+            document.getElementById("studentId").value = studentId;
+            document.getElementById("dateCheckedIn").value = date + "/" + today.getFullYear();
+            document.getElementById("lesson").value = "";
+            document.getElementById("textNumber").value = "";
+            document.getElementById("row").value = "";
+            document.getElementById("second").value = "";
+            document.getElementById("other").value = "";
+            document.getElementById("power").value = "";
+
+         $.ajax({
+     url: '@Url.Action("GetCheckedSessionDetaiByClass", "Classes")',
+     type: "GET",
+     data: {
+         idClass: classId,
+         studentId: studentId,
+         date:  date + "/" + today.getFullYear()
+     },
+     success: function (data) {
+        if (data != null)
+        {
+            document.getElementById("lesson").value = data.Lesson;
+            document.getElementById("textNumber").value = data.OnClassNumber;
+            document.getElementById("row").value = data.OnClassRow;
+            document.getElementById("second").value = data.OnClassPaper;
+            document.getElementById("other").value = data.Other;
+            document.getElementById("power").value = data.Power;
+
+            var checkInCb =  document.getElementsByName("checkIn");
+
+            var smsCb =  document.getElementsByName("isSMS");
+
+            if (data.StatusCheckin)
+            {
+                checkInCb[0].checked = true;    
+                checkInCb[1].checked = false;
+            }
+
+            else
+            {
+                checkInCb[0].checked = false;
+                checkInCb[1].checked = true;
+            }
+
+             if (data.SendSMS)
+             {
+                 smsCb[0].checked = true;    
+                 smsCb[1].checked = false;
+             }
+
+             else
+             {
+                 smsCb[0].checked = false;
+                 smsCb[1].checked = true;
+             }
+
+            document.getElementById("completely").selectedIndex = GetDropDownIndex(data.Complete);
+            document.getElementById("exactRate").selectedIndex = GetDropDownIndex(data.Exactly);
+            document.getElementById("home_completely").selectedIndex = GetDropDownIndex(data.HomeComplete);
+            document.getElementById("home_exactRate").selectedIndex = GetDropDownIndex(data.HomeExactly);
+            document.getElementById("focusRate").selectedIndex = GetDropDownIndex(data.Focus);
+            document.getElementById("confidentRate").selectedIndex = GetDropDownIndex(data.Confident);
+            document.getElementById("rememberRate").selectedIndex = GetDropDownIndex(data.Remember);
+            document.getElementById("reflexRate").selectedIndex = GetDropDownIndex(data.Reflex);
+        }
+     },
+     error: function (xhr, error) {
+         console.log("error: " + error);
+     }
+ });
+    }
+    $("#scheduleModal").on("hidden.bs.modal", function () {
+    location.reload();
+});
 </script>
