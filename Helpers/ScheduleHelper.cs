@@ -115,7 +115,7 @@ namespace SuperbrainManagement.Helpers
         {
             TimeSpan timeQuantity = toDate - fromDate;
 
-            return timeQuantity.TotalHours;
+            return timeQuantity.Duration().TotalHours;
         }
 
         public string GetTimeSlot(DateTime fromHour, DateTime toHour)
