@@ -3,12 +3,12 @@
 @{
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    int stt = 1;
     var courses = Model;
-}        <div class="row">
-    <div class="col col-md-6 col-sm-12">
+}        
+<div class="row">
+    <div class="col col-md-4 col-sm-12">
         <form action="" onsubmit="javascript: Loadlist()"  method="get" id="formload">
-            <div class="input-group mb-3">
+            <div class="input-group">
                 @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
                 {
                     @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", @onchange = "javascript:Loadlist()" })
@@ -16,12 +16,12 @@
             </div>
         </form>
     </div>
-    <div class="col col-md-6 col-sm-12 text-right" style="text-align:right;">
+    <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
         <a href="javascript:Add_CourseBranch()" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
     </div>
 </div>
 
-<table class="table fs-3">
+<table class="table fs-3 mt-3">
     <thead class="bg-success text-white rounded-1">
         <tr>
             <th class="text-center">STT</th>
@@ -46,6 +46,7 @@
             <form action="/" method="post">
                 @Html.AntiForgeryToken()
                 <div class="modal-body">
+                    <input type="hidden" name="typeaction" value="" id="typeaction" />
                     <label class="text-success">Cơ sở</label>
                     @Html.DropDownList("IdBranchForm", null, htmlAttributes: new { @class = "form-control" })
 
@@ -91,13 +92,15 @@
          });
     }
     function Add_CourseBranch() {
-        $("#exampleModalLabel").html("Thêm khóa học"); 
-        $("#IdBranchForm").removeClass("disabled"); 
+        $("#exampleModalLabel").html("Thêm khóa học");
+        $("#IdBranchForm").removeClass("disabled");
         $("#IdCourse").removeClass("disabled");
         $('#exampleModal').modal('show');
+        $('#typeaction').val("create");
     }
     function Edit_CourseBranch(IdBranch, IdCourse) {
-        $("#exampleModalLabel").html("Chỉnh sửa khóa học"); 
+        $("#exampleModalLabel").html("Chỉnh sửa khóa học");
+        $('#typeaction').val("edit");
         $("#IdBranchForm").val(IdBranch);
         $("#IdBranchForm").addClass("disabled");
         $("#IdCourse").addClass("disabled");
@@ -129,20 +132,45 @@
                 IdBranch: $("#IdBranchForm").val(),
                 PriceCourse: $("#PriceCourse").val(),
                 PriceOnline: $("#PriceOnline").val(),
-                PriceTest: $("#PriceTest").val()
+                PriceTest: $("#PriceTest").val(),
+                Action: $("#typeaction").val()
             },
             success: function (data) {
                 if (data.status == "ok") {
-                    showSuccess("Đã thêm thành công", 3000);
+                    showSuccess(data.message, 3000);
                     Loadlist();
                     $('#exampleModal').modal('hide');
                 } else {
-                    showError(data.status,3000);
+                    showError(data.message,3000);
                 }
             },
             error: function (xhr, error) {
                 console.log(error);
             }
         });
+    }
+
+    function Delete_CourseBranch(IdBranch,IdCourse) {
+        if (confirm('Bạn có muốn xóa khóa học của cơ sở này?')) {
+            $.ajax({
+                url: '@Url.Action("Delete_CourseBranch", "Courses")',
+                type: 'POST',
+                data: {
+                    IdBranch: IdBranch,
+                    IdCourse: IdCourse
+                },
+                success: function (data) {
+                    if (data.status=="ok") {
+                        showSuccess(data.message, 3000);
+                        Loadlist();
+                    } else {
+                        showError(data.message,3000);
+                    }
+                },
+                error: function () {
+                    showError('Error deleting course',3000);
+                }
+            });
+        }
     }
 </script>

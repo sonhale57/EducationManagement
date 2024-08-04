@@ -8,7 +8,10 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using System.Xml.Linq;
+using SuperbrainManagement.Helpers;
 using SuperbrainManagement.Models;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -48,61 +51,92 @@ namespace SuperbrainManagement.Controllers
                     count++;
                     string strStatus = "";
                     string strbtn = "";
-                    if (CheckUsers.CheckHQ())
-                    {
-                        querybranch = " and IdBranch=" + idbranch;
-                        strbtn = "<a href='/trainingcourses/edit/" + reader["Id"] +"' class='me-1'><i class='ti ti-edit text-primary'></i></a>" +
-                                "<a href='javascript:Delete(" + reader["Id"] +")' class='me-1'><i class='ti ti-trash text-danger'></i></a>" +
-                                "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
-                                    "<i class=\"ti ti-dots-vertical\"></i>" +
-                                "</a>" +
-                                "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">" +
-                                    "<li>" +
-                                        "<a href=\"javascript:Load_dangky(" + reader["Id"] +")\" class=\"dropdown-item\">" +
-                                            "<i class=\"ti ti-receipt\"></i> Đăng ký tham gia" +
-                                        "</a>" +
-                                    "</li>" +
-                                "</ul>";
-                    }
+
+                    querybranch = " and IdBranch=" + idbranch;
+
+                    //Chưa bắt đầu
                     if (DateTime.Parse(reader["Fromdate"].ToString()) > DateTime.Now)
                     {
                         strStatus = "<span class='text-muted'>Chưa diễn ra</span>";
-                        strbtn = "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
-                                    "<i class=\"ti ti-dots-vertical\"></i>" +
-                                "</a>" +
-                                "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">" +
-                                    "<li>" +
-                                        "<a href=\"javascript:Load_dangky(" + reader["Id"] +")\" class=\"dropdown-item\">" +
+                        // Kiểm tra HQ
+                        if (CheckUsers.CheckHQ())
+                        {
+                            strbtn = "<a href='/trainingcourses/edit/" + reader["Id"] + "' class='me-1'><i class='ti ti-edit text-primary'></i></a>" +
+                                    "<a href='javascript:Delete(" + reader["Id"] + ")' class='me-1'><i class='ti ti-trash text-danger'></i></a>" +
+                                    "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
+                                        "<i class=\"ti ti-dots-vertical\"></i>" +
+                                    "</a>" +
+                                    "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">" +
+                                        "<li>"+
+                                        "<a href=\"javascript:Load_dangky(" + reader["Id"] + ")\" class=\"dropdown-item\">" +
                                             "<i class=\"ti ti-receipt\"></i> Đăng ký tham gia" +
                                         "</a>" +
-                                    "</li>" +
-                                "</ul>";
+                                        "</li>" +
+                                    "</ul>";
+                        }
+                        else
+                        {
+                            strbtn ="<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
+                                        "<i class=\"ti ti-dots-vertical\"></i>" +
+                                    "</a>" +
+                                    "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">" +
+                                        "<li>"+
+                                        "<a href=\"javascript:Load_dangky(" + reader["Id"] + ")\" class=\"dropdown-item\">" +
+                                            "<i class=\"ti ti-receipt\"></i> Đăng ký tham gia" +
+                                        "</a>" +
+                                        "</li>" +
+                                    "</ul>";
+                        }
                     }
                     else
                     {
                         if (DateTime.Parse(reader["Todate"].ToString()) < DateTime.Now)
                         {
                             strStatus = "<span class='text-danger'>Đã kết thúc</span>";
-                            strbtn = "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
-                                    "<i class=\"ti ti-dots-vertical\"></i>" +
-                                "</a>" +
-                                "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">" +
-                                    "<li>" +
-                                        "<a href=\"javascript:Load_result(" + reader["Id"] + ")\" class=\"dropdown-item\">" +
-                                            "<i class=\"ti ti-receipt\"></i> Đánh giá đào tạo" +
+                            // Kiểm tra HQ
+                            if (CheckUsers.CheckHQ())
+                            {
+                                strbtn = "<a href='/trainingcourses/edit/" + reader["Id"] + "' class='me-1'><i class='ti ti-edit text-primary'></i></a>" +
+                                        "<a href='javascript:Delete(" + reader["Id"] + ")' class='me-1'><i class='ti ti-trash text-danger'></i></a>" +
+                                        "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
+                                            "<i class=\"ti ti-dots-vertical\"></i>" +
                                         "</a>" +
-                                    "</li>" +
-                                "</ul>";
+                                        "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">" +
+                                            "<li>" +
+                                            "<a href=\"javascript:Rating_registration(" + reader["Id"] + ")\" class=\"dropdown-item\">" +
+                                                "<i class=\"ti ti-receipt\"></i> Đánh giá khóa đào tạo" +
+                                            "</a>" +
+                                            "</li>" +
+                                        "</ul>";
+                            }
+                            else
+                            {
+                                strbtn = "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
+                                            "<i class=\"ti ti-dots-vertical\"></i>" +
+                                        "</a>" +
+                                        "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">" +
+                                            "<li>" +
+                                            "<a href=\"javascript:Rating_registration(" + reader["Id"] + ")\" class=\"dropdown-item\">" +
+                                                "<i class=\"ti ti-receipt\"></i> Xem kết quả khóa đào tạo" +
+                                            "</a>" +
+                                            "</li>" +
+                                        "</ul>";
+                            }
                         }
                         else
                         {
                             strStatus = "<span class='text-success'>Đang diễn ra</span>";
-                            strbtn = "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
-                                        "<i class=\"ti ti-dots-vertical\"></i>" +
-                                    "</a>";
+                            // Kiểm tra HQ
+                            if (CheckUsers.CheckHQ())
+                            {
+                                strbtn = "<a href='/trainingcourses/edit/" + reader["Id"] + "' class='me-1'><i class='ti ti-edit text-primary'></i></a>" +
+                                        "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
+                                            "<i class=\"ti ti-dots-vertical\"></i>" +
+                                        "</a>" ;
+                            }
                         }
                     }
-                    
+
                     str += "<tr>"
                             + "<td class='text-center'>" + count + "</td>"
                             + "<td>" + reader["name"].ToString() + "</td>"
@@ -127,11 +161,6 @@ namespace SuperbrainManagement.Controllers
         {
             int idbranch = Convert.ToInt32(CheckUsers.idBranch());
             string str = "";
-            //var employee = db.Employees.Find(id);
-            //string phone = employee.Phone;
-            //string email = employee.Email;
-            //string position = (employee.IdPosition == null ? "" : employee.Position.Name);
-            //string time = (employee.DateStart == null ? "" : employee.DateStart.Value.ToString("dd/MM/yyyy"));
             var join = db.RegistrationTrainings.Where(x=>x.IdTraining==id);
             if (!CheckUsers.CheckHQ())
             {
@@ -262,7 +291,187 @@ namespace SuperbrainManagement.Controllers
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
+        public ActionResult Load_ratingregistration(int id)
+        {
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            string str = "";
+            var join = db.RegistrationTrainings.Where(x => x.IdTraining == id);
+            if (!CheckUsers.CheckHQ())
+            {
+                join = db.RegistrationTrainings.Where(x => x.IdTraining == id && x.IdBranch == idbranch);
+            }
+            int count = 0;
+            var train = db.TrainingCourses.Find(id);
+            double tongtien = 0;
+            foreach (var ite in join)
+            {
+                tongtien += Double.Parse(train.Price.ToString());
+                count++;
+                str += "<tr>"
+                    + "<td class='text-center'>" + count + "</td>"
+                    + "<td class='text-left'>" + ite.Employee.Name + "</td>"
+                    + "<td class='text-center'>" + (ite.Employee.DateOfBirth == null ? "-" : ite.Employee.DateOfBirth.Value.ToString("dd/MM/yyyy")) + "</td>"
+                    + "<td class='text-center'>" + ite.Employee.Phone + "</td>"
+                    + "<td class='text-center'>" + ite.Employee.Email + "</td>"
+                    + "<td class='text-left'>" + ite.Employee.Branch.Name + "</td>"
+                    + "<td class='text-center'>" + Get_resultTraninning(ite.Employee.Id, id) + "</td>";
+                if (CheckUsers.CheckHQ())
+                {
+                    str += "<td class='text-end'><a href='javascript:Rating_Employee(" + id + "," + ite.Employee.Id + ")' class='btn btn-sm btn-success me-1'><i class='ti ti-check text-white'></i> Đánh giá</a></td>";
+                }
+                str += "</tr>";
+            }
+            string strinfo = "<p><b>Khóa đào tạo:</b> "+train.Name+"</p>"
+                            +"<p><b>Ghi chú:</b> " + train.Description + "</p>"
+                            + "<p><b>Phí đào tạo:</b> " + string.Format("{0:N0} đ",train.Price) + "</p>"
+                            + "<p><b>Thời gian:</b> " + train.Fromdate.Value.ToString("dd/MM/yyyy") + " - "+train.Todate.Value.ToString("dd/MM/yyyy")+"</p>";
+            var item = new
+            {
+                str,
+                strinfo
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Load_infoRating(int IdTrainning,int IdEmployee) 
+        {
+            var t = db.TrainingCourses.Find(IdTrainning);
+            var e = db.Employees.Find(IdEmployee);
+            var item = new { 
+                strNameT= t.Name,
+                strNameE = e.Name
+            };
+            return Json(item,JsonRequestBehavior.AllowGet);
+        }
 
+        [HttpPost]
+        public ActionResult Submit_rating(int IdTrainingCourse,int IdEmployee,bool Result,int TotalScore,int NumberCertification, string SuperbrainScore,string BrandScore,string TeachScore,string SaleScore,string MindsetScore,string SorobanScore,string OnlineScore,string CompleteScore,string ParticipationScore,string DemeanorScore,string ProactiveScore, string Description)
+        {
+            string status = "ok";
+            var type = db.TrainingResults.SingleOrDefault(x => x.IdTraining == IdTrainingCourse&&x.IdEmpoyee==IdEmployee);
+            var e = db.Employees.Find(IdEmployee);
+            var reg = db.RegistrationTrainings.SingleOrDefault(x=>x.IdTraining==IdTrainingCourse&& x.IdEmployee==IdEmployee);
+            if (type == null)
+            {
+                var rate = new TrainingResult()
+                {
+                    IdTraining = IdTrainingCourse,
+                    IdEmpoyee = IdEmployee,
+                    Result = Result,
+                    TotalScore = TotalScore,
+                    NumberCertification = NumberCertification,
+                    SaleScore = SaleScore,
+                    SorobanScore = SorobanScore,
+                    SuperbrainScore = SuperbrainScore,
+                    BrandScore = BrandScore,
+                    TeachScore = TeachScore,
+                    MindsetScore = MindsetScore,
+                    CompleteScore = CompleteScore,
+                    DemeanorScore = DemeanorScore,
+                    ParticipationScore = ParticipationScore,
+                    ProactiveScore = ProactiveScore,
+                    OnlineScore = OnlineScore,
+                    Description = Description,
+                    DateCreate = DateTime.Now,
+                    IdUser = Convert.ToInt32(CheckUsers.iduser())
+                };
+                db.TrainingResults.Add(rate);
+                reg.IsPass = Result;
+                reg.Result = TotalScore;
+                db.Entry(reg);
+                db.SaveChanges();
+
+                if (Result == true)
+                {
+                    e.IsOfficial = true;
+                    e.CertificateNumber = NumberCertification;
+                    db.Entry(e);
+                    db.SaveChanges();
+                    Create_Account(IdEmployee);
+                }
+            }
+            else
+            {
+                status = "Giáo viên này đã được đánh giá trước đó!";
+            }
+            var item = new
+            {
+                status
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        public static string GetLastName(string fullName)
+        {
+            if (string.IsNullOrEmpty(fullName))
+            {
+                return string.Empty;
+            }
+
+            string[] nameParts = fullName.Split(' ');
+            return nameParts[nameParts.Length - 1];
+        }
+        public static string GetLastThreeDigits(string phoneNumber)
+        {
+            if (string.IsNullOrEmpty(phoneNumber) || phoneNumber.Length < 3)
+            {
+                return phoneNumber;
+            }
+
+            return phoneNumber.Substring(phoneNumber.Length - 3);
+        }
+
+        public void Create_Account(int IdEmployee) {
+            ConvertText convi = new ConvertText();
+
+            var e = db.Employees.Find(IdEmployee);
+            var user = db.Users.SingleOrDefault(x => x.IdEmployee == IdEmployee);
+            string Username = "GV_" + convi.fixtex(GetLastName(e.Name)) + GetLastThreeDigits(e.Phone);
+            var IdBranch = e.IdBranch;
+            MD5Hash md5 = new MD5Hash();
+            string pass = md5.GetMD5Working("taptrung");
+            string Password = md5.mahoamd5(pass.Replace("&^%$", ""));
+            if (user == null)
+            {
+                var us = new User() {
+                    Name = e.Name,
+                    Username = Username,
+                    Password = Password,
+                    Active = true,
+                    Enable =true,
+                    Expire = DateTime.Now.AddMonths(6),
+                    DateCreate = DateTime.Now,
+                    IdBranch = IdBranch,
+                    Createby = Convert.ToInt32(CheckUsers.iduser()),
+                    IdEmployee = IdEmployee
+                };
+                db.Users.Add(us);
+                db.SaveChanges();
+            }
+        }
+        public string Get_resultTraninning(int IdEmployee,int IdTrainning) {
+            var result = db.RegistrationTrainings.SingleOrDefault(x=>x.IdTraining ==IdTrainning && x.IdEmployee == IdEmployee);
+            if (result == null)
+            {
+                return "-";
+            }
+            else
+            {
+                if (result.IsPass == null)
+                {
+                    return "Chưa đánh giá";
+                }
+                else
+                {
+                    if (result.IsPass == true)
+                    {
+                        return "<span class='text-success'>Đã đạt </span>";
+                    }
+                    else
+                    {
+                        return "<span class='text-danger'>Chưa đạt</span>";
+                    }
+                }
+            }
+        }
 
         #region DefaultController
 
@@ -307,7 +516,7 @@ namespace SuperbrainManagement.Controllers
                 return RedirectToAction("Index");
             }
 
-            ViewBag.IdType = new SelectList(db.TrainingTypes, "Id", "Code", trainingCourse.IdType);
+            ViewBag.IdType = new SelectList(db.TrainingTypes, "Id", "Name", trainingCourse.IdType);
             ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", trainingCourse.IdUser);
             return View(trainingCourse);
         }
@@ -324,7 +533,7 @@ namespace SuperbrainManagement.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.IdType = new SelectList(db.TrainingTypes, "Id", "Code", trainingCourse.IdType);
+            ViewBag.IdType = new SelectList(db.TrainingTypes, "Id", "Name", trainingCourse.IdType);
             ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", trainingCourse.IdUser);
             return View(trainingCourse);
         }
@@ -342,7 +551,7 @@ namespace SuperbrainManagement.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            ViewBag.IdType = new SelectList(db.TrainingTypes, "Id", "Code", trainingCourse.IdType);
+            ViewBag.IdType = new SelectList(db.TrainingTypes, "Id", "Name", trainingCourse.IdType);
             ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", trainingCourse.IdUser);
             return View(trainingCourse);
         }

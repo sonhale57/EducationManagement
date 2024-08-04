@@ -4,28 +4,26 @@
 }
 
 <div class="row">
-    <div class="col col-md-6 col-sm-12">
-        <form action="/ProductCategories" method="get" id="formload">
-            <div class="input-group mb-3">
-                <input type="text" class="form-control" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
-                <button class="input-group-text bg-success" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
-            </div>
-        </form>
+    <div class="col col-md-3 col-sm-12">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="searchString" placeholder="Tìm kiếm" value="">
+            <a class="input-group-text bg-success" id="basic-addon2" href="javascript:Loadlist()"><i class="ti ti-search text-white"></i></a>
+        </div>
     </div>
-    <div class="col col-md-6 col-sm-12 text-right" style="text-align:right;">
+    <div class="col col-md-9 col-sm-12 text-right" style="text-align:right;">
         <div class="me-0 btn btn-md p-0">
             <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="ti ti-arrows-sort"></i> Sắp xếp theo
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-ascending"></i> Cũ nhất</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
+                <li><a class="dropdown-item" href="javascript:Loadlist('name')"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
+                <li><a class="dropdown-item" href="javascript:Loadlist('name_desc')"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
+                <li><a class="dropdown-item" href="javascript:Loadlist('date')"><i class="ti ti-sort-ascending"></i> Cũ nhất</a></li>
+                <li><a class="dropdown-item" href="javascript:Loadlist('date_desc')"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
             </ul>
         </div>
         <a href="/products/create" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
-        <a href="/ProductCategories/create" class="btn btn-md btn-primary ms-0"><i class="ti ti-archive"></i> Thêm mới danh mục</a>
+        <a href="javascript:Add_Category()" class="btn btn-md btn-primary ms-0"><i class="ti ti-archive"></i> Thêm mới danh mục</a>
     </div>
 </div>
 <table class="table fs-3">
@@ -49,6 +47,48 @@
     </thead>
     <tbody id="showlist"></tbody>
 </table>
+<div class="modal fade" id="modaladdProgram" tabindex="-1" aria-labelledby="modaladdProgramLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="width:800px;">
+            <form action="/" method="post" id="form_nhap">
+                <div class="modal-header">
+                    <h5 class="modal-title text-success" id="modaladdProgramLabel">Thêm danh mục</h5>
+                </div>
+                <hr style="width:90%;margin:0 auto;" />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col-md-12 mt-2">
+                            <label>Mã danh mục</label>
+                            <input type="hidden" name="action" value="" class="form-control" id="action" placeholder="Mã chương trình" />
+                            <input type="hidden" name="IdCategory" value="" class="form-control" id="IdCategory" placeholder="Mã chương trình" />
+                            <input type="text" name="CodeCategory" value="" class="form-control" id="CodeCategory" placeholder="Mã danh mục" />
+                        </div>
+
+                        <div class="form-group col-md-12 mt-2">
+                            <label>Tên danh mục</label>
+                            <input type="text" name="NameCategory" value="" class="form-control" id="NameCategory" placeholder="Tên danh mục" />
+                        </div>
+
+                        <div class="form-group col-md-12 mt-2">
+                            <label>Thứ tự hiển thị</label>
+                            <input type="text" name="DisplayOrderCategory" value="" class="form-control" id="DisplayOrderCategory" placeholder="Thứ tự hiển thị" />
+                        </div>
+
+                        <div class="form-group col-md-12 mt-2">
+                            <label>Mô tả ngắn</label>
+                            <input type="text" name="DescriptionCategory" value="" class="form-control" id="DescriptionCategory" placeholder="Mô tả ngắn" />
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-success text-center" onclick="Submit_AddCategory()" id="btnAction">
+                            <i class="ti ti-circle-plus"></i> Cập nhật
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <script>
     Loadlist();
     function Loadlist(sort) {
@@ -70,6 +110,83 @@
              }
          });
     }
+     function Add_Category() {
+         $('#action').val("create");
+         $("#modaladdProgramLabel").html("Thêm danh mục");
+         $('#modaladdProgram').modal('show');
+    }
+     function Edit_Category(IdCategory) {
+         $("#modaladdProgramLabel").html("Chỉnh sửa danh mục");
+         $('#action').val("edit");
+         $("#IdCategory").val(IdCategory);
+         $("#CodeCategory").addClass("disabled");
+         $.ajax({
+             url: '@Url.Action("Load_EditCategory", "Products")',
+             type: "GET",
+             data: {
+                 IdCategory: IdCategory
+             },
+             success: function (data) {
+                 $('#CodeCategory').val(data.code);
+                 $('#NameCategory').val(data.name);
+                 $('#DescriptionCategory').val(data.description);
+                 $('#DisplayOrderCategory').val(data.displayorder);
+                 $('#modaladdProgram').modal('show');
+             },
+             error: function (xhr, error) {
+                 console.log(error);
+             }
+         });
+     }
+
+     function Submit_AddCategory() {
+         $.ajax({
+             url: '@Url.Action("Submit_AddCategory", "Products")',
+             type: "POST",
+             data: {
+                 Id: $("#IdCategory").val(),
+                 action: $("#action").val(),
+                 Code: $("#CodeCategory").val(),
+                 Name: $("#NameCategory").val(),
+                 DisplayOrder: $("#DisplayOrderCategory").val(),
+                 Description: $("#DescriptionCategory").val()
+             },
+             success: function (data) {
+                 if (data.status == "ok") {
+                     $('#modaladdProgram').modal('hide');
+                     location.reload();
+                 } else {
+                     showError(data.message,3000);
+                 }
+             },
+             error: function (xhr, error) {
+                 console.log(error);
+             }
+         });
+    }
+
+    function Delete_category(IdCategory) {
+        if (confirm('Bạn có muốn xóa danh mục này?')) {
+            $.ajax({
+                url: '@Url.Action("Delete_Category", "Products")',
+                type: 'POST',
+                data: {
+                    IdCategory: IdCategory
+                },
+                success: function (data) {
+                    if (data.status=="ok") {
+                        showSuccess(data.message, 3000);
+                        Loadlist();
+                    } else {
+                        showError(data.message,3000);
+                    }
+                },
+                error: function () {
+                    showError('Lỗi! tồn tại vật tư trong danh mục này',3000);
+                }
+            });
+        }
+    }
 
     function ChangeStatus(button) {
         var id = parseInt(button.getAttribute("data-id")); // Chuyển đổi id thành một số nguyên
@@ -88,7 +205,7 @@
             }
         });
     }
-    
+
     function Delete_Program(Id) {
         if (confirm('Are you sure you want to delete this program?')) {
             $.ajax({

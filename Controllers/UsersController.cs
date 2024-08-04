@@ -12,6 +12,8 @@ using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using PagedList.Mvc;
 using PagedList;
 using SuperbrainManagement.Models;
+using System.Threading.Tasks;
+using SuperbrainManagement.Helpers;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -49,6 +51,10 @@ namespace SuperbrainManagement.Controllers
 
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, string idBranch)
         {
+            if (CheckUsers.iduser() == "")
+            {
+                return Redirect("/authentication");
+            }
             var branches = db.Branches.ToList();
             int idbranch = int.Parse(CheckUsers.idBranch());
             if (!CheckUsers.CheckHQ())
@@ -71,7 +77,7 @@ namespace SuperbrainManagement.Controllers
             }
             ViewBag.CurrentFilter = searchString;
 
-            var users = db.Users.ToList();
+            var users = db.Users.Where(x=>x.Enable==true).ToList();
 
             if (!string.IsNullOrEmpty(idBranch))
             {
@@ -208,9 +214,130 @@ namespace SuperbrainManagement.Controllers
             };
             return Json(item,JsonRequestBehavior.AllowGet);
         }
-
+        public ActionResult Load_infoEdit(int id)
+        {
+            var e = db.Employees.Find(id);
+            string username = "", name = "";
+            var us = db.Users.Find(id);
+            if (us != null)
+            {
+                name = us.Name;
+                username = us.Username;
+            }
+            var item = new
+            {
+                name,
+                username
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public ActionResult Submit_EditUser(int Id, string Password)
+        {
+            string status = "ok";
+            string message = "ok";
+            if (string.IsNullOrEmpty(Password))
+            {
+                message = "Không có mật khẩu!";
+            }
+            else
+            {
+                MD5Hash md5 = new MD5Hash();
+                Password = md5.GetMD5Working(Password);
+                string pass = md5.mahoamd5(Password.Replace("&^%$", ""));
+                var user = db.Users.Find(Id);
+                if (user == null)
+                {
+                    status = "error";
+                    message = "Không tìm thấy User này!";
+                }
+                else
+                {
+                    user.Password = pass;
+                    db.Entry(user);
+                    db.SaveChanges();
+                    status="ok";
+                    message = "Đã cập nhật thành công!";
+                }
+            }
+            var item = new { status, message };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public async Task<ActionResult> Delete_Account(int id)
+        {
+            string status, message;
+            var user = await db.Users.FindAsync(id);
+            if (user == null)
+            {
+                status = "error";
+                message = "Không tìm thấy user này!";
+                return HttpNotFound();
+            }
+            user.Enable = false;
+            db.Entry(user);
+            status = "ok";
+            message = "Đã xóa thành công!";
+            await db.SaveChangesAsync();
+            var item = new
+            {
+                status,
+                message
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public async Task<ActionResult> Extend_Account(int id)
+        {
+            string status, message;
+            var user = await db.Users.FindAsync(id);
+            if (user == null)
+            {
+                status = "error";
+                message = "Không tìm thấy user này!";
+                return HttpNotFound();
+            }
+            user.Expire = user.Expire.Value.AddMonths(6);
+            db.Entry(user);
+            status = "ok";
+            message = "Đã gia hạn thành công!";
+            await db.SaveChangesAsync();
+            var item = new
+            {
+                status,
+                message
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public async Task<ActionResult> Submit_ChangePassword(string Password)
+        {
+            string status, message;
+            int id = Convert.ToInt32(CheckUsers.iduser());
+            var user = await db.Users.FindAsync(id);
+            if (user == null)
+            {
+                status = "error";
+                message = "Phiên đăng nhập đã kết thúc, vui lòng đăng nhập lại!";
+                return HttpNotFound();
+            }
+            MD5Hash md5 = new MD5Hash();
+            Password = md5.GetMD5Working(Password);
+            string pass = md5.mahoamd5(Password.Replace("&^%$", ""));
+            user.Password = pass;
+            db.Entry(user);
+            status = "ok";
+            message = "Đã cập nhật thành công!";
+            await db.SaveChangesAsync();
+            var item = new
+            {
+                status,
+                message
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
         // GET: Users
-       [HttpPost]
+        [HttpPost]
         public ActionResult updateStatus(int id, int status)
         {
             User user = db.Users.Find(id);

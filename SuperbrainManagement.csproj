@@ -924,7 +924,7 @@
     <Content Include="Views\TrainingCourses\Index.cshtml" />
     <Content Include="Views\Branches\List.cshtml" />
     <Content Include="Views\Classes\Filter.cshtml" />
-
+    <Content Include="Views\Orders\PrintOrder.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

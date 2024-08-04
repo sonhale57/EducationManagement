@@ -6,7 +6,7 @@
     int stt = 1;
 }
 <div class="row">
-    <div class="col col-md-6 col-sm-12">
+    <div class="col col-md-4 col-sm-12">
         <form action="/users" method="get" id="formload">
             <div class="input-group mb-3">
                 @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
@@ -18,7 +18,7 @@
             </div>
         </form>
     </div>
-    <div class="col col-md-6 col-sm-12 text-right" style="text-align:right;">
+    <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
         <div class="me-0 btn btn-md p-0">
             <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="ti ti-arrows-sort"></i> Sắp xếp theo
@@ -37,12 +37,13 @@
     <thead class="bg-success text-white rounded-1">
         <tr>
             <th class="text-center">STT</th>
-            <th>Tên nhân sự</th>
-            <th>Tên hiển thị</th>
-            <th>Tên đăng nhập</th>
-            <th>Ngày tạo</th>
+            <th class="text-left">Tên hiển thị</th>
+            <th class="text-left">Tên đăng nhập</th>
+            <th class="text-center">Vị trí</th>
+            <th class="text-center">Ngày tạo</th>
+            <th class="text-center">Ngày hết hạn</th>
             <th class="text-center">Trạng thái</th>
-            <th class="text-center">Thao tác</th>
+            <th class="text-end">Thao tác</th>
         </tr>
     </thead>
 
@@ -53,16 +54,26 @@
                 @stt
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Employee.Name)
-            </td>
-            <td>
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Username)
             </td>
-            <td>
+            <td class="text-center">
+                @(item.Employee.IdPosition==null?"-":item.Employee.Position.Name)
+            </td>
+            <td class="text-center">
                 @Html.DisplayFor(modelItem => item.DateCreate)
+            </td>
+            <td class="text-center">
+                @if (item.Expire > DateTime.Now)
+                {
+                    @Html.DisplayFor(modelItem => item.Expire)
+                }
+                else
+                {
+                    <span class="text-danger">Đã hết hạn</span>
+                }
             </td>
             <td class="text-center">
                 @if (item.Active != null && item.Active == true)
@@ -80,14 +91,20 @@
                     </label>
                 }
             </td>
-            <td class="text-center">
-                <a href="/users/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
-                <a href="/users/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
+            <td class="text-end">
+                <a href="javascript:Edit_Account(@item.Id)" class="me-1"><i class="ti ti-edit text-primary"></i></a>
+                <a href="javascript:Delete_Account(@item.Id)" class="me-1"><i class="ti ti-trash text-danger"></i></a>
                 <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="ti ti-dots-vertical"></i>
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <li><a class="dropdown-item" href=""><i class="ti ti-user-off"></i> Đổi mật khẩu</a></li>
+                    @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
+                    {
+                        if (item.Expire <= DateTime.Now)
+                        {
+                            <li><a href="javascript:Extend_Account(@item.Id)" class="dropdown-item"><i class="ti ti-shield-check"></i> Gia hạn</a></li>
+                        }
+                    }
                     <li><button type="button" class="confirmButton dropdown-item" onclick="getDataPermission(@item.Id)" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="ti ti-lock-access"></i> Phân quyền</button></li>
                 </ul>
             </td>
@@ -100,31 +117,52 @@
         @Html.PagedListPager(Model, page => Url.Action("Index", new { page }), new PagedListRenderOptions { LiElementClasses = new string[] { "page-item" } })
     </ul>
 </nav>
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content" style="width:800px;">
             <div class="modal-header">
-                <h5 class="modal-fullscreen" id="exampleModalLabel">Phân quyền</h5>
-                <button type="button" class="btn btn-sm text-danger" data-dismiss="modal" aria-label="Close">
-                    <i class="ti ti-x"></i>
-                </button>
+                <h5 class="modal-fullscreen" id="editModalLabel">Chỉnh sửa tài khoản</h5>
             </div>
+            <hr style="width:90%;margin:0 auto;" />
+            <form action="/" method="post" id="form_nhap">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col col-md-12">
+                            <label>Họ tên</label>
+                            <input type="hidden" id="IdUser" value="" class="form-control" />
+                            <input type="text" id="EditName" value="" class="form-control" disabled />
+                        </div>
+                        <div class="col col-md-12 mt-3">
+                            <label>Tên đăng nhập</label>
+                            <input type="text" id="EditUsername" value="" class="form-control" disabled />
+                        </div>
+                        <div class="col col-md-12 mt-3">
+                            <label>Mật khẩu mới</label>
+                            <input type="password" id="EditPassword" value="" class="form-control" required />
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-success mt-3" onclick="Submit_edituser()" id="btnAction">
+                        <i class="ti ti-circle-plus"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" >
+            <div class="modal-header">
+                <h5 class="modal-fullscreen" id="exampleModalLabel">Phân quyền tài khoản</h5>
+            </div>
+            <hr style="width:90%;margin:0 auto;" />
             <div class="modal-body">
                 <form id="vehicleForm">
-                    <table cellpadding="0" cellspacing="0" border="0" class="table" id="datatable">
-                        <colgroup>
-                            <col class="con0">
-                            <col class="con1">
-                            <col class="con0">
-                            <col class="con1">
-                        </colgroup>
-                        <thead>
+                    <table cellpadding="0" cellspacing="0" border="0" class="table table-bordered" id="datatable">
+                        <thead class="bg-success text-white">
                             <tr>
-                                <th rowspan="2" style="width:400px">Chức năng</th>
-                                <th colspan="4" style="text-align:center"> Quyền cho phép</th>
-                            </tr>
-                            <tr>
-                                <th class="head1" style="text-align:left"><i>Xem</i></th>
+                                <th class="head0">CHỨC NĂNG</th>
+                                <th class="head0" style="text-align:left"><i>Xem</i></th>
                                 <th class="head0" style="text-align:left"><i>Thêm</i></th>
                                 <th class="head0" style="text-align:left"><i>Sửa</i></th>
                                 <th class="head0" style="text-align:left"><i>Xóa</i></th>
@@ -146,6 +184,49 @@
 @section Scripts
  {
     <script>
+
+        function Edit_Account(id) {
+            $('#EditName').val("");
+            $('#EditUsername').val("");
+            $.ajax({
+                url: '@Url.Action("Load_infoEdit", "Users")',
+                type: "GET",
+                data: {
+                    id:id
+                },
+                success: function (data) {
+                    $('#IdUser').val(id);
+                    $('#EditName').val(data.name);
+                    $('#EditUsername').val(data.username);
+                    $('#editModal').modal('show');
+                },
+                error: function (xhr, error) {
+                    console.log(error);
+                }
+            });
+        }
+        function Submit_edituser() {
+        $.ajax({
+            url: '@Url.Action("Submit_EditUser", "Users")',
+            type: "POST",
+            data: {
+                Id: $("#IdUser").val(),
+                Password: $("#EditPassword").val()
+            }
+            , dataType: "json",
+            success: function (data) {
+                if (data.status == "ok") {
+                    $('#editModal').modal('hide');
+                    showSuccess(data.message, 3000);
+                }
+                else {
+                    showError(data.message, 3000);
+                }
+            },
+            error: function () { showError('Lỗi!', 3000); }
+        });
+    }
+
     function updateCheckboxValue(checkbox) {
         var value = checkbox.checked ? 1 : 0;
         checkbox.value = value;
@@ -164,23 +245,18 @@
                 var table = $('#datatable tbody');
                 response.forEach(function (role) {
                     var row = $('<tr>');
-                    row.append('<td><i class="fa fa-barcode"></i><b>' + role.Name + '</b></td>');
-                    row.append('<td style="text-align: left;padding-left: -10px;"><a><i class="fa fa-check"></i></a><input type="hidden" id="checkall1_3" value="1"></td>');
-                    row.append('<td style="text-align: left;padding-left: -10px;"><a><i class="fa fa-check"></i></a><input type="hidden" id="checkall1_3" value="1"></td>');
-                    row.append('<td style="text-align: left;padding-left: -10px;"><a><i class="fa fa-check"></i></a><input type="hidden" id="checkall1_3" value="1"></td>');
-                    row.append('<td style="text-align: left;padding-left: -10px;"><a><i class="fa fa-check"></i></a><input type="hidden" id="checkall1_3" value="1"></td>');
+                    row.append('<td class="text-success" colspan=5><i class="ti ti-barcode"></i> <b>' + role.Name + '</b></td>');
 
                     table.append(row);
 
                     role.Permissions.forEach(function (permission) {
                     var permissionRow = $('<tr class="permission">');
-                        permissionRow.append('<td>+ ' + permission.Name + '<div class="blur_color">' + permission.code + '</div><input class="IdPermission" hidden type="number" value="' + permission.id + '"></td>');
+                        permissionRow.append('<td><b>+ ' + permission.Name + '</b><div class="blur_color"><i class="ti ti-corner-down-right"></i>' + permission.code + '</div><input class="IdPermission" hidden type="number" value="' + permission.id + '"></td>');
 
-                    var isReadCheckbox = '<td><input class="IsRead" type="checkbox" onchange="updateCheckboxValue(this) "' + (permission.IsRead ? ' checked' : '') + ' value="' + (permission.IsRead ? '1' : '0') + '"></td>';
-                    var isCreateCheckbox = '<td><input class="IsCreate" type="checkbox" onchange="updateCheckboxValue(this)"' + (permission.IsCreate ? ' checked' : '') + ' value="' + (permission.IsCreate ? '1' : '0') + '"></td>';
-                    var isEditCheckbox = '<td><input class="IsEdit" type="checkbox" onchange="updateCheckboxValue(this) "' + (permission.IsEdit ? ' checked' : '') + ' value="' + (permission.IsEdit ? '1' : '0') + '"></td>';
-                    var isDeleteCheckbox = '<td><input class="IsDelete" type="checkbox" onchange="updateCheckboxValue(this) "' + (permission.IsDelete ? ' checked' : '') + ' value="' + (permission.IsDelete ? '1' : '0') + '"></td>';
-
+                        var isReadCheckbox = '<td class="text-center"><input class="IsRead" type="checkbox" onchange="updateCheckboxValue(this) "' + (permission.IsRead ? ' checked' : '') + ' value="' + (permission.IsRead ? '1' : '0') + '"></td>';
+                        var isCreateCheckbox = '<td class="text-center"><input class="IsCreate" type="checkbox" onchange="updateCheckboxValue(this)"' + (permission.IsCreate ? ' checked' : '') + ' value="' + (permission.IsCreate ? '1' : '0') + '"></td>';
+                        var isEditCheckbox = '<td class="text-center"><input class="IsEdit" type="checkbox" onchange="updateCheckboxValue(this) "' + (permission.IsEdit ? ' checked' : '') + ' value="' + (permission.IsEdit ? '1' : '0') + '"></td>';
+                        var isDeleteCheckbox = '<td class="text-center"><input class="IsDelete" type="checkbox" onchange="updateCheckboxValue(this) "' + (permission.IsDelete ? ' checked' : '') + ' value="' + (permission.IsDelete ? '1' : '0') + '"></td>';
 
                     permissionRow.append(isReadCheckbox);
                     permissionRow.append(isCreateCheckbox);
@@ -231,7 +307,7 @@
             });
     });
 
-      function ChangeStatus(button) {
+    function ChangeStatus(button) {
             var id = parseInt(button.getAttribute("data-id")); // Chuyển đổi id thành một số nguyên
             var status = button.value; // Sử dụng button.value thay vì lấy từ tất cả các button
             $.ajax({
@@ -247,7 +323,51 @@
                     showError("Lỗi cập nhật!", 3000);
                 }
             });
+    }
+        function Delete_Account(Id) {
+        if (confirm('Bạn có muốn xóa tài khoản này?')) {
+            $.ajax({
+                url: '@Url.Action("Delete_Account", "Users")',
+                type: 'POST',
+                data: {
+                    id: Id
+                },
+                success: function (data) {
+                    if (data.status=="ok") {
+                        showSuccess(data.message, 3000);
+                        location.reload();
+                    } else {
+                        showError(data.message,3000);
+                    }
+                },
+                error: function () {
+                    showError('Error deleting user',3000);
+                }
+            });
         }
+        }
+        function Extend_Account(Id) {
+    if (confirm('Bạn có muốn gia hạn tài khoản này?')) {
+        $.ajax({
+            url: '@Url.Action("Extend_Account", "Users")',
+            type: 'POST',
+            data: {
+                id: Id
+            },
+            success: function (data) {
+                if (data.status=="ok") {
+                    showSuccess(data.message, 3000);
+                    location.reload();
+                } else {
+                    showError(data.message,3000);
+                }
+            },
+            error: function () {
+                showError('Error deleting user',3000);
+            }
+        });
+    }
+}
     </script>
 }
 

@@ -67,7 +67,7 @@
         public string SpeedEndterm { get; set; }
 
         [StringLength(500)]
-        [Display(Name="Địn hướng phát triển")]
+        [Display(Name="Định hướng phát triển")]
         public string DevelopRoute { get; set; }
 
         [Display(Name="Điểm đạt")]

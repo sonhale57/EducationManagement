@@ -70,6 +70,7 @@ namespace SuperbrainManagement.Controllers
                             + "<td class='text-center'>" + reader["Hours"].ToString() + "</td>"
                             + "<td class='text-end'>" 
                             + "<a href='javascript:Edit_CourseBranch(" + IdBranch + "," + reader["Id"] +")' class=\"me-1\"><i class=\"ti ti-edit text-primary\"></i></a>"
+                            + "<a href='javascript:Delete_CourseBranch(" + IdBranch + "," + reader["Id"] + ")' class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a>"
                             + "</td>"
                             + "</tr>";
                     }
@@ -78,6 +79,30 @@ namespace SuperbrainManagement.Controllers
             }
             var item = new {
             str
+            };
+            return Json(item,JsonRequestBehavior.AllowGet);
+        }
+
+
+        [HttpPost]
+        public async Task<ActionResult> Delete_CourseBranch(int IdBranch,int IdCourse)
+        {
+            string status,message;
+            var pc = await db.CourseBranches.Where(x=>x.IdBranch==IdBranch&&x.IdCourse==IdCourse).FirstOrDefaultAsync();
+            if (pc == null)
+            {
+                status = "error";
+                message = "Không tìm thấy khóa học của cơ sở này!";
+                return HttpNotFound();
+            }
+
+            db.CourseBranches.Remove(pc);
+            await db.SaveChangesAsync();
+            status = "ok";
+            message = "Đã xóa thành công!";
+            var item = new { 
+                status,
+                message
             };
             return Json(item,JsonRequestBehavior.AllowGet);
         }
@@ -207,31 +232,56 @@ namespace SuperbrainManagement.Controllers
             ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", course.IdUser);
             return View(course);
         }
-        public ActionResult Submit_CourseBranch(int IdBranch, int IdCourse, decimal PriceCourse, decimal PriceOnline, decimal PriceTest)
+        public ActionResult Submit_CourseBranch(int IdBranch, int IdCourse, decimal PriceCourse, decimal PriceOnline, decimal PriceTest,string Action)
         {
+
             string status = "ok";
+            string message = "";
             var cb = db.CourseBranches.SingleOrDefault(x => x.IdBranch == IdBranch && x.IdCourse == IdCourse);
-            if (cb == null)
+            if (Action == "create")
             {
-                var courseBranch = new CourseBranch()
+                if (cb == null)
                 {
-                    IdCourse = IdCourse,
-                    IdBranch = IdBranch,
-                    PriceCourse = PriceCourse,
-                    PriceAccount = PriceOnline,
-                    PriceTest = PriceTest
-                };
-                db.CourseBranches.Add(courseBranch);
-                db.SaveChanges();
-                status = "ok";
+                    var courseBranch = new CourseBranch()
+                    {
+                        IdCourse = IdCourse,
+                        IdBranch = IdBranch,
+                        PriceCourse = PriceCourse,
+                        PriceAccount = PriceOnline,
+                        PriceTest = PriceTest
+                    };
+                    db.CourseBranches.Add(courseBranch);
+                    db.SaveChanges();
+                    status = "ok";
+                    message = "Đã thêm thành công!";
+                }
+                else
+                {
+                    status = "error";
+                    message = "Cơ sở đã tồn tại khóa học này!";
+                }
             }
             else
             {
-                status = "Cơ sở đã tồn tại khóa học này.";
+                if (cb == null)
+                {
+                    status = "error";
+                    message = "Không tìm thấy khóa học này của cơ sở!";
+                }
+                else
+                {
+                    cb.PriceAccount = PriceOnline;
+                    cb.PriceTest = PriceTest;
+                    cb.PriceCourse = PriceCourse;
+                    db.Entry(cb);
+                    db.SaveChanges();
+                    status="ok";
+                    message = "Đã cập nhật thành công!";
+                }
             }
             var item = new
             {
-                status
+                status,message
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
