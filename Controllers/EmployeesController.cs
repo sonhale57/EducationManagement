@@ -22,83 +22,92 @@ namespace SuperbrainManagement.Controllers
 
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, string idBranch, string filterEnum)
         {
-            var branches = db.Branches.ToList();
-            int idbranch = int.Parse(CheckUsers.idBranch());
-            if (!CheckUsers.CheckHQ())
+            if (CheckUsers.iduser() == "")
             {
-                branches = db.Branches.Where(x => x.Id == idbranch).ToList();
-            }
-            if (string.IsNullOrEmpty(idBranch))
-            {
-                idBranch = branches.First().Id.ToString();
-            }
-            ViewBag.IdBranch = new SelectList(branches, "Id", "Name", idBranch);
-            
-            ViewBag.CurrentBranch = idBranch;
-
-            if (searchString != null)
-            {
-                page = 1;
+                return Redirect("/authentication");
             }
             else
             {
-                searchString = currentFilter;
-            }
-            ViewBag.CurrentFilter = searchString;
-
-            var employees = db.Employees.ToList();
-            if (!string.IsNullOrEmpty(filterEnum))
-            {
-                employees= employees.Where(x=>x.IsOfficial==Boolean.Parse(filterEnum)).ToList();
-                ViewBag.SelectedFilter = (filterEnum=="1"?"Official":"");
-                ViewBag.CurrentEnum = (filterEnum == "1" ? "True" : "False");
-            }
-            else
-            {
-                employees = employees.Where(x => x.IsOfficial == true).ToList();
-                ViewBag.SelectedFilter = "Official";
-                ViewBag.CurrentEnum= "True";
-            }
-
-            if (!string.IsNullOrEmpty(idBranch))
-            {
-                employees = employees.Where(x => x.IdBranch == int.Parse(idBranch)).ToList();
-            }
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                employees = employees.Where(x => x.Name.ToLower().Contains(searchString.ToLower())).ToList();
-            }
-            switch (sortOrder)
-            {
-                case "name_desc":
-                    employees = employees.OrderByDescending(s => s.Name).ToList();
-                    break;
-                case "date":
-                    employees = employees.OrderBy(s => s.Id).ToList();
-                    break;
-                case "name":
-                    employees = employees.OrderBy(s => s.Name).ToList();
-                    break;
-                default:
-                    employees = employees.OrderByDescending(s => s.Id).ToList();
-                    break;
-            }
-            int pageSize = 20;
-            int pageNumber = (page ?? 1);
 
 
-            var pagedData = employees.ToPagedList(pageNumber, pageSize);
+                var branches = db.Branches.ToList();
+                int idbranch = int.Parse(CheckUsers.idBranch());
+                if (!CheckUsers.CheckHQ())
+                {
+                    branches = db.Branches.Where(x => x.Id == idbranch).ToList();
+                }
+                if (string.IsNullOrEmpty(idBranch))
+                {
+                    idBranch = branches.First().Id.ToString();
+                }
+                ViewBag.IdBranch = new SelectList(branches, "Id", "Name", idBranch);
 
-            var pagedListRenderOptions = new PagedListRenderOptions();
-            pagedListRenderOptions.FunctionToTransformEachPageLink = (liTag, aTag) =>
-            {
-                liTag.AddCssClass("page-item");
-                aTag.AddCssClass("page-link");
-                return liTag;
-            };
+                ViewBag.CurrentBranch = idBranch;
 
-            ViewBag.PagedListRenderOptions = pagedListRenderOptions;
-            return View(pagedData);
+                if (searchString != null)
+                {
+                    page = 1;
+                }
+                else
+                {
+                    searchString = currentFilter;
+                }
+                ViewBag.CurrentFilter = searchString;
+
+                var employees = db.Employees.Where(x=>x.Enable==true).ToList();
+                if (!string.IsNullOrEmpty(filterEnum))
+                {
+                    employees = employees.Where(x => x.IsOfficial == Boolean.Parse(filterEnum)).ToList();
+                    ViewBag.SelectedFilter = (filterEnum == "1" ? "Official" : "");
+                    ViewBag.CurrentEnum = (filterEnum == "1" ? "True" : "False");
+                }
+                else
+                {
+                    employees = employees.Where(x => x.IsOfficial == true).ToList();
+                    ViewBag.SelectedFilter = "Official";
+                    ViewBag.CurrentEnum = "True";
+                }
+
+                if (!string.IsNullOrEmpty(idBranch))
+                {
+                    employees = employees.Where(x => x.IdBranch == int.Parse(idBranch)).ToList();
+                }
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    employees = employees.Where(x => x.Name.ToLower().Contains(searchString.ToLower())).ToList();
+                }
+                switch (sortOrder)
+                {
+                    case "name_desc":
+                        employees = employees.OrderByDescending(s => s.Name).ToList();
+                        break;
+                    case "date":
+                        employees = employees.OrderBy(s => s.Id).ToList();
+                        break;
+                    case "name":
+                        employees = employees.OrderBy(s => s.Name).ToList();
+                        break;
+                    default:
+                        employees = employees.OrderByDescending(s => s.Id).ToList();
+                        break;
+                }
+                int pageSize = 20;
+                int pageNumber = (page ?? 1);
+
+
+                var pagedData = employees.ToPagedList(pageNumber, pageSize);
+
+                var pagedListRenderOptions = new PagedListRenderOptions();
+                pagedListRenderOptions.FunctionToTransformEachPageLink = (liTag, aTag) =>
+                {
+                    liTag.AddCssClass("page-item");
+                    aTag.AddCssClass("page-link");
+                    return liTag;
+                };
+
+                ViewBag.PagedListRenderOptions = pagedListRenderOptions;
+                return View(pagedData);
+            }
         }
         public static string GetLastName(string fullName)
         {
@@ -118,6 +127,40 @@ namespace SuperbrainManagement.Controllers
             }
 
             return phoneNumber.Substring(phoneNumber.Length - 3);
+        }
+        public ActionResult Submit_AddPosition(string Code, string Name,string Action)
+        {
+
+            string status = "ok";
+            string message = "";
+            var pc = db.Positions.SingleOrDefault(x => x.Code == Code && x.Enable == true);
+            if (Action == "create")
+            {
+                if (pc == null)
+                {
+                    var c = new Position()
+                    {
+                        Code = Code,
+                        Name = Name,
+                        Enable = true
+                    };
+                    db.Positions.Add(c);
+                    db.SaveChanges();
+                    status = "ok";
+                    message = "Đã thêm thành công!";
+                }
+                else
+                {
+                    status = "error";
+                    message = "Đã tồn tại mã này!";
+                }
+            }
+            var item = new
+            {
+                status,
+                message
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
         }
         [HttpPost]
         public ActionResult Submit_adduser(int IdEmployee,string Name,string Password)
@@ -175,20 +218,50 @@ namespace SuperbrainManagement.Controllers
         [HttpPost]
         public async Task<ActionResult> Delete_Employee(int id)
         {
+            string status, message;
             var pc = await db.Employees.FindAsync(id);
             var user = db.Users.FirstOrDefault(u => u.IdEmployee == id);
             if (pc == null)
             {
+                status = "error";
+                message = "Không tồn tại nhân sự này!";
                 return HttpNotFound();
             }
             pc.Enable = false;
             user.Enable = false;
             db.Entry(user); 
             db.Entry(pc);
-
+            status = "ok";
+            message = "Đã xóa thành công!";
             await db.SaveChangesAsync();
-
-            return Json(new { success = true });
+            var item = new { status,message
+            };
+            return Json(item,JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public async Task<ActionResult> Confirm_official(int id)
+        {
+            string status, message;
+            var pc = await db.Employees.FindAsync(id);
+            var user = db.Users.FirstOrDefault(u => u.IdEmployee == id);
+            if (pc == null)
+            {
+                status = "error";
+                message = "Không tồn tại nhân sự này!";
+                return HttpNotFound();
+            }
+            pc.IsOfficial = true;
+            db.Entry(user);
+            db.Entry(pc);
+            status = "ok";
+            message = "Đã cập nhật thành công!";
+            await db.SaveChangesAsync();
+            var item = new
+            {
+                status,
+                message
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
         }
         public ActionResult Load_infoEmployee(int id)
         {

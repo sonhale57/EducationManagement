@@ -113,7 +113,7 @@
             <form action="/" method="post" id="form_xuat">
                 <div class="modal-header">
                     <h5 class="modal-title text-success" id="exampleModalLabel2">
-                        Danh sách đang ký tham gia đào tạo
+                        Danh sách đăng ký tham gia đào tạo
                     </h5>
                 </div>
                 <hr style="width:90%;margin:0 auto;" />
@@ -161,6 +161,148 @@
                     <div class="text-center">
                         <button type="button" class="btn btn-success" onclick="Submit_payment()">
                             <i class="ti ti-credit-card"></i> Thanh toán phí tham gia
+                        </button>
+                        <button type="button" class="btn btn-outline-dark" onclick="close_modal()">
+                            <i class="ti ti-door-exit"></i> Thoát
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalRating" tabindex="-1" aria-labelledby="modalRatingLabel2" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content" style="">
+            <form action="/" method="post" id="form_xuat">
+                <div class="modal-header">
+                    <h5 class="modal-title text-success" id="modalRatingLabel2">
+                        Kết quả giáo viên tham gia đào tạo
+                    </h5>
+                </div>
+                <hr style="width:90%;margin:0 auto;" />
+                <div class="modal-body">
+                    <input type="hidden" name="IdTraining" id="IdTraining" value="" />
+                    <div class="row" id="showinfo">
+                    </div>
+                    <p class="text-muted fw-light mt-3 text-decoration-underline"><i class="ti ti-file-analytics"></i> Danh sách đính kèm</p>
+                    <table class="table ">
+                        <tr class="bg-success text-white">
+                            <th class="text-center">STT</th>
+                            <th class="text-left">Họ tên</th>
+                            <th class="text-center">Ngày sinh</th>
+                            <th class="text-center">Điện thoại</th>
+                            <th class="text-left">Email</th>
+                            <th class="text-left">Cơ sở</th>
+                            <th class="text-center">Kết quả</th>
+                            @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
+                            {
+                                <th class="text-center">Thao tác</th>
+                            }
+                        </tr>
+                        <tbody id="showlist_rating"></tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalRatingEmployees" tabindex="-1" aria-labelledby="modalRatingEmployeesLabel2" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content" style="">
+            <form action="/" method="post" id="form-danhgia">
+                <div class="modal-header">
+                    <h5 class="modal-title text-success" id="modalRatingEmployeesLabel2">
+                        Đánh giá giáo viên tham gia đào tạo
+                    </h5>
+                </div>
+                <hr style="width:90%;margin:0 auto;" />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col col-md-6 mt-3">
+                            <label>Khóa đào tạo</label>
+                            <input type="hidden" name="rateIdTrainning" value="" id="rateIdTrainning" />
+                            <input type="text" name="rateNameTrainning" id="rateNameTrainning" value="" class="form-control disabled" />
+                        </div>
+                        <div class="col col-md-6 mt-3">
+                            <label>Giáo viên tham gia</label>
+                            <input type="hidden" name="rateIdEmployee" value="" id="rateIdEmployee" />
+                            <input type="text" name="rateNameEmployee" id="rateNameEmployee" value="" class="form-control disabled" />
+                        </div>
+
+                        <div class="col col-md-6 mt-3">
+                            <label>Kết quả</label>
+                            <select id="rateResult" class="form-control">
+                                <option value="true">Đã đạt</option>
+                                <option value="false">Chưa đạt</option>
+                            </select>
+                        </div>
+                        <div class="col col-md-6 mt-3">
+                            <label>Số giấy chứng nhận</label>
+                            <input type="text" name="rateNumberofCertificate" id="rateNumberofCertificate" value="" class="form-control" />
+                        </div>
+
+                        <h5 class="text-primary mt-3"><i class="ti ti-rating-12-plus"></i> Điểm chuyên môn</h5>
+
+                        <div class="col col-md-6 mt-3">
+                            <label>Bài KT tổng kết 1</label>
+                            <input type="text" name="rateTotalScore" id="rateTotalScore" value="" class="form-control" />
+                        </div>
+                        <div class="col col-md-6 mt-3">
+                            <label>Tổng quan Superbrain</label>
+                            <input type="text" name="rateSuperbrainScore" id="rateSuperbrainScore" value="" class="form-control" />
+                        </div>
+                        <div class="col col-md-6 mt-3">
+                            <label>Nhận diện thương hiệu</label>
+                            <input type="text" name="rateBrandScore" id="rateBrandScore" value="" class="form-control" />
+                        </div>
+                        <div class="col col-md-6 mt-3">
+                            <label>Hoạt động giảng dạy</label>
+                            <input type="text" name="rateTeachScore" id="rateTeachScore" value="" class="form-control" />
+                        </div>
+                        <div class="col col-md-6 mt-3">
+                            <label>Chốt sale</label>
+                            <input type="text" name="rateSaleScore" id="rateSaleScore" value="" class="form-control" />
+                        </div>
+                        <div class="col col-md-6 mt-3">
+                            <label>Tâm thế người hướng dẫn</label>
+                            <input type="text" name="rateMindsetScore" id="rateMindsetScore" value="" class="form-control" />
+                        </div>
+                        <div class="col col-md-6 mt-3">
+                            <label>Soroban</label>
+                            <input type="text" name="rateSorobanScore" id="rateSorobanScore" value="" class="form-control" />
+                        </div>
+                        <div class="col col-md-6 mt-3">
+                            <label>Luyện tập Online</label>
+                            <input type="text" name="rateOnlineScore" id="rateOnlineScore" value="" class="form-control" />
+                        </div>
+
+                        <h5 class="text-primary mt-3"><i class="ti ti-rating-12-plus"></i> Điểm thái độ</h5>
+
+                        <div class="col col-md-6 mt-3">
+                            <label>Hoàn thành bài tập đầy đủ</label>
+                            <input type="text" name="rateCompleteScore" id="rateCompleteScore" value="" class="form-control" />
+                        </div>
+                        <div class="col col-md-6 mt-3">
+                            <label>Tham gia đầy đủ</label>
+                            <input type="text" name="rateParticipationScore" id="rateParticipationScore" value="" class="form-control" />
+                        </div>
+                        <div class="col col-md-6 mt-3">
+                            <label>Đúng tác phong</label>
+                            <input type="text" name="rateDemeanorScore" id="rateDemeanorScore" value="" class="form-control" />
+                        </div>
+                        <div class="col col-md-6 mt-3">
+                            <label>Tích cực chủ động</label>
+                            <input type="text" name="rateProactiveScore" id="rateProactiveScore" value="" class="form-control" />
+                        </div>
+                        <div class="col col-md-12 mt-3">
+                            <label>Nhận xét chung</label>
+                            <textarea type="text" name="rateDescription" id="rateDescription" value="" class="form-control"></textarea>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-success" onclick="Submit_rating()">
+                            <i class="ti ti-rating-12-plus"></i> Cập nhật đánh giá
                         </button>
                         <button type="button" class="btn btn-outline-dark" onclick="close_modal()">
                             <i class="ti ti-door-exit"></i> Thoát
@@ -220,6 +362,89 @@
         $("#IdTraining").val(id);
         $("#modalRegistration").modal('show');
     }
+    function Rating_registration(id) {
+        Load_ratingregistration(id);
+        $("#modalRating").modal('show');
+    }
+    function Load_ratingregistration(id) {
+        $.ajax({
+            url: '@Url.Action("Load_ratingregistration", "TrainingCourses")',
+            type: "GET",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                $('#showlist_rating').html(data.str);
+                $('#showinfo').html(data.strinfo);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function Rating_Employee(IdTrainning, IdEmployee) {
+        Load_infoRating(IdTrainning, IdEmployee);
+        $("#modalRatingEmployees").modal('show');
+    }
+    function Load_infoRating(IdTrainning,IdEmployee) {
+        $.ajax({
+            url: '@Url.Action("Load_infoRating", "TrainingCourses")',
+            type: "GET",
+            data: {
+                IdTrainning: IdTrainning,
+                IdEmployee: IdEmployee
+            },
+            success: function (data) {
+                $('#rateIdEmployee').val(IdEmployee);
+                $('#rateIdTrainning').val(IdTrainning);
+                $('#rateNameEmployee').val(data.strNameE);
+                $('#rateNameTrainning').val(data.strNameT);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function Submit_rating() {
+        $.ajax({
+            url: '@Url.Action("Submit_rating", "TrainingCourses")',
+            type: "POST",
+            data: {
+                IdEmployee: $("#rateIdEmployee").val(),
+                IdTrainingCourse: $("#rateIdTrainning").val(),
+                Result: $("#rateResult").val(),
+                NumberCertification: $("#rateNumberofCertificate").val(),
+                TotalScore: $("#rateTotalScore").val(),
+                SuperbrainScore: $("#rateSuperbrainScore").val(),
+                BrandScore: $("#rateBrandScore").val(),
+                SaleScore: $("#rateSaleScore").val(),
+                SaleScore: $("#rateSaleScore").val(),
+                MindsetScore: $("#rateMindsetScore").val(),
+                SorobanScore: $("#rateSorobanScore").val(),
+                OnlineScore: $("#rateOnlineScore").val(),
+                CompleteScore: $("#rateCompleteScore").val(),
+                ParticipationScore: $("#rateParticipationScore").val(),
+                DemeanorScore: $("#rateDemeanorScore").val(),
+                ProactiveScore: $("#rateProactiveScore").val(),
+                Description: $("#rateDescription").val()
+            }
+        , dataType: "json",
+        success: function (data) {
+            if (data.status == "ok") {
+                $('#modalRatingEmployees').modal('hide');
+                Load_ratingregistration($("#rateIdTrainning").val());
+                showSuccess("Đã đánh giá thành công!", 3000);
+            }
+            else {
+                showError(data.status, 3000);
+            }
+        },
+        error: function () { showError('Lỗi!', 3000); }
+        });
+    }
+
 
     function Load_dangky(id) {
         Load_infoByTrainingCourse(id);
@@ -289,6 +514,6 @@
             }
         },
         error: function () { showError('Lỗi!', 3000); }
-    });
-}
+        });
+    }
 </script>

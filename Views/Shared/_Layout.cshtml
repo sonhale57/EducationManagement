@@ -19,22 +19,42 @@
             height: 200px;
             overflow-y: scroll;
         }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 12px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        body {
+            user-select: none;
+        }
+        body::-webkit-scrollbar {
+            width: 5px;
+        }
+        body::-webkit-scrollbar-track {
+            background-color: #fafafa;
+        }
+        body::-webkit-scrollbar-thumb {
+            background-image: linear-gradient(-45deg, #13DEB9, #20c997);
+            border-radius: 50px;
+        }
+        .modal-dialog-scrollable .modal-body::-webkit-scrollbar {
+            width: 5px;
+        }
+        .modal-dialog-scrollable .modal-body::-webkit-scrollbar-track {
+            background-color: #fafafa;
+        }
 
-            .custom-scrollbar::-webkit-scrollbar {
-                width: 12px;
-            }
-
-            .custom-scrollbar::-webkit-scrollbar-track {
-                background: #f1f1f1;
-            }
-
-            .custom-scrollbar::-webkit-scrollbar-thumb {
-                background: #888;
-            }
-
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: #555;
-                }
+        .modal-dialog-scrollable .modal-body::-webkit-scrollbar-thumb {
+            background-image: linear-gradient(-45deg, #13DEB9, #20c997);
+            border-radius: 50px;
+        }
     </style>
 </head>
 <body>
@@ -122,7 +142,7 @@
                                     </a>
                                 </li>
                                 <li class="sidebar-item">
-                                    <a href="javascript:void(0)" class="sidebar-link">
+                                    <a href="/classes/filter" class="sidebar-link">
                                         <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Điểm danh</span>
                                     </a>
                                 </li>
@@ -376,13 +396,13 @@
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
                                     <div class="message-body">
-                                        <a href="/Authentication/Profile" class="d-flex align-items-center gap-2 dropdown-item">
+                                        <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
                                             <i class="ti ti-user fs-6"></i>
                                             <p class="mb-0 fs-3">Hồ sơ cá nhân</p>
                                         </a>
-                                        <a href="/Authentication/MyAccount" class="d-flex align-items-center gap-2 dropdown-item">
+                                        <a href="javascript:ChangePassword()" class="d-flex align-items-center gap-2 dropdown-item">
                                             <i class="ti ti-lock-access fs-6"></i>
-                                            <p class="mb-0 fs-3">Thông tin tài khoản</p>
+                                            <p class="mb-0 fs-3">Đổi mật khẩu</p>
                                         </a>
                                         <hr />
                                         <a href="/Authentication/Logout" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
@@ -406,10 +426,75 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content" style="width:800px;">
+                <div class="modal-header">
+                    <h5 class="modal-fullscreen" id="changePasswordModalLabel">Đổi mật khẩu</h5>
+                </div>
+                <hr style="width:90%;margin:0 auto;" />
+                <form action="/" method="post" id="form_nhap">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col col-md-12 mt-3">
+                                <label>Mật khẩu mới</label>
+                                <input type="hidden" id="IdUser" value="" class="form-control" />
+                                <input type="password" id="EditPassword" value="" class="form-control" onkeyup="check()" required />
+                            </div>
+                            <div class="col col-md-12 mt-3">
+                                <label>Nhập lại mật khẩu</label>
+                                <input type="password" id="ConfirmPassword" value="" class="form-control" onkeyup="check()" required />
+                                <small class="fst-italic" id="message"></small>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-success mt-3" onclick="Submit_changepassword()" id="btnAction">
+                            <i class="ti ti-refresh"></i> Lưu thay đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     @Scripts.Render("~/bundles/signalR")
     <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
     <script>
         CKEDITOR.replace('editor1');
+        function ChangePassword() {
+            $('#changePasswordModal').modal('show');
+        }
+        function Submit_changepassword() {
+            if ($("#EditPassword").val() != $("#ConfirmPassword").val()) {
+                showError("Mật khẩu không trùng khớp!");
+            }
+            $.ajax({
+                url: '@Url.Action("Submit_ChangePassword", "Users")',
+                type: "POST",
+                data: {
+                    Password: $("#EditPassword").val()
+                }
+                , dataType: "json",
+                success: function (data) {
+                    if (data.status == "ok") {
+                        $('#changePasswordModal').modal('hide');
+                        showSuccess(data.message, 3000);
+                    }
+                    else {
+                        showError(data.message, 3000);
+                    }
+                },
+                error: function () { showError('Lỗi!', 3000); }
+            });
+        }
+        var check = function () {
+            if (document.getElementById('EditPassword').value ==
+                document.getElementById('ConfirmPassword').value) {
+                document.getElementById('message').style.color = 'green';
+                document.getElementById('message').innerHTML = '<i class="ti ti-check text-success"></i> Matching';
+            } else {
+                document.getElementById('message').style.color = 'red';
+                document.getElementById('message').innerHTML = 'Mật khẩu không trùng khớp!';
+            }
+        }
     </script>
 
     <script src="~/assets/js/select2.min.js"></script>

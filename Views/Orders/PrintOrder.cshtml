@@ -1,0 +1,159 @@
+﻿
+@{
+    ViewBag.Title = "PrintOrder";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    @@media print {
+    body * {
+        visibility: hidden;
+    }
+    #printableCard, #printableCard * {
+        visibility: visible;
+    }
+    #printableCard {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 148mm; /* A5 width */
+        height: 210mm; /* A5 height */
+        padding: 10mm; /* Padding to ensure content is not cut off */
+        box-sizing: border-box;
+        overflow: hidden; /* Prevents content from overflowing */
+    }
+
+    .card {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .table-responsive {
+        overflow: visible;
+    }
+
+    .table {
+        width: 100%;
+    }
+}
+</style>
+<div class="d-sm-flex d-block align-items-center justify-content-between align-content-center">
+    <div class="">
+    </div>
+    <div class="d-flex">
+        <a href="javascript:Print_Order()" class="btn btn-sm btn-outline-dark"><i class="ti ti-printer"></i> In đơn hàng</a>
+    </div>
+</div>
+<div class="card mt-2"  id="printableCard">
+    <div class="card-body">
+        <div class="d-sm-flex d-block align-items-center justify-content-between align-content-center">
+            <div class="">
+                <h5 class="text-body-secondary">Mã đơn hàng: <a class="fw-bold" href="#!"><span id="strCode"></span></a></h5>
+                <p class="text-body-secondary mt-1 mb-0">Người đặt hàng: <span class="text-body-emphasis fw-semibold" id="strTen"></span></p>
+                <p class="text-body-secondary mt-1 mb-0">Cơ sở: <span class="text-body-emphasis fw-semibold" id="strCoso"></span></p>
+                <p class="text-body-secondary mt-1 mb-0">Số điện thoại nhận hàng: <span class="text-body-emphasis fw-semibold" id="strdienthoai"></span></p>
+                <p class="text-body-secondary mt-1 mb-0">Địa chỉ giao hàng: <span class="text-body-emphasis fw-semibold" id="strDiachi"></span></p>
+                <p class="text-body-secondary mt-1 mb-0">Ngày đặt: <span class="text-body-emphasis fw-semibold" id="strDate"></span></p>
+            </div>
+        </div>
+        <div class="row g-5 gy-7 mt-3">
+            <div class="col-12 col-xl-8 col-xxl-9">
+                <div id="orderTable">
+                    <div class="table-responsive scrollbar">
+                        <table class="table fs-9 mb-0">
+                            <thead>
+                                <tr>
+                                    <td class="fw-bolder text-muted text-center">STT</td>
+                                    <td class="fw-bolder text-muted">Vật tư</td>
+                                    <td class="fw-bolder text-muted text-center">Đơn vị</td>
+                                    <td class="fw-bolder text-muted text-center">Đơn giá</td>
+                                    <td class="fw-bolder text-muted text-center">Số lượng</td>
+                                    <td class="fw-bolder text-muted text-center">Thành tiền</td>
+                                </tr>
+                            </thead>
+                            <tbody id="showlist"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-12 col-xl-4 col-xxl-3">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h3 class="card-title mb-4">Summary</h3>
+                                <div>
+                                    <div class="d-flex justify-content-between">
+                                        <p class="text-body fw-semibold">Thành tiên đơn hàng :</p>
+                                        <p class="text-body-emphasis fw-semibold" id="strTongtien"></p>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <p class="text-body fw-semibold">Giảm :</p>
+                                        <p class="text-danger fw-semibold">0</p>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <p class="text-body fw-semibold">Thuế :</p>
+                                        <p class="text-body-emphasis fw-semibold">8%</p>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <p class="text-body fw-semibold">Tổng tiền :</p>
+                                        <p class="text-body-emphasis fw-semibold" id="strTong">$665</p>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between border-top border-translucent border-dashed pt-4">
+                                    <p class="text-body fw-semibold mb-0">Tổng thanh toán :</p>
+                                    <p class="mb-0 text-body-emphasis fw-semibold" id="strTongthanhtoan">$695.20</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" name="IdOrder" value="@ViewBag.IdOrder" id="IdOrder" />
+
+<script>
+    var id = $("#IdOrder").val();
+    LoadStatus_Order(id);
+    function LoadStatus_Order(id) {
+        $.ajax({
+            url: '@Url.Action("Loadlist_PrintOrder", "Orders")',
+            type: "GET",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                $('#showlist').html(data.str);
+                $('#strCode').html (data.strCode);
+                $('#strTongtien').html(data.strTongtien);
+                $('#strTong').html(data.strTongtien);
+                $('#strTen').html(data.strTen);
+                $('#strCoso').html(data.strCoso);
+                $('#strDiachi').html(data.strDiachi);
+                $('#strdienthoai').html(data.strdienthoai);
+                $('#strDate').html(data.strDate);
+                $('#strTongthanhtoan').html(data.strTongtien);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+    function Print_Order() {
+        // Clone the card content to a new element for printing
+        var printContents = document.getElementById('printableCard').innerHTML;
+        var originalContents = document.body.innerHTML;
+
+        // Replace body content with the card content
+        document.body.innerHTML = printContents;
+
+        // Trigger the print dialog
+        window.print();
+
+        // Restore the original body content
+        document.body.innerHTML = originalContents;
+    }
+</script>

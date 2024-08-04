@@ -37,7 +37,7 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                querysearch = " and p.Name like N'" + searchString + "' or p.Code like N'" + searchString + "'";
+                querysearch = " and (p.Name like N'" + searchString + "' or p.Code like N'" + searchString + "')";
             }
             if (!string.IsNullOrEmpty(sort))
             {
@@ -73,7 +73,7 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
                         + "<td class='text-center text-success fw-bolder'>" + readerCat["Code"] + "</td>"
                         + "<td class='text-success fw-bolder' colspan=10>" 
                         + readerCat["Name"] 
-                        +"<a href=\"/productcategories/edit/" + readerCat["Id"] +"\" class=\"ms-2\"><i class=\"ti ti-edit text-primary fw-bolder\"></i></a>"
+                        +"<a href=\"javascript:Edit_Category(" + readerCat["Id"] +")\" class=\"ms-2\"><i class=\"ti ti-edit text-primary fw-bolder\"></i></a>"
                         +"<a href=\"javascript:Delete_category(" + readerCat["Id"] +")\" class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a>"
                         + "</td>"
                         + "</tr>";
@@ -99,7 +99,7 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
                                 + "<td class='text-center'>" + reader["Quota"].ToString() + "</td>"
                                 + "<td class='text-center'>" + reader["UnitOfPackage"].ToString() + "</td>"
                                 + "<td class='text-center'>" + reader["NumberOfPackage"].ToString() + "</td>"
-                                + "<td>" + (reader["Active"].ToString().ToLower() == "true" ? "<label class=\"custom-control ios-switch\"><input type=\"checkbox\" class=\"ios-switch-control-input\" onchange=\"javascript: ChangeStatus(this)\" data-id=\"" + reader["Id"] + "\" value=\"0\" checked><span class=\"ios-switch-control-indicator\"></span></label>" : "<label class=\"custom-control ios-switch\"><input type=\"checkbox\" class=\"ios-switch-control-input\" onchange=\"javascript: ChangeStatus(this)\" data-id=\"" + reader["Id"] + "\" value=\"1\"><span class=\"ios-switch-control-indicator\"></span></label>") + "</td>"
+                                + "<td class='text-center'>" + (reader["Active"].ToString().ToLower() == "true" ? "<label class=\"custom-control ios-switch\"><input type=\"checkbox\" class=\"ios-switch-control-input\" onchange=\"javascript: ChangeStatus(this)\" data-id=\"" + reader["Id"] + "\" value=\"0\" checked><span class=\"ios-switch-control-indicator\"></span></label>" : "<label class=\"custom-control ios-switch\"><input type=\"checkbox\" class=\"ios-switch-control-input\" onchange=\"javascript: ChangeStatus(this)\" data-id=\"" + reader["Id"] + "\" value=\"1\"><span class=\"ios-switch-control-indicator\"></span></label>") + "</td>"
                                 + "<td class='text-end'>"
                                     + "<a href=\"/products/edit/" + reader["Id"] + "\" class=\"me-1\"><i class=\"ti ti-edit text-primary\"></i></a>"
                                     + "<a href=\"/products/delete/" + reader["Id"] + "\" class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a>"
@@ -122,19 +122,102 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
-        [HttpPost]
-        public async Task<ActionResult> Delete_Category(int id)
+        public ActionResult Load_EditCategory(int IdCategory)
         {
-            var pc = await db.ProductCategories.FindAsync(id);
+            var c = db.ProductCategories.Find(IdCategory);
+            var name = c.Name;
+            var code = c.Code;
+            var displayorder = c.DisplayOrder;
+            var description = c.Description;
+            var item = new
+            {
+                code,
+                name,
+                description,
+                displayorder
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Submit_AddCategory(int Id, string Code, string Name, string Description, string Action,int DisplayOrder)
+        {
+
+            string status = "ok";
+            string message = "";
+            var pc = db.ProductCategories.SingleOrDefault(x=> x.Code == Code&&x.Enable==true);
+            if (Action == "create")
+            {
+                if (pc == null)
+                {
+                    var c = new ProductCategory()
+                    {
+                        Code = Code,
+                        Name = Name,
+                        Description = Description,
+                        DisplayOrder = DisplayOrder,
+                        Enable = true,
+                        DateCreate = DateTime.Now,
+                        Active = true,
+                        IdUser = Convert.ToInt32(CheckUsers.iduser())
+                    };
+                    db.ProductCategories.Add(c);
+                    db.SaveChanges();
+                    status = "ok";
+                    message = "Đã thêm thành công!"; 
+                }
+                else
+                {
+                    status = "error";
+                    message = "Đã tồn tại mã danh mục này!";
+                }
+            }
+            else
+            {
+                var cb = db.ProductCategories.Find(Id);
+                if (cb == null)
+                {
+                    status = "error";
+                    message = "Không tìm thấy danh mục này!";
+                }
+                else
+                {
+                    cb.Name = Name;
+                    cb.Code = Code;
+                    cb.Description = Description;
+                    cb.DisplayOrder = DisplayOrder;
+                    db.Entry(cb);
+                    db.SaveChanges();
+                    status = "ok";
+                    message = "Đã cập nhật thành công!";
+                }
+            }
+            var item = new
+            {
+                status,
+                message
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public async Task<ActionResult> Delete_Category(int IdCategory)
+        {
+            string status, message;
+            var pc = await db.ProductCategories.FindAsync(IdCategory);
             if (pc == null)
             {
+                status = "error";
+                message = "Không tồn tại danh mục này!";
                 return HttpNotFound();
             }
 
             db.ProductCategories.Remove(pc);
             await db.SaveChangesAsync();
-
-            return Json(new { success = true });
+            status = "ok";
+            message = "Đã xóa thành công!";
+            var item = new { 
+                status,
+                message
+            };
+            return Json(item,JsonRequestBehavior.AllowGet);
         }
         // GET: Products/Details/5
         public async Task<ActionResult> Details(int? id)
@@ -154,7 +237,7 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
         // GET: Products/Create
         public ActionResult Create()
         {
-            ViewBag.IdCategory = new SelectList(db.ProductCategories, "Id", "Name");
+            ViewBag.IdCategory = new SelectList(db.ProductCategories.Where(x=>x.Enable==true), "Id", "Name");
             return View();
         }
 

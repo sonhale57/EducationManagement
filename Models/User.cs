@@ -111,8 +111,10 @@ namespace SuperbrainManagement.Models
 
         public bool? Active { get; set; }
 
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime? Expire { get; set; }
 
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime? DateCreate { get; set; }
 
         public int? Createby { get; set; }
