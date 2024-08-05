@@ -209,6 +209,67 @@ namespace SuperbrainManagement.Controllers
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
+        public ActionResult LoadCount(string IdBranch)
+        {
+            string IdBranch_HQ = db.Branches.SingleOrDefault(x => x.Code.ToLower() == "hq").Id.ToString();
+            int count_new = 0, count_cancel = 0, count_payment = 0, count_confirm = 0, count_package = 0, count_delivery = 0, count_complete = 0;
+            var list = db.Orders.Where(x=>x.IdBranch ==Convert.ToInt32(IdBranch)).ToList();
+            
+            if (string.IsNullOrEmpty(IdBranch))
+            {
+                //Kiểm tra tài khoản đang đăng nhập => Cơ sở
+                IdBranch = CheckUsers.idBranch();
+                 if (IdBranch == IdBranch_HQ)
+                {
+                    list = db.Orders.ToList();
+                }
+                else
+                {
+                    int idbranch = Convert.ToInt32(IdBranch);
+                    list = db.Orders.Where(x => x.IdBranch == idbranch).ToList();
+                }
+            }
+            else
+            {
+                int idbranch = Convert.ToInt32(IdBranch);
+                list = db.Orders.Where(x => x.IdBranch == idbranch).ToList();
+            }
+           
+            foreach(var i  in list)
+            {
+                if (i.Status == 1)
+                {
+                    count_new++;
+                } else if (i.Status == 2)
+                {
+                    count_payment++;
+                } else if (i.Status == 3)
+                {
+                    count_confirm++;
+                } else if (i.Status == 4)
+                { 
+                    count_package++; 
+                }else if(i.Status == 5)
+                {
+                    count_delivery++;
+                }else if(i.Status == 6)
+                {
+                    count_complete++;
+                }
+                else { count_cancel++; }    
+            }
+            var item = new
+            {
+                count_new,
+                count_payment,
+                count_confirm,
+                count_package,
+                count_delivery,
+                count_complete,
+                count_cancel
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
         public string Status_timeline(int IdOrder)
         {
             var orderStatus = db.OrderStatus.Where(x => x.IdOrder == IdOrder);
@@ -360,23 +421,29 @@ namespace SuperbrainManagement.Controllers
                 reader.Close();
             }
             string strSelect = "";
+            string strStatus = "";
             var status = db.Orders.Find(id).Status + 1;
             switch (status)
             {
                 case 2:
                     strSelect += "<option value='2' selected>Thanh toán đơn hàng</option>";
+                    strStatus = "2";
                     break;
                 case 3:
                     strSelect += "<option value='3' selected>Xác nhận đơn hàng</option>";
+                    strStatus = "3";
                     break;
                 case 4:
                     strSelect += "<option value='4' selected>Đã đóng gói</option>";
+                    strStatus = "4";
                     break;
                 case 5:
                     strSelect += "<option value='5' selected>Đang giao hàng</option>";
+                    strStatus = "5";
                     break;
                 case 6:
                     strSelect += "<option value='6' selected>Đã hoàn thành</option>";
+                    strStatus = "6";
                     break;
             }
             string strTimeline = Status_timeline(id);
@@ -388,7 +455,9 @@ namespace SuperbrainManagement.Controllers
                 strSelect,
                 strTongtien,
                 strTimeline,
-                count
+                count,
+                strStatus,
+                isHQ =CheckUsers.CheckHQ()
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }

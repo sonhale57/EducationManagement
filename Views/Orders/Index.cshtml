@@ -298,6 +298,7 @@
                         <div class="col col-4 col-md-4 col-sm-12">
                             <label class="text-success">Mã đơn hàng:</label>
                             <input type="hidden" name="IdOrder" id="IdOrder" placeholder="Tên liên hệ" value="" class="form-control" />
+                            <input type="hidden" name="isHQ" id="isHQ" placeholder="Tên liên hệ" value="" class="form-control" />
                             <input type="text" name="Name" id="strCode" placeholder="Tên liên hệ" value="" class="form-control" disabled />
                         </div>
                         <div class="col col-4 col-md-4 col-sm-12">
@@ -315,7 +316,7 @@
                         </div>
                         <div class="col col-8 col-md-8 col-sm-12 mt-3">
                             <label class="text-success">Ghi chú cập nhật:</label>
-                            <input type="text" name="Description" id="Description" placeholder="Ghi chú cập nhật" value="" class="form-control" />
+                            <input type="text" name="statusDescription" id="statusDescription" placeholder="Ghi chú cập nhật" value="" class="form-control" />
                         </div>
                     </div>
                     <div class="line_box stav_projektu" style="margin: 40px 0 40px 0;" id="showlist_status">
@@ -399,14 +400,20 @@
                 id: id
             },
             success: function (data) {
-                console.log(data);
                 $('#showlist_statusorder').html(data.str);
                 $('#IdOrder').val(id);
                 $('#strCode').val(data.strCode);
                 $('#strTongtien').val(data.strTongtien);
+                $('#isHQ').val(data.isHQ);
                 $('#showlist_status').html(data.strTimeline);
                 $('#Status').html(data.strSelect);
                 $('#countline').val(data.count);
+                if (data.isHQ == false) {
+                    console.log("status là: " + data.status);
+                    if (data.status == 3 || data.status == 4 || data.status == 5) {
+                        $("#btn_submit").addClass("hideof");
+                    }
+                }
             },
             error: function (xhr, error) {
                 console.log(error);
@@ -480,7 +487,7 @@
     function submit_statusorder() {
         var idOrder = $("#IdOrder").val();
         var status = $("#Status").val();
-        var description = $("#Description").val();
+        var description = $("#statusDescription").val();
         var fileInput = $("#Image")[0];
         var file = fileInput.files[0]; // Lấy tệp từ input
 
