@@ -9,7 +9,7 @@
     <link href="~/assets/css/select2.css" rel="stylesheet" />
     <script src="~/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
     <script src="~/assets/js/main.js"></script>
-    @Scripts.Render("~/bundles/jquery")
+    <script src="~/assets/js/jquery-3.4.1.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.min.css">
     <script src="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/js/jquery-confirm.min.js"></script>
 
@@ -19,34 +19,44 @@
             height: 200px;
             overflow-y: scroll;
         }
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 12px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #888;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
+
+            .custom-scrollbar::-webkit-scrollbar {
+                width: 12px;
+            }
+
+            .custom-scrollbar::-webkit-scrollbar-track {
+                background: #f1f1f1;
+            }
+
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+                background: #888;
+            }
+
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: #555;
+                }
+
         body {
             user-select: none;
         }
-        body::-webkit-scrollbar {
-            width: 5px;
-        }
-        body::-webkit-scrollbar-track {
-            background-color: #fafafa;
-        }
-        body::-webkit-scrollbar-thumb {
-            background-image: linear-gradient(-45deg, #13DEB9, #20c997);
-            border-radius: 50px;
-        }
+
+            body::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            body::-webkit-scrollbar-track {
+                background-color: #fafafa;
+            }
+
+            body::-webkit-scrollbar-thumb {
+                background-image: linear-gradient(-45deg, #13DEB9, #20c997);
+                border-radius: 50px;
+            }
+
         .modal-dialog-scrollable .modal-body::-webkit-scrollbar {
             width: 5px;
         }
+
         .modal-dialog-scrollable .modal-body::-webkit-scrollbar-track {
             background-color: #fafafa;
         }
@@ -209,8 +219,30 @@
                                 <span>
                                     <i class="ti ti-shopping-cart"></i>
                                 </span>
-                                <span class="hide-menu"> Đơn hàng</span>
+                                <span class="hide-menu"> Quản lý Đơn hàng</span>
                             </a>
+                            <ul aria-expanded="false" class="collapse first-level base-level-line">
+                                <li class="sidebar-item">
+                                    <a href="/orders?openModal=true" class="sidebar-link">
+                                        <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Đặt hàng</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a href="/orders" class="sidebar-link">
+                                        <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Đơn hàng</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a href="/orders/statistics" class="sidebar-link">
+                                        <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Thống kê đơn hàng</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a href="/orders/detailstatistics" class="sidebar-link">
+                                        <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Thống kê chi tiết</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="javascript:void(0)" aria-expanded="false">
@@ -236,7 +268,7 @@
                                     </a>
                                 </li>
                                 <li class="sidebar-item">
-                                    <a href="javascript:void(0)" class="sidebar-link">
+                                    <a href="/warehouses/statistics" class="sidebar-link">
                                         <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Thống kê</span>
                                     </a>
                                 </li>
@@ -455,7 +487,7 @@
             </div>
         </div>
     </div>
-    @Scripts.Render("~/bundles/signalR")
+    <script src="~/assets/js/jquery.signalR-2.4.3.min.js"></script>
     <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
     <script>
         CKEDITOR.replace('editor1');
@@ -497,6 +529,7 @@
         }
     </script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
     <script src="~/assets/js/select2.min.js"></script>
     <script src="~/assets/js/sidebarmenu.js" asp-append-version="true"></script>
     <script src="~/assets/js/app.min.js" asp-append-version="true"></script>

@@ -58,6 +58,8 @@ namespace SuperbrainManagement.Models
         public decimal? TotalAmount { get; set; }
 
         public bool? Type { get; set; }
+        [StringLength(50)]
+        public string Cat { get; set; }
 
         public virtual Branch Branch { get; set; }
 

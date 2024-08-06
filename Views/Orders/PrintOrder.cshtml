@@ -1,109 +1,96 @@
 ﻿
 @{
     ViewBag.Title = "PrintOrder";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = null;
 }
-<style>
-    @@media print {
-    body * {
-        visibility: hidden;
-    }
-    #printableCard, #printableCard * {
-        visibility: visible;
-    }
-    #printableCard {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 148mm; /* A5 width */
-        height: 210mm; /* A5 height */
-        padding: 10mm; /* Padding to ensure content is not cut off */
-        box-sizing: border-box;
-        overflow: hidden; /* Prevents content from overflowing */
-    }
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Superbrain Management Software</title>
+    <link rel="shortcut icon" type="image/png" href="~/assets/images/logos/icon web.png" />
+    <link rel="stylesheet" href="~/assets/css/styles.css" />
+    <link href="~/assets/css/select2.css" rel="stylesheet" />
+    <script src="~/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+    <script src="~/assets/js/main.js"></script>
+    @Scripts.Render("~/bundles/jquery")
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/js/jquery-confirm.min.js"></script>
 
-    .card {
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-    }
-
-    .table-responsive {
-        overflow: visible;
-    }
-
-    .table {
-        width: 100%;
-    }
-}
-</style>
-<div class="d-sm-flex d-block align-items-center justify-content-between align-content-center">
-    <div class="">
-    </div>
-    <div class="d-flex">
-        <a href="javascript:Print_Order()" class="btn btn-sm btn-outline-dark"><i class="ti ti-printer"></i> In đơn hàng</a>
-    </div>
-</div>
-<div class="card mt-2"  id="printableCard">
-    <div class="card-body">
-        <div class="d-sm-flex d-block align-items-center justify-content-between align-content-center">
-            <div class="">
-                <h5 class="text-body-secondary">Mã đơn hàng: <a class="fw-bold" href="#!"><span id="strCode"></span></a></h5>
-                <p class="text-body-secondary mt-1 mb-0">Người đặt hàng: <span class="text-body-emphasis fw-semibold" id="strTen"></span></p>
-                <p class="text-body-secondary mt-1 mb-0">Cơ sở: <span class="text-body-emphasis fw-semibold" id="strCoso"></span></p>
-                <p class="text-body-secondary mt-1 mb-0">Số điện thoại nhận hàng: <span class="text-body-emphasis fw-semibold" id="strdienthoai"></span></p>
-                <p class="text-body-secondary mt-1 mb-0">Địa chỉ giao hàng: <span class="text-body-emphasis fw-semibold" id="strDiachi"></span></p>
-                <p class="text-body-secondary mt-1 mb-0">Ngày đặt: <span class="text-body-emphasis fw-semibold" id="strDate"></span></p>
-            </div>
+    <style>
+        @@media print {
+        }
+    </style>
+    </head>
+<body style="background:#A6CE39;">
+    <div class="d-sm-flex d-block align-items-center justify-content-between align-content-center mt-3 me-5">
+        <div class="">
         </div>
-        <div class="row g-5 gy-7 mt-3">
-            <div class="col-12 col-xl-8 col-xxl-9">
-                <div id="orderTable">
-                    <div class="table-responsive scrollbar">
-                        <table class="table fs-9 mb-0">
-                            <thead>
-                                <tr>
-                                    <td class="fw-bolder text-muted text-center">STT</td>
-                                    <td class="fw-bolder text-muted">Vật tư</td>
-                                    <td class="fw-bolder text-muted text-center">Đơn vị</td>
-                                    <td class="fw-bolder text-muted text-center">Đơn giá</td>
-                                    <td class="fw-bolder text-muted text-center">Số lượng</td>
-                                    <td class="fw-bolder text-muted text-center">Thành tiền</td>
-                                </tr>
-                            </thead>
-                            <tbody id="showlist"></tbody>
-                        </table>
-                    </div>
+        <div class="d-flex">
+            <a href="javascript:Print_Order()" class="btn btn-sm btn-outline-dark"><i class="ti ti-printer"></i> In đơn hàng</a>
+        </div>
+    </div>
+    <div class="container mt-2" id="printableCard">
+        <div class="card-body">
+            <div class="d-sm-flex d-block align-items-center justify-content-between align-content-center">
+                <div class="">
+                    <h6 class="text-body-secondary"><i class="ti ti-shopping-cart"></i> Mã đơn hàng: <a class="fw-bold" href="#!"><span id="strCode"></span></a></h6>
+                    <p class="text-body-secondary mt-1 mb-0">Người đặt hàng: <span class="text-body-emphasis fw-semibold" id="strTen"></span></p>
+                    <p class="text-body-secondary mt-1 mb-0">Cơ sở: <span class="text-body-emphasis fw-semibold" id="strCoso"></span></p>
+                    <p class="text-body-secondary mt-1 mb-0">Số điện thoại nhận hàng: <span class="text-body-emphasis fw-semibold" id="strdienthoai"></span></p>
+                    <p class="text-body-secondary mt-1 mb-0">Địa chỉ giao hàng: <span class="text-body-emphasis fw-semibold" id="strDiachi"></span></p>
+                    <p class="text-body-secondary mt-1 mb-0">Ngày đặt: <span class="text-body-emphasis fw-semibold" id="strDate"></span></p>
                 </div>
-
             </div>
-            <div class="col-12 col-xl-4 col-xxl-3">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <h3 class="card-title mb-4">Summary</h3>
-                                <div>
-                                    <div class="d-flex justify-content-between">
-                                        <p class="text-body fw-semibold">Thành tiên đơn hàng :</p>
-                                        <p class="text-body-emphasis fw-semibold" id="strTongtien"></p>
+            <div class="row g-5 gy-7 mt-3">
+                <div class="col-12 col-xl-8 col-xxl-9">
+                    <div id="orderTable">
+                        <div class="table-responsive scrollbar">
+                            <table class="table table-bordered fs-9 mb-0">
+                                <thead>
+                                    <tr>
+                                        <td class="fw-bolder text-muted text-center">STT</td>
+                                        <td class="fw-bolder text-muted">Vật tư</td>
+                                        <td class="fw-bolder text-muted text-center">Đơn vị</td>
+                                        <td class="fw-bolder text-muted text-center">Đơn giá</td>
+                                        <td class="fw-bolder text-muted text-center">Số lượng</td>
+                                        <td class="fw-bolder text-muted text-center">Thành tiền</td>
+                                    </tr>
+                                </thead>
+                                <tbody id="showlist"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-12 col-xl-4 col-xxl-3">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h3 class="card-title mb-4">Summary</h3>
+                                    <div>
+                                        <div class="d-flex justify-content-between">
+                                            <p class="text-body fw-semibold">Thành tiên đơn hàng :</p>
+                                            <p class="text-body-emphasis fw-semibold" id="strTongtien"></p>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <p class="text-body fw-semibold">Giảm :</p>
+                                            <p class="text-danger fw-semibold">0</p>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <p class="text-body fw-semibold">Tổng tiền :</p>
+                                            <p class="text-body-emphasis fw-semibold" id="strTong">$665</p>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between border-top border-translucent border-dashed pt-4">
+                                        <p class="text-body fw-semibold mb-0">Tổng thanh toán :</p>
+                                        <p class="mb-0 text-body-emphasis fw-semibold" id="strTongthanhtoan"></p>
                                     </div>
                                     <div class="d-flex justify-content-between">
-                                        <p class="text-body fw-semibold">Giảm :</p>
-                                        <p class="text-danger fw-semibold">0</p>
+                                        <small class="fst-italic">(đã bao gồm thuế GTGT 8%)</small>
                                     </div>
-                                    <div class="d-flex justify-content-between">
-                                        <p class="text-body fw-semibold">Thuế :</p>
-                                        <p class="text-body-emphasis fw-semibold">8%</p>
-                                    </div>
-                                    <div class="d-flex justify-content-between">
-                                        <p class="text-body fw-semibold">Tổng tiền :</p>
-                                        <p class="text-body-emphasis fw-semibold" id="strTong">$665</p>
-                                    </div>
-                                </div>
-                                <div class="d-flex justify-content-between border-top border-translucent border-dashed pt-4">
-                                    <p class="text-body fw-semibold mb-0">Tổng thanh toán :</p>
-                                    <p class="mb-0 text-body-emphasis fw-semibold" id="strTongthanhtoan">$695.20</p>
                                 </div>
                             </div>
                         </div>
@@ -112,10 +99,9 @@
             </div>
         </div>
     </div>
-</div>
-<input type="hidden" name="IdOrder" value="@ViewBag.IdOrder" id="IdOrder" />
+    <input type="hidden" name="IdOrder" value="@ViewBag.IdOrder" id="IdOrder" />
 
-<script>
+    <script>
     var id = $("#IdOrder").val();
     LoadStatus_Order(id);
     function LoadStatus_Order(id) {
@@ -141,19 +127,59 @@
                 console.log(error);
             }
         });
-    }
-    function Print_Order() {
-        // Clone the card content to a new element for printing
-        var printContents = document.getElementById('printableCard').innerHTML;
-        var originalContents = document.body.innerHTML;
+        }
+        function Print_Order() {
+            var printContents = document.getElementById('printableCard').innerHTML;
 
-        // Replace body content with the card content
-        document.body.innerHTML = printContents;
+            // Tạo một phần tử div ẩn để chứa nội dung cần in
+            var printFrame = document.createElement('iframe');
+            printFrame.style.position = 'absolute';
+            printFrame.style.width = '0px';
+            printFrame.style.height = '0px';
+            printFrame.style.border = 'none';
+            document.body.appendChild(printFrame);
 
-        // Trigger the print dialog
-        window.print();
+            // Viết nội dung vào iframe
+            var iframeDoc = printFrame.contentWindow.document;
+            iframeDoc.open();
+            iframeDoc.write('<html><head><title>Print Order</title>');
 
-        // Restore the original body content
-        document.body.innerHTML = originalContents;
-    }
-</script>
+            // Thêm các liên kết CSS từ trang chính vào iframe
+            var cssLinks = [];
+            var styles = document.getElementsByTagName('style');
+            var links = document.getElementsByTagName('link');
+
+            for (var i = 0; i < links.length; i++) {
+                if (links[i].rel === 'stylesheet') {
+                    cssLinks.push(links[i].href);
+                }
+            }
+            for (var j = 0; j < styles.length; j++) {
+                cssLinks.push(styles[j].innerHTML);
+            }
+
+            // Thêm liên kết CSS vào iframe
+            cssLinks.forEach(function (cssLink) {
+                iframeDoc.write('<link rel="stylesheet" type="text/css" href="' + cssLink + '">');
+            });
+
+            // Thêm inline style nếu có
+            iframeDoc.write('<style>' + document.querySelector('style').innerHTML + '</style>');
+
+            iframeDoc.write('</head><body style="width: 90%; margin: 0 auto;">');
+            iframeDoc.write(printContents);
+            iframeDoc.write('</body></html>');
+            iframeDoc.close(); // Đóng tài liệu để đảm bảo iframe có thể in
+
+            // Gọi hàm print của iframe
+            printFrame.contentWindow.focus();
+            printFrame.contentWindow.print();
+
+            // Xóa iframe sau khi in xong
+            setTimeout(function () {
+                document.body.removeChild(printFrame);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

@@ -436,5 +436,24 @@ namespace SuperbrainManagement.Controllers
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
+        public ActionResult Statistics()
+        {
+            if (CheckUsers.iduser() == "")
+            {
+                return Redirect("/authentication");
+            }
+            else
+            {
+                var branches = db.Branches.ToList();
+                int idbranch = int.Parse(CheckUsers.idBranch());
+                if (!CheckUsers.CheckHQ())
+                {
+                    branches = db.Branches.Where(x => x.Id == idbranch).ToList();
+                }
+                ViewBag.IdBranch = new SelectList(branches, "Id", "Name");
+                return View();
+            }
+        }
+
     }
 }

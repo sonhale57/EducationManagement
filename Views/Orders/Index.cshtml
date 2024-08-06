@@ -249,14 +249,14 @@
                         </div>
                     </div>
                     <table class="table mt-3">
-                        <thead class="bg-info">
+                        <thead class="bg-success">
                             <tr class="text-white">
-                                <td>STT</td>
+                                <td class="text-center">STT</td>
                                 <td>Vật tư</td>
-                                <td>Đơn vị</td>
-                                <td>Đơn giá</td>
-                                <td>Số lượng</td>
-                                <td>Thành tiền</td>
+                                <td class="text-center">Đơn vị</td>
+                                <td class="text-center">Đơn giá</td>
+                                <td class="text-center">Số lượng</td>
+                                <td class="text-center">Thành tiền</td>
                             </tr>
                         </thead>
                         <tbody id="showlist_order"></tbody>
@@ -324,12 +324,12 @@
                     <table class="table mt-3">
                         <thead class="bg-success">
                             <tr class="text-white">
-                                <td>STT</td>
+                                <td class="text-center">STT</td>
                                 <td>Vật tư</td>
-                                <td>Đơn vị</td>
-                                <td>Đơn giá</td>
-                                <td>Số lượng</td>
-                                <td>Thành tiền</td>
+                                <td class="text-center">Đơn vị</td>
+                                <td class="text-end">Đơn giá</td>
+                                <td class="text-center">Số lượng</td>
+                                <td class="text-end">Thành tiền</td>
                             </tr>
                         </thead>
                         <tbody id="showlist_statusorder"></tbody>
@@ -345,8 +345,15 @@
     </div>
 </div>
 <script>
-    Loadlist(1);
-    Loadlist_Count();
+    $(document).ready(function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('openModal') === 'true') {
+            $('#exampleModal').modal('show');
+        }
+        Loadlist(1);
+        Loadlist_Count();
+    });
+    
     function Loadlist(i) {
         $('#showlist').html("");
         $("#loading").html("<span class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></span>");
@@ -409,7 +416,6 @@
                 $('#Status').html(data.strSelect);
                 $('#countline').val(data.count);
                 if (data.isHQ == false) {
-                    console.log("status là: " + data.status);
                     if (data.status == 3 || data.status == 4 || data.status == 5) {
                         $("#btn_submit").addClass("hideof");
                     }
@@ -438,7 +444,7 @@
     }
     function update_thanhtien(i) {
         var max = parseInt($('#soluong_' + i).attr('max'));
-        var dongia = parseInt($("#dongia_" + i).val().replace(',',''));
+        var dongia = parseFloat($("#dongia_" + i).val().replace(/,/g, '')); // Remove all commas
         var soluong = parseInt($("#soluong_" + i).val());
         var heso = parseInt($("#NumberOfPackage_" + i).val());
         if ((soluong * heso) > max) {
@@ -451,6 +457,7 @@
             $("#thanhtien_" + i).val(thanhtien.toLocaleString());
             sum_tongtien();
         }
+        showSuccess(dongia, 3000);
     }
     function sum_tongtien() {
         var countline = $("#countline").val();
@@ -458,14 +465,18 @@
         for (var i = 1; i <= countline; i++) {
             var soluong = Number($("#soluong_" + i).val());
             if (soluong > 0) {
-                var dongia = parseInt($("#dongia_" + i).val().replace(',',''));
+                var dongia = parseFloat($("#dongia_" + i).val().replace(/,/g, '')); // Remove all commas
                 var thanhtien = dongia * soluong;
                 tongtien += thanhtien;
             }
         }
         $("#tongtien").val(tongtien.toLocaleString());
     }
+
+    var isProcessing = false;
     function submit_order() {
+    var isProcessing = true;
+    if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
     $.ajax({
         url: '@Url.Action("Submit_order", "Orders")',
         type: "POST",
@@ -475,27 +486,30 @@
             if (data.status == "ok") {
                 $('#exampleModal').modal('hide');
                 Loadlist(1);
-                showSuccess("Đã nhập thành công!", 3000);
+                showSuccess("Đã đặt hàng thành công!", 3000);
+                isProcessing = false;
             }
             else {
                 showError(data.status, 3000);
+                isProcessing = false;
             }
         },
         error: function () { showError('Lỗi!', 3000); }
     });
     }
     function submit_statusorder() {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
         var idOrder = $("#IdOrder").val();
         var status = $("#Status").val();
         var description = $("#statusDescription").val();
         var fileInput = $("#Image")[0];
-        var file = fileInput.files[0]; // Lấy tệp từ input
+        var file = fileInput.files[0]; 
 
         if (!idOrder || !status) {
             showError('IdOrder và Status không được để trống!', 3000);
             return;
         }
-
+        isProcessing = true; // Đánh dấu là đang xử lý
         var formData = new FormData();
         formData.append("IdOrder", idOrder);
         formData.append("Status", status);
@@ -516,11 +530,13 @@
                     showSuccess("Đã cập nhật thành công!", 3000);
                 } else {
                     showError(data.status, 3000);
+                    isProcessing = false;
                 }
             },
             error: function (xhr, status, error) {
                 var errorMessage = xhr.status + ': ' + xhr.statusText;
                 showError('Lỗi! ' + errorMessage, 3000);
+                isProcessing = false;
             }
         });
     }
