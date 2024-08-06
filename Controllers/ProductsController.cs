@@ -300,19 +300,6 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
         // POST: Products/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
-        /*
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "Id,Name,Description,Code,Image,Price,DiscountPrice,StatusDiscount,IdCategory,IsCore,Unit,Quota,NumberOfPackage,UnitOfPackage,Inventory,IsFixed,IsSale,IdSupplier,PowerScore")] Product product)
-        {
-            if (ModelState.IsValid)
-            {
-                db.Entry(product).State = EntityState.Modified;
-                await db.SaveChangesAsync();
-                return Redirect("/productcategories");
-            }
-            return Redirect("/productcategories");
-        }*/
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit([Bind(Include = "Id,Name,Description,Code,Image,Price,DiscountPrice,StatusDiscount,IdCategory,IsCore,Unit,Quota,NumberOfPackage,UnitOfPackage,Inventory,IsFixed,IsSale,IdSupplier,PowerScore")] Product product, HttpPostedFileBase imageFile)

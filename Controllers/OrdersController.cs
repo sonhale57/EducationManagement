@@ -209,6 +209,67 @@ namespace SuperbrainManagement.Controllers
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
+        public ActionResult LoadCount(string IdBranch)
+        {
+            string IdBranch_HQ = db.Branches.SingleOrDefault(x => x.Code.ToLower() == "hq").Id.ToString();
+            int count_new = 0, count_cancel = 0, count_payment = 0, count_confirm = 0, count_package = 0, count_delivery = 0, count_complete = 0;
+            var list = db.Orders.Where(x=>x.IdBranch ==Convert.ToInt32(IdBranch)).ToList();
+            
+            if (string.IsNullOrEmpty(IdBranch))
+            {
+                //Kiểm tra tài khoản đang đăng nhập => Cơ sở
+                IdBranch = CheckUsers.idBranch();
+                 if (IdBranch == IdBranch_HQ)
+                {
+                    list = db.Orders.ToList();
+                }
+                else
+                {
+                    int idbranch = Convert.ToInt32(IdBranch);
+                    list = db.Orders.Where(x => x.IdBranch == idbranch).ToList();
+                }
+            }
+            else
+            {
+                int idbranch = Convert.ToInt32(IdBranch);
+                list = db.Orders.Where(x => x.IdBranch == idbranch).ToList();
+            }
+           
+            foreach(var i  in list)
+            {
+                if (i.Status == 1)
+                {
+                    count_new++;
+                } else if (i.Status == 2)
+                {
+                    count_payment++;
+                } else if (i.Status == 3)
+                {
+                    count_confirm++;
+                } else if (i.Status == 4)
+                { 
+                    count_package++; 
+                }else if(i.Status == 5)
+                {
+                    count_delivery++;
+                }else if(i.Status == 6)
+                {
+                    count_complete++;
+                }
+                else { count_cancel++; }    
+            }
+            var item = new
+            {
+                count_new,
+                count_payment,
+                count_confirm,
+                count_package,
+                count_delivery,
+                count_complete,
+                count_cancel
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
         public string Status_timeline(int IdOrder)
         {
             var orderStatus = db.OrderStatus.Where(x => x.IdOrder == IdOrder);
@@ -305,7 +366,7 @@ namespace SuperbrainManagement.Controllers
                     str += "<tr>"
                             + "<td class='text-center align-content-center'>" + count + "</td>"
                             + "<td class='w-25 align-content-center'> <img src='" + reader["Image"].ToString() + "' alt='" + reader["Name"].ToString() + "' class='rounded-2 me-2' height='40'><span class='text-success'>" + reader["code"].ToString() + "</span> - " + reader["Name"].ToString() + "</td>"
-                            + "<td class='w-25 align-content-center'>" + reader["UnitOfPackage"].ToString() + "</td>"
+                            + "<td class='w-25 text-center'>" + reader["UnitOfPackage"].ToString() + "</td>"
                             + "<td class='w-10 align-content-center'>"
                             + "<input type='hidden' name='NumberOfPackage_" + count + "' id='NumberOfPackage_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + reader["NumberOfPackage"].ToString() + "' class='form-control'>"
                             + "<input type='hidden' name='IdProduct_" + count + "' id='idproduct_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + reader["Id"].ToString() + "' class='form-control' onchange='javascript:update_thanhtien(" + count + ")'>"
@@ -346,37 +407,43 @@ namespace SuperbrainManagement.Controllers
                     double thanhtien = Double.Parse(reader["TotalAmount"].ToString());
                     tongtien += thanhtien;
                     str += "<tr>"
-                            + "<td class='text-center align-content-center'>" + count + "</td>"
-                            + "<td class='align-content-center'> <img src='" + reader["Image"].ToString() + "' alt='" + reader["Name"].ToString() + "' class='rounded-2 me-2' height='40'><span class='text-success'>" + reader["CodeProduct"].ToString() + "</span> - " + reader["Name"].ToString() + "</td>"
-                            + "<td class='text-center align-content-center'>" + reader["Unit"].ToString() + "</td>"
-                            + "<td class='align-content-center'>" + string.Format("{0:N0}", dongia) + "</td>"
-                            + "<td class='text-center align-content-center'>" + reader["Amount"].ToString() + "</td>"
-                            + "<td class='align-content-center'>" + string.Format("{0:N0}", thanhtien) + "</td>"
+                            + "<td class='text-center'>" + count + "</td>"
+                            + "<td class=''> <img src='" + reader["Image"].ToString() + "' alt='" + reader["Name"].ToString() + "' class='rounded-2 me-2' height='40'><span class='text-success'>" + reader["CodeProduct"].ToString() + "</span> - " + reader["Name"].ToString() + "</td>"
+                            + "<td class='text-center'>" + reader["Unit"].ToString() + "</td>"
+                            + "<td class='text-end'>" + string.Format("{0:N0}", dongia) + "</td>"
+                            + "<td class='text-center'>" + reader["Amount"].ToString() + "</td>"
+                            + "<td class='text-end'>" + string.Format("{0:N0}", thanhtien) + "</td>"
                            + "</tr>";
                     strCode = reader["CodeOrder"].ToString();
                     strTongtien = reader["tongtien"].ToString();
                 }
-                str += "<tr><td colspan=5 class='text-end'>Tổng tiền: </td><td>" + string.Format("{0:N0}", tongtien) + "</td></tr>";
+                str += "<tr><td colspan=5 class='text-end'>Tổng tiền: </td><td class='text-end'>" + string.Format("{0:N0}", tongtien) + "</td></tr>";
                 reader.Close();
             }
             string strSelect = "";
+            string strStatus = "";
             var status = db.Orders.Find(id).Status + 1;
             switch (status)
             {
                 case 2:
                     strSelect += "<option value='2' selected>Thanh toán đơn hàng</option>";
+                    strStatus = "2";
                     break;
                 case 3:
                     strSelect += "<option value='3' selected>Xác nhận đơn hàng</option>";
+                    strStatus = "3";
                     break;
                 case 4:
                     strSelect += "<option value='4' selected>Đã đóng gói</option>";
+                    strStatus = "4";
                     break;
                 case 5:
                     strSelect += "<option value='5' selected>Đang giao hàng</option>";
+                    strStatus = "5";
                     break;
                 case 6:
                     strSelect += "<option value='6' selected>Đã hoàn thành</option>";
+                    strStatus = "6";
                     break;
             }
             string strTimeline = Status_timeline(id);
@@ -388,7 +455,9 @@ namespace SuperbrainManagement.Controllers
                 strSelect,
                 strTongtien,
                 strTimeline,
-                count
+                count,
+                strStatus,
+                isHQ =CheckUsers.CheckHQ()
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
@@ -782,15 +851,15 @@ namespace SuperbrainManagement.Controllers
                     tongtien += thanhtien;
                     str += "<tr>"
                             + "<td class='text-center'>" + count + "</td>"
-                            + "<td class=''> <img src='" + reader["Image"].ToString() + "' alt='" + reader["Name"].ToString() + "' class='rounded-2 me-2' height='40'><span class='text-success'>" + reader["CodeProduct"].ToString() + "</span> - " + reader["Name"].ToString() + "</td>"
+                            + "<td class=''>" + reader["Name"].ToString() + "</td>"
                             + "<td class='text-center'>" + reader["Unit"].ToString() + "</td>"
-                            + "<td class='text-center'>" + string.Format("{0:N0}", dongia) + "</td>"
+                            + "<td class='text-end'>" + string.Format("{0:N0}", dongia) + "</td>"
                             + "<td class='text-center'>" + reader["Amount"].ToString() + "</td>"
-                            + "<td class='text-center'>" + string.Format("{0:N0}", thanhtien) + "</td>"
+                            + "<td class='text-end'>" + string.Format("{0:N0}", thanhtien) + "</td>"
                            + "</tr>";
                     strCode = reader["CodeOrder"].ToString();
                 }
-                str += "<tr><td colspan=5 class='text-end'>Tổng tiền: </td><td class='text-center'>" + string.Format("{0:N0}", tongtien) + "</td></tr>";
+                str += "<tr><td colspan=5 class='text-end'>Tổng tiền: </td><td class='text-end'>" + string.Format("{0:N0}", tongtien) + "</td></tr>";
                 strTongtien = string.Format("{0:N0}", tongtien);
                 reader.Close();
             }
@@ -805,6 +874,145 @@ namespace SuperbrainManagement.Controllers
                 strCoso, strTen, strDiachi,strdienthoai,strDate
             };
             return Json(item,JsonRequestBehavior.AllowGet); 
+        }
+    
+        public ActionResult Statistics()
+        {
+            if (CheckUsers.iduser() == "")
+            {
+                return Redirect("/authentication");
+            }
+            else
+            {
+                var branches = db.Branches.ToList();
+                int idbranch = int.Parse(CheckUsers.idBranch());
+                if (!CheckUsers.CheckHQ())
+                {
+                    branches = db.Branches.Where(x => x.Id == idbranch).ToList();
+                }
+                ViewBag.IdBranch = new SelectList(branches, "Id", "Name");
+                return View();
+            }
+        }
+        public ActionResult Load_Statistics(DateTime Fromdate,DateTime Todate,int IdBranch)
+        {
+            string str = "";
+            int IdBranchHQ = db.Branches.SingleOrDefault(x => x.Code.ToLower() == "hq"&&x.Enable==true).Id;
+            var list=db.Orders.Where(x=>x.DateCreate>=Fromdate&&x.DateCreate<=Todate);
+            if(IdBranch != IdBranchHQ) //Khác HQ
+            {
+                list= list.Where(x=>x.IdBranch==IdBranch);
+            }
+            int count=0;
+            foreach (var i in list)
+            {
+                count++;
+                string trangthai="";
+                switch ((int)i.Status)
+                {
+                    case 0:
+                        trangthai = "Đơn hàng hủy";
+                        break;
+                    case 1:
+                        trangthai = "Đơn hàng mới";
+                        break;
+                    case 2:
+                        trangthai = "Đơn hàng thanh toán";
+                        break;
+                    case 3:
+                        trangthai = "Đơn hàng đã xác nhận";
+                        break;
+                    case 4:
+                        trangthai = "Đơn hàng đóng gói";
+                        break;
+                    case 5:
+                        trangthai = "Đơn hàng đang giao";
+                        break;
+                    case 6:
+                        trangthai = "Đơn hàng hoàn thành";
+                        break;
+                }
+                var sum = db.OrderDetails.Where(x => x.IdOrder == i.Id).Sum(x=>x.TotalAmount);
+                str += "<tr>"
+                    +"<td class='text-center'>" +count+"</td>"
+                    +"<td>"+i.Code+"</td>"
+                    +"<td>"+i.Branch.Name+"</td>"
+                    +"<td class='text-center'>"+i.DateCreate.Value.ToString("dd/MM/yyyy")+"</td>"
+                    +"<td class='text-center'>"+trangthai+"</td>"
+                    + "<td class='text-end'>"+string.Format("{0:N0} đ",sum)+"</td>"
+                    + "</tr>";
+            }
+            var item = new { 
+                str
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult DetailStatistics()
+        {
+            if (CheckUsers.iduser() == "")
+            {
+                return Redirect("/authentication");
+            }
+            else
+            {
+                var branches = db.Branches.ToList();
+                int idbranch = int.Parse(CheckUsers.idBranch());
+                if (!CheckUsers.CheckHQ())
+                {
+                    branches = db.Branches.Where(x => x.Id == idbranch).ToList();
+                }
+                ViewBag.IdBranch = new SelectList(branches, "Id", "Name");
+                return View();
+            }
+        }
+        public ActionResult Load_DetailStatistics(DateTime Fromdate, DateTime Todate, int IdBranch)
+        {
+            string str = "";
+            string querycn = "";
+            int IdBranchHQ = db.Branches.SingleOrDefault(x => x.Code.ToLower() == "hq" && x.Enable == true).Id;
+            var list = db.Orders.Where(x => x.DateCreate >= Fromdate && x.DateCreate <= Todate);
+
+            if (IdBranch != IdBranchHQ) //Khác HQ
+            {
+                querycn = " and o.IdBranch=" + IdBranch;
+            }
+            int count = 0;
+            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "select o.Code,p.Name as NameProduct,od.Price,p.Unit,od.Amount,od.TotalAmount,b.Name as NameBranch,o.DateCreate,o.Status"
+                                    + " from[Order] o"
+                                    + " join OrderDetail od on od.IdOrder = o.Id"
+                                    + " join Product p on p.Id = od.IdProduct"
+                                    + " join Branch b on b.Id = o.IdBranch"
+                                    + " where o.DateCreate between ' " + Fromdate + " ' and  ' " + Todate + " ' " + querycn;
+                SqlCommand command = new SqlCommand(query, connection);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    count++;
+                    str += "<tr>"
+                        + "<td class='text-center'>" + count + "</td>"
+                        + "<td class='text-center'>" + reader["Code"] + "</td>"
+                        + "<td class='text-center'>" + reader["NameProduct"] + "</td>"
+                        + "<td class='text-center'>" + reader["Unit"] + "</td>"
+                        + "<td class='text-end'>" + reader["Price"] + "</td>"
+                        + "<td class='text-center'>" + reader["Amount"] + "</td>"
+                        + "<td class='text-end'>" + reader["TotalAmount"] + "</td>"
+                        + "<td class='text-center'>" + reader["NameBranch"] + "</td>"
+                        + "<td class='text-center'>" + DateTime.Parse(reader["DateCreate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
+                        + "</tr>";
+                }
+                reader.Close();
+            }
+
+            var item = new
+            {
+                str
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
         }
     }
 }

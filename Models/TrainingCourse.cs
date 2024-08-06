@@ -32,11 +32,11 @@
         [StringLength(250)]
         public string Description { get; set; }
 
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")]
         [Display(Name = "Ngày bắt đầu")]
         public DateTime? Fromdate { get; set; }
 
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")]
         [Display(Name = "Ngày kết thúc")]
         public DateTime? Todate { get; set; }
 
@@ -45,7 +45,7 @@
         public bool? Active { get; set; }
 
         [Display(Name = "Hạn đăng ký")]
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")]
         public DateTime? ResgistrationDeadline { get; set; }
 
         [Column(TypeName = "numeric")]

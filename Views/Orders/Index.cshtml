@@ -249,14 +249,14 @@
                         </div>
                     </div>
                     <table class="table mt-3">
-                        <thead class="bg-info">
+                        <thead class="bg-success">
                             <tr class="text-white">
-                                <td>STT</td>
+                                <td class="text-center">STT</td>
                                 <td>Vật tư</td>
-                                <td>Đơn vị</td>
-                                <td>Đơn giá</td>
-                                <td>Số lượng</td>
-                                <td>Thành tiền</td>
+                                <td class="text-center">Đơn vị</td>
+                                <td class="text-center">Đơn giá</td>
+                                <td class="text-center">Số lượng</td>
+                                <td class="text-center">Thành tiền</td>
                             </tr>
                         </thead>
                         <tbody id="showlist_order"></tbody>
@@ -298,6 +298,7 @@
                         <div class="col col-4 col-md-4 col-sm-12">
                             <label class="text-success">Mã đơn hàng:</label>
                             <input type="hidden" name="IdOrder" id="IdOrder" placeholder="Tên liên hệ" value="" class="form-control" />
+                            <input type="hidden" name="isHQ" id="isHQ" placeholder="Tên liên hệ" value="" class="form-control" />
                             <input type="text" name="Name" id="strCode" placeholder="Tên liên hệ" value="" class="form-control" disabled />
                         </div>
                         <div class="col col-4 col-md-4 col-sm-12">
@@ -315,7 +316,7 @@
                         </div>
                         <div class="col col-8 col-md-8 col-sm-12 mt-3">
                             <label class="text-success">Ghi chú cập nhật:</label>
-                            <input type="text" name="Description" id="Description" placeholder="Ghi chú cập nhật" value="" class="form-control" />
+                            <input type="text" name="statusDescription" id="statusDescription" placeholder="Ghi chú cập nhật" value="" class="form-control" />
                         </div>
                     </div>
                     <div class="line_box stav_projektu" style="margin: 40px 0 40px 0;" id="showlist_status">
@@ -323,12 +324,12 @@
                     <table class="table mt-3">
                         <thead class="bg-success">
                             <tr class="text-white">
-                                <td>STT</td>
+                                <td class="text-center">STT</td>
                                 <td>Vật tư</td>
-                                <td>Đơn vị</td>
-                                <td>Đơn giá</td>
-                                <td>Số lượng</td>
-                                <td>Thành tiền</td>
+                                <td class="text-center">Đơn vị</td>
+                                <td class="text-end">Đơn giá</td>
+                                <td class="text-center">Số lượng</td>
+                                <td class="text-end">Thành tiền</td>
                             </tr>
                         </thead>
                         <tbody id="showlist_statusorder"></tbody>
@@ -344,8 +345,15 @@
     </div>
 </div>
 <script>
-    Loadlist(1);
-    Loadlist_Count();
+    $(document).ready(function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('openModal') === 'true') {
+            $('#exampleModal').modal('show');
+        }
+        Loadlist(1);
+        Loadlist_Count();
+    });
+    
     function Loadlist(i) {
         $('#showlist').html("");
         $("#loading").html("<span class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></span>");
@@ -399,14 +407,19 @@
                 id: id
             },
             success: function (data) {
-                console.log(data);
                 $('#showlist_statusorder').html(data.str);
                 $('#IdOrder').val(id);
                 $('#strCode').val(data.strCode);
                 $('#strTongtien').val(data.strTongtien);
+                $('#isHQ').val(data.isHQ);
                 $('#showlist_status').html(data.strTimeline);
                 $('#Status').html(data.strSelect);
                 $('#countline').val(data.count);
+                if (data.isHQ == false) {
+                    if (data.status == 3 || data.status == 4 || data.status == 5) {
+                        $("#btn_submit").addClass("hideof");
+                    }
+                }
             },
             error: function (xhr, error) {
                 console.log(error);
@@ -431,7 +444,7 @@
     }
     function update_thanhtien(i) {
         var max = parseInt($('#soluong_' + i).attr('max'));
-        var dongia = parseInt($("#dongia_" + i).val().replace(',',''));
+        var dongia = parseFloat($("#dongia_" + i).val().replace(/,/g, '')); // Remove all commas
         var soluong = parseInt($("#soluong_" + i).val());
         var heso = parseInt($("#NumberOfPackage_" + i).val());
         if ((soluong * heso) > max) {
@@ -444,6 +457,7 @@
             $("#thanhtien_" + i).val(thanhtien.toLocaleString());
             sum_tongtien();
         }
+        showSuccess(dongia, 3000);
     }
     function sum_tongtien() {
         var countline = $("#countline").val();
@@ -451,14 +465,18 @@
         for (var i = 1; i <= countline; i++) {
             var soluong = Number($("#soluong_" + i).val());
             if (soluong > 0) {
-                var dongia = parseInt($("#dongia_" + i).val().replace(',',''));
+                var dongia = parseFloat($("#dongia_" + i).val().replace(/,/g, '')); // Remove all commas
                 var thanhtien = dongia * soluong;
                 tongtien += thanhtien;
             }
         }
         $("#tongtien").val(tongtien.toLocaleString());
     }
+
+    var isProcessing = false;
     function submit_order() {
+    var isProcessing = true;
+    if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
     $.ajax({
         url: '@Url.Action("Submit_order", "Orders")',
         type: "POST",
@@ -468,27 +486,30 @@
             if (data.status == "ok") {
                 $('#exampleModal').modal('hide');
                 Loadlist(1);
-                showSuccess("Đã nhập thành công!", 3000);
+                showSuccess("Đã đặt hàng thành công!", 3000);
+                isProcessing = false;
             }
             else {
                 showError(data.status, 3000);
+                isProcessing = false;
             }
         },
         error: function () { showError('Lỗi!', 3000); }
     });
     }
     function submit_statusorder() {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
         var idOrder = $("#IdOrder").val();
         var status = $("#Status").val();
-        var description = $("#Description").val();
+        var description = $("#statusDescription").val();
         var fileInput = $("#Image")[0];
-        var file = fileInput.files[0]; // Lấy tệp từ input
+        var file = fileInput.files[0]; 
 
         if (!idOrder || !status) {
             showError('IdOrder và Status không được để trống!', 3000);
             return;
         }
-
+        isProcessing = true; // Đánh dấu là đang xử lý
         var formData = new FormData();
         formData.append("IdOrder", idOrder);
         formData.append("Status", status);
@@ -509,11 +530,13 @@
                     showSuccess("Đã cập nhật thành công!", 3000);
                 } else {
                     showError(data.status, 3000);
+                    isProcessing = false;
                 }
             },
             error: function (xhr, status, error) {
                 var errorMessage = xhr.status + ': ' + xhr.statusText;
                 showError('Lỗi! ' + errorMessage, 3000);
+                isProcessing = false;
             }
         });
     }
