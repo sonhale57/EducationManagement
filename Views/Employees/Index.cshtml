@@ -21,16 +21,8 @@
     <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
         <div class="me-0 btn btn-md p-0">
             <button class="btn btn-md btn-outline-dark" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="ti ti-filter"></i> @{
-                    if (Convert.ToString(ViewBag.SelectedFilter) == "Official")
-                    {
-                        <span>Chính thức</span>
-                    }
-                    else
-                    {
-                        <span>Thử việc</span>
-                    }
-                }
+                <i class="ti ti-filter"></i> 
+                <span id="filterEnum"></span>
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = true, currentFilter =  ViewBag.CurrentFilter,IdBranch=ViewBag.CurrentBranch})"> Chính thức</a></li>
@@ -133,7 +125,7 @@
                         </div>
                         <div class="col col-md-12 mt-3">
                             <label>Tên đăng nhập</label>
-                            <input type="text" id="Username" value="" class="form-control" disabled />
+                            <input type="text" id="Username" value="" class="form-control" @(SuperbrainManagement.Controllers.CheckUsers.CheckHQ()?"":"disabled") />
                         </div>
                         <div class="col col-md-12 mt-3">
                             <label>Mật khẩu</label>
@@ -149,6 +141,16 @@
     </div>
 </div>
 <script>
+
+    $(document).ready(function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('filterEnum') === 'False') {
+            $('#filterEnum').html("Thử việc");
+        } else {
+            $('#filterEnum').html("Chính thức");
+        }
+    });
+
     function Add_userbyEmployee(id) {
         $('#Username').val("");
         $.ajax({
@@ -220,6 +222,7 @@
                     showError('Error deleting employee',3000);
                 }
             });
+            return false;
         }
     }
     function Confirm_Official(Id) {
@@ -242,6 +245,7 @@
                     showError('Error deleting employee',3000);
                 }
             });
+            return false;
         }
     }
 </script>

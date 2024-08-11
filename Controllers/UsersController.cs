@@ -287,21 +287,20 @@ namespace SuperbrainManagement.Controllers
             return Json(item, JsonRequestBehavior.AllowGet);
         }
         [HttpPost]
-        public async Task<ActionResult> Extend_Account(int id)
+        public ActionResult Extend_Account(int id)
         {
             string status, message;
-            var user = await db.Users.FindAsync(id);
+            var user = db.Users.Find(id);
             if (user == null)
             {
                 status = "error";
                 message = "Không tìm thấy user này!";
-                return HttpNotFound();
             }
             user.Expire = user.Expire.Value.AddMonths(6);
             db.Entry(user);
             status = "ok";
             message = "Đã gia hạn thành công!";
-            await db.SaveChangesAsync();
+            db.SaveChanges();
             var item = new
             {
                 status,
@@ -310,16 +309,15 @@ namespace SuperbrainManagement.Controllers
             return Json(item, JsonRequestBehavior.AllowGet);
         }
         [HttpPost]
-        public async Task<ActionResult> Submit_ChangePassword(string Password)
+        public ActionResult Submit_ChangePassword(string Password)
         {
             string status, message;
             int id = Convert.ToInt32(CheckUsers.iduser());
-            var user = await db.Users.FindAsync(id);
+            var user = db.Users.Find(id);
             if (user == null)
             {
                 status = "error";
                 message = "Phiên đăng nhập đã kết thúc, vui lòng đăng nhập lại!";
-                return HttpNotFound();
             }
             MD5Hash md5 = new MD5Hash();
             Password = md5.GetMD5Working(Password);
@@ -328,7 +326,7 @@ namespace SuperbrainManagement.Controllers
             db.Entry(user);
             status = "ok";
             message = "Đã cập nhật thành công!";
-            await db.SaveChangesAsync();
+            db.SaveChanges();
             var item = new
             {
                 status,

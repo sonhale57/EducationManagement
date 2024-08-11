@@ -233,15 +233,15 @@
                     <div class="row">
                         <div class="col col-4 col-md-4 col-sm-12">
                             <label class="text-success">Tên liên hệ:</label>
-                            <input type="text" name="Name" id="Name" placeholder="Tên liên hệ" value="" class="form-control" />
+                            <input type="text" name="Name" id="addName" placeholder="Tên liên hệ" value="" class="form-control" />
                         </div>
                         <div class="col col-4 col-md-4 col-sm-12">
                             <label class="text-success">Số điện thoại:</label>
-                            <input type="text" name="Phone" id="Phone" placeholder="Số điện thoại nhận hàng" value="" class="form-control" />
+                            <input type="text" name="Phone" id="addPhone" placeholder="Số điện thoại nhận hàng" value="" class="form-control" />
                         </div>
                         <div class="col col-4 col-md-4 col-sm-12">
                             <label class="text-success">Địa chỉ:</label>
-                            <input type="text" name="Address" id="Address" placeholder="Địa chỉ nhận hàng" value="" class="form-control" />
+                            <input type="text" name="Address" id="addAddress" placeholder="Địa chỉ nhận hàng" value="" class="form-control" />
                         </div>
                         <div class="col col-12 col-md-12 col-sm-12 mt-3">
                             <label class="text-success">Ghi chú:</label>
@@ -436,6 +436,9 @@
                 console.log(data);
                 $('#showlist_order').html(data.str);
                 $('#countline').val(data.count);
+                $('#addName').val(data.name);
+                $('#addPhone').val(data.phone);
+                $('#addAddress').val(data.address);
             },
             error: function (xhr, error) {
                 console.log(error);
@@ -457,7 +460,6 @@
             $("#thanhtien_" + i).val(thanhtien.toLocaleString());
             sum_tongtien();
         }
-        showSuccess(dongia, 3000);
     }
     function sum_tongtien() {
         var countline = $("#countline").val();
@@ -475,7 +477,6 @@
 
     var isProcessing = false;
     function submit_order() {
-    var isProcessing = true;
     if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
     $.ajax({
         url: '@Url.Action("Submit_order", "Orders")',
@@ -524,7 +525,7 @@
             processData: false, // Không xử lý dữ liệu
             dataType: "json",
             success: function (data) {
-                if (data.status === "ok") {
+                if (data.status == "ok") {
                     $('#modalStatus').modal('hide');
                     Loadlist(1);
                     showSuccess("Đã cập nhật thành công!", 3000);

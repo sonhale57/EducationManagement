@@ -1,53 +1,193 @@
 ﻿@model SuperbrainManagement.Models.Student
 
 @{
-    ViewBag.Title = "Details";
+    ViewBag.Controller = "Học viên";
+    ViewBag.Title = "Thông tin học viên";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div class="container">   
 </div><div class="row">
-    <div class="col-lg-2">
+    <div class="col-lg-12">
         <div class="profile-card-4 z-depth-3">
             <div class="card">
-                <div class="card-body text-center bg-light rounded-top">
-                    <div class="user-box">
-                        <img src="@(Model.Image==""?Model.Image:"/Assets/images/profile/user-1.jpg")" height="100" alt="user avatar" class="rounded-circle">
-                    </div>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group shadow-none">
-                        <li class="list-group-item text-center">
-                            <div class="list-details">
-                                <span>@Model.Name</span>
+                <div class="card-body text-start bg-light rounded-top">
+                    <form action="/Students/Edit/@Model.Id" method="post" enctype="multipart/form-data" id="form_editStudent">
+                        @Html.AntiForgeryToken()
+                        <div class="user-box">
+                            <img src="@(Model.Image!=null?Model.Image:"/Assets/images/profile/user-1.jpg")" height="100" width="100" alt="user avatar" class="rounded-circle">
+                        </div>
+                        <div class="row text-start mt-3">
+                            <div class="col-md-6">
+                                <h6 class="text-primary"><i class="ti ti-user-circle"></i> Thông tin học viên</h6>
+                                <div class="form-group row mt-2">
+                                    <label class="form-control-label ms-2">Hình ảnh học viên:</label>
+                                    <div class="col-lg-12">
+                                        <input type="file" id="Image" name="Image" accept="image/*" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="form-group row mt-2">
+                                    <label class="form-control-label ms-2">Mã học viên</label>
+                                    <div class="col-lg-12">
+                                        @Html.HiddenFor(model => model.Id)
+                                        @Html.EditorFor(model => model.Code, new { htmlAttributes = new { @class = "form-control", @readonly = "true" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row mt-2">
+                                    <label class="form-control-label ms-2">Họ tên</label>
+                                    <div class="col-lg-12">
+                                        @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row mt-2">
+                                    <label class="form-control-label ms-2">Giới tính</label>
+                                    <div class="col-lg-12">
+                                        @{
+                                            var sex = new List<SelectListItem>
+                                            {
+                                                new SelectListItem { Text = "Nam", Value = "Nam" },
+                                                new SelectListItem { Text = "Nữ", Value = "Nữ" }
+                                            };
+                                        }
+                                        @Html.DropDownListFor(model => model.Sex, sex, new { @class = "form-control", id = "Sex" })
+                                    </div>
+                                </div>
+                                <div class="form-group row mt-2">
+                                    <label class="form-control-label ms-2">Sinh nhật</label>
+                                    <div class="col-lg-12">
+                                        @Html.EditorFor(model => model.DateOfBirth, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row mt-2">
+                                    <label class="form-control-label ms-2">Số điện thoại</label>
+                                    <div class="col-lg-12">
+                                        <input class="form-control" type="text" name="Phone" id="Phone" value="@Model.Phone">
+                                    </div>
+                                </div>
+                                <div class="form-group row mt-2">
+                                    <label class="form-control-label ms-2">Email</label>
+                                    <div class="col-lg-12">
+                                        <input class="form-control" type="email" name="Email" id="Email" value="@Model.Email">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row mt-2">
+                                    <label class="form-control-label ms-2">Trường</label>
+                                    <div class="col-lg-6">
+                                        <input class="form-control" type="text" name="School" id="School" value="@Model.School" placeholder="Đang học trường">
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <input class="form-control" type="text" name="Class" id="Class" value="@Model.Class" placeholder="Lớp">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row mt-2">
+                                    <label class="form-control-label ms-2">Tài khoản</label>
+                                    <div class="col-lg-6">
+                                        <input class="form-control" type="text" name="Username" id="Username" value="@Model.Username">
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <input class="form-control" type="password" name="Password" id="Password" value="@Model.Password" placeholder="Mật khẩu">
+                                    </div>
+                                </div>
                             </div>
-                        </li>
-                        <li class="list-group-item text-center">
-                            <div class="list-details">
-                                <span>@Model.Sex</span>
+                            <div class="col-md-6">
+                                <h6 class="text-primary"><i class="ti ti-users"></i> Thông tin phụ huynh</h6>
+                                <div class="form-group row mt-2">
+                                    <label class="form-control-label ms-2">Họ tên phụ huynh</label>
+                                    <div class="col-lg-12">
+                                        <input class="form-control" type="text" name="ParentName" id="ParentName" value="@Model.ParentName" placeholder="Họ tên phụ huynh">
+                                    </div>
+                                </div>
+                                <div class="form-group row mt-2">
+                                    <label class="form-control-label ms-2">Ngày sinh</label>
+                                    <div class="col-lg-12">
+                                        @Html.EditorFor(model => model.ParentDateOfBirth, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row mt-2">
+                                    <label class="form-control-label ms-2">Mối quan hệ với học viên</label>
+                                    <div class="col-lg-12">
+                                        @{
+                                            var relationship = new List<SelectListItem>
+                                            {
+                                                new SelectListItem { Text = "--", Value = "" },
+                                                new SelectListItem { Text = "Cha mẹ", Value = "Cha mẹ" },
+                                                new SelectListItem { Text = "Ông bà", Value = "Ông bà" },
+                                                new SelectListItem { Text = "Khác", Value = "Khác" }
+                                            };
+                                        }
+                                        @Html.DropDownListFor(model => model.Relationship, relationship, new { @class = "form-control", id = "Relationship" })
+                                    </div>
+                                </div>
+                                <div class="form-group row mt-2">
+                                    <label class="form-control-label ms-2">Địa chỉ</label>
+                                    <div class="col-lg-12">
+                                        <input class="form-control" type="text" name="Address" id="Address" value="@Model.Address" placeholder="Address">
+                                    </div>
+                                </div>
+                                <div class="form-group row mt-2">
+                                    <div class="col-lg-6">
+                                        <label class="form-control-label"></label>
+                                        <input class="form-control" type="text" name="District" id="District" value="@Model.District" placeholder="City">
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <label class="form-control-label"></label>
+                                        <input class="form-control" type="text" name="City" id="City" value="@Model.City" placeholder="State">
+                                    </div>
+                                </div>
+                                <div class="form-group row mt-2">
+                                    <label class="form-control-label ms-2">Nghề nghiệp</label>
+                                    <div class="col-lg-12">
+                                        <input class="form-control" type="text" name="Job" id="Job" value="@Model.Job" placeholder="Nghề nghiệp">
+                                    </div>
+                                </div>
+                                <div class="form-group row mt-2">
+                                    <div class="col-lg-6">
+                                        <label class="form-control-label ms-2">Phụ huynh biết qua</label>
+                                        @{
+                                            var bietqua = new List<SelectListItem>
+                                            {
+                                                new SelectListItem { Text = "--", Value = "" },
+                                                new SelectListItem { Text = "Bạn bè", Value = "Bạn bè" },
+                                                new SelectListItem { Text = "Website", Value = "Website" },
+                                                new SelectListItem { Text = "Facebook", Value = "Facebook" },
+                                                new SelectListItem { Text = "Zalo", Value = "Zalo" },
+                                                new SelectListItem { Text = "Trường học", Value = "Trường học" },
+                                                new SelectListItem { Text = "Hội thảo", Value = "Hội thảo" },
+                                                new SelectListItem { Text = "Tờ rơi", Value = "Tờ rơi" },
+                                                new SelectListItem { Text = "Khác", Value = "Khác" }
+                                            };
+                                        }
+                                        @Html.DropDownListFor(model => model.Known, bietqua, new { @class = "form-control", id = "Known" })
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <label class="form-control-label ms-2">Chương trình MKT</label>
+                                        @Html.DropDownList("IdMKT", null, htmlAttributes: new { @class = "form-control" })
+                                    </div>
+                                </div>
+                                <input type="hidden" name="DateCreate" id="DateCreate" value="@Model.DateCreate.ToShortDateString()" />
+                                @Html.HiddenFor(model => model.IdBranch)
+                                @Html.HiddenFor(model => model.Status)
+                                @Html.HiddenFor(model => model.Enable)
+                                @Html.HiddenFor(model => model.IdUser)
                             </div>
-                        </li>
-                        <li class="list-group-item text-center">
-                            <div class="list-details">
-                                <span>@Model.DateOfBirth.Value.ToShortDateString()</span>
-                            </div>
-                        </li>
-                    </ul>
+                        </div>
+                        <a href="javascript:Submit_editStudent()" class="btn btn-success btn-sm mt-3"><i class="ti ti-edit"></i> Chỉnh sửa thông tin</a>
+                    </form>
+
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-10">
+    <div class="col-lg-12">
         <div class="card z-depth-3">
             <div class="card-body">
                 <ul class="nav nav-tabs" id="myTab" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Thông tin học viên</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
                         <button class="nav-link" id="tuvan-tab" data-bs-toggle="tab" data-bs-target="#tuvan" type="button" role="tab" aria-controls="tuvan" aria-selected="true">Lịch sử Tư vấn <span class="badge bg-info" id="count_tuvan"></span></button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Khóa học đã đăng ký <span class="badge bg-success">@ViewBag.Count</span></button>
+                        <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Khóa học đã đăng ký <span class="badge bg-success">@ViewBag.Count</span></button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Lịch sử học <span class="badge bg-success">@ViewBag.Countlop</span></button>
@@ -57,73 +197,7 @@
                     </li>
                 </ul>
                 <div class="tab-content" id="myTabContent">
-                    <div class="tab-pane fade show active p-2" id="home" role="tabpanel" aria-labelledby="home-tab">
-                        <form>
-                            <div class="form-group row mt-2">
-                                <label class="col-lg-2 col-form-label form-control-label">Ảnh đại diện</label>
-                                <div class="col-lg-10">
-                                    <input class="form-control" type="file">
-                                </div>
-                            </div>
-                            <div class="form-group row mt-2">
-                                <label class="col-lg-2 col-form-label form-control-label">Họ tên</label>
-                                <div class="col-lg-10">
-                                    @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
-                                </div>
-                            </div>
-                            <div class="form-group row mt-2">
-                                <label class="col-lg-2 col-form-label form-control-label">Sinh nhật</label>
-                                <div class="col-lg-10">
-                                    @Html.EditorFor(model => model.DateOfBirth, new { htmlAttributes = new { @class = "form-control" } })
-                                </div>
-                            </div>
-                            <div class="form-group row mt-2">
-                                <label class="col-lg-2 col-form-label form-control-label">Email</label>
-                                <div class="col-lg-10">
-                                    <input class="form-control" type="email" value="@Model.Email">
-                                </div>
-                            </div>
-                            <div class="form-group row mt-2">
-                                <label class="col-lg-2 col-form-label form-control-label">Số điện thoại</label>
-                                <div class="col-lg-10">
-                                    <input class="form-control" type="email" value="@Model.Phone">
-                                </div>
-                            </div>
-                            <div class="form-group row mt-2">
-                                <label class="col-lg-2 col-form-label form-control-label">Địa chỉ</label>
-                                <div class="col-lg-10">
-                                    <input class="form-control" type="text" value="@Model.Address" placeholder="Address">
-                                </div>
-                            </div>
-                            <div class="form-group row mt-2">
-                                <label class="col-lg-2 col-form-label form-control-label"></label>
-                                <div class="col-lg-5">
-                                    <input class="form-control" type="text" value="@Model.District" placeholder="City">
-                                </div>
-                                <div class="col-lg-5">
-                                    <input class="form-control" type="text" value="@Model.City" placeholder="State">
-                                </div>
-                            </div>
-                            <div class="form-group row mt-2">
-                                <label class="col-lg-2 col-form-label form-control-label">Tên đăng nhập</label>
-                                <div class="col-lg-10">
-                                    <input class="form-control" type="text" value="@Model.Username">
-                                </div>
-                            </div>
-                            <div class="form-group row mt-2">
-                                <label class="col-lg-2 col-form-label form-control-label">Mật khẩu</label>
-                                <div class="col-lg-10">
-                                    <input class="form-control" type="password" value="@Model.Password">
-                                </div>
-                            </div>
-                            <div class="form-group row mt-2">
-                                <div class="col-lg-12">
-                                    <a href="/Students/Edit/@Model.Id" class="btn btn-primary" ><i class="ti ti-edit"></i> Chỉnh sửa</a>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="tab-pane fade p-2" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                    <div class="tab-pane fade show active p-2" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                         <table class="table rounded-0">
                             <thead class="bg-success">
                                 <tr class="text-white">
@@ -414,7 +488,28 @@
              console.log("lỗi"+error);
          }
      });
-}
+    }
+    function Submit_editStudent() {
+        var formData = new FormData(document.getElementById("form_editStudent"));
+
+        $.ajax({
+            url: '@Url.Action("Submit_editStudent", "Students")',
+            type: "POST",
+            data: formData,
+            contentType: false,  // Không đặt `contentType` khi sử dụng FormData
+            processData: false,  // Không xử lý dữ liệu thành chuỗi
+            success: function (data) {
+                if (data.status = "ok") {
+                    showSuccess("Đã cập nhật thành công!", 3000);
+                } else {
+                    showError(data.message, 3000);
+                }
+            },
+            error: function (xhr, error) {
+                console.log("Lỗi: " + error);
+            }
+        });
+    }
 
     function Loadlist_xetlop(idregistration, idcourse) {
         var today = new Date();

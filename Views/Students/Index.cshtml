@@ -1,7 +1,8 @@
 ﻿@model PagedList.IPagedList<SuperbrainManagement.DTOs.StudentViewDTO>
 @using PagedList.Mvc;
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Controller = "Học viên";
+    ViewBag.Title = "Danh sách";
     Layout = "~/Views/Shared/_Layout.cshtml";
     int stt = 1;
 }
@@ -61,7 +62,7 @@
             <th>Họ tên</th>
             <th class="text-center">Năm sinh</th>
             <th class="text-center">Giới tính</th>
-            <th>trạng thái</th>
+            <th class="text-center">Trạng thái</th>
             <th>Quản lý</th>
             <th class="text-end">Thao tác</th>
         </tr>
@@ -74,10 +75,11 @@
                 @stt
             </td>
             <td class="fw-bold">
-                @Html.DisplayFor(modelItem => item.Code)
+                <a href="/students/details/@item.Id" class="text-muted me-1">@Html.DisplayFor(modelItem => item.Code)</a>
+                
             </td>
             <td class="fw-bold">
-                @Html.DisplayFor(modelItem => item.Name)
+                <a href="/students/details/@item.Id" class="text-muted me-1">@Html.DisplayFor(modelItem => item.Name)</a>
             </td>
             <td class="text-center">
                 @item.DateOfBirth.Value.Year

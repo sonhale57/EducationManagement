@@ -341,9 +341,13 @@ namespace SuperbrainManagement.Controllers
         }
         public ActionResult Loadlist_order()
         {
+            int IdUser = Convert.ToInt32(CheckUsers.iduser());
+            var user = db.Users.Find(IdUser);
+
             string idbranch_hq = db.Branches.SingleOrDefault(x => x.Code.ToLower() == "hq").Id.ToString();
             string str = ""; int count = 0;
             int idBranch = int.Parse(CheckUsers.idBranch());
+            var cn = db.Branches.Find(idBranch);
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -381,7 +385,10 @@ namespace SuperbrainManagement.Controllers
             var item = new
             {
                 str,
-                count
+                count,
+                name= user.Name,
+                phone = cn.Phone,
+                address= cn.Address.ToString()
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }

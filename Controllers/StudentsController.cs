@@ -18,6 +18,12 @@ using System.Data.SqlClient;
 using System.Globalization;
 using SuperbrainManagement.DTOs;
 using SuperbrainManagement.Helpers;
+using System.IO;
+using Microsoft.AspNet.SignalR.Hubs;
+using Microsoft.Owin.BuilderProperties;
+using Org.BouncyCastle.Utilities.Encoders;
+using System.Web.Helpers;
+using System.Xml.Linq;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -36,6 +42,10 @@ namespace SuperbrainManagement.Controllers
         // GET: Students
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, string idBranch, FilterEnum filterEnum = FilterEnum.Official)
         {
+            if (CheckUsers.iduser() == "")
+            {
+                return Redirect("/authentication");
+            }
             var branches = db.Branches.ToList();
             int idbranch = int.Parse(CheckUsers.idBranch());
             if (!CheckUsers.CheckHQ())
@@ -154,7 +164,7 @@ namespace SuperbrainManagement.Controllers
                     return Json(new { success = false, message = "Item not found" });
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return Json(new { success = false, message = "Item not found" });
             }
@@ -285,7 +295,7 @@ namespace SuperbrainManagement.Controllers
         }
     
         [HttpPost] 
-        public ActionResult SaveRegistration(int? IdRegistration,int type, int? IdObject,int? price,int? totalamount,int? amount,string Description,int? Discount,List<listProduct> listProduct)
+        public ActionResult SaveRegistration(int? IdRegistration,int type, int? IdObject,int? price,int? totalamount,int? amount,string Description,int? Discount)
         {
             string iduser = CheckUsers.iduser();
             Student student = Session["infoUser"] as Student;
@@ -378,7 +388,6 @@ namespace SuperbrainManagement.Controllers
                     }
                 default:
                     return Json(null);
-                    break;
             }
 
         }
@@ -387,7 +396,6 @@ namespace SuperbrainManagement.Controllers
             List<RevenueReference> revenueReferences = Connect.Select<RevenueReference>("select * from RevenueReference");
 
             var str = "";
-            var number = 0;
             var totalamount = 0;
             if (IdOther != 0)
             {
@@ -402,7 +410,6 @@ namespace SuperbrainManagement.Controllers
                     str += "<option value='" + items.Id + "' data-name='" + items.Name + "'>" + items.Name + "</option>";
                 }
                 totalamount = Convert.ToInt32(revenueReferences[0].Price);
-                
             }
 
             var item = new
@@ -674,9 +681,7 @@ namespace SuperbrainManagement.Controllers
         public ActionResult getDataComboxProduct(int? idproduct)
         {
             List<Product> products = Connect.Select<Product>("select * from Product");
-
             var str = "";
-            var strTable = "";
             var number = 0;
             var totalamount = 0;
             if (idproduct != 0)
@@ -821,6 +826,8 @@ namespace SuperbrainManagement.Controllers
                                select rec).Count();
             ViewBag.Count = countkhoadangky;
             ViewBag.Countlop = countlophoc;
+            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Name", student.IdBranch);
+            ViewBag.IdMKT = new SelectList(db.MKTCampaigns.Where(x=>x.Enable==true), "Id", "Name",student.IdMKT);
             ViewBag.IdClass = new SelectList(db.Classes.Where(x => x.IdBranch == idBranch).ToList(), "Id", "Name");
             return View(student);
         }
@@ -828,8 +835,8 @@ namespace SuperbrainManagement.Controllers
         // GET: Students/Create
         public ActionResult Create()
         {
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo");
-            ViewBag.IdBranch = new SelectList(db.MKTCampaigns, "Id", "Code");
+            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Name");
+            ViewBag.IdMKT = new SelectList(db.MKTCampaigns, "Id", "Name");
             return View();
         }
 
@@ -879,10 +886,21 @@ namespace SuperbrainManagement.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,Name,Image,Code,DateOfBirth,Sex,Username,Password,Enable,School,Class,Description,ParentName,Phone,Email,ParentDateOfBirth,City,District,Address,Relationship,Job,Facebook,Hopeful,Known,IdMKT,IdBranch,PowerScore,Balance,Presenter,Status,Power,StatusStudy")] Student student)
+        public ActionResult Edit([Bind(Include = "Id,Name,Image,Code,DateOfBirth,Sex,Username,Password,Enable,School,Class,Description,ParentName,Phone,Email,ParentDateOfBirth,City,District,Address,Relationship,Job,Facebook,Hopeful,Known,IdMKT,IdBranch,PowerScore,Balance,Presenter,Status,Power,StatusStudy")] Student student, HttpPostedFileBase file)
         {
             if (ModelState.IsValid)
             {
+                if (file != null && file.ContentLength > 0)
+                {
+                    // Generate a unique file name
+                    string fileName = Path.GetFileNameWithoutExtension(file.FileName);
+                    string extension = Path.GetExtension(file.FileName);
+                    fileName = $"{fileName}_{DateTime.Now:yyyyMMddHHmmssfff}{extension}";
+                    // Specify the path to save the file
+                    string _path = Path.Combine(Server.MapPath("~/Uploads/Orders"), fileName);
+                    file.SaveAs(_path);
+                    student.Image = "/Uploads/Images/" + fileName;
+                }
                 db.Entry(student).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -891,6 +909,61 @@ namespace SuperbrainManagement.Controllers
             ViewBag.IdBranch = new SelectList(db.MKTCampaigns, "Id", "Code", student.IdBranch);
             return View(student);
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Submit_editStudent(int Id, string Code, string Name, DateTime DateOfBirth, string Sex, string Username, string Password, string School, string Class, string Description, string ParentName, string Phone, string Email, DateTime ParentDateOfBirth, string City, string District, string Address, string Relationship, string Job, string Facebook, string Hopeful, string Known, int IdMKT, HttpPostedFileBase Image)
+        {
+            string status="", message="";
+            var student = db.Students.Find(Id);
+            if (student != null)
+            {
+                student.DateOfBirth = DateOfBirth;
+                student.Code = Code;
+                student.Name = Name;
+                student.Sex = Sex;
+                student.Username = Username;
+                student.Password = Password;
+                student.School = School;
+                student.Class = Class;
+                student.Description = Description;
+                student.ParentName = ParentName;
+                student.Phone = Phone;
+                student.Email = Email;
+                student.ParentDateOfBirth = ParentDateOfBirth;
+                student.City = City;
+                student.District = District;
+                student.Address = Address;
+                student.Relationship = Relationship;
+                student.Job = Job;
+                student.Facebook = Facebook;
+                student.Hopeful = Hopeful;
+                student.Known = Known;
+                student.IdMKT = IdMKT;
+
+                // Xử lý upload file ảnh
+                if (Image != null && Image.ContentLength > 0)
+                {
+                    string fileName = Path.GetFileNameWithoutExtension(Image.FileName);
+                    string extension = Path.GetExtension(Image.FileName);
+                    fileName = $"{fileName}_{DateTime.Now:yyyyMMddHHmmssfff}{extension}";
+                    string path = Path.Combine(Server.MapPath("~/Uploads/Images"), fileName);
+                    Image.SaveAs(path);
+                    student.Image = "/Uploads/Images/" + fileName;
+                }
+                status = "ok";
+                db.Entry(student).State = EntityState.Modified;
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                status = "Error";
+                message = "Không tìm thấy học viên này!";
+            }
+            var item = new { status, message };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+
 
         // GET: Students/Delete/5
         public ActionResult Delete(int? id)
@@ -906,7 +979,6 @@ namespace SuperbrainManagement.Controllers
             }
             return View(student);
         }
-
         public ActionResult GetSchedule(int idClass, string fromDate, string toDate)
         {
             var schedulesbyClass = db.Schedules
