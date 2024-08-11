@@ -41,7 +41,7 @@
         public string Code { get; set; }
 
         [Display(Name = "Sinh nhật")]
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")]
         public DateTime? DateOfBirth { get; set; }
 
         [StringLength(10)]
@@ -82,6 +82,7 @@
         public string Email { get; set; }
 
         [Display(Name = "Sinh nhật phụ huynh")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")]
         public DateTime? ParentDateOfBirth { get; set; }
 
         [StringLength(50)]

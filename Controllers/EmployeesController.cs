@@ -163,7 +163,7 @@ namespace SuperbrainManagement.Controllers
             return Json(item, JsonRequestBehavior.AllowGet);
         }
         [HttpPost]
-        public ActionResult Submit_adduser(int IdEmployee,string Name,string Password)
+        public ActionResult Submit_adduser(int IdEmployee,string Username,string Name,string Password)
         {
             string status = "ok";
             string message = "ok";
@@ -202,6 +202,7 @@ namespace SuperbrainManagement.Controllers
                 }
                 else
                 {
+                    user.Username = Username;
                     user.Password = pass;
                     db.Entry(user);
                     db.SaveChanges();
@@ -216,46 +217,46 @@ namespace SuperbrainManagement.Controllers
             return Json(item,JsonRequestBehavior.AllowGet);
         }
         [HttpPost]
-        public async Task<ActionResult> Delete_Employee(int id)
+        public ActionResult Delete_Employee(int id)
         {
             string status, message;
-            var pc = await db.Employees.FindAsync(id);
+            var pc = db.Employees.Find(id);
             var user = db.Users.FirstOrDefault(u => u.IdEmployee == id);
-            if (pc == null)
+            if (user == null)
             {
                 status = "error";
                 message = "Không tồn tại nhân sự này!";
-                return HttpNotFound();
+            }
+            else
+            {
+                user.Enable = false;
+                db.Entry(user); 
+                db.SaveChanges();
             }
             pc.Enable = false;
-            user.Enable = false;
-            db.Entry(user); 
             db.Entry(pc);
+            db.SaveChanges();
             status = "ok";
             message = "Đã xóa thành công!";
-            await db.SaveChangesAsync();
             var item = new { status,message
             };
             return Json(item,JsonRequestBehavior.AllowGet);
         }
         [HttpPost]
-        public async Task<ActionResult> Confirm_official(int id)
+        public ActionResult Confirm_official(int id)
         {
             string status, message;
-            var pc = await db.Employees.FindAsync(id);
-            var user = db.Users.FirstOrDefault(u => u.IdEmployee == id);
+            var pc = db.Employees.Find(id);
             if (pc == null)
             {
                 status = "error";
                 message = "Không tồn tại nhân sự này!";
-                return HttpNotFound();
             }
             pc.IsOfficial = true;
-            db.Entry(user);
             db.Entry(pc);
+            db.SaveChanges();
             status = "ok";
             message = "Đã cập nhật thành công!";
-            await db.SaveChangesAsync();
             var item = new
             {
                 status,
@@ -341,8 +342,8 @@ namespace SuperbrainManagement.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo", employee.IdBranch);
-            ViewBag.IdPosition = new SelectList(db.Positions, "Id", "Code", employee.IdPosition);
+            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Name", employee.IdBranch);
+            ViewBag.IdPosition = new SelectList(db.Positions, "Id", "Name", employee.IdPosition);
             return View(employee);
         }
 
@@ -356,8 +357,8 @@ namespace SuperbrainManagement.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo", employee.IdBranch);
-            ViewBag.IdPosition = new SelectList(db.Positions, "Id", "Code", employee.IdPosition);
+            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Name", employee.IdBranch);
+            ViewBag.IdPosition = new SelectList(db.Positions, "Id", "Name", employee.IdPosition);
             return View(employee);
         }
 

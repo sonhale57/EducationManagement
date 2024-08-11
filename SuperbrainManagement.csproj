@@ -448,6 +448,7 @@
     <Content Include="assets\js\jquery-3.4.1.min.js" />
     <Content Include="assets\js\jquery.signalR-2.4.3.js" />
     <Content Include="assets\js\jquery.signalR-2.4.3.min.js" />
+    <Content Include="assets\js\main.js" />
     <Content Include="assets\js\select2.js" />
     <Content Include="assets\js\select2.min.js" />
     <Content Include="assets\js\sidebarmenu.js" />
@@ -932,6 +933,7 @@
     <Content Include="Views\Orders\Statistics.cshtml" />
     <Content Include="Views\Orders\DetailStatistics.cshtml" />
     <Content Include="Views\Warehouses\Statistics.cshtml" />
+    <Content Include="Views\Students\Create.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
