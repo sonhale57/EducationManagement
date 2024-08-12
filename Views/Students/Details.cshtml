@@ -83,7 +83,7 @@
                                 <div class="form-group row mt-2">
                                     <label class="form-control-label ms-2">Tài khoản</label>
                                     <div class="col-lg-6">
-                                        <input class="form-control" type="text" name="Username" id="Username" value="@Model.Username">
+                                        <input class="form-control @(SuperbrainManagement.Controllers.CheckUsers.CheckHQ()?"":"disabled")" type="text" name="Username" id="Username" value="@Model.Username">
                                     </div>
                                     <div class="col-lg-6">
                                         <input class="form-control" type="password" name="Password" id="Password" value="@Model.Password" placeholder="Mật khẩu">

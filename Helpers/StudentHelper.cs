@@ -19,7 +19,7 @@ namespace SuperbrainManagement.Helpers
                                student => student.Id,
                                registration => registration.IdStudent,
                                (student, registrations) => new { Student = student, Registrations = registrations })
-                           .Where(x => !x.Registrations.Any())
+                           .Where(x => !x.Registrations.Any() && x.Student.Enable == true)
                            .Select(x => x.Student)
                            .ToList();
 
@@ -35,7 +35,7 @@ namespace SuperbrainManagement.Helpers
                                student => student.Id,
                                registration => registration.IdStudent,
                                (student, registration) => new { Student = student, Registration = registration })
-                            .Where(x => x.Student.Id == x.Registration.IdStudent)
+                            .Where(x => x.Student.Enable==true && x.Student.Id == x.Registration.IdStudent)
                             .Select(x => x.Student)
                             .Distinct().ToList();
             return students;

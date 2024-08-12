@@ -24,6 +24,7 @@ using Microsoft.Owin.BuilderProperties;
 using Org.BouncyCastle.Utilities.Encoders;
 using System.Web.Helpers;
 using System.Xml.Linq;
+using System.Data.Entity.Validation;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -40,23 +41,15 @@ namespace SuperbrainManagement.Controllers
         }
 
         // GET: Students
-        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, string idBranch, FilterEnum filterEnum = FilterEnum.Official)
+        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, string IdBranch, FilterEnum filterEnum = FilterEnum.Official)
         {
             if (CheckUsers.iduser() == "")
             {
                 return Redirect("/authentication");
             }
-            var branches = db.Branches.ToList();
+            var branches = db.Branches.Where(x=>x.Enable==true).ToList();
             int idbranch = int.Parse(CheckUsers.idBranch());
-            if (!CheckUsers.CheckHQ())
-            {
-                branches = db.Branches.Where(x => x.Id == idbranch).ToList();
-            }
-            if (string.IsNullOrEmpty(idBranch))
-            {
-                idBranch = branches.First().Id.ToString();
-            }
-            ViewBag.IdBranch = new SelectList(branches, "Id", "Name", idBranch);
+            ViewBag.IdBranch = new SelectList(branches, "Id", "Name", IdBranch);
 
             if (searchString != null)
             {
@@ -69,13 +62,17 @@ namespace SuperbrainManagement.Controllers
             ViewBag.CurrentFilter = searchString;
 
             var students = filterEnum == FilterEnum.Potential ? studentHelper.GetPotentialStudent() : studentHelper.GetOfficialStudent();
-
-            //var students = db.Students.Include(x=>x.User).ToList();
-
-            if (!string.IsNullOrEmpty(idBranch))
+            if (!string.IsNullOrEmpty(IdBranch))
             {
-                students = students.Where(x => x.IdBranch == int.Parse(idBranch)).ToList();
+                students = students.Where(x => x.IdBranch == int.Parse(IdBranch)).ToList();
+                ViewBag.CurrentBranch=IdBranch;
             }
+            else
+            {
+                students = students.Where(x => x.IdBranch == idbranch).ToList();
+                ViewBag.CurrentBranch= idbranch;
+            }
+
             if (!string.IsNullOrEmpty(searchString))
             {
                 students = students.Where(x => x.Name.ToLower().Contains(searchString.ToLower())).ToList();
@@ -95,7 +92,7 @@ namespace SuperbrainManagement.Controllers
                     students = students.OrderByDescending(s => s.Id).ToList();
                     break;
             }
-            int pageSize = 20;
+            int pageSize = 50;
             int pageNumber = (page ?? 1);
 
             var studentsWithStatus = filterEnum == FilterEnum.Potential ?
@@ -182,12 +179,11 @@ namespace SuperbrainManagement.Controllers
 
             return newCode;
         }
-        string Getcode_Student()
+        string Getcode_Student(int IdBranch)
         {
-            int idBranch = int.Parse(CheckUsers.idBranch());
-            int nextCode = db.Students.Where(x=>x.IdBranch==idBranch).Count() + 1;
+            int nextCode = db.Students.Where(x=>x.IdBranch== IdBranch).Count() + 1;
             string code = nextCode.ToString().PadLeft(5, '0');
-            var cn = db.Branches.Find(idBranch);
+            var cn = db.Branches.Find(IdBranch);
             string str = cn.Code +"-"+ code;
             return str;
         }
@@ -845,25 +841,78 @@ namespace SuperbrainManagement.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Name,Image,Code,DateOfBirth,Sex,Username,Password,Enable,School,Class,Description,ParentName,Phone,Email,ParentDateOfBirth,City,District,Address,Relationship,Job,Facebook,Hopeful,Known,IdMKT,IdBranch,PowerScore,Balance,Presenter,Status,Power,StatusStudy")] Student student)
+        public ActionResult Create([Bind(Include = "Id,Name,Image,Code,DateOfBirth,Sex,Username,Password,Enable,School,Class,Description,ParentName,Phone,Email,ParentDateOfBirth,City,District,Address,Relationship,Job,Facebook,Hopeful,Known,IdMKT,IdBranch,PowerScore,Balance,Presenter,Status,Power,StatusStudy")] Student student, HttpPostedFileBase file)
         {
             int idBranch= Convert.ToInt32(CheckUsers.idBranch());
-            int idUser = Convert.ToInt32(CheckUsers.iduser());
+            int IdUser = Convert.ToInt32(CheckUsers.iduser());
             if (ModelState.IsValid)
             {
-                student.Code = Getcode_Student();
-                student.IdBranch = idBranch;
-                student.DateCreate = DateTime.Now;
-                student.IdUser = idUser;
-                student.Enable = true;
-                db.Students.Add(student);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (Check_availidStudent(student.Name, student.Phone, student.Email) == "ok")
+                {
+                    if (file != null && file.ContentLength > 0)
+                    {
+                        // Generate a unique file name
+                        string fileName = Path.GetFileNameWithoutExtension(file.FileName);
+                        string extension = Path.GetExtension(file.FileName);
+                        fileName = $"{fileName}_{DateTime.Now:yyyyMMddHHmmssfff}{extension}";
+                        // Specify the path to save the file
+                        string _path = Path.Combine(Server.MapPath("~/Uploads/Images"), fileName);
+                        file.SaveAs(_path);
+                        student.Image = "/Uploads/Images/" + fileName;
+                    }
+                    if (student.IdBranch == null)
+                    {
+                        student.Code = Getcode_Student(idBranch);
+                        student.IdBranch = idBranch;
+                    }
+                    else
+                    {
+                        int IdBranch = Convert.ToInt32(student.IdBranch);
+                        student.Code = Getcode_Student(IdBranch);
+                        student.IdBranch = IdBranch;
+                    }
+                    student.Username=Get_usernameStudent(student.Name,student.Phone);
+                    student.Password = "taptrung";
+                    student.DateCreate = DateTime.Now;
+                    student.IdUser = IdUser;
+                    student.Enable = true;
+                    db.Students.Add(student);
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    TempData["error"] = "<div class='alert alert-danger'>" + Check_availidStudent(student.Name,student.Phone,student.Email)+"</div>";
+                }
             }
-
             return View(student);
         }
-
+        public string Get_usernameStudent(string Name,string Phone) {
+            string username = Name + Phone;
+            var student  = db.Students.SingleOrDefault(x=>x.Username== username);
+            var st = db.Students.Where(x=>x.Username.Contains(username)).Count();
+            if(student == null)
+            {
+                return username;
+            }
+            return username+"_"+st;
+        }
+        public string Check_availidStudent(string Name,string Phone,string Email)
+        {
+            var student = db.Students.SingleOrDefault(x=>x.Name==Name && x.Phone==Phone &&x.Email==Email);
+            var checkPhone = db.Students.Where(x=>x.Phone==Phone).Count();
+            var checkEmail = db.Students.Where(x=>x.Email==Email).Count();
+            if (checkEmail > 2)
+            {
+                return "Email đã đủ số lượng đăng ký!";
+            }
+            if (checkPhone > 2)
+            {
+                return "Số điện thoại đã đủ số lượng đăng ký!";
+            }
+            if (student != null) return "Đã tồn tại học viên này, vui lòng kiểm tra trong danh sách tiềm năng hoặc danh sách đã xóa!";
+            return "ok";
+        }
         // GET: Students/Edit/5
         public ActionResult Edit(int? id)
         {
@@ -897,7 +946,7 @@ namespace SuperbrainManagement.Controllers
                     string extension = Path.GetExtension(file.FileName);
                     fileName = $"{fileName}_{DateTime.Now:yyyyMMddHHmmssfff}{extension}";
                     // Specify the path to save the file
-                    string _path = Path.Combine(Server.MapPath("~/Uploads/Orders"), fileName);
+                    string _path = Path.Combine(Server.MapPath("~/Uploads/Images"), fileName);
                     file.SaveAs(_path);
                     student.Image = "/Uploads/Images/" + fileName;
                 }
@@ -905,8 +954,8 @@ namespace SuperbrainManagement.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo", student.IdBranch);
-            ViewBag.IdBranch = new SelectList(db.MKTCampaigns, "Id", "Code", student.IdBranch);
+            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Name", student.IdBranch);
+            ViewBag.IdMKT = new SelectList(db.MKTCampaigns, "Id", "Name", student.IdMKT);
             return View(student);
         }
         [HttpPost]
@@ -963,7 +1012,49 @@ namespace SuperbrainManagement.Controllers
             var item = new { status, message };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
+        [HttpPost]
+        public ActionResult Delete_Students(int id)
+        {
+            string status, message;
+            var st = db.Students.Find(id);
 
+            if (st == null)
+            {
+                status = "error";
+                message = "Không tồn tại học viên này!";
+                return Json(new { status, message }, JsonRequestBehavior.AllowGet);
+            }
+
+            try
+            {
+                st.Enable = false;
+                db.Entry(st).State = EntityState.Modified;
+                db.SaveChanges();
+
+                status = "ok";
+                message = "Đã xóa thành công!";
+            }
+            catch (DbEntityValidationException ex)
+            {
+                status = "error";
+                message = "Có lỗi xảy ra khi xóa dữ liệu!";
+                // Log hoặc hiển thị các lỗi xác thực chi tiết nếu cần
+                foreach (var entityValidationErrors in ex.EntityValidationErrors)
+                {
+                    foreach (var validationError in entityValidationErrors.ValidationErrors)
+                    {
+                        Console.WriteLine("Property: " + validationError.PropertyName + " Error: " + validationError.ErrorMessage);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                status = "error";
+                message = "Có lỗi xảy ra: " + ex.Message;
+            }
+
+            return Json(new { status, message }, JsonRequestBehavior.AllowGet);
+        }
 
         // GET: Students/Delete/5
         public ActionResult Delete(int? id)
@@ -1085,7 +1176,15 @@ namespace SuperbrainManagement.Controllers
             db.SaveChanges();
             return RedirectToAction("Index");
         }
-
+        public ActionResult DeletedList()
+        {
+            ViewBag.IdBranch = new SelectList(db.Branches.ToList(), "Id", "Name");
+            return View();
+        }
+        public ActionResult Loadlist_deleted()
+        {
+            return View();
+        }
         protected override void Dispose(bool disposing)
         {
             if (disposing)

@@ -13,16 +13,16 @@
             <div class="input-group mb-3">
                 @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
                 {
-                    @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2" })
+                    @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", onchange = "this.form.submit();" })
                 }
-                <input type="text" class="form-control" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter ">
+                <input type="text" class="form-control" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
                 <button class="input-group-text bg-success" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
             </div>
         </form>
     </div>
     <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
         <div class="me-0 btn btn-md p-0">
-            <button class="btn btn-md btn-outline-dark" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="ti ti-filter"></i> @{
                     if (Convert.ToString(ViewBag.SelectedFilter) == "Potential")
                     {
@@ -32,28 +32,27 @@
                     {
                         <span> Chính thức</span>
                     }
-                 }
+                }
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = 0, currentFilter =  ""})"> Chính thức</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = 1, currentFilter = "" })"> Tiềm năng</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { IdBranch=ViewBag.CurrentBranch,filterEnum = "Official", currentFilter = ViewBag.CurrentFilter })"> Chính thức</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { IdBranch=ViewBag.CurrentBranch, filterEnum = "Potential", currentFilter = ViewBag.CurrentFilter })"> Tiềm năng</a></li>
             </ul>
         </div>
         <div class="me-0 btn btn-md p-0">
-            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="ti ti-arrows-sort"></i> Sắp xếp theo
             </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = ViewBag.SelectedFilter, sortOrder = "name", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = ViewBag.SelectedFilter, sortOrder = "name_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = ViewBag.SelectedFilter, sortOrder = "date", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-ascending"></i> Mới nhất</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = ViewBag.SelectedFilter, sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Cũ nhất</a></li>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { IdBranch=ViewBag.CurrentBranch, filterEnum = ViewBag.SelectedFilter, sortOrder = "name", currentFilter = ViewBag.CurrentFilter })"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { IdBranch=ViewBag.CurrentBranch, filterEnum = ViewBag.SelectedFilter, sortOrder = "name_desc", currentFilter = ViewBag.CurrentFilter })"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { IdBranch=ViewBag.CurrentBranch, filterEnum = ViewBag.SelectedFilter, sortOrder = "date", currentFilter = ViewBag.CurrentFilter })"><i class="ti ti-sort-ascending"></i> Mới nhất</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { IdBranch=ViewBag.CurrentBranch, filterEnum = ViewBag.SelectedFilter, sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Cũ nhất</a></li>
             </ul>
         </div>
-
         <a href="/students/create" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
     </div>
-    </div>
+</div>
 <table class="table fs-3">
     <thead class="bg-success text-white rounded-1">
         <tr>
@@ -95,7 +94,7 @@
             </td>
             <td class="text-end">
                 <a href="/students/details/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
-                <a href="/students/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
+                <a href="javascript:Delete_Student(@item.Id)" class="me-1"><i class="ti ti-trash text-danger"></i></a>
                 <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="ti ti-dots-vertical"></i>
                 </a>
@@ -114,8 +113,27 @@
     </ul>
 </nav>
 <script>
-    function onchange_active() {
-        //Script Onchange
-        showSuccess("Onchange", 2000);
+    function Delete_Student(Id) {
+        if (confirm('Bạn có muốn xóa học viên này?')) {
+            $.ajax({
+                url: '@Url.Action("Delete_Students", "Students")',
+                type: 'POST',
+                data: {
+                    id: Id
+                },
+                success: function (data) {
+                    if (data.status=="ok") {
+                        showSuccess(data.message, 3000);
+                        location.reload();
+                    } else {
+                        showError(data.message,3000);
+                    }
+                },
+                error: function () {
+                    showError('Error deleting student',3000);
+                }
+            });
+            return false;
+        }
     }
 </script>
