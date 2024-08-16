@@ -102,7 +102,7 @@ namespace SuperbrainManagement.Controllers
         // GET: Promotions/Create
         public ActionResult Create()
         {
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo");
+            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Name");
             ViewBag.IdUser = new SelectList(db.Users, "Id", "Name");
             return View();
         }
@@ -121,7 +121,7 @@ namespace SuperbrainManagement.Controllers
                 return RedirectToAction("Index");
             }
 
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo", promotion.IdBranch);
+            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Name", promotion.IdBranch);
             ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", promotion.IdUser);
             return View(promotion);
         }
@@ -138,7 +138,7 @@ namespace SuperbrainManagement.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo", promotion.IdBranch);
+            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Name", promotion.IdBranch);
             ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", promotion.IdUser);
             return View(promotion);
         }
@@ -156,7 +156,7 @@ namespace SuperbrainManagement.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo", promotion.IdBranch);
+            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Name", promotion.IdBranch);
             ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", promotion.IdUser);
             return View(promotion);
         }

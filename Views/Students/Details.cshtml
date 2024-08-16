@@ -86,7 +86,7 @@
                                         <input class="form-control @(SuperbrainManagement.Controllers.CheckUsers.CheckHQ()?"":"disabled")" type="text" name="Username" id="Username" value="@Model.Username">
                                     </div>
                                     <div class="col-lg-6">
-                                        <input class="form-control" type="password" name="Password" id="Password" value="@Model.Password" placeholder="Mật khẩu">
+                                        <input class="form-control" type="password" name="Password" id="Password" value="@Model.Password" placeholder="Mật khẩu" onclick="myFunction()">
                                     </div>
                                 </div>
                             </div>
@@ -634,5 +634,13 @@
                 console.log("error: " + error);
             }
         });
+    }
+    function myFunction() {
+        var x = document.getElementById("Password");
+        if (x.type === "password") {
+            x.type = "text";
+        } else {
+            x.type = "password";
+        }
     }
 </script>

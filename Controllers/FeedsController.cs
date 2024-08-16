@@ -30,7 +30,7 @@ namespace SuperbrainManagement.Controllers
                     + "<div class=\"p-1 border-1\">"
                     + "<div class=\"row align-items-center\">"
                     + "<div class=\"col-auto text-end\">"
-                    + "<img src=\"" + item.User.Employee.Image + "\" alt=\"\" width=\"35\" height=\"35\" class=\"rounded-circle\">"
+                    + "<img src=\"" + (item.User.Employee.Image == null ? "/Assets/images/profile/user-1.jpg" : item.User.Employee.Image) + "\" alt=\"\" width=\"35\" height=\"35\" class=\"rounded-circle\">"
                     + "</div>"
                     + "<div class=\"col-10\">"
                     + "<div class=\"overflow-hidden flex-nowrap\">"

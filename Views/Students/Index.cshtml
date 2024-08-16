@@ -57,13 +57,12 @@
     <thead class="bg-success text-white rounded-1">
         <tr>
             <th class="text-center">STT</th>
-            <th>Mã học viên</th>
-            <th>Họ tên</th>
-            <th class="text-center">Năm sinh</th>
-            <th class="text-center">Giới tính</th>
-            <th class="text-center">Trạng thái</th>
-            <th>Quản lý</th>
-            <th class="text-end">Thao tác</th>
+            <th>MÃ HỌC VIÊN</th>
+            <th>HỌ TÊN</th>
+            <th class="text-center">SINH NHẬT</th>
+            <th class="text-center">TRẠNG THÁI</th>
+            <th>QUẢN LÝ</th>
+            <th class="text-end">THAO TÁC</th>
         </tr>
     </thead>
 
@@ -81,10 +80,7 @@
                 <a href="/students/details/@item.Id" class="text-muted me-1">@Html.DisplayFor(modelItem => item.Name)</a>
             </td>
             <td class="text-center">
-                @item.DateOfBirth.Value.Year
-            </td>
-            <td class="text-center">
-                @Html.DisplayFor(modelItem => item.Sex)
+                @(item.DateOfBirth==null?"":item.DateOfBirth.Value.ToString("dd/MM/yyyy"))
             </td>
             <td class="text-center">
                 @Html.DisplayFor(modelItem => item.Status)

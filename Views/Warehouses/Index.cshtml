@@ -92,12 +92,12 @@
                     <table class="table mt-3">
                         <thead class="bg-success">
                             <tr class="text-white">
-                                <td>STT</td>
+                                <td class="text-center">STT</td>
                                 <td>Vật tư</td>
-                                <td>Đơn vị</td>
-                                <td>Đơn giá</td>
-                                <td>Số lượng</td>
-                                <td>Thành tiền</td>
+                                <td class="text-center">Đơn vị</td>
+                                <td class="text-center">Đơn giá</td>
+                                <td class="text-center">Số lượng</td>
+                                <td class="text-center">Thành tiền</td>
                             </tr>
                         </thead>
                         <tbody id="showlist_nhap"></tbody>
@@ -154,12 +154,12 @@
                     <table class="table mt-3">
                         <thead class="bg-success">
                             <tr class="text-white">
-                                <td>STT</td>
+                                <td class="text-center">STT</td>
                                 <td>Vật tư</td>
-                                <td>Đơn vị</td>
-                                <td>Đơn giá</td>
-                                <td>Số lượng</td>
-                                <td>Thành tiền</td>
+                                <td class="text-center">Đơn vị</td>
+                                <td class="text-center">Đơn giá</td>
+                                <td class="text-center">Số lượng</td>
+                                <td class="text-center">Thành tiền</td>
                             </tr>
                         </thead>
                         <tbody id="showlist_xuat"></tbody>
@@ -246,7 +246,7 @@
         for (var i = 1; i <= countline; i++) {
             var soluong = Number($("#soluong_" + i).val());
             if (soluong > 0) {
-                var dongia = parseInt($("#dongia_" + i).val());
+                var dongia = parseFloat($("#dongia_" + i).val().replace(/,/g, '')); // Remove all commas
                 var thanhtien = dongia * soluong;
                 tongtien += thanhtien;
             }
@@ -254,7 +254,7 @@
         $("#tongtien").val(tongtien.toLocaleString());
     }
     function update_thanhtien(i) {
-        var dongia = parseInt($("#dongia_" + i).val());
+        var dongia = parseFloat($("#dongia_" + i).val().replace(/,/g, '')); // Remove all commas
         var soluong = parseInt($("#soluong_" + i).val());
         var thanhtien = dongia * soluong;
         $("#thanhtien_" + i).val(thanhtien.toLocaleString());
@@ -263,7 +263,7 @@
 
     function update_thanhtienxuat(i) {
         var max = parseInt($('#soluong_'+i).attr('max'));
-        var dongia = parseInt($("#dongia_" + i).val());
+        var dongia = parseFloat($("#dongia_" + i).val().replace(/,/g, '')); // Remove all commas
         var soluong = parseInt($("#soluong_" + i).val());
         if (soluong > max) {
             showError("Vui lòng nhập số lượng nhỏ hơn!", 3000);
@@ -282,7 +282,7 @@
         for (var i = 1; i <= countline; i++) {
             var soluong = Number($("#soluong_" + i).val());
             if (soluong > 0) {
-                var dongia = parseInt($("#dongia_" + i).val());
+                var dongia = parseFloat($("#dongia_" + i).val().replace(/,/g, '')); // Remove all commas
                 var thanhtien = dongia * soluong;
                 tongtien += thanhtien;
             }
