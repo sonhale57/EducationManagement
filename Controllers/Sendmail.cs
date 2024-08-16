@@ -42,7 +42,7 @@ namespace SuperbrainManagement.Controllers
             {
                 smtpClient.Send(mail);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
             finally

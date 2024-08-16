@@ -21,11 +21,10 @@ namespace SuperbrainManagement.Controllers
         {
             return View();
         }
-        public ActionResult Loadlist(string searchString,string sort)
+        public ActionResult Loadlist()
         {
             var configTimePayment = db.Configurations.OrderByDescending(x => x.Id).FirstOrDefault().TimePayment;
             string str = "";
-            string querySearch = "", querySort = "";
             var cum = db.BranchGroups.Where(x=>x.Enable==true).ToList();
             int count = 0;
             int countcum = 0;

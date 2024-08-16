@@ -351,7 +351,7 @@ namespace SuperbrainManagement.Controllers
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "SELECT p.Id,p.Image, p.Name,p.Unit,p.Price,p.NumberOfPackage,p.UnitOfPackage,p.Code,p.Quota,COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '1' AND re.IdBranch =" + idbranch_hq + "), 0) -"
+                string query = "SELECT p.Id,p.Image, p.Name,p.Unit,p.Description,p.Price,p.NumberOfPackage,p.UnitOfPackage,p.Code,p.Quota,COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '1' AND re.IdBranch =" + idbranch_hq + "), 0) -"
                                         + " COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '0' AND re.IdBranch =" + idbranch_hq + "), 0) AS Tonkho"
                                         + " FROM product p"
                                         + " where p.enable=1 "
@@ -369,7 +369,7 @@ namespace SuperbrainManagement.Controllers
                     double dongiaban = dongia * heso;
                     str += "<tr>"
                             + "<td class='text-center align-content-center'>" + count + "</td>"
-                            + "<td class='w-25 align-content-center'> <img src='" + reader["Image"].ToString() + "' alt='" + reader["Name"].ToString() + "' class='rounded-2 me-2' height='40'><span class='text-success'>" + reader["code"].ToString() + "</span> - " + reader["Name"].ToString() + "</td>"
+                            + "<td class='w-25 align-content-center'> <img src='" + (reader["Image"].ToString() == "" ? "/assets/images/logos/icon web.png" : reader["Image"].ToString()) + "' alt='" + reader["Name"].ToString() + "' class='rounded-2 me-2' height='40'><span class='text-success'>" + reader["Name"].ToString() + "<br/><small class='fst-italic text-muted'>Ghi chú: " + reader["Description"].ToString() + "</small></td>"
                             + "<td class='w-25 text-center'>" + reader["UnitOfPackage"].ToString() + "</td>"
                             + "<td class='w-10 align-content-center'>"
                             + "<input type='hidden' name='NumberOfPackage_" + count + "' id='NumberOfPackage_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + reader["NumberOfPackage"].ToString() + "' class='form-control'>"
@@ -415,7 +415,7 @@ namespace SuperbrainManagement.Controllers
                     tongtien += thanhtien;
                     str += "<tr>"
                             + "<td class='text-center'>" + count + "</td>"
-                            + "<td class=''> <img src='" + reader["Image"].ToString() + "' alt='" + reader["Name"].ToString() + "' class='rounded-2 me-2' height='40'><span class='text-success'>" + reader["CodeProduct"].ToString() + "</span> - " + reader["Name"].ToString() + "</td>"
+                            + "<td class=''> <img src='" + (reader["Image"].ToString() == "" ? "/assets/images/logos/icon web.png" : reader["Image"].ToString()) + "' alt='" + reader["Name"].ToString() + "' class='rounded-2 me-2' height='40'><span class='text-success'>" + reader["Name"].ToString() + "<br/><small class='fst-italic text-muted'>Ghi chú: " + reader["Description"].ToString() + "</small></td>"
                             + "<td class='text-center'>" + reader["Unit"].ToString() + "</td>"
                             + "<td class='text-end'>" + string.Format("{0:N0}", dongia) + "</td>"
                             + "<td class='text-center'>" + reader["Amount"].ToString() + "</td>"

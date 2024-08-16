@@ -138,7 +138,7 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
-        public ActionResult Submit_AddCategory(int Id, string Code, string Name, string Description, string Action,int DisplayOrder)
+        public ActionResult Submit_AddCategory(int? Id, string Code, string Name, string Description, string Action,int DisplayOrder)
         {
 
             string status = "ok";
@@ -198,19 +198,18 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
             return Json(item, JsonRequestBehavior.AllowGet);
         }
         [HttpPost]
-        public async Task<ActionResult> Delete_Category(int IdCategory)
+        public ActionResult Delete_Category(int IdCategory)
         {
             string status, message;
-            var pc = await db.ProductCategories.FindAsync(IdCategory);
+            var pc = db.ProductCategories.Find(IdCategory);
             if (pc == null)
             {
                 status = "error";
                 message = "Không tồn tại danh mục này!";
-                return HttpNotFound();
             }
 
             db.ProductCategories.Remove(pc);
-            await db.SaveChangesAsync();
+            db.SaveChanges();
             status = "ok";
             message = "Đã xóa thành công!";
             var item = new { 
@@ -293,7 +292,7 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
             {
                 return HttpNotFound();
             }
-            ViewBag.IdCategory = new SelectList(db.ProductCategories, "Id", "Name", product.IdCategory);
+            ViewBag.IdCategory = new SelectList(db.ProductCategories.Where(x => x.Enable == true), "Id", "Name", product.IdCategory);
             return View(product);
         }
 
@@ -358,7 +357,7 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
 
                     return RedirectToAction("Index");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
                 }

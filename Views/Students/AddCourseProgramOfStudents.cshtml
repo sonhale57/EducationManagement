@@ -1,6 +1,7 @@
 ﻿@model SuperbrainManagement.Models.Student
 @{
-    ViewBag.Title = "AddCourseProgramOfStudents";
+    ViewBag.Controller = "Học viên";
+    ViewBag.Title = "Phiếu đăng ký khóa học";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -14,11 +15,9 @@
                         <i class="ti ti-dots text-success"></i>
                     </a>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <a class="dropdown-item" href="@Url.Action("RegistrationPrints","Students")">In phiếu đăng ký tổng</a>
-                        <a class="dropdown-item" href="#">In phiếu đăng ký chi tiết</a>
-                        <a class="dropdown-item" href="#">Thu tiền</a>
-                        <a class="dropdown-item" href="#">Xét vào lớp</a>
-                        <a class="dropdown-item" href="#">Xóa phiếu đăng ký</a>
+                        <a class="dropdown-item" href="@Url.Action("RegistrationPrints","Students")"><i class="ti ti-printer"></i> In phiếu đăng ký tổng</a>
+                        <a class="dropdown-item" href="#"><i class="ti ti-printer"></i> In phiếu đăng ký chi tiết</a>
+                        <a class="dropdown-item" href="#"><i class="ti ti-credit-card"></i> Thu tiền</a>
                     </div>
                 </div>
             </th>
@@ -49,7 +48,7 @@
     </div>
 </div>
 <table class="table table-rounded table-bordered" style="">
-    <tr class="bg-primary text-white">
+    <tr class="bg-success text-white">
         <th class="text-center">STT</th>
         <th class="text-center">Tên khoản thu</th>
         <th class="text-center">Đơn giá</th>
@@ -121,10 +120,11 @@
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" style="padding-right: -100px;margin-right: 110px;height: 100vh;">
-        <div class="modal-content rounded-0 h-75" style="width: 600px;">
-            <div class="modal-header bg-info">
-                <h5 class="modal-title text-white" id="exampleModalLabel">Đăng ký khóa học</h5>
+        <div class="modal-content h-75" style="width: 600px;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Đăng ký khóa học</h5>
             </div>
+            <hr style="width:90%;margin:0 auto;" />
             <div class="modal-body">
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Chương trình</label>
@@ -187,13 +187,13 @@
         </div>
     </div>
 </div>
-@*modal*@
 <div class="modal fade" id="exampleModalProduct" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" style="padding-right: -100px;margin-right: 110px;height: 100%;">
-        <div class="modal-content rounded-0 h-75" style="width: 600px;">
-            <div class="modal-header bg-info">
-                <h5 class="modal-title text-white" id="exampleModalLabel">Đăng ký vật tư</h5>
+        <div class="modal-content h-75" style="width: 600px;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Đăng ký vật tư</h5>
             </div>
+            <hr style="width:90%;margin:0 auto;" />
             <div class="modal-body">
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Vật tư</label>
@@ -237,12 +237,12 @@
 </div>
 <div class="modal fade" id="exampleModalRevenueReferences" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" style="padding-right: -100px;margin-right: 110px;height: 100%;">
-        <div class="modal-content rounded-0 h-75" style="width: 600px;">
-            <div class="modal-header bg-info">
-                <h5 class="modal-title text-white" id="exampleModalLabel">Đăng ký thu khác</h5>
+        <div class="modal-content  h-75" style="width: 600px;">
+            <div class="modal-header ">
+                <h5 class="modal-title" id="exampleModalLabel">Đăng ký thu khác</h5>
             </div>
+            <hr style="width:90%;margin:0 auto;" />
             <div class="modal-body">
-
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Tên khoản thu</label>
                     <div class="col-lg-9">

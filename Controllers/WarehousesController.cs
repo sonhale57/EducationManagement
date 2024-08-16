@@ -214,17 +214,18 @@ namespace SuperbrainManagement.Controllers
 
                 while (reader.Read())
                 {
+                    double amount = Double.Parse(reader["Price"].ToString(), 0);
                     count++;
                     str += "<tr>"
                             + "<td class='text-center align-content-center'>" + count + "</td>"
                             + "<td class='w-25 align-content-center'> <img src='" + reader["Image"].ToString() + "' alt='" + reader["Name"].ToString() + "' class='rounded-2 me-2' height='40'><span class='text-success'>" + reader["code"].ToString() + "</span> - " + reader["Name"].ToString() + "</td>"
-                            + "<td class='w-25 align-content-center'>" + reader["Unit"].ToString() + "</td>"
-                            + "<td class='w-10 align-content-center'>"
+                            + "<td class='w-25 align-content-center text-center'>" + reader["Unit"].ToString() + "</td>"
+                            + "<td class='w-10 align-content-center text-center'>"
                             + "<input type='hidden' name='IdProduct_" + count + "' id='idproduct_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + reader["Id"].ToString() + "' class='form-control' onchange='javascript:update_thanhtien(" + count + ")'>"
-                            + "<input type='text' name='Price_" + count + "' id='dongia_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + reader["Price"].ToString() + "' class='form-control' onchange='javascript:update_thanhtien(" + count + ")'>"
+                            + "<input type='text' name='Price_" + count + "' id='dongia_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + string.Format("{0:N0}", amount) + "' class='form-control text-end' onchange='javascript:update_thanhtien(" + count + ")'>"
                             + "</td>"
-                            + "<td class='text-center w-5 align-content-center'><input type='text' name='Amount_" + count + "'  id='soluong_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' class='form-control soluong' onchange='javascript:update_thanhtien(" + count + ")'></td>"
-                            + "<td class='text-center w-10 align-content-center'><input type='text' name='TotalAmount_" + count + "'  id='thanhtien_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' class='form-control' readonly></td>"
+                            + "<td class='text-center w-5 align-content-center'><input type='text' name='Amount_" + count + "'  id='soluong_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' class='form-control text-center soluong' onchange='javascript:update_thanhtien(" + count + ")'></td>"
+                            + "<td class='text-center w-10 align-content-center'><input type='text' name='TotalAmount_" + count + "'  id='thanhtien_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' class='form-control text-end' readonly></td>"
                             + "</tr>";
                 }
                 reader.Close();
@@ -255,17 +256,18 @@ namespace SuperbrainManagement.Controllers
                 while (reader.Read())
                 {
                     count++;
+                    double amount = Double.Parse(reader["Price"].ToString(), 0);
                     int tonkho = int.Parse(reader["Tonkho"].ToString());
                     str += "<tr>"
                             + "<td class='text-center align-content-center'>" + count + "</td>"
                             + "<td class='w-25 align-content-center'> <img src='" + reader["Image"].ToString() + "' alt='" + reader["Name"].ToString() + "' class='rounded-2 me-2' height='40'><span class='text-success'>" + reader["code"].ToString() + "</span> - " + reader["Name"].ToString() + "</td>"
-                            + "<td class='w-25 align-content-center'>" + reader["Unit"].ToString() + "</td>"
-                            + "<td class='w-10 align-content-center'>"
+                            + "<td class='w-25 align-content-center text-center'>" + reader["Unit"].ToString() + "</td>"
+                            + "<td class='w-10 align-content-center text-center'>"
                             + "<input type='hidden' name='IdProduct_" + count + "' id='idproduct_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + reader["Id"].ToString() + "' class='form-control' onchange='javascript:update_thanhtienxuat(" + count + ")'>"
-                            + "<input type='text' name='Price_" + count + "' id='dongia_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + reader["Price"].ToString() + "' class='form-control' onchange='javascript:update_thanhtienxuat(" + count + ")'>"
+                            + "<input type='text' name='Price_" + count + "' id='dongia_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + string.Format("{0:N0}", amount) + "' class='form-control text-end' onchange='javascript:update_thanhtienxuat(" + count + ")'>"
                             + "</td>"
-                            + "<td class='text-center w-5 align-content-center'><input type='text' name='Amount_" + count + "'  id='soluong_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' max='" + reader["Tonkho"].ToString() + "' class='form-control soluong' onchange='javascript:update_thanhtienxuat(" + count + ")' " + (tonkho > 0 ? "" : "Disabled") + "></td>"
-                            + "<td class='text-center w-10 align-content-center'><input type='text' name='TotalAmount_" + count + "'  id='thanhtien_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' class='form-control' readonly></td>"
+                            + "<td class='text-center w-5 align-content-center'><input type='text' name='Amount_" + count + "'  id='soluong_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' max='" + reader["Tonkho"].ToString() + "' class='form-control text-center soluong' onchange='javascript:update_thanhtienxuat(" + count + ")' " + (tonkho > 0 ? "" : "Disabled") + "></td>"
+                            + "<td class='text-center w-10 align-content-center'><input type='text' name='TotalAmount_" + count + "'  id='thanhtien_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' class='form-control text-end' readonly></td>"
                             + "</tr>";
                 }
                 reader.Close();
@@ -334,7 +336,7 @@ namespace SuperbrainManagement.Controllers
                 for (int i = 1; i <= Count; i++)
                 {
                     int idproduct = int.Parse(Form["IdProduct_" + i].ToString());
-                    decimal dongia = Decimal.Parse(Form["Price_" + i].ToString());
+                    decimal dongia = Decimal.Parse(Form["Price_" + i].ToString().Replace(",", ""));
                     int soluong = int.Parse(Form["Amount_" + i].ToString());
                     Decimal thanhtien = Decimal.Parse(Form["TotalAmount_" + i].ToString().Replace(",", ""));
 
@@ -403,7 +405,7 @@ namespace SuperbrainManagement.Controllers
                 for (int i = 1; i <= Count; i++)
                 {
                     int idproduct = int.Parse(Form["IdProduct_" + i].ToString());
-                    decimal dongia = Decimal.Parse(Form["Price_" + i].ToString());
+                    decimal dongia = Decimal.Parse(Form["Price_" + i].ToString().Replace(",", ""));
                     int soluong = int.Parse(Form["Amount_" + i].ToString());
                     Decimal thanhtien = Decimal.Parse(Form["TotalAmount_" + i].ToString().Replace(",", ""));
 
