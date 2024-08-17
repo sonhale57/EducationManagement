@@ -388,7 +388,7 @@ namespace SuperbrainManagement.Controllers
                 count,
                 name= user.Name,
                 phone = cn.Phone,
-                address= cn.Address.ToString()
+                address= cn.Address
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
