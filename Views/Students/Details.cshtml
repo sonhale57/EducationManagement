@@ -10,11 +10,12 @@
     <div class="col-lg-12">
         <div class="profile-card-4 z-depth-3">
             <div class="card">
-                <div class="card-body text-start bg-light rounded-top">
-                    <div class="user-box">
+                <div class="card-body bg-light rounded-top">
+                    <div class="user-box ">
                         <img src="@(Model.Image != null ? Model.Image : "/Assets/images/profile/user-1.jpg")" height="100" width="100" alt="user avatar" class="rounded-circle">
                         <a href="javascript:void(0)" class="bg-success rounded-circle p-2 text-white d-inline-flex position-absolute bottom-0 end-0 mb-n3 me-3" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Add To Cart"><i class="ti ti-user-check fs-4"></i></a>
                         <h6 class="text-success mt-2">@Model.Name</h6>
+                        <h6 class="text-muted">@(Model.DateOfBirth==null?"":Model.DateOfBirth.Value.ToString("dd/MM/yyyy"))</h6>
                     </div>
                 </div>
             </div>

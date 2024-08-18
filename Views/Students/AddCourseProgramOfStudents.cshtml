@@ -119,8 +119,8 @@
 </button>
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" style="padding-right: -100px;margin-right: 110px;height: 100vh;">
-        <div class="modal-content h-75" style="width: 600px;">
+    <div class="modal-dialog modal-dialog-scrollable" style="padding-right: -100px;margin-right: 110px;">
+        <div class="modal-content" style="width: 600px;">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Đăng ký khóa học</h5>
             </div>
@@ -129,14 +129,14 @@
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Chương trình</label>
                     <div class="col-lg-9">
-                        <select class="form-control IdEmployee" name="phonghoc0" id="programSelect" onchange="getDataCombobox(this.value,0,1)">
+                        <select class="form-control IdEmployee" name="phonghoc0" id="programSelect" onchange="getDataCombobox(this.value,1)">
                         </select>
                     </div>
                 </div>
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Khóa học</label>
                     <div class="col-lg-9">
-                        <select class="form-control IdEmployee" name="phonghoc1" id="courseSelect" onchange="getDataCombobox(0, this.value,2)">
+                        <select class="form-control IdEmployee" name="phonghoc1" id="courseSelect" onchange="GetInfoCourse()">
                         </select>
                     </div>
                 </div>
@@ -144,35 +144,36 @@
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Học phí</label>
                     <div class="col-lg-9">
-                        <input class="form-control" type="email" value="" id="priceCourse" readonly>
+                        <input class="form-control" type="text" value="" id="priceCourse" readonly>
                     </div>
                 </div>
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Chương trình KM</label>
                     <div class="col-lg-9">
-                        <select class="form-control IdEmployee" name="phonghoc0" id="promotionSelect">
+                        <select class="form-control IdEmployee" name="phonghoc0" id="promotionSelect" onchange="Getvalue_discount()">
                         </select>
                     </div>
                 </div>
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Chiết khấu</label>
                     <div class="col-lg-9">
-                        <input class="form-control" type="email" value="0" id="discountCourse">
+                        <input class="form-control" type="text" value="0" id="discountCourse" readonly>
                     </div>
                 </div>
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Thành tiền</label>
                     <div class="col-lg-9">
-                        <input class="form-control" type="email" value="" id="totalamountCourse" readonly>
+                        <input class="form-control" type="text" value="" id="totalamountCourse" readonly>
                     </div>
                 </div>
-                <div class="hideof">
-                    <table class="table table-bordered">
-                        <tr class="table-primary">
-                            <th>CHỌN</th>
-                            <th>TÊN</th>
-                            <th>ĐƠN GIÁ</th>
-                            <th>THÀNH TIỀN</th>
+                <div class="mt-3">
+                    <h6 class="text-success"><i class="ti ti-ruler-measure"></i> Vật tư kèm theo khóa học</h6>
+                    <table class="table table-bordered rounded">
+                        <tr class="bg-success text-center text-white">
+                            <th>Chọn</th>
+                            <th>Tên vật tư</th>
+                            <th>Đơn vị</th>
+                            <th>Thành tiền</th>
                         </tr>
                         <tbody id="tableProduct">
                         </tbody>
@@ -205,25 +206,25 @@
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Đơn giá</label>
                     <div class="col-lg-9">
-                        <input class="form-control" type="email" value="0" id="priceProduct">
+                        <input class="form-control" type="text" value="0" id="priceProduct">
                     </div>
                 </div>
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Số lượng</label>
                     <div class="col-lg-9">
-                        <input class="form-control" type="email" value="0" id="numberProduct" readonly>
+                        <input class="form-control" type="text" value="0" id="numberProduct" readonly>
                     </div>
                 </div>
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Chiết khấu</label>
                     <div class="col-lg-9">
-                        <input class="form-control" type="email" value="0" id="discountProduct" readonly>
+                        <input class="form-control" type="text" value="0" id="discountProduct" readonly>
                     </div>
                 </div>
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Thành tiền</label>
                     <div class="col-lg-9">
-                        <input class="form-control" type="email" value="" id="totalamountProduct" readonly>
+                        <input class="form-control" type="text" value="" id="totalamountProduct" readonly>
                     </div>
                 </div>
             </div>
@@ -286,38 +287,7 @@
 
 @section scripts {
     <script>
-        function prints() {
-
-       var totalamount = $('#totalamount').val();
-        var code = $('#Bill').val();
-            $.ajax({
-                url: '@Url.Action("RegistrationPrints","Students")',
-                type: 'POST',
-                data: {
-                  IdStudent: idstudent,
-                  totalamount: totalamount
-                },
-                success: function () {
-
-                },
-                error: function (xhr, error) {
-
-                }
-            });
-        }
-        function updateCheckboxValue(checkbox) {
-            // Kiểm tra xem checkbox có được chọn hay không
-            var value = checkbox.checked ? 1 : 0;
-
-            // Gán giá trị cho checkbox
-            checkbox.value = value;
-
-            // In giá trị của checkbox ra console để kiểm tra
-            console.log("Checkbox value updated to: " + value);
-        }
         function deleteitem(courseId, registrationId) {
-
-
             var $row = $(this).closest('tr'); // Tìm hàng chứa nút xóa đã được click
 
             $.ajax({
@@ -339,24 +309,6 @@
 
                 }
             });
-        }
-        function formatVND(number) {
-            // Convert number to string
-            var strNumber = number.toString();
-
-            // Split the number into integer and decimal parts
-            var parts = strNumber.split(".");
-
-            // Format the integer part with dots
-            var formattedInteger = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-
-            // Add the currency symbol and decimal part if exists
-            var result = formattedInteger + "";
-            if (parts.length > 1) {
-                result += "." + parts[1];
-            }
-
-            return result;
         }
         function getDataComboboxOther(IdOther) {
              $.ajax({
@@ -404,29 +356,34 @@
             }
            });
         }
-        function getDataCombobox(IdProgram, IdCourse,type) {
+        function getDataCombobox(IdProgram,type) {
           $.ajax({
               url: '@Url.Action("GetDataCombobox", "Students")',
               type: "GET",
-              data: { IdProgram: IdProgram, IdCourse: IdCourse,type },
+              data: { IdProgram: IdProgram,type },
               success: function (data) {
-                  console.log(data);
-                  $('#tableProduct').html(data.strTable);
-                  if (data.strpro.length === 0 && data.type === 1) {
+                  $('#promotionSelect').html(data.strpromotion);
+                  $('#programSelect').html(data.strpro);
+                  $('#courseSelect').html(data.strcour);
+                  GetInfoCourse();
+                  Getvalue_discount();
+                  Update_totalAmount();
+              }, 
+              error: function (xhr, error) {
+                  console.log(error);
+              }
 
-                      $("#courseSelect").html(data.strcour);
-
-
-                  } else if (data.strpro.length !== 0 && data.type === 1) {
-                      $('#promotionSelect').html(data.strpromotion);
-                      $('#programSelect').html(data.strpro);
-                      $('#courseSelect').html(data.strcour);
-                  } else if (data.type === 2) {
-                      $('#priceCourse').val(data.priceCourse);
-                      $('#totalamountCourse').val(formatVND(data.priceCourse));
-                  }
+          });
+        }
+        GetInfoCourse();
+        function GetInfoCourse() {
+          $.ajax({
+              url: '@Url.Action("GetInfoCourse", "Students")',
+              type: "GET",
+              data: { IdCourse: $("#courseSelect").val() },
+              success: function (data) {
                   $('#priceCourse').val(data.priceCourse);
-                  $('#totalamountCourse').val(formatVND(data.priceCourse));
+                  $('#tableProduct').html(data.strtable);
               },
               error: function (xhr, error) {
                   console.log(error);
@@ -434,7 +391,16 @@
 
           });
         }
-
+        function Getvalue_discount() {
+            let value = $("#promotionSelect").val();
+            $('#discountCourse').val(value); Update_totalAmount();
+        }
+        function Update_totalAmount() {
+            var dongia = parseFloat($("#priceCourse").val().replace(/,/g, '')); // Remove all commas
+            var giam = parseFloat($("#discountCourse").val().replace(/,/g, '')); // Remove all commas
+            var thanhtien = dongia - giam;
+            $('#totalamountCourse').val(thanhtien);
+        }
         function loaddata(idRegistraion) {
             var randomParam = new Date().getTime(); // Tạo một tham số ngẫu nhiên
             $.ajax({
@@ -451,17 +417,15 @@
                     $('#dataBody').empty();
                     // Tạo một hàng mới cho bảng
 
-
                     // Thêm hàng mới vào phần tử <tbody> của bảng
                     $('#dataBody').html(data.datalist);
                     document.getElementById("IdRegistration").value = data.idRegistrations;
                     document.getElementById("Bill").value = data.Code;
                     document.getElementById("Datecreate").value = data.DateCreate;
-                    $(".total").text(formatVND(data.TotalAmount));
+                    $(".total").text(data.TotalAmount);
                 },
                 error: function (xhr, status, error) {
-                    alert("san pham da ton tai");
-                    console.error('Error saving cart item:', error);
+                    showError("Đã tồn tại, vui lòng kiểm tra lại!", 3000);
                 }
             })
         }
@@ -479,8 +443,6 @@
             $(".listproduct").each(function () {
                 // Within each iteration, 'this' refers to the current DOM element
                 // Wrap 'this' with jQuery to access jQuery methods
-
-
                 // Làm bất cứ điều gì bạn muốn với trạng thái kiểm tra isChecked ở đây
 
                 var item = {
@@ -489,10 +451,7 @@
                     };
                     isChecked.push(item);
 
-
-
                  // Check if the checkbox is checked
-
             });
             console.log("Checkbox value:", isChecked);
 

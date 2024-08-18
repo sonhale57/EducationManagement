@@ -25,6 +25,7 @@ using Org.BouncyCastle.Utilities.Encoders;
 using System.Web.Helpers;
 using System.Xml.Linq;
 using System.Data.Entity.Validation;
+using System.Data.Entity.Infrastructure;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -707,7 +708,135 @@ namespace SuperbrainManagement.Controllers
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
-        public ActionResult GetDataCombobox(int? IdProgram,int? IdCourse,int? type)
+        public ActionResult GetDataCombobox(int? IdProgram, int? type)
+        {
+            int idBranch = int.Parse(CheckUsers.idBranch());
+            var strcour = "";
+            var strpro = "";
+            var strpromotion = "";
+            string sqlquery = "";
+            List<Program> programs= Connect.Select<Program>("SELECT * FROM Program where enable='1'");
+            string seleted = "";
+            foreach (var pro in programs)
+            {
+                if (pro.Id == IdProgram)
+                {
+                    seleted = " selected";
+                }
+                else
+                {
+                    seleted = "";
+                }
+                strpro += "<option value='" + pro.Id + "' data-name='" + pro.Name + "'"+seleted+">" + pro.Name + "</option>";
+            }
+            List<Promotion> promotions = Connect.Select<Promotion>("Select * from Promotion where idBranch='"+idBranch+"' and todate>getdate() and active='1'");
+            if (promotions.Count > 0)
+            {
+                foreach (var promotion in promotions)
+                {
+                    
+                    strpromotion += "<option value='" + string.Format("{0:N0}", promotion.Value) + "' data-name='" + promotion.Name + "'>" + promotion.Name + "</option>";
+                }
+            }
+            else
+            {
+                strpromotion += "<option value='0' data-name='--'>--</option>";
+            }
+            if (type == 1)
+            {
+                if (IdProgram == 0)
+                {
+                    sqlquery = " and c.IdProgram='" + programs[0].Id + "'";
+                }
+                else
+                {
+                    sqlquery = " and c.IdProgram='" + IdProgram + "'";
+                }
+            }
+            else
+            {
+
+            }
+            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "select c.Id,c.Code,c.Name,cb.PriceCourse,cb.DiscountPrice,cb.StatusDiscount" +
+                                " from Course c join CourseBranch cb on c.id = cb.IdCourse" +
+                                " where cb.IdBranch = '" + idBranch + "'" + sqlquery + " order by c.DisplayOrder";
+
+                SqlCommand command = new SqlCommand(query, connection);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    if (!reader.HasRows)
+                    {
+                        strcour += "<option value='0' data-name='0'>Không có khóa học</option>";
+                    }
+                    else
+                    {
+                        strcour += "<option value='" + reader["Id"] + "' data-name='" + reader["Name"] + "'>" + reader["Name"] + "</option>";
+                    }
+                }
+                reader.Close();
+            }
+            var item = new { 
+                strcour,
+                strpro,
+                strpromotion,
+                type=type
+            };
+            return Json(item,JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult GetInfoCourse(int IdCourse)
+        {
+            int idBranch = int.Parse(CheckUsers.idBranch());
+            string priceCourse = "";
+            string strtable = "";
+            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "select c.Id,c.Code,c.Name,cb.PriceCourse,cb.DiscountPrice,cb.StatusDiscount" +
+                                " from Course c join CourseBranch cb on c.id = cb.IdCourse" +
+                                " where cb.IdBranch = '" + idBranch + "' and c.Id=" + IdCourse + " order by c.DisplayOrder";
+
+                string querykho = "select p.Id,p.Name,p.Unit,p.Price,pc.Amount" +
+                                " from ProductCourse pc " +
+                                " join Product p on p.id=pc.IdProduct" +
+                                " where pc.IdCourse=" + IdCourse;
+
+                SqlCommand command = new SqlCommand(query, connection);
+                SqlCommand commandkho = new SqlCommand(querykho, connection);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                SqlDataReader readerkho = commandkho.ExecuteReader();
+                while (reader.Read())
+                {
+                    double amount = Double.Parse(reader["PriceCourse"].ToString(), 0);
+                    priceCourse = string.Format("{0:N0}", amount);
+                }
+
+                while (readerkho.Read())
+                {
+                    double dongia = Double.Parse(readerkho["Price"].ToString(), 0);
+                    strtable += "<tr>"
+                        + "<td class='text-center'></td>"
+                        + "<td>" + readerkho["Name"] + "</td>"
+                        + "<td class='text-center'>" + readerkho["Unit"].ToString() + "</td>"
+                        + "<td class='text-end'>" + string.Format("{0:N0}", dongia) + "</td>"
+                        + "</tr>";
+                }
+                readerkho.Close();
+                reader.Close();
+            }
+            var item = new
+            {
+                priceCourse,
+                strtable
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult GetDataComboboxx(int? IdProgram,int? IdCourse,int? type)
         {
             int idBranch = int.Parse(CheckUsers.idBranch());
             var item = new
@@ -736,12 +865,12 @@ namespace SuperbrainManagement.Controllers
             }
             else if(IdProgram != 0 && type == 1)
             {
-           
+
                     // Nếu có IdProgram được chọn, lấy danh sách khóa học của chương trình tương ứng
                     List<Course> courses = Connect.Select<Course>("SELECT * FROM Course WHERE IdProgram = '" + IdProgram + "'");
                     priceCourse = Convert.ToInt32(courses[0].Price);
                     item.courses.AddRange(courses);
-                
+
             
             }else if (type == 2) 
             {
@@ -766,6 +895,7 @@ namespace SuperbrainManagement.Controllers
             {
                 strcour += "<option value='" + course.Id + "' data-name='" + course.Name + "'>" + course.Name + "</option>";
             }
+
             var strpromotion = "";
             foreach(var promotion in promotions)
             {
@@ -795,8 +925,6 @@ namespace SuperbrainManagement.Controllers
 
             return Json(strcombobox, JsonRequestBehavior.AllowGet);
         }
-
-
 
         // GET: Students/Details/5
         public ActionResult Details(int? id)
@@ -888,7 +1016,8 @@ namespace SuperbrainManagement.Controllers
             return View(student);
         }
         public string Get_usernameStudent(string Name,string Phone) {
-            string username = Name + Phone;
+            ConvertText convi = new ConvertText();
+            string username = convi.fixtex(Name) + Phone;
             var student  = db.Students.SingleOrDefault(x=>x.Username== username);
             var st = db.Students.Where(x=>x.Username.Contains(username)).Count();
             if(student == null)
