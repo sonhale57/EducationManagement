@@ -26,6 +26,7 @@ using System.Web.Helpers;
 using System.Xml.Linq;
 using System.Data.Entity.Validation;
 using System.Data.Entity.Infrastructure;
+using System.Transactions;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -167,9 +168,10 @@ namespace SuperbrainManagement.Controllers
                 return Json(new { success = false, message = "Item not found" });
             }
         }
-        public string GenerateCode()
+        public string GenerateCode(int IdBranch)
         {
-            string prefix = "DK_HQ";
+            string code=db.Branches.Find(IdBranch).Code;
+            string prefix = "DK_"+code;
 
             // Generate a random number
             Random random = new Random();
@@ -195,18 +197,35 @@ namespace SuperbrainManagement.Controllers
             ViewBag.IdRegistration = idRegistration;
             return View();
         }
-
+        public decimal Check_paymentRegistration(int IdRegistration) {
+            decimal tongthanhtoan = 0;
+            var trans = db.Transactions.Where(x => x.IdRegistration ==IdRegistration);
+            if (trans.Count() > 0) {
+                foreach(var item in trans)
+                {
+                    tongthanhtoan +=(decimal)item.TotalAmount;
+                }
+            }
+            else
+            {
+                tongthanhtoan = 0;
+            }
+            return tongthanhtoan;
+        }
         public ActionResult getData(string IdRegistration)
         {
-            DataTable dataTableCourse = Connect.SelectAll("SELECT cour.Name AS NameCourse, rescourse.IdCourse, res.Id, rescourse.Price, pro.Name AS NameProgram, res.Amount, rescourse.TotalAmount, res.Code, res.DateCreate, res.Discount FROM Registration res INNER JOIN RegistrationCourse rescourse ON rescourse.IdRegistration = res.Id INNER JOIN Course cour ON cour.Id = rescourse.IdCourse INNER JOIN Program pro ON pro.Id = cour.IdProgram WHERE res.Id = '" + IdRegistration + "'");
+            DataTable dataTableCourse = Connect.SelectAll("SELECT cour.Name AS NameCourse, rescourse.IdCourse, res.Id, rescourse.Price, pro.Name AS NameProgram, res.Amount, rescourse.TotalAmount, res.Code, res.DateCreate, rescourse.Discount FROM Registration res INNER JOIN RegistrationCourse rescourse ON rescourse.IdRegistration = res.Id INNER JOIN Course cour ON cour.Id = rescourse.IdCourse INNER JOIN Program pro ON pro.Id = cour.IdProgram WHERE res.Id = '" + IdRegistration + "'");
             DataTable dataTableProduct = Connect.SelectAll("SELECT resproduct.Discount,pro.Name, resproduct.Price, resproduct.TotalAmount, res.Id, resproduct.IdProduct FROM Registration res INNER JOIN RegistrationProduct resproduct ON res.Id = resproduct.IdRegistration INNER JOIN Product pro ON pro.Id = resproduct.IdProduct WHERE res.Id = '" + IdRegistration + "'");
             DataTable dataTableOther = Connect.SelectAll("select revenue.Name,revenue.Price,revenue.Discount,other.Amount,other.TotalAmount,res.Id,other.IdReference from Registration res inner join RegistrationOther other on other.IdRegistration = res.Id inner join RevenueReference revenue on revenue.Id = other.IdReference where other.IdRegistration = '"+IdRegistration+"'");
             Registration registration = Connect.SelectSingle<Registration>("SELECT * FROM Registration WHERE Id = '" + IdRegistration + "'");
 
             var data = new StringBuilder();
-            var totalAmount = 0;
             var i = 0;
-
+            var tongtien = 0;
+            var chietkhau = 0;
+            var tongthanhtoan = 0;
+            decimal dathanhtoan = 0;
+            decimal conlai = 0;
             List<DataRow> allRows = new List<DataRow>();
             allRows.AddRange(dataTableCourse.AsEnumerable());
             allRows.AddRange(dataTableProduct.AsEnumerable());
@@ -215,68 +234,77 @@ namespace SuperbrainManagement.Controllers
             foreach (DataRow row in allRows)
             {
                 i++;
-                string amountString = "";
-                string discount = "";
+                string dongia = "";
+                string giam = "";
+                string thanhtien = "";
                 string name = "";
-                string total = "";
                 var idobject = 0;
+                int type = 0;
                 if (row.Table == dataTableCourse)
                 {
-                    amountString = string.Format("{0:N0} đ", row["TotalAmount"]);
-                    discount = string.Format("{0:N0} đ", row["Discount"]);
-                    name = row["NameProgram"].ToString() + "<hr>" + row["NameCourse"].ToString();
+                    type = 1;
+                    dongia = string.Format("{0:N0}", row["Price"]);
+                    giam = string.Format("{0:N0}", row["Discount"]);
+                    thanhtien = string.Format("{0:N0}", row["TotalAmount"]);
+
+                    tongtien += Convert.ToInt32(row["Price"]);
+                    chietkhau += Convert.ToInt32(row["Discount"]);
+
                     idobject = Convert.ToInt32(row["IdCourse"]);
-                    total = amountString;
+                    name = row["NameProgram"].ToString() + "<hr>" + row["NameCourse"].ToString();
                 }
                 else if (row.Table == dataTableProduct)
                 {
-                    amountString = string.Format("{0:N0} đ", row["Price"]);
-                    discount = string.Format("{0:N0} đ", row["Discount"]);
-                    total = string.Format("{0:N0} đ", row["TotalAmount"]);
+                    type = 2;
+                    dongia = string.Format("{0:N0}", row["Price"]);
+                    giam = string.Format("{0:N0}", row["Discount"]);
+                    thanhtien = string.Format("{0:N0}", row["TotalAmount"]);
+
+                    tongtien += Convert.ToInt32(row["Price"]);
+                    chietkhau += Convert.ToInt32(row["Discount"]);
+
                     idobject = Convert.ToInt32(row["IdProduct"]);
                     name = row["Name"].ToString();
                 }else if(row.Table == dataTableOther)
                 {
-                    amountString = string.Format("{0:N0} đ", row["Price"]);
-                    discount = string.Format("{0:N0} đ", row["Discount"]);
-                    total = string.Format("{0:N0} đ", row["TotalAmount"]);
+                    type = 3;
+                    dongia = string.Format("{0:N0}", row["Price"]);
+                    giam = string.Format("{0:N0}", row["Discount"]);
+                    thanhtien = string.Format("{0:N0}", row["TotalAmount"]);
+
+                    tongtien += Convert.ToInt32(row["Price"]);
+                    chietkhau += Convert.ToInt32(row["Discount"]);
+
                     idobject = Convert.ToInt32(row["IdReference"]);
                     name = row["Name"].ToString();
                 }
-
                 var newRow = "<tr>" +
-                    "<td style='text-align:center;'>" + i + "</td>" +
-                    "<td style='text-align:left;'>" + name + "</td>" +
-                    "<td style='text-align:center;'>1</td>" +
-                    "<td style='text-align:right;'>" + amountString + "</td>" +
-                    "<td style='text-align:center;'>" + discount + "</td>" +
-                    "<td style='text-align:right;'>" + total + "</td>" +
-                    "<td style='text-align:center;'>" +
-                    "<a href='#' class='btn btn-sm btn-danger ti-trash' onclick=\"deleteitem('" + idobject + "','" + row["Id"] + "')\" data-courseid='" + idobject + "' data-registrationid='" + row["Id"] + "'>" +
-                    "<i class='bx bx-trash-alt font-size-18'></i>" +
+                    "<td class='text-center align-content-center'>" + i + "</td>" +
+                    "<td class='text-start align-content-center'>" + name + "</td>" +
+                    "<td class='text-end align-content-center'>" + dongia + "</td>" +
+                    "<td class='text-center align-content-center'>1</td>" +
+                    "<td class='text-end align-content-center'>" +  giam + "</td>" +
+                    "<td class='text-end align-content-center'>" + thanhtien + "</td>" +
+                    "<td class='text-center align-content-center'>" +
+                    "<a href='javascript:Delete_item(" + IdRegistration+","+idobject+","+type+")' class='text-danger'>" +
+                    "<i class='ti ti-trash font-size-18'></i>" +
                     "</a>" +
                     "</td>" +
                     "</tr>";
 
                 data.Append(newRow);
-
-                if (row.Table == dataTableCourse)
-                {
-                    totalAmount += Convert.ToInt32(row["TotalAmount"]);
-                }
-                else if (row.Table == dataTableProduct)
-                {
-                    totalAmount += Convert.ToInt32(row["TotalAmount"]);
-                }else if(row.Table == dataTableOther)
-                {
-                    totalAmount += Convert.ToInt32(row["TotalAmount"]);
-                }
             }
-
+            tongthanhtoan = tongtien - chietkhau;
+            dathanhtoan = Check_paymentRegistration(Convert.ToInt32(IdRegistration));
+            conlai = tongthanhtoan - dathanhtoan;
             var result = new
             {
                 datalist = data.ToString(),
-                TotalAmount = totalAmount,
+                Tongtien = string.Format("{0:N0}", tongtien),
+                Chietkhau = string.Format("{0:N0}", chietkhau),
+                Tongthanhtoan = string.Format("{0:N0}", tongthanhtoan),
+                Dathanhtoan = string.Format("{0:N0}", dathanhtoan),
+                Conlai = string.Format("{0:N0}", conlai),
                 DateCreate = Convert.ToDateTime(registration.DateCreate).ToString("dd/MM/yyyy"),
                 idRegistrations = registration.Id,
                 Code = registration.Code
@@ -290,133 +318,201 @@ namespace SuperbrainManagement.Controllers
            public int isChecked {  get; set; }
            public int idpro {  get; set; }
         }
-    
-        [HttpPost] 
-        public ActionResult SaveRegistration(int? IdRegistration,int type, int? IdObject,int? price,int? totalamount,int? amount,string Description,int? Discount)
+
+        [HttpPost]
+        public ActionResult SaveRegistration(int? IdRegistration, int type, int? IdObject, decimal? price, decimal? totalamount, int? amount, string Description, int? Discount)
         {
-            string iduser = CheckUsers.iduser();
-            Student student = Session["infoUser"] as Student;
-
-            Registration registration = new Registration();
-            registration = Connect.SelectSingle<Registration>("select * from Registration where Id='" + IdRegistration + "'");
-             // Create new Registration
-            if(registration == null)
+            using (var scope = new TransactionScope())
             {
-                Registration NewRegistration = new Registration();
-                NewRegistration.IdStudent = student.Id;
-                NewRegistration.IdUser = Convert.ToInt32(iduser);
-                NewRegistration.Amount = amount;
-                NewRegistration.Code = GenerateCode();
-                NewRegistration.TotalAmount = totalamount;
-                NewRegistration.DateCreate = DateTime.Now;
-                NewRegistration.Status = true;
-                NewRegistration.Enable = true;
-                NewRegistration.Description = Description;
-                NewRegistration.IdBranch = student.IdBranch;
-                db.Registrations.Add(NewRegistration);
-                db.SaveChanges();
-                registration = NewRegistration;
-                Session["IdRegistration"] = registration.Id;
-            }
-            //Check type luồng Product,Course,Order
-            switch (type)
-            {
-                case 1:
-                    RegistrationProduct registrationProduct = Connect.SelectSingle<RegistrationProduct>("select * from RegistrationProduct where IdProduct = '"+IdObject+"'  and IdRegistration = '"+registration.Id+"'");
-                    if(registrationProduct != null)
+                try
+                {
+                    string iduser = CheckUsers.iduser();
+                    Student student = Session["infoUser"] as Student;
+                    int IdBranch = Convert.ToInt32(student.IdBranch);
+                    Registration registration = Connect.SelectSingle<Registration>("select * from Registration where Id='" + IdRegistration + "'");
+                    // Create new Registration
+                    if (registration == null)
                     {
-                        return Json(null);
+                        Registration NewRegistration = new Registration
+                        {
+                            IdStudent = student.Id,
+                            IdUser = Convert.ToInt32(iduser),
+                            Amount = amount,
+                            Code = GenerateCode(IdBranch),
+                            TotalAmount = totalamount,
+                            DateCreate = DateTime.Now,
+                            Status = true,
+                            Enable = true,
+                            Description = Description,
+                            IdBranch = student.IdBranch
+                        };
+                        db.Registrations.Add(NewRegistration);
+                        db.SaveChanges();
+                        registration = NewRegistration;
+                        Session["IdRegistration"] = registration.Id;
+                    }
 
-                    }else
+                    // Check type luồng Product, Course, Order
+                    switch (type)
                     {
-                        RegistrationProduct NewregistrationProduct = new RegistrationProduct();
-                        NewregistrationProduct.IdRegistration = registration.Id;
-                        NewregistrationProduct.IdProduct = Convert.ToInt32(IdObject);
-                        NewregistrationProduct.Status = true;
-                        NewregistrationProduct.Price = price;
-                        NewregistrationProduct.Amount = amount;
-                        NewregistrationProduct.TotalAmount = totalamount;
-                        NewregistrationProduct.Discount = Discount;
-                        db.RegistrationProducts.Add(NewregistrationProduct);
-                        db.SaveChanges();
-                        return Json(NewregistrationProduct.IdRegistration);
+                        case 1:
+                            RegistrationProduct registrationProduct = Connect.SelectSingle<RegistrationProduct>("select * from RegistrationProduct where IdProduct = '" + IdObject + "' and IdRegistration = '" + registration.Id + "'");
+                            if (registrationProduct != null)
+                            {
+                                return Json(null);
+                            }
+                            else
+                            {
+                                RegistrationProduct NewregistrationProduct = new RegistrationProduct
+                                {
+                                    IdRegistration = registration.Id,
+                                    IdProduct = Convert.ToInt32(IdObject),
+                                    Status = false,
+                                    Price = price,
+                                    Amount = amount,
+                                    TotalAmount = totalamount,
+                                    Discount = Discount
+                                };
+                                db.RegistrationProducts.Add(NewregistrationProduct);
+                                db.SaveChanges();
+                                scope.Complete(); // Commit transaction
+                                return Json(NewregistrationProduct.IdRegistration);
+                            }
+                        case 2:
+                            RegistrationCourse registrationCourse = Connect.SelectSingle<RegistrationCourse>("select * from RegistrationCourse where IdRegistration = '" + registration.Id + "' AND IdCourse = '" + IdObject + "'");
+                            if (registrationCourse != null)
+                            {
+                                return Json(null);
+                            }
+                            else
+                            {
+                                var listproduct = db.ProductCourses.Where(x => x.IdCourse == IdObject);
+                                RegistrationCourse NewregistrationCourse = new RegistrationCourse
+                                {
+                                    Status = false,
+                                    Price = price,
+                                    Amount = amount,
+                                    TotalAmount = totalamount,
+                                    IdRegistration = registration.Id,
+                                    IdCourse = Convert.ToInt32(IdObject),
+                                    Discount = Discount,
+                                    StatusExchangeCourse = false,
+                                    StatusExtend = false,
+                                    StatusJoinClass = false,
+                                    StatusReserve = false
+                                };
+                                db.RegistrationCourses.Add(NewregistrationCourse);
+                                db.SaveChanges();
+
+                                if (listproduct.Any())
+                                {
+                                    foreach (var p in listproduct)
+                                    {
+                                        RegistrationProduct NewregistrationProduct = new RegistrationProduct
+                                        {
+                                            IdRegistration = registration.Id,
+                                            IdProduct = Convert.ToInt32(p.IdProduct),
+                                            Status = false,
+                                            Price = p.Product.Price,
+                                            Amount = p.Amount,
+                                            TotalAmount = p.Product.Price,
+                                            Discount = 0
+                                        };
+                                        db.RegistrationProducts.Add(NewregistrationProduct);
+                                        db.SaveChanges();
+                                    }
+                                }
+
+                                scope.Complete(); // Commit transaction
+                                return Json(NewregistrationCourse.IdRegistration);
+                            }
+                        case 3:
+                            RegistrationOther registrationOther = Connect.SelectSingle<RegistrationOther>("select * from RegistrationOther where IdRegistration = '" + registration.Id + "' and IdReference = '" + IdObject + "'");
+                            if (registrationOther != null)
+                            {
+                                return Json(null);
+                            }
+                            else
+                            {
+                                RegistrationOther NewRegistrationOther = new RegistrationOther
+                                {
+                                    IdRegistration = registration.Id,
+                                    IdReference = Convert.ToInt32(IdObject),
+                                    Discount = Discount,
+                                    Status = "0",
+                                    Price = price,
+                                    Amount = amount,
+                                    TotalAmount = totalamount
+                                };
+                                db.RegistrationOthers.Add(NewRegistrationOther);
+                                db.SaveChanges();
+                                scope.Complete(); // Commit transaction
+                                return Json(NewRegistrationOther.IdRegistration);
+                            }
+                        default:
+                            return Json(null);
                     }
-                case 2:
-                    RegistrationCourse registrationCourse = Connect.SelectSingle<RegistrationCourse>("select * from RegistrationCourse  where IdRegistration = '"+registration.Id+"'  AND IdCourse = '"+IdObject+"'"); 
-                    if(registrationCourse != null)
-                    {
-                        return Json(null);
-                    }else
-                    {
-                        RegistrationCourse NewregistrationCourse = new RegistrationCourse();
-                        NewregistrationCourse.Status = true;
-                        NewregistrationCourse.Price = price;
-                        NewregistrationCourse.Amount = amount;
-                        NewregistrationCourse.TotalAmount = totalamount;
-                        NewregistrationCourse.IdRegistration = registration.Id;
-                        NewregistrationCourse.IdCourse  = Convert.ToInt32(IdObject);
-                        NewregistrationCourse.Discount = Discount;
-                        NewregistrationCourse.StatusExchangeCourse = false;
-                        NewregistrationCourse.StatusExtend = false;
-                        NewregistrationCourse.StatusJoinClass=false;
-                        NewregistrationCourse.StatusReserve=false;
-                        db.RegistrationCourses.Add(NewregistrationCourse);
-                        db.SaveChanges();
-                        return Json(NewregistrationCourse.IdRegistration);
-                    }
-                case 3:
-                    RegistrationOther RegistrationOther = Connect.SelectSingle<RegistrationOther>("select * from RegistrationOther where IdRegistration = '"+registration.Id+"' and IdReference = '"+IdObject+"'");
-                    if(RegistrationOther != null)
-                    {
-                        return Json(null);
-                    }else
-                    {
-                        RegistrationOther NewRegistrationOther = new RegistrationOther();
-                        NewRegistrationOther.IdRegistration = registration.Id;
-                        NewRegistrationOther.IdReference = Convert.ToInt32(IdObject);
-                        NewRegistrationOther.Discount = Discount;
-                        NewRegistrationOther.Status = "1";
-                        NewRegistrationOther.Price = price;
-                        NewRegistrationOther.Amount = amount;
-                        NewRegistrationOther.TotalAmount = totalamount;
-                        db.RegistrationOthers.Add(NewRegistrationOther);
-                        db.SaveChanges();
-                        return Json(NewRegistrationOther.IdRegistration);
-                    }
-                default:
+                }
+                catch (Exception)
+                {
+                    // Handle exception if needed
                     return Json(null);
+                }
             }
-
         }
-        public ActionResult getDataComboxOther(int? IdOther)
+        [HttpPost]
+        public ActionResult Submit_deleteItem(int IdRegistration, int Id, int Type)
         {
-            List<RevenueReference> revenueReferences = Connect.Select<RevenueReference>("select * from RevenueReference");
-
-            var str = "";
-            var totalamount = 0;
-            if (IdOther != 0)
+            string status, message;
+            if (Type == 1)
             {
-                RevenueReference product = Connect.SelectSingle<RevenueReference>("select * from RevenueReference where Id = '" + IdOther + "'");
-                totalamount = Convert.ToInt32(product.Price);
-                
+                //Course
+                var pc = db.RegistrationCourses.SingleOrDefault(x => x.IdCourse == Id && x.IdRegistration == IdRegistration);
+                if (pc == null)
+                {
+                    status = "error";
+                    message = "Khóa học này đã được xóa khỏi phiếu!";
+                }
+                db.RegistrationCourses.Remove(pc);
+                db.SaveChanges();
+                status = "ok";
+                message = "Đã xóa khóa thành công khỏi phiếu!";
+            }
+            else if (Type == 2)
+            {
+                //Product
+                var pc = db.RegistrationProducts.SingleOrDefault(x => x.IdProduct == Id && x.IdRegistration == IdRegistration);
+                if (pc == null)
+                {
+                    status = "error";
+                    message = "Vật tư này đã được xóa khỏi phiếu!";
+                }
+                db.RegistrationProducts.Remove(pc);
+                db.SaveChanges();
+                status = "ok";
+                message = "Đã xóa vật tư thành công khỏi phiếu!";
             }
             else
             {
-                foreach (var items in revenueReferences)
+                //Order
+                var pc = db.RegistrationOthers.SingleOrDefault(x => x.IdReference == Id && x.IdRegistration == IdRegistration);
+                if (pc == null)
                 {
-                    str += "<option value='" + items.Id + "' data-name='" + items.Name + "'>" + items.Name + "</option>";
+                    status = "error";
+                    message = "Khoản thu đã được xóa khỏi phiếu!";
                 }
-                totalamount = Convert.ToInt32(revenueReferences[0].Price);
+                db.RegistrationOthers.Remove(pc);
+                db.SaveChanges();
+                status = "ok";
+                message = "Đã xóa khoản thu thành công khỏi phiếu!";
             }
-
             var item = new
             {
-                str,
-                totalamount
+                status,
+                message
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
-
         public ActionResult Load_lophoc(int? idStudent)
         {
             string str = "";
@@ -520,8 +616,6 @@ namespace SuperbrainManagement.Controllers
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
-       
-
         public ActionResult Submit_xetlop(int idRegistration,int idCourse,int idStudent,int idClass,DateTime fromdate,DateTime todate)
         {
             int idBranch = int.Parse(CheckUsers.idBranch());
@@ -558,7 +652,6 @@ namespace SuperbrainManagement.Controllers
             var item = new { status="ok"};
             return Json(item,JsonRequestBehavior.AllowGet);
         }
-
         public ActionResult Load_tuvan(int idStudent)
         {
             string str = "";int count = 0;
@@ -675,40 +768,54 @@ namespace SuperbrainManagement.Controllers
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
-        public ActionResult getDataComboxProduct(int? idproduct)
+        public ActionResult getDataComboxOther()
         {
-            List<Product> products = Connect.Select<Product>("select * from Product");
+            int idBranch = int.Parse(CheckUsers.idBranch());
+            List<RevenueReference> revenueReferences = Connect.Select<RevenueReference>("select * from RevenueReference Where IdBranch='"+idBranch+"'");
             var str = "";
-            var number = 0;
-            var totalamount = 0;
-            if (idproduct != 0)
+            foreach (var items in revenueReferences)
             {
-                Product product = Connect.SelectSingle<Product>("select * from Product where Id = '" + idproduct + "'");
-                totalamount = Convert.ToInt32(product.Price);
-                number = Convert.ToInt32(product.NumberOfPackage);
-
+                var dongia = items.Price;
+                var dongiagiam = items.Discount;
+                var statusdiscount = items.StatusDiscount;
+                str += "<option value='" + items.Id + "' data-name='" + items.Name + "' data-dongia='"+(statusdiscount==true?string.Format("{0:N0}",dongiagiam):string.Format("{0:N0}",dongia))+"'>" + items.Name + "</option>";
             }
-            else
-            {
-                foreach (var items in products)
-                {
-
-                    str += "<option value='" + items.Id + "' data-name='" + items.Name + "' data-inventory='" + ProductReceiptionDetailsController.GetInventory(items.Id) + "'>" + items.Name + "</option>";
-                }
-
-                totalamount = Convert.ToInt32(products[0].Price);
-                number = Convert.ToInt32(products[0].NumberOfPackage);
-            }
-
             var item = new
             {
-                str,
-                totalamount,
-                number
+                str
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
-        public ActionResult GetDataCombobox(int? IdProgram, int? type)
+        public ActionResult getDataComboxProduct()
+        {
+            var str = "";
+            int idBranch = int.Parse(CheckUsers.idBranch());
+            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "SELECT p.Id,p.Name,p.Image,p.Unit,p.Price,p.Code,p.Quota,p.IsFixed,COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '1' AND re.IdBranch = " + idBranch + "), 0) -"
+                                        + " COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '0' AND re.IdBranch = " + idBranch + "), 0) AS Tonkho"
+                                        + " FROM product p"
+                                        + " where p.enable=1 and p.isCore=1 and p.Active=1";
+
+                SqlCommand command = new SqlCommand(query, connection);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                     int tonkho = Convert.ToInt32(reader["tonkho"]);
+                     double dongia = Convert.ToDouble(reader["Price"]);
+                    str += "<option value='" + reader["Id"] + "' data-name='" + reader["Name"] + "' data-tonkho='"+tonkho+"' data-dongia='"+string.Format("{0:N0}",dongia)+"' data-isfixed=' "+ reader["IsFixed"] +" '>" + reader["Name"] + "</option>";
+                }
+                reader.Close();
+            }
+            var item = new
+            {
+                str
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult GetDataCombobox(int? IdProgram)
         {
             int idBranch = int.Parse(CheckUsers.idBranch());
             var strcour = "";
@@ -742,21 +849,15 @@ namespace SuperbrainManagement.Controllers
             {
                 strpromotion += "<option value='0' data-name='--'>--</option>";
             }
-            if (type == 1)
+            if (IdProgram == 0)
             {
-                if (IdProgram == 0)
-                {
-                    sqlquery = " and c.IdProgram='" + programs[0].Id + "'";
-                }
-                else
-                {
-                    sqlquery = " and c.IdProgram='" + IdProgram + "'";
-                }
+                sqlquery = " and c.IdProgram='" + programs[0].Id + "'";
             }
             else
             {
-
+                sqlquery = " and c.IdProgram='" + IdProgram + "'";
             }
+            
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -783,8 +884,7 @@ namespace SuperbrainManagement.Controllers
             var item = new { 
                 strcour,
                 strpro,
-                strpromotion,
-                type=type
+                strpromotion
             };
             return Json(item,JsonRequestBehavior.AllowGet);
         }
@@ -836,96 +936,6 @@ namespace SuperbrainManagement.Controllers
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
-        public ActionResult GetDataComboboxx(int? IdProgram,int? IdCourse,int? type)
-        {
-            int idBranch = int.Parse(CheckUsers.idBranch());
-            var item = new
-            {
-                courses = new List<Course>(),
-                programs = new List<Program>()
-            };
-
-            // Lấy danh sách tất cả các chương trình
-            List<Program> programs = Connect.Select<Program>("SELECT * FROM Program");
-            List<Promotion> promotions = Connect.Select<Promotion>("Select * from Promotion where idBranch='"+idBranch+"' and todate>getdate() and active='1'");
-            List<Product> products = Connect.Select<Product>("select * from Product");
-            var priceCourse = 0;
-            // Nếu không có IdProgram được chọn, lấy danh sách khóa học của chương trình đầu tiên
-            if (IdProgram == 0 && type == 1)
-            {
-                // Lấy danh sách khóa học của chương trình đầu tiên
-                    if (programs.Count > 0)
-                    {
-                        List<Course> courses = Connect.Select<Course>("SELECT * FROM Course WHERE IdProgram = '" + programs[0].Id + "'");
-                        priceCourse = Convert.ToInt32(courses[0].Price);
-                        item.programs.AddRange(programs);
-                        item.courses.AddRange(courses);
-                    }
-                
-            }
-            else if(IdProgram != 0 && type == 1)
-            {
-
-                    // Nếu có IdProgram được chọn, lấy danh sách khóa học của chương trình tương ứng
-                    List<Course> courses = Connect.Select<Course>("SELECT * FROM Course WHERE IdProgram = '" + IdProgram + "'");
-                    priceCourse = Convert.ToInt32(courses[0].Price);
-                    item.courses.AddRange(courses);
-
-            
-            }else if (type == 2) 
-            {
-                if (IdCourse != 0)
-                {
-                    Course course = Connect.SelectSingle<Course>("select * from Course where Id = '" + IdCourse + "'");
-                    priceCourse = Convert.ToInt32(course.Price);
-                }
-            }
-          
-            // Tạo chuỗi HTML cho các dropdown chương trình
-            var strpro = "";
-            if (item.programs.Count > 0)
-            {
-                foreach (var pro in item.programs)
-                {
-                    strpro += "<option value='" + pro.Id + "' data-name='" + pro.Name + "'>" + pro.Name + "</option>";
-                }
-            }
-            var strcour = "";
-            foreach (var course in item.courses)
-            {
-                strcour += "<option value='" + course.Id + "' data-name='" + course.Name + "'>" + course.Name + "</option>";
-            }
-
-            var strpromotion = "";
-            foreach(var promotion in promotions)
-            {
-                strpromotion += "<option value='" + promotion.Id + "' data-name='" + promotion.Name + "'>" + promotion.Name + "</option>";
-            }
-            var strTable = "";
-            foreach (var itemtable in products)
-            {
-                strTable += "<tr class='listproduct'>"
-                      + "<th><input class='idproduct' onclick='updateCheckboxValue(this)'  type='checkbox' value=''/><input class='idpro' value='"+itemtable.Id+"' hidden/></th>"
-                    + "<th>" + itemtable.Name + "</th>"
-                     + "<th>" + itemtable.Price + "</th>"
-                       + "<th>" + itemtable.Price + "</th>"
-                    + "</tr>";
-            }
-            // Tạo đối tượng để chứa chuỗi HTML của dropdown chương trình và khóa học
-            var strcombobox = new
-            {
-                strpro,
-                strcour,
-                strTable,
-                strpromotion,
-                priceCourse =  priceCourse,
-                type = type
-                // Đây là để giữ chỗ, bạn có thể thêm logic để tạo chuỗi HTML cho dropdown khóa học tương ứng
-            };
-
-            return Json(strcombobox, JsonRequestBehavior.AllowGet);
-        }
-
         // GET: Students/Details/5
         public ActionResult Details(int? id)
         {
@@ -1042,6 +1052,67 @@ namespace SuperbrainManagement.Controllers
             if (student != null) return "Đã tồn tại học viên này, vui lòng kiểm tra trong danh sách tiềm năng hoặc danh sách đã xóa!";
             return "ok";
         }
+
+        public ActionResult Load_paymentInfo(int IdRegistration)
+        {
+            decimal tongtien = 0;
+            decimal dathanhtoan = 0;
+            decimal conlai = 0;
+            var rc = db.RegistrationCourses.Where(x=>x.IdRegistration==IdRegistration);
+            var rp = db.RegistrationProducts.Where (x=>x.IdRegistration == IdRegistration);
+            var ro = db.RegistrationOthers.Where(x => x.IdRegistration == IdRegistration);
+            var registration = db.Registrations.Find(IdRegistration);
+            int? IdStudent = registration.IdStudent;
+            var voucher = db.StudentVouchers.Where(x=>x.IdStudent==IdStudent);
+            decimal? valueVoucher = 0;
+                decimal? thu = 0, chi = 0;
+            foreach(var i in rc)
+            {
+                tongtien += (decimal)i.TotalAmount;
+            }
+            foreach (var i in rp)
+            {
+                tongtien += (decimal)i.TotalAmount;
+            }
+            foreach (var i in ro)
+            {
+                tongtien += (decimal)i.TotalAmount;
+            }
+            foreach(var i in voucher)
+            {
+                if (i.Type == true)
+                {
+                    thu += i.Voucher;
+                }
+                else
+                {
+                    chi += i.Voucher;
+                }
+            }
+            valueVoucher = thu - chi;
+            dathanhtoan = Check_paymentRegistration(IdRegistration);
+            conlai = tongtien - dathanhtoan;
+
+            var item = new { 
+                Conlai=string.Format("{0:N0}",conlai) ,
+                Code= registration.Code,
+                Name= registration.Student.Name,
+                valueVoucher = string.Format("{0:N0}", valueVoucher)
+            };
+            return Json(item,JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Submit_paymentRegistration(int IdRegistration,decimal Tienthu,decimal Voucher)
+        {
+            string status="", message="";
+            var registration = db.Registrations.Find(IdRegistration);
+            var item = new { 
+                status,
+                message
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+
         // GET: Students/Edit/5
         public ActionResult Edit(int? id)
         {

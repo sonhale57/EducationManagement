@@ -8,6 +8,7 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using SuperbrainManagement.Models;
+using System.Management;
 
 namespace SuperbrainManagement.Controllers.RegistrationStudent
 {
@@ -62,6 +63,39 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
             ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo", revenueReference.IdBranch);
             ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", revenueReference.IdUser);
             return View(revenueReference);
+        }
+        [HttpPost]
+        public async Task<ActionResult> Submit_addRef(string Code, string Name, decimal Price, decimal DiscountPrice, bool StatusDiscount)
+        {
+            int idBranch = int.Parse(CheckUsers.idBranch());
+            string status, message;
+            var refer = db.RevenueReferences.SingleOrDefault(x => x.Code == Code && x.IdBranch==idBranch);
+            if (refer != null)
+            {
+                status = "error";
+                message = "Đã tồn tại mã này!";
+            }
+            else
+            {
+                int IdUser = Convert.ToInt32(CheckUsers.iduser());
+                RevenueReference revenueReference = new RevenueReference()
+                {
+                    Code = Code,
+                    Name = Name,
+                    Price = Price,
+                    DateCreate = DateTime.Now,
+                    IdUser = IdUser,
+                    StatusDiscount = StatusDiscount,
+                    Discount = DiscountPrice,
+                    IdBranch = idBranch
+                };
+                db.RevenueReferences.Add(revenueReference);
+                db.SaveChanges();
+                status = "ok";
+                message = "Đã thêm thành công!";
+            }
+            var item = new { status, message };
+            return Json(item, JsonRequestBehavior.AllowGet);
         }
 
         // GET: RevenueReferences/Edit/5

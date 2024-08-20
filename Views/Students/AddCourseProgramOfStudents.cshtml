@@ -16,8 +16,8 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                         <a class="dropdown-item" href="@Url.Action("RegistrationPrints","Students")"><i class="ti ti-printer"></i> In phiếu đăng ký tổng</a>
-                        <a class="dropdown-item" href="#"><i class="ti ti-printer"></i> In phiếu đăng ký chi tiết</a>
-                        <a class="dropdown-item" href="#"><i class="ti ti-credit-card"></i> Thu tiền</a>
+                        <a class="dropdown-item" href="javascript:PrintDetails()"><i class="ti ti-printer"></i> In phiếu đăng ký chi tiết</a>
+                        <a class="dropdown-item" href="javascript:Payment_registration()"><i class="ti ti-credit-card"></i> Thu tiền</a>
                     </div>
                 </div>
             </th>
@@ -55,66 +55,53 @@
         <th class="text-center">Số lượng</th>
         <th class="text-center">Chiết khấu</th>
         <th class="text-center">Thành tiền</th>
-        <th class="text-center">Thao tác</th>
+        <th class="text-center">.</th>
     </tr>
     <tbody id="dataBody">
     </tbody>
     <tr>
-        <td colspan="5"></td>
-        <td style="text-align:right;">
-            Tổng tiền:
+        <td colspan="5" class="text-end">Tổng tiền:</td>
+        <td class="text-end">
+            <b id="tongtien">0</b>
         </td>
-        <td style="text-align:right;">
-            <b class="total">0</b>
-        </td>
+        <td></td>
     </tr>
     <tr>
-        <td colspan="5"></td>
-        <td style="text-align:right;">
-            Chiết khấu:
+        <td colspan="5" class="text-end">Chiết khấu:</td>
+        <td class="text-end">
+            <b id="chietkhau">0</b>
         </td>
-        <td style="text-align:right;">
-            <b>0</b>
-        </td>
+        <td></td>
     </tr>
     <tr>
-        <td colspan="5"></td>
-        <td style="text-align:right;">
-            Tổng
-            thanh toán:
+        <td colspan="5" class="text-end">Tổng thanh toán:</td>
+        <td class="text-end">
+            <b id="tongthanhtoan">0</b>
         </td>
-        <td style="text-align:right;">
-            <b class="total" id="totalamount">0</b>
-        </td>
+        <td></td>
     </tr>
     <tr>
-        <td colspan="5"></td>
-        <td style="text-align:right;">
-            Đã thanh
-            toán:
+        <td colspan="5" class="text-end">Đã thanh toán:</td>
+        <td class="text-end">
+            <b id="dathanhtoan">0</b>
         </td>
-        <td style="text-align:right;">
-            <b>0</b>
-        </td>
+        <td></td>
     </tr>
     <tr>
-        <td colspan="5"></td>
-        <td style="text-align:right;">
-            Còn
-            lại:
+        <td colspan="5" class="text-end">Còn lại:</td>
+        <td class="text-end">
+            <b id="conlai">0</b>
         </td>
-        <td style="text-align:right;">
-            <b class="total">0</b>
-        </td>
+        <td></td>
     </tr>
 </table>
 <button type="button" class="btn btn-success" onclick="getDataCombobox(0,0,1)" data-bs-toggle="modal" data-bs-target="#exampleModal">
     <i class="ti ti-certificate"></i> Thêm khóa học
 </button>
-<button type="button" class="btn btn-success" onclick="getDataComboboxProduct(0)" data-bs-toggle="modal" data-bs-target="#exampleModalProduct">
+<button type="button" class="btn btn-success" onclick="getDataComboboxProduct()" data-bs-toggle="modal" data-bs-target="#exampleModalProduct">
     <i class="ti ti-shopping-cart"></i> Thêm vật tư
 </button>
-<button type="button" class="btn btn-success" onclick="getDataComboboxOther(0)" data-bs-toggle="modal" data-bs-target="#exampleModalRevenueReferences">
+<button type="button" class="btn btn-success" onclick="getDataComboboxOther()" data-bs-toggle="modal" data-bs-target="#exampleModalRevenueReferences">
     <i class="ti ti-checklist"></i> Thu khác
 </button>
 <!-- Modal -->
@@ -199,14 +186,14 @@
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Vật tư</label>
                     <div class="col-lg-9">
-                        <select class="form-control IdEmployee" name="phonghoc0" id="productSelect" onchange="getDataComboboxProduct(this.value)">
+                        <select class="form-control IdEmployee" name="phonghoc0" id="productSelect" onchange="GetInfoProduct()">
                         </select>
                     </div>
                 </div>
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Đơn giá</label>
                     <div class="col-lg-9">
-                        <input class="form-control" type="text" value="0" id="priceProduct">
+                        <input class="form-control" type="text" value="0" id="priceProduct" onchange="Getvalue_product()">
                     </div>
                 </div>
                 <div class="form-group row mt-2">
@@ -218,7 +205,7 @@
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Chiết khấu</label>
                     <div class="col-lg-9">
-                        <input class="form-control" type="text" value="0" id="discountProduct" readonly>
+                        <input class="form-control" type="text" value="0" id="discountProduct" onchange="Getvalue_product()">
                     </div>
                 </div>
                 <div class="form-group row mt-2">
@@ -245,34 +232,34 @@
             <hr style="width:90%;margin:0 auto;" />
             <div class="modal-body">
                 <div class="form-group row mt-2">
-                    <label class="col-lg-3 col-form-label form-control-label">Tên khoản thu</label>
-                    <div class="col-lg-9">
-                        <select class="form-control IdEmployee" name="phonghoc0" id="OtherSelect" onchange="getDataComboboxOther(this.value)">
+                    <label class="col-lg-3 col-form-label form-control-label mt-3">Tên khoản thu </label>
+                    <div class="col-lg-9  text-end"><a href="javascript:AddReferences()" class="text-success"><i class="ti ti-playlist-add"></i></a>
+                        <select class="form-control IdEmployee" name="phonghoc0" id="OtherSelect" onchange="GetInfoOrther()">
                         </select>
                     </div>
                 </div>
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Đơn giá</label>
                     <div class="col-lg-9">
-                        <input class="form-control" type="email" value="0" id="priceOther">
+                        <input class="form-control" type="text" value="0" id="priceOther">
                     </div>
                 </div>
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Số lượng</label>
                     <div class="col-lg-9">
-                        <input class="form-control" type="email" value="1" id="numerOther" readonly>
+                        <input class="form-control" type="text" value="1" id="numerOther" readonly>
                     </div>
                 </div>
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Chiết khấu</label>
                     <div class="col-lg-9">
-                        <input class="form-control" type="email" value="0" id="discountOther" readonly>
+                        <input class="form-control" type="text" value="0" id="discountOther" onchange="Getvalue_other()">
                     </div>
                 </div>
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Thành tiền</label>
                     <div class="col-lg-9">
-                        <input class="form-control" type="email" value="" id="totalamountOther" readonly>
+                        <input class="form-control" type="text" value="" id="totalamountOther" readonly>
                     </div>
                 </div>
             </div>
@@ -284,83 +271,383 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="exampleModalAddReferences" tabindex="-1" aria-labelledby="exampleModalAddReferencesLabel" aria-hidden="true">
+    <div class="modal-dialog" style="padding-right: -100px;margin-right: 110px;height: 100%;">
+        <div class="modal-content  h-75" style="width: 600px;">
+            <div class="modal-header ">
+                <h5 class="modal-title" id="exampleModalAddReferencesLabel">Tạo thêm khoản thu khác</h5>
+            </div>
+            <hr style="width:90%;margin:0 auto;" />
+            <div class="modal-body">
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Mã</label>
+                    <div class="col-lg-9  text-end">
+                        <input class="form-control" type="text" value="" id="CodeRef" placeholder="Mã khoản thu">
+                    </div>
+                </div>
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Tên khoản thu </label>
+                    <div class="col-lg-9  text-end">
+                        <input class="form-control" type="text" value="" id="NameRef" placeholder="Tên khoản thu">
+                    </div>
+                </div>
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Đơn giá</label>
+                    <div class="col-lg-9">
+                        <input class="form-control" type="text" value="" id="PriceRef" placeholder="Đơn giá">
+                    </div>
+                </div>
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Đơn giá giảm</label>
+                    <div class="col-lg-9">
+                        <input class="form-control" type="text" value="" id="DiscountPriceRef" placeholder="Đơn giá khi giảm">
+                    </div>
+                </div>
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Trạng thái giảm giá</label>
+                    <div class="col-lg-9">
+                        <select class="form-control" id="StatusDiscount">
+                            <option value="true">Đang giảm giá</option>
+                            <option value="false" selected>Không giảm</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" onclick="Submit_addRef()">
+                    <i class="ti ti-circle-plus"></i> Thêm mới
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
+<div class="modal fade" id="examplePayment" tabindex="-1" aria-labelledby="examplePaymentLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="examplePaymentLabel">Phiếu thu học phí</h5>
+            </div>
+            <hr style="width:90%;margin:0 auto;" />
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group mt-2">
+                            <label class="form-control-label">Phiếu đăng ký</label>
+                            <input type="hidden" id="IdRegis" />
+                            <input class="form-control disabled" type="text" value="" id="CodeRegis" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-group mt-2">
+                            <label class="form-control-label">Họ tên học viên</label>
+                            <input class="form-control disabled" type="text" value="" id="NameRegis" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mt-2">
+                            <label class="form-control-label">Tổng tiền</label>
+                            <input class="form-control disabled" type="text" value="" id="TongtienRegis" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-group mt-2">
+                            <label class="form-control-label">+ Tài khoản <small class="fst-italic">(Số dư: <span id="sodu" class="text-danger"></span>)</small></label>
+                            <input class="form-control" type="text" value="0" id="TaikhoanRegis" onchange="Read_text()" onkeyup="Read_text(), Sum_money()">
+                            <input type="hidden" name="name" value="" id="TaikhoanMax" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mt-2">
+                            <label class="form-control-label">Hình thức</label>
+                            <select id="methodRegis" class="form-control">
+                                <option value="tienmat">Tiền mặt</option>
+                                <option value="chuyenkhoan">Chuyển khoản</option>
+                                <option value="quetthe">Quẹt thẻ</option>
+                                <option value="khac">Khác</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-group mt-2">
+                            <label class="form-control-label">Số tiền thu</label>
+                            <input class="form-control" type="text" value="" id="TienthuRegis" onchange="Sum_money()" onkeyup="Sum_money()">
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group mt-2">
+                            <label class="form-control-label">Số tiền còn nợ lại</label>
+                            <input class="form-control disabled" type="text" value="" id="Conlai">
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-group mt-2">
+                            <label class="form-control-label">Bằng chữ</label>
+                            <input class="form-control disabled" type="text" value="" id="Bangchu" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-12 mt-3">
+                        <a href="javascript:Submit_paymentRegistration()" class="btn btn-sm btn-success">+ Tạo phiếu thu</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @section scripts {
     <script>
-        function deleteitem(courseId, registrationId) {
-            var $row = $(this).closest('tr'); // Tìm hàng chứa nút xóa đã được click
 
+        $(document).ready(function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('IdRegistration') != '') {
+                LoadList(urlParams.get('IdRegistration'));
+            }
+        });
+        function Read_text() {
+            var tongtien = parseFloat($("#TongtienRegis").val().replace(/,/g, '')); // Remove all commas
+            var voucher = parseFloat($("#TaikhoanRegis").val().replace(/,/g, '')); // Remove all commas
+            var voucher_max = parseFloat($("#TaikhoanMax").val().replace(/,/g, '')); // Remove all commas
+            //var tienthu = parseFloat($("#TienthuRegis").val().replace(/,/g, '')); // Remove all commas
+
+            if (voucher > voucher_max) {
+                showError('Số dư không đủ, vui lòng nhập nhỏ hơn!', 3000);
+                voucher = 0;
+                $("#TaikhoanRegis").val(0);
+            }
+            var tienthu = tongtien - voucher;
+            var formattedTotalAmount = tienthu.toLocaleString('en-US', { minimumFractionDigits: 0 });
+            $("#TienthuRegis").val(formattedTotalAmount);
+
+            var conno = tongtien - tienthu - voucher;
+            var formattedConno = conno.toLocaleString('en-US', { minimumFractionDigits: 0 });
+            $("#Conlai").val(formattedConno);
+        }
+        function Sum_money() {
+            var tongtien = parseFloat($("#TongtienRegis").val().replace(/,/g, '')); // Remove all commas
+            var voucher = parseFloat($("#TaikhoanRegis").val().replace(/,/g, '')); // Remove all commas
+            var tienthu = parseFloat($("#TienthuRegis").val().replace(/,/g, '')); // Remove all commas
+
+            var conno = tongtien - voucher - tienthu;
+            var formattedConno = conno.toLocaleString('en-US', { minimumFractionDigits: 0 });
+            $("#Conlai").val(formattedConno);
+        }
+
+        function Payment_registration() {
+            let IdRegistration = $("#IdRegistration").val();
+            if (IdRegistration == "") {
+                showError("Chưa có phiếu đăng ký được khởi tạo", 4000);
+            }
             $.ajax({
-                url: '@Url.Action("Deletes", "Students")', // Thay thế bằng URL xóa của bạn
-                type: 'POST',
+                url: '@Url.Action("Load_paymentInfo", "Students")',
+                type: 'GET',
                 data: {
-                    IdCourse: courseId,
-                    IdRegistration: registrationId
+                    IdRegistration: IdRegistration
                 },
                 success: function (data) {
-                    loaddata(data);
-
-                    // Xóa hàng từ bảng sau khi xóa thành công
-                    $row.remove();
-
+                    $('#IdRegis').val(IdRegistration);
+                    $('#CodeRegis').val(data.Code);
+                    $('#NameRegis').val(data.Name);
+                    $('#TaikhoanMax').val(data.valueVoucher);
+                    $('#sodu').text(data.valueVoucher);
+                    $('#TongtienRegis').val(data.Conlai);
+                    $('#TienthuRegis').val(data.Conlai);
+                    $("#examplePayment").modal('show');
+                    Read_text();
                 },
-                error: function (xhr, status, error) {
-                    console.error('Error deleting cart item:', error);
-
+                error: function (xhr, error) {
                 }
             });
         }
-        function getDataComboboxOther(IdOther) {
-             $.ajax({
+        function Submit_paymentRegistration() {
+            let IdRegistration = $("#IdRegistration").val();
+            var Voucher = parseFloat($("#TaikhoanRegis").val().replace(/,/g, '')); // Remove all commas
+            var Tienthu = parseFloat($("#TienthuRegis").val().replace(/,/g, '')); // Remove all commas
+            var Conlai = parseFloat($("#Conlai").val().replace(/,/g, '')); // Remove all commas
+            if (Conlai < 0) {
+                showError("Số tiền thu không hợp lệ, vui lòng kiểm tra lại!", 3000);
+            }
+            $.ajax({
+                url: '@Url.Action("Submit_paymentRegistration", "Students")', // Thay thế bằng URL xóa của bạn
+                type: 'POST',
+                data: {
+                    IdRegistration: IdRegistration,
+                    Voucher: Voucher,
+                    Tienthu: Tienthu
+                },
+                success: function (data) {
+                    if (data.status == "ok") {
+                        showSuccess(data.message, 3000);
+                        LoadList(IdRegistration);
+                    }
+                    showError(data.message, 3000);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error payment error: ', error);
+                }
+            });
+        }
+
+        function Delete_item(IdRegistration, Id, Type) {
+            if (confirm('Bạn có muốn xóa khỏi phiếu đăng ký?')) {
+                $.ajax({
+                    url: '@Url.Action("Submit_deleteItem", "Students")', // Thay thế bằng URL xóa của bạn
+                    type: 'POST',
+                    data: {
+                        IdRegistration: IdRegistration,
+                        Id: Id,
+                        Type: Type
+                    },
+                    success: function (data) {
+                        if (data.status == "ok") {
+                            showSuccess(data.message, 3000);
+                            LoadList(IdRegistration);
+                        }
+                        showError(data.message, 3000);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error deleting cart item:', error);
+                    }
+                });
+            }
+        }
+        function AddReferences() {
+            $("#exampleModalAddReferences").modal('show');
+        }
+        function Submit_addRef() {
+            $.ajax({
+                url: '@Url.Action("Submit_addRef", "RevenueReferences")',
+                type: "POST",
+                data: {
+                    Code: $("#CodeRef").val(),
+                    Name: $("#NameRef").val(),
+                    Price: $("#PriceRef").val(),
+                    DiscountPrice: $("#DiscountPriceRef").val(),
+                    StatusDiscount: $("#StatusDiscount").val()
+                },
+                success: function (data) {
+                    if (data.status == "ok") {
+                        $('#exampleModalAddReferences').modal('hide');
+                        getDataComboboxOther();
+                        showSuccess(data.message, 3000);
+                    } else {
+                        showError(data.message, 3000);
+                    }
+                },
+                error: function (xhr, error) {
+                    console.log(error);
+                }
+            });
+        }
+        function Getvalue_other() {
+            let dongia = parseFloat($("#priceOther").val().replace(/,/g, '')); // Remove all commas
+            let giam = parseFloat($("#discountOther").val().replace(/,/g, '')); // Remove all commas
+            var thanhtien = dongia - giam;
+            // Định dạng thành tiền với dấu phẩy
+            var formattedThanhTien = thanhtien.toLocaleString('en-US', { minimumFractionDigits: 0 });
+
+            // Cập nhật giá trị vào trường totalamountCourse
+            $('#totalamountOther').val(formattedThanhTien);
+        }
+        function GetInfoOrther() {
+            var selectElement = document.getElementById("OtherSelect");
+            // Lấy tùy chọn đã chọn
+            var selectedOption = selectElement.options[selectElement.selectedIndex];
+
+            // Lấy giá trị từ các thuộc tính data-*
+            var dongia = selectedOption.getAttribute("data-dongia");
+
+            // Cập nhật giá trị vào input priceProduct
+            var priceProductElement = document.getElementById("priceOther");
+            priceProductElement.value = dongia;
+
+
+            // Tính tổng tiền (thành tiền) và định dạng lại giá trị
+            let giam = parseFloat($("#discountOther").val().replace(/,/g, '')); // Remove all commas
+
+            var totalAmount = parseFloat(dongia.replace(/,/g, '')) - giam;
+            var formattedTotalAmount = totalAmount.toLocaleString('en-US', { minimumFractionDigits: 0 });
+            // Cập nhật giá trị vào input totalamountProduct
+            document.getElementById("totalamountOther").value = formattedTotalAmount;
+        }
+        function getDataComboboxOther() {
+            $.ajax({
                 url: '@Url.Action("getDataComboxOther", "Students")',
                 type: 'GET',
-                data: {
-                    IdOther: IdOther
-            },
-                    success: function (data) {
-                        if (data.str.length !== 0) {
-                            $('#OtherSelect').html(data.str);
-                            $('#totalamountOther').val(data.totalamount);
-                            $('#priceOther').val(data.totalamount);
-                        }else {
-                            $('#totalamountOther').val(data.totalamount);
-                            $('#priceOther').val(data.totalamount);
-                        }
+                data: {},
+                success: function (data) {
+                    $('#OtherSelect').html(data.str);
+                    GetInfoOrther();
                 },
-                error: function(xhr,error){
-
+                error: function (xhr, error) {
                 }
-                });
+            });
         }
-        function getDataComboboxProduct(idproduct) {
-          $.ajax({
-           url: '@Url.Action("getDataComboxProduct","Students")',
-           type: 'GET',
-           data: {
-           idproduct: idproduct
-        },
-              success: function (data) {
-                  if (data.str.length !== 0) {
-                      $('#productSelect').html(data.str);
-                      $('#totalamountProduct').val(data.totalamount);
-                      $('#priceProduct').val(data.totalamount);
-                      $('#number').val(data.number);
-                  }else {
-                        $('#totalamountProduct').val(data.totalamount);
-                      $('#priceProduct').val(data.totalamount);
-                      $('#number').val(data.number);
-                  }
-           },
-           error: function(xhr,error){
+        function getDataComboboxProduct() {
+            $.ajax({
+                url: '@Url.Action("getDataComboxProduct","Students")',
+                type: 'GET',
+                data: {},
+                success: function (data) {
+                    $('#productSelect').html(data.str);
+                    GetInfoProduct();
+                },
+                error: function (xhr, error) {
+                }
+            });
+        }
+        function Getvalue_product() {
+            let dongia = parseFloat($("#priceProduct").val().replace(/,/g, '')); // Remove all commas
+            let giam = parseFloat($("#discountProduct").val().replace(/,/g, '')); // Remove all commas
+            var thanhtien = dongia - giam;
+            // Định dạng thành tiền với dấu phẩy
+            var formattedThanhTien = thanhtien.toLocaleString('en-US', { minimumFractionDigits: 0 });
 
-            }
-           });
+            // Cập nhật giá trị vào trường totalamountCourse
+            $('#totalamountProduct').val(formattedThanhTien);
         }
-        function getDataCombobox(IdProgram,type) {
+        function GetInfoProduct(){
+            var selectElement = document.getElementById("productSelect");
+
+            // Lấy tùy chọn đã chọn
+            var selectedOption = selectElement.options[selectElement.selectedIndex];
+
+            // Lấy giá trị từ các thuộc tính data-*
+            var dongia = selectedOption.getAttribute("data-dongia");
+            var isfixed = selectedOption.getAttribute("data-isfixed").trim();
+            var tonkho = parseInt(selectedOption.getAttribute("data-tonkho"), 10);
+
+            // Cập nhật giá trị vào input priceProduct
+            var priceProductElement = document.getElementById("priceProduct");
+            priceProductElement.value = dongia;
+
+            // Kiểm tra nếu isfixed khác "True" thì cho phép chỉnh sửa priceProduct, ngược lại đặt readonly
+            if (isfixed !== "True") {
+                priceProductElement.readOnly = false;
+            } else {
+                priceProductElement.readOnly = true;
+            }
+
+            // Cập nhật giá trị vào input numberProduct
+            var numberProductElement = document.getElementById("numberProduct");
+            if (tonkho > 0) {
+                numberProductElement.value = 1;
+            } else {
+                numberProductElement.value = 0;
+            }
+
+            // Tính tổng tiền (thành tiền) và định dạng lại giá trị
+            var totalAmount = parseFloat(dongia.replace(/,/g, '')) * parseInt(numberProductElement.value);
+            var formattedTotalAmount = totalAmount.toLocaleString('en-US', { minimumFractionDigits: 0 });
+
+            // Cập nhật giá trị vào input totalamountProduct
+            document.getElementById("totalamountProduct").value = formattedTotalAmount;
+        }
+        function getDataCombobox(IdProgram) {
           $.ajax({
               url: '@Url.Action("GetDataCombobox", "Students")',
               type: "GET",
-              data: { IdProgram: IdProgram,type },
+              data: { IdProgram: IdProgram },
               success: function (data) {
                   $('#promotionSelect').html(data.strpromotion);
                   $('#programSelect').html(data.strpro);
@@ -368,11 +655,10 @@
                   GetInfoCourse();
                   Getvalue_discount();
                   Update_totalAmount();
-              }, 
+              },
               error: function (xhr, error) {
                   console.log(error);
               }
-
           });
         }
         GetInfoCourse();
@@ -384,11 +670,11 @@
               success: function (data) {
                   $('#priceCourse').val(data.priceCourse);
                   $('#tableProduct').html(data.strtable);
+                  Update_totalAmount();
               },
               error: function (xhr, error) {
                   console.log(error);
               }
-
           });
         }
         function Getvalue_discount() {
@@ -396,12 +682,16 @@
             $('#discountCourse').val(value); Update_totalAmount();
         }
         function Update_totalAmount() {
-            var dongia = parseFloat($("#priceCourse").val().replace(/,/g, '')); // Remove all commas
-            var giam = parseFloat($("#discountCourse").val().replace(/,/g, '')); // Remove all commas
+            let dongia = parseFloat($("#priceCourse").val().replace(/,/g, '')); // Remove all commas
+            let giam = parseFloat($("#discountCourse").val().replace(/,/g, '')); // Remove all commas
             var thanhtien = dongia - giam;
-            $('#totalamountCourse').val(thanhtien);
+            // Định dạng thành tiền với dấu phẩy
+            var formattedThanhTien = thanhtien.toLocaleString('en-US', { minimumFractionDigits: 0 });
+
+            // Cập nhật giá trị vào trường totalamountCourse
+            $('#totalamountCourse').val(formattedThanhTien);
         }
-        function loaddata(idRegistraion) {
+        function LoadList(idRegistraion) {
             var randomParam = new Date().getTime(); // Tạo một tham số ngẫu nhiên
             $.ajax({
                 url: '@Url.Action("getData", "Students")',
@@ -422,7 +712,12 @@
                     document.getElementById("IdRegistration").value = data.idRegistrations;
                     document.getElementById("Bill").value = data.Code;
                     document.getElementById("Datecreate").value = data.DateCreate;
-                    $(".total").text(data.TotalAmount);
+                    $("#tongtien").text(data.Tongtien);
+                    $("#chietkhau").text(data.Chietkhau);
+                    $("#tongthanhtoan").text(data.Tongthanhtoan);
+                    $("#dathanhtoan").text(data.Dathanhtoan);
+                    $("#conlai").text(data.Conlai);
+                    $("#tongthanhtoan").text(data.Discount);
                 },
                 error: function (xhr, status, error) {
                     showError("Đã tồn tại, vui lòng kiểm tra lại!", 3000);
@@ -444,40 +739,31 @@
                 // Within each iteration, 'this' refers to the current DOM element
                 // Wrap 'this' with jQuery to access jQuery methods
                 // Làm bất cứ điều gì bạn muốn với trạng thái kiểm tra isChecked ở đây
-
                 var item = {
                          isChecked: $(this).find('.idproduct').val(),
                          idpro: $(this).find('.idpro').val(),
                     };
                     isChecked.push(item);
-
-                 // Check if the checkbox is checked
             });
-            console.log("Checkbox value:", isChecked);
-
             if (type === 1) {
-                price = $('#priceProduct').val(); // Assuming the price input has an id of "textInput
                 IdObject = $('#productSelect').val();
-                discount = $('#discountProduct').val();
-
-                totalamount = $('#priceProduct').val();
-                amount = $('#priceProduct').val();
+                price = parseFloat($("#priceProduct").val().replace(/,/g, '')); // Remove all commas
+                discount = parseFloat($("#discountProduct").val().replace(/,/g, '')); // Remove all commas
+                totalamount = parseFloat($("#totalamountProduct").val().replace(/,/g, '')); // Remove all commas
+                amount = $('#numberProduct').val();
             } else if (type === 2) {
-                price = $('#priceCourse').val(); // Assuming the price input has an id of "textInput
                 IdObject = $('#courseSelect').val();
-                discount = $('#discountCourse').val();
-
-                totalamount = $('#priceCourse').val();
+                price = parseFloat($("#priceCourse").val().replace(/,/g, '')); // Remove all commas
+                discount = parseFloat($("#discountCourse").val().replace(/,/g, '')); // Remove all commas
+                totalamount = parseFloat($("#totalamountCourse").val().replace(/,/g, '')); // Remove all commas
                 amount = $('#priceCourse').val();
             } else if (type === 3) {
-                price = $('#priceOther').val(); // Assuming the price input has an id of "textInput
                 IdObject = $('#OtherSelect').val();
-                discount = $('#discountOther').val();
-
-                totalamount = $('#priceOther').val();
-                amount = $('#priceOther').val();
+                price = parseFloat($("#priceOther").val().replace(/,/g, '')); // Remove all commas
+                discount = parseFloat($("#discountOther").val().replace(/,/g, '')); // Remove all commas
+                totalamount = parseFloat($("#totalamountOther").val().replace(/,/g, '')); // Remove all commas
+                amount = $('#numerOther').val();
             }
-
 
             // Make AJAX request with collected data
             $.ajax({
@@ -497,13 +783,10 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (data) {
-                    loaddata(data);
-
+                    LoadList(data);
                 },
                 error: function (xhr, status, error) {
-
-                     showError("san pham da ton tai", 3000);
-                    console.error('Error saving cart item:', error);
+                    showError("Error saving cart item", 3000);
                 }
             });
         }

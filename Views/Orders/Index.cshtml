@@ -347,7 +347,7 @@
 <script>
     $(document).ready(function () {
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('openModal') === 'true') {
+        if (urlParams.get('openModal') == 'true') {
             $('#exampleModal').modal('show');
         }
         Loadlist(1);
@@ -477,26 +477,26 @@
 
     var isProcessing = false;
     function submit_order() {
-    if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
-    $.ajax({
-        url: '@Url.Action("Submit_order", "Orders")',
-        type: "POST",
-        data: $("#form_dathang").serialize()
-        , dataType: "json",
-        success: function (data) {
-            if (data.status == "ok") {
-                $('#exampleModal').modal('hide');
-                Loadlist(1);
-                showSuccess("Đã đặt hàng thành công!", 3000);
-                isProcessing = false;
-            }
-            else {
-                showError(data.status, 3000);
-                isProcessing = false;
-            }
-        },
-        error: function () { showError('Lỗi!', 3000); }
-    });
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        $.ajax({
+            url: '@Url.Action("Submit_order", "Orders")',
+            type: "POST",
+            data: $("#form_dathang").serialize()
+            , dataType: "json",
+            success: function (data) {
+                if (data.status == "ok") {
+                    $('#exampleModal').modal('hide');
+                    Loadlist(1);
+                    showSuccess("Đã đặt hàng thành công!", 3000);
+                    isProcessing = false;
+                }
+                else {
+                    showError(data.status, 3000);
+                    isProcessing = false;
+                }
+            },
+            error: function () { showError('Lỗi!', 3000); }
+        });
     }
     function submit_statusorder() {
         if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
