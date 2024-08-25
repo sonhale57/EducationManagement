@@ -20,11 +20,14 @@
     <div class="col col-md-6 col-sm-12 text-right" style="text-align:right;">
         <div class="me-0 btn btn-md p-0">
             <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="ti ti-filter"></i> Loc theo
+                <i class="ti ti-filter"></i>
+                <span id="filterEnum"></span>
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 <li><a class="dropdown-item" href="javascript:Loadlist('1','date_desc')"><i class="ti ti-row-insert-top"></i> Phiếu thu</a></li>
                 <li><a class="dropdown-item" href="javascript:Loadlist('0','date_desc')"><i class="ti ti-row-insert-bottom"></i> Phiếu chi</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { filterEnum = 1 })"> Phiếu thu</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = 0})"> Phiếu chi</a></li>
             </ul>
         </div>
         <div class="me-0 btn btn-md p-0">
@@ -50,11 +53,11 @@
             <th class="text-center">Mã phiếu</th>
             <th class="text-center">Người (nhận,nộp)</th>
             <th class="text-left">Lý do</th>
-            <th class="text-center">Số tiền</th>
+            <th class="text-end">Số tiền</th>
             <th class="text-center">Hình thức</th>
             <th class="text-center">Loại</th>
             <th class="text-center">Ngày</th>
-            <th class="text-end">Người thao tác</th>
+            <th class="text-center">Người thao tác</th>
             <th class="text-end">Thao tác</th>
         </tr>
     </thead>
@@ -62,10 +65,10 @@
     <tbody id="showlist"></tbody>
 </table>
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" style="margin-right: 110px;">
-        <div class="modal-content rounded-0 " style="width: 600px;">
-            <div class="modal-header bg-info">
-                <h5 class="modal-title text-white" id="exampleModalLabel">Tạo phiếu</h5>
+    <div class="modal-dialog modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Tạo phiếu</h5>
             </div>
             <form action="/" method="post" enctype="multipart/form-data" id="form_transaction">
                 <div class="modal-body row">
@@ -162,13 +165,19 @@
         var formattedLastMonth = lastMonthYear + '-' + ('0' + lastMonth).slice(-2) + '-' + ('0' + currentDay).slice(-2);
         // Đặt giá trị mới cho phần tử có id là "fromdate"
         $("#fromdate").val(formattedLastMonth);
-        Loadlist(true);
+        Loadlist();
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('openModal') === 'true') {
             $('#exampleModal').modal('show');
         }
+        if (urlParams.get('filterEnum') == 1 || urlParams.get('filterEnum') == null) {
+            $('#filterEnum').html("Phiếu thu");
+        } else {
+            $('#filterEnum').html("Phiếu chi");
+        }
     });
-    function Loadlist(type, sort) {
+    function Loadlist(sort) {
+        const urlParams = new URLSearchParams(window.location.search);
         $("#loading").html("<td colspan=10 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
         $.ajax({
             url: '@Url.Action("Loadlist", "Transactions")',
@@ -178,7 +187,7 @@
                 fromdate: $("#fromdate").val(),
                 todate: $("#todate").val(),
                 sort: sort,
-                type: type,
+                type: urlParams.get('filterEnum'),
                 searchString: $("#searchString").val()
             },
             success: function (data) {
@@ -226,7 +235,7 @@
             success: function (data) {
                 if (data.status === "ok") {
                     $('#exampleModal').modal('hide');
-                    Loadlist(type);
+                    Loadlist();
                     showSuccess("Đã cập nhật thành công!", 3000);
                 } else {
                     showError(data.status, 3000);

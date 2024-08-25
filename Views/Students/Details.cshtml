@@ -215,8 +215,8 @@
                                     <td class="text-center">STT</td>
                                     <td>Mã đăng ký</td>
                                     <td>Khóa học</td>
-                                    <td>Thành tiền</td>
-                                    <td>Ngày đăng ký</td>
+                                    <td class="text-end">Thành tiền</td>
+                                    <td class="text-center">Ngày đăng ký</td>
                                     <td class="text-center">Thanh toán</td>
                                     <td class="text-center">Tình trạng</td>
                                     <td class="text-end">Thao tác</td>
@@ -252,10 +252,10 @@
                                     <td>Mã đăng ký</td>
                                     <td>Khóa học</td>
                                     <td>Lớp học</td>
-                                    <td>Ngày bắt đầu</td>
-                                    <td>Ngày kết thúc</td>
+                                    <td class="text-center">Ngày bắt đầu</td>
+                                    <td class="text-center">Ngày kết thúc</td>
                                     <td class="text-center">Số buổi</td>
-                                    <td>Ngày xét lớp</td>
+                                    <td class="text-center">Ngày xét lớp</td>
                                     <td class="text-center">Tình trạng</td>
                                 </tr>
                             </thead>
@@ -297,11 +297,12 @@
 </div>
 <input type="hidden" name="idStudent" value="@Model.Id" id="idStudent" />
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" style="padding-right: -100px;margin-right: 110px;height: 100vh;">
-        <div class="modal-content rounded-0" style="width: 600px;">
-            <div class="modal-header bg-info">
-                <h5 class="modal-title text-white" id="exampleModalLabel">Xét vào lớp học</h5>
+    <div class="modal-dialog modal-dialog-scrollable" style="padding-right: -100px;margin-right: 110px;">
+        <div class="modal-content" style="width: 600px;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Xét vào lớp học</h5>
             </div>
+            <hr style="width:90%;margin:0 auto;" />
             <div class="modal-body">
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Mã đăng ký</label>
@@ -313,7 +314,7 @@
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Khóa học</label>
                     <div class="col-lg-9">
-                        <select id="IdCourse" class="form-control" disabled>
+                        <select id="IdCourse" class="form-control disabled">
                         </select>
                     </div>
                 </div>
@@ -342,10 +343,10 @@
                         <thead>
                             <tr>
                                 <th class="text-center">STT</th>
-                                <th class="text-center"> Thứ</th>
-                                <th class="text-center"> Giờ Học</th>
-                                <th class="text-center"> Số Giờ</th>
-                                <th class="text-center"> Giáo viên</th>
+                                <th class="text-center">Thứ</th>
+                                <th class="text-center">Giờ Học</th>
+                                <th class="text-center">Số Giờ</th>
+                                <th class="text-center">Giáo viên</th>
                             </tr>
                         </thead>
                         <tbody id="datarow">
@@ -357,10 +358,11 @@
                     <table cellpadding="0" cellspacing="0" border="0" class="table">
                         <thead>
                             <tr>
+                                <th class="text-center">Buổi</th>
                                 <th class="text-center">Ngày</th>
-                                <th class="text-center"> Thứ</th>
-                                <th class="text-center"> Giờ Học</th>
-                                <th class="text-center"> Số Giờ</th>
+                                <th class="text-center">Thứ</th>
+                                <th class="text-center">Giờ Học</th>
+                                <th class="text-center">Số Giờ</th>
                             </tr>
                         </thead>
                         <tbody id="timetable_datarow">
@@ -370,15 +372,15 @@
             </div>
             <div class="modal-footer text-start">
                 <form action="/Students/ShowTimeTableData" method="get" target="_blank">
-                    <input type="hidden" id="idClassShowTimeTbl" name="idClassShowTimeTbl"/>
-                    <input type="hidden" id="fromDateShowTimeTbl"  name="fromDate" />
-                    <input type="hidden" id="toDateShowTimeTbl"  name="toDate"/>
-                    <input type="hidden" id="studentId"  name="studentId" value="@Model.Id"/>
+                    <input type="hidden" id="idClassShowTimeTbl" name="idClassShowTimeTbl" />
+                    <input type="hidden" id="fromDateShowTimeTbl" name="fromDate" />
+                    <input type="hidden" id="toDateShowTimeTbl" name="toDate" />
+                    <input type="hidden" id="studentId" name="studentId" value="@Model.Id" />
                     <button type="submit" class="btn btn-info">
-                        <i class="ti ti-calendar"></i> Xem thời khoá biểu
+                        <i class="ti ti-calendar"></i> In thời khoá biểu
                     </button>
                 </form>
-                <button type="button" class="btn btn-success" onclick="Submit_xetlop()">
+                <button type="button" class="btn btn-success" onclick="Submit_xetlop()" id="btnSubmitXetlop">
                     <i class="ti ti-circle-plus"></i> Xét vào lớp học
                 </button>
 
@@ -553,7 +555,11 @@
                 $('#IdRegistration').val(idregistration);
                 $('#RegistrationCode').val(data.registrionCode);
                 $('#IdCourse').html(data.str);
-
+                if (data.statusStudent == false) {
+                    $("#btnSubmitXetlop").addClass("hideof");
+                    showError("Không thể xét lớp cho học viên này!", 5000);
+                }
+                loadSchedule();
             },
             error: function (xhr, error) {
 
@@ -609,6 +615,7 @@
         const idClass = $("#IdClass").val();
         const fromDate = $("#fromdate").val();
         const toDate = $("#todate").val();
+        const idCourse = $("#IdCourse").val();
 
         $("#idClassShowTimeTbl").val(parseInt(idClass));
         $("#fromDateShowTimeTbl").val(fromDate);
@@ -623,11 +630,13 @@
             data: {
                 idClass: idClass,
                 fromDate: fromDate,
-                toDate: toDate
+                toDate: toDate,
+                idCourse: idCourse
             },
             success: function (data) {
                 if (data.status = "ok") {
                     let index = 1;
+                    let stt = 1;
                     $.each(data.schedulesbyClass, function (key, value) {
                         $('#datarow')
                             .append('<tr><td>' + index++ + '</td><td>' + value.DayOfWeek + '</td><td>' + value.TimeSlot + '</td><td>' + value.HourQuantity + '</td><td>' + value.TeacherName +'</td></tr>');
@@ -636,7 +645,7 @@
 
                     $.each(data.timeTableData, function (index, value) {
                         $('#timetable_datarow')
-                            .append('<tr><td>' + value.Date + '</td><td>' + value.DayOfWeek + '</td><td>' + value.TimeSlot + '</td><td>' + value.HourQuantity + '</td></tr>');
+                            .append('<tr><td>Buổi ' + stt++ + '</td><td>' + value.Date + '</td><td>' + value.DayOfWeek + '</td><td>' + value.TimeSlot + '</td><td>' + value.HourQuantity + '</td></tr>');
                     });
                 }
             },

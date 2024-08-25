@@ -1,6 +1,4 @@
-﻿
-@{
-    ViewBag.Title = "PrintOrder";
+﻿@{
     Layout = null;
 }
 <!DOCTYPE html>
@@ -22,7 +20,7 @@
         @@media print {
         }
     </style>
-    </head>
+</head>
 <body>
     <div class="d-sm-flex d-block align-items-center justify-content-between align-content-center mt-3 me-5">
         <div class="">
@@ -33,18 +31,19 @@
     </div>
     <div class="container mt-2" id="printableCard">
         <div class="card-body">
-            <div class="d-sm-flex d-block align-items-center justify-content-between align-content-center">
-                <div class="">
+            <div class="row">
+                <div class="col-6 col-md-6 align-content-center">
+                    <img src="https://superbrain.edu.vn/wp-content/uploads/2024/01/logo_khoi-day-tiem-nang.png" alt="Superbrain" height="70" />
+                </div>
+                <div class="col-6 col-md-6">
                     <h6 class="text-body-secondary"><i class="ti ti-shopping-cart"></i> Mã đơn hàng: <a class="fw-bold" href="#!"><span id="strCode"></span></a></h6>
                     <p class="text-body-secondary mt-1 mb-0">Người đặt hàng: <span class="text-body-emphasis fw-semibold" id="strTen"></span></p>
                     <p class="text-body-secondary mt-1 mb-0">Cơ sở: <span class="text-body-emphasis fw-semibold" id="strCoso"></span></p>
-                    <p class="text-body-secondary mt-1 mb-0">Số điện thoại nhận hàng: <span class="text-body-emphasis fw-semibold" id="strdienthoai"></span></p>
-                    <p class="text-body-secondary mt-1 mb-0">Địa chỉ giao hàng: <span class="text-body-emphasis fw-semibold" id="strDiachi"></span></p>
                     <p class="text-body-secondary mt-1 mb-0">Ngày đặt: <span class="text-body-emphasis fw-semibold" id="strDate"></span></p>
                 </div>
             </div>
             <div class="row g-5 gy-7 mt-3">
-                <div class="col-12 col-xl-8 col-xxl-9">
+                <div class="col-12 col-xl-12 col-xxl-12">
                     <div id="orderTable">
                         <div class="table-responsive scrollbar">
                             <table class="table table-bordered fs-9 mb-0">
@@ -62,35 +61,20 @@
                             </table>
                         </div>
                     </div>
-
+                    <p class="mt-2">Ghi chú: <span class="fst-italic" id="strDescription"></span></p>
                 </div>
-                <div class="col-12 col-xl-4 col-xxl-3">
+                <div class="col-12 col-xl-12 col-xxl-12">
                     <div class="row">
                         <div class="col-12">
                             <div class="card mb-3">
                                 <div class="card-body">
-                                    <h3 class="card-title mb-4">Summary</h3>
-                                    <div>
-                                        <div class="d-flex justify-content-between">
-                                            <p class="text-body fw-semibold">Thành tiên đơn hàng :</p>
-                                            <p class="text-body-emphasis fw-semibold" id="strTongtien"></p>
+                                    <p class="text-end">..............., Ngày @DateTime.Now.Day Tháng @DateTime.Now.Month Năm @DateTime.Now.Year</p>
+                                        <div class="d-flex justify-content-between text-center">
+                                            <p class="text-body fw-semibold">Người lập phiếu <br /><small class="fst-italic">(Ký, họ tên)</small> <br /><br /><br /><br /><span>@ViewBag.NguoiIn</span></p>
+                                            <p class="text-body fw-semibold">Người nhận hàng <br /><small class="fst-italic">(Ký, họ tên)</small> <br /><br /><br /><br /><span class="mt-5"></span></p>
+                                            <p class="text-body fw-semibold">Thủ kho <br /><small class="fst-italic">(Ký, họ tên)</small> <br /><br /><br /><br /><span class="mt-5">@ViewBag.NguoiIn</span></p>
+                                            <p class="text-body fw-semibold">BP. Kế toán <br /><small class="fst-italic">(Ký, họ tên)</small><br /><br /><br /><br /><span class="mt-5">@ViewBag.BPKetoan</span></p>
                                         </div>
-                                        <div class="d-flex justify-content-between">
-                                            <p class="text-body fw-semibold">Giảm :</p>
-                                            <p class="text-danger fw-semibold">0</p>
-                                        </div>
-                                        <div class="d-flex justify-content-between">
-                                            <p class="text-body fw-semibold">Tổng tiền :</p>
-                                            <p class="text-body-emphasis fw-semibold" id="strTong">$665</p>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex justify-content-between border-top border-translucent border-dashed pt-4">
-                                        <p class="text-body fw-semibold mb-0">Tổng thanh toán :</p>
-                                        <p class="mb-0 text-body-emphasis fw-semibold" id="strTongthanhtoan"></p>
-                                    </div>
-                                    <div class="d-flex justify-content-between">
-                                        <small class="fst-italic">(đã bao gồm thuế GTGT 8%)</small>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -106,7 +90,7 @@
     LoadStatus_Order(id);
     function LoadStatus_Order(id) {
         $.ajax({
-            url: '@Url.Action("Loadlist_PrintOrder", "Orders")',
+            url: '@Url.Action("Loadlist_PrintOrderDelivery", "Orders")',
             type: "GET",
             data: {
                 id: id
@@ -120,6 +104,7 @@
                 $('#strCoso').html(data.strCoso);
                 $('#strDiachi').html(data.strDiachi);
                 $('#strdienthoai').html(data.strdienthoai);
+                $('#strDescription').html(data.strDescription);
                 $('#strDate').html(data.strDate);
                 $('#strTongthanhtoan').html(data.strTongtien);
             },

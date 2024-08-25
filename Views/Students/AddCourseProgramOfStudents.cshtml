@@ -17,7 +17,6 @@
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                         <a class="dropdown-item" href="@Url.Action("RegistrationPrints","Students")"><i class="ti ti-printer"></i> In phiếu đăng ký tổng</a>
                         <a class="dropdown-item" href="javascript:PrintDetails()"><i class="ti ti-printer"></i> In phiếu đăng ký chi tiết</a>
-                        <a class="dropdown-item" href="javascript:Payment_registration()"><i class="ti ti-credit-card"></i> Thu tiền</a>
                     </div>
                 </div>
             </th>
@@ -26,6 +25,14 @@
 </table>
 <div class="row ps-3">
     <div class="col col-6 col-md-6 col-sm-12 mb-2">
+        <p>Mã học viên</p>
+        <input class="form-control text-box single-line" style="border:none;" data-val="true" data-val-length="The field Username must be a string with a maximum length of 50." data-val-length-max="50" id="Username" name="Username" type="text" value="@Model.Code" readonly>
+    </div>
+    <div class="col col-6 col-md-6 col-sm-12 mb-2">
+        <p>Họ tên học viên</p>
+        <input class="form-control text-box single-line" style="border:none;" data-val="true" data-val-length="The field Name must be a string with a maximum length of 50." data-val-length-max="50" id="Name" name="Name" type="text" value="@Model.Name" readonly>
+    </div>
+    <div class="col col-6 col-md-6 col-sm-12 mb-2">
         <p>Mã hóa đơn</p>
         <input class="form-control text-box single-line" style="border:none;" data-val="true" data-val-length="The field Name must be a string with a maximum length of 50." data-val-length-max="50" id="Bill" name="Name" type="text" value="" readonly>
         <input type="hidden" id="IdRegistration" value="" name="id" />
@@ -33,14 +40,6 @@
     <div class="col col-6 col-md-6 col-sm-12 mb-2">
         <p>Ngày tạo</p>
         <input class="form-control text-box single-line" style="border:none;" data-val="true" data-val-length="The field Username must be a string with a maximum length of 50." data-val-length-max="50" id="Datecreate" name="Username" type="text" value="" readonly>
-    </div>
-    <div class="col col-6 col-md-6 col-sm-12 mb-2">
-        <p>Họ tên học viên</p>
-        <input class="form-control text-box single-line" style="border:none;" data-val="true" data-val-length="The field Name must be a string with a maximum length of 50." data-val-length-max="50" id="Name" name="Name" type="text" value="@Model.Name" readonly>
-    </div>
-    <div class="col col-6 col-md-6 col-sm-12 mb-2">
-        <p>Mã học viên</p>
-        <input class="form-control text-box single-line" style="border:none;" data-val="true" data-val-length="The field Username must be a string with a maximum length of 50." data-val-length-max="50" id="Username" name="Username" type="text" value="@Model.Code" readonly>
     </div>
     <div class="col col-12 col-md-12 col-sm-12 mb-2">
         <p>Ghi chú</p>
@@ -95,15 +94,23 @@
         <td></td>
     </tr>
 </table>
-<button type="button" class="btn btn-success" onclick="getDataCombobox(0,0,1)" data-bs-toggle="modal" data-bs-target="#exampleModal">
-    <i class="ti ti-certificate"></i> Thêm khóa học
-</button>
-<button type="button" class="btn btn-success" onclick="getDataComboboxProduct()" data-bs-toggle="modal" data-bs-target="#exampleModalProduct">
-    <i class="ti ti-shopping-cart"></i> Thêm vật tư
-</button>
-<button type="button" class="btn btn-success" onclick="getDataComboboxOther()" data-bs-toggle="modal" data-bs-target="#exampleModalRevenueReferences">
-    <i class="ti ti-checklist"></i> Thu khác
-</button>
+
+<div class="d-sm-flex d-block align-items-center justify-content-between align-content-center mt-3 me-5">
+    <div class="">
+        <button type="button" class="btn btn-success" onclick="getDataCombobox(0,0,1)" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <i class="ti ti-certificate"></i> Thêm khóa học
+        </button>
+        <button type="button" class="btn btn-success" onclick="getDataComboboxProduct()" data-bs-toggle="modal" data-bs-target="#exampleModalProduct">
+            <i class="ti ti-shopping-cart"></i> Thêm vật tư
+        </button>
+        <button type="button" class="btn btn-success" onclick="getDataComboboxOther()" data-bs-toggle="modal" data-bs-target="#exampleModalRevenueReferences">
+            <i class="ti ti-checklist"></i> Thu khác
+        </button>
+    </div>
+    <div class="d-flex">
+        <a href="javascript:Payment_registration()" class="btn btn-success me-1" id="btnThutien"><i class="ti ti-credit-card"></i> Thu tiền</a>
+    </div>
+</div>
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable" style="padding-right: -100px;margin-right: 110px;">
@@ -233,7 +240,8 @@
             <div class="modal-body">
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label mt-3">Tên khoản thu </label>
-                    <div class="col-lg-9  text-end"><a href="javascript:AddReferences()" class="text-success"><i class="ti ti-playlist-add"></i></a>
+                    <div class="col-lg-9  text-end">
+                        <a href="javascript:AddReferences()" class="text-success"><i class="ti ti-playlist-add"></i></a>
                         <select class="form-control IdEmployee" name="phonghoc0" id="OtherSelect" onchange="GetInfoOrther()">
                         </select>
                     </div>
@@ -395,13 +403,26 @@
         </div>
     </div>
 </div>
+
+
 @section scripts {
     <script>
-
         $(document).ready(function () {
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('IdRegistration') != '') {
-                LoadList(urlParams.get('IdRegistration'));
+
+            const idRegistration = urlParams.get('IdRegistration');
+            const modalPayment = urlParams.get('modalPayment');
+
+            // Kiểm tra tham số IdRegistration có tồn tại và khác rỗng
+            if (idRegistration) {
+                LoadList(idRegistration);
+            }
+
+            // Kiểm tra nếu modalPayment là "True" và IdRegistration có giá trị
+            if (modalPayment === 'True' && idRegistration) {
+                $("#IdRegistration").val(idRegistration)
+                Payment_registration();
+                $("#examplePayment").modal('show');
             }
         });
         function Read_text() {
@@ -460,7 +481,7 @@
             });
         }
         function Submit_paymentRegistration() {
-            let IdRegistration = $("#IdRegistration").val();
+            let IdRegistration = $("#IdRegis").val();
             var Voucher = parseFloat($("#TaikhoanRegis").val().replace(/,/g, '')); // Remove all commas
             var Tienthu = parseFloat($("#TienthuRegis").val().replace(/,/g, '')); // Remove all commas
             var Conlai = parseFloat($("#Conlai").val().replace(/,/g, '')); // Remove all commas
@@ -473,12 +494,14 @@
                 data: {
                     IdRegistration: IdRegistration,
                     Voucher: Voucher,
-                    Tienthu: Tienthu
+                    Tienthu: Tienthu,
+                    Method: $("#methodRegis").val()
                 },
                 success: function (data) {
                     if (data.status == "ok") {
                         showSuccess(data.message, 3000);
                         LoadList(IdRegistration);
+                        $("#examplePayment").modal('hide');
                     }
                     showError(data.message, 3000);
                 },
@@ -718,9 +741,13 @@
                     $("#dathanhtoan").text(data.Dathanhtoan);
                     $("#conlai").text(data.Conlai);
                     $("#tongthanhtoan").text(data.Discount);
+                    let con = parseFloat(data.Conlai.replace(/,/g, '')); // Remove all commas
+                    if (con == 0) {
+                        $("#btnThutien").addClass("hideof");
+                    }
                 },
                 error: function (xhr, status, error) {
-                    showError("Đã tồn tại, vui lòng kiểm tra lại!", 3000);
+                    //showError("Đã tồn tại, vui lòng kiểm tra lại!", 3000);
                 }
             })
         }

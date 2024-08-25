@@ -271,11 +271,12 @@
                                 <td><input type="text" name="tongtien" value="0" class="form-control text-end" id="tongtien" /></td>
                             </tr>
                             <tr>
-                            <td colspan="6" class="text-end">
-                                <button type="button" class="btn btn-success" onclick="submit_order()">
-                                    <i class="ti ti-shopping-cart-plus"></i> Xác nhận đặt hàng
-                                </button>
-                            </td>                        
+                                <td colspan="6" class="text-end">
+                                    <span class="loader"></span>
+                                    <button type="button" class="btn btn-success" onclick="submit_order()">
+                                        <i class="ti ti-shopping-cart-plus"></i> Xác nhận đặt hàng
+                                    </button>
+                                </td>                        
                             </tr>
                         </tfoot>
                         
@@ -336,6 +337,7 @@
                     </table>
                 </div>
                 <div class="modal-footer text-start">
+                    <span class="loader"></span>
                     <button type="button" class="btn btn-success" onclick="submit_statusorder()" id="btn_submit">
                         <i class="ti ti-refresh"></i> Cập nhật đơn hàng
                     </button>
@@ -353,7 +355,7 @@
         Loadlist(1);
         Loadlist_Count();
     });
-    
+
     function Loadlist(i) {
         $('#showlist').html("");
         $("#loading").html("<span class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></span>");
@@ -478,24 +480,29 @@
     var isProcessing = false;
     function submit_order() {
         if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
         $.ajax({
             url: '@Url.Action("Submit_order", "Orders")',
             type: "POST",
-            data: $("#form_dathang").serialize()
-            , dataType: "json",
+            data: $("#form_dathang").serialize(),
+            dataType: "json",
             success: function (data) {
                 if (data.status == "ok") {
                     $('#exampleModal').modal('hide');
                     Loadlist(1);
                     showSuccess("Đã đặt hàng thành công!", 3000);
-                    isProcessing = false;
-                }
-                else {
+                } else {
                     showError(data.status, 3000);
-                    isProcessing = false;
                 }
+                isProcessing = false; // Hoàn thành xử lý
+                $(".loader").html("");
             },
-            error: function () { showError('Lỗi!', 3000); }
+            error: function () {
+                showError('Lỗi!', 3000);
+                isProcessing = false; // Hoàn thành xử lý khi có lỗi
+                $(".loader").html("");
+            }
         });
     }
     function submit_statusorder() {
@@ -504,13 +511,14 @@
         var status = $("#Status").val();
         var description = $("#statusDescription").val();
         var fileInput = $("#Image")[0];
-        var file = fileInput.files[0]; 
+        var file = fileInput.files[0];
 
         if (!idOrder || !status) {
             showError('IdOrder và Status không được để trống!', 3000);
             return;
         }
         isProcessing = true; // Đánh dấu là đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
         var formData = new FormData();
         formData.append("IdOrder", idOrder);
         formData.append("Status", status);
@@ -531,18 +539,23 @@
                     showSuccess("Đã cập nhật thành công!", 3000);
                 } else {
                     showError(data.status, 3000);
-                    isProcessing = false;
                 }
+                isProcessing = false;
+                $(".loader").html("");
             },
             error: function (xhr, status, error) {
                 var errorMessage = xhr.status + ': ' + xhr.statusText;
                 showError('Lỗi! ' + errorMessage, 3000);
                 isProcessing = false;
+                $(".loader").html("");
             }
         });
     }
 
     function Cancel_Order(Id) {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đánh dấu là đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
         if (confirm('Bạn có muốn hủy đơn hàng này?')) {
             $.ajax({
                 url: '@Url.Action("Cancel_Order", "Orders")',
@@ -557,9 +570,13 @@
                     } else {
                         showError(data.message,3000);
                     }
+                    isProcessing = false;
+                    $(".loader").html("");
                 },
                 error: function () {
                     showError('Error deleting employee',3000);
+                    isProcessing = false;
+                    $(".loader").html("");
                 }
             });
         }

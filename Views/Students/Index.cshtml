@@ -83,14 +83,14 @@
                 @(item.DateOfBirth==null?"":item.DateOfBirth.Value.ToString("dd/MM/yyyy"))
             </td>
             <td class="text-center">
-                @Html.DisplayFor(modelItem => item.Status)
+                @Html.Raw(item.Status)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.NameOfUser)
             </td>
             <td class="text-end">
                 <a href="/students/details/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
-                <a href="javascript:Delete_Student(@item.Id)" class="me-1"><i class="ti ti-trash text-danger"></i></a>
+                <a href="javascript:Submit_Delete(@item.Id)" class="me-1"><i class="ti ti-trash text-danger"></i></a>
                 <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="ti ti-dots-vertical"></i>
                 </a>
@@ -109,10 +109,10 @@
     </ul>
 </nav>
 <script>
-    function Delete_Student(Id) {
+    function Submit_Delete(Id) {
         if (confirm('Bạn có muốn xóa học viên này?')) {
             $.ajax({
-                url: '@Url.Action("Delete_Students", "Students")',
+                url: '@Url.Action("Submit_Delete", "Students")',
                 type: 'POST',
                 data: {
                     id: Id

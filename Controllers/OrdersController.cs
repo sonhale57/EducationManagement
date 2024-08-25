@@ -8,11 +8,14 @@ using System.Data.Entity;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Transactions;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.UI.WebControls;
 using System.Xml.Linq;
 using static System.Runtime.CompilerServices.RuntimeHelpers;
+using System.Transactions;
+using Transaction = SuperbrainManagement.Models.Transaction;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -140,11 +143,17 @@ namespace SuperbrainManagement.Controllers
                     count++;
                     string badgeStatus = "";
                     string strbtn = "";
+                    string strbtnprint = "";
                     if (reader["status"].ToString() == "1")
                     {
                         badgeStatus = "<span class='badge text-success bg-light'>Đơn hàng mới</span>";
                         strbtn = "<a href=\"javascript:Cancel_Order(" + reader["Id"] + ")\" class=\"btn btn-danger btn-sm ms-1\"><i class=\"ti ti-trash\"></i></a>" 
                                 + "<a href=\"/Orders/PrintOrder?IdOrder=" + reader["Id"] +"\" class=\"btn btn-success btn-sm ms-1\"><i class=\"ti ti-printer\"></i></a>";
+                        if (CheckUsers.CheckHQ())
+                        {
+                            strbtnprint= "<a href=\"/Orders/PrintOrderDelivery?IdOrder=" + reader["Id"] + "\" class=\"btn btn-success btn-sm ms-1\"><i class=\"ti ti-printer\"></i> In phiếu</a>";
+
+                        }
                     }
                     else if (reader["status"].ToString() == "2")
                     {
@@ -182,6 +191,7 @@ namespace SuperbrainManagement.Controllers
                                         + "<p class=\"mb-1\"><i class=\"ti ti-shopping-cart\"></i> <a href='javascript:Status_Order(" + reader["Id"] + ")' class='text-dark fw-bolder'>" + reader["Code"] + "</a> " + badgeStatus + "</p>"
                                         + "<div>"
                                             +strbtn
+                                            +strbtnprint
                                         + "</div>"
                                     + "</div>"
                                 + "</div>"
@@ -529,86 +539,108 @@ namespace SuperbrainManagement.Controllers
         {
             int idbranch_hq = db.Branches.SingleOrDefault(x => x.Code.ToLower() == "hq").Id;
             string status = "ok";
-            string Name = Form["Name"].ToString();
-            string Phone = Form["Phone"].ToString();
-            string Address = Form["Address"].ToString();
-            string Description = Form["Description"].ToString();
+            string Name = Form["Name"];
+            string Phone = Form["Phone"];
+            string Address = Form["Address"];
+            string Description = Form["Description"];
             int Count = int.Parse(Form["countline"].ToString());
             decimal Tongtien = Decimal.Parse(Form["tongtien"].ToString().Replace(",", ""));
-            if (Tongtien > 0)
+            if (string.IsNullOrEmpty(Address))
             {
-                var order = new Order()
+                Address = "...";
+
+            }
+
+            using (var scope = new TransactionScope())
+            {
+                try
                 {
-                    DateCreate = DateTime.Now,
-                    IdUser = int.Parse(CheckUsers.iduser()),
-                    IdBranch = int.Parse(CheckUsers.idBranch()),
-                    Status = 1,
-                    Phone = Phone,
-                    Address = Address,
-                    Description = Description,
-                    Code = Getcode_order(),
-                    Enable = true,
-                };
-                var receiption = new WarehouseReceiption()
-                {
-                    Name = Name,
-                    Phone = Phone,
-                    Address = Address,
-                    Description = Description,
-                    Code = Getcode_receiption(false),
-                    Status = true,
-                    Type = false,
-                    Enable = true,
-                    IdUser = int.Parse(CheckUsers.iduser()),
-                    IdBranch = idbranch_hq,
-                    Credit = 0,
-                    Debit = 0,
-                    DateCreate = DateTime.Now,
-                };
-                db.Orders.Add(order);
-                db.WarehouseReceiptions.Add(receiption);
-                db.SaveChanges();
-                int OrderId = order.Id;
-                int ReceiptionId = receiption.Id;
-                for (int i = 1; i <= Count; i++)
-                {
-                    int heso = int.Parse(Form["NumberOfPackage_" + i].ToString());
-                    int idproduct = int.Parse(Form["IdProduct_" + i].ToString());
-                    decimal dongia = Decimal.Parse(Form["Price_" + i].ToString());
-                    int soluong = int.Parse(Form["Amount_" + i].ToString());
-                    int soluongxuat = soluong * heso;
-                    Decimal thanhtien = Decimal.Parse(Form["TotalAmount_" + i].ToString().Replace(",", ""));
-                    if (soluong > 0)
+                    if (Tongtien > 0)
                     {
-                        var details = new OrderDetail()
+                        var order = new Order()
                         {
-                            IdOrder = OrderId,
-                            IdProduct = idproduct,
-                            Amount = soluong,
-                            Price = dongia,
-                            TotalAmount = thanhtien,
-                            Status = true
+                            DateCreate = DateTime.Now,
+                            IdUser = int.Parse(CheckUsers.iduser()),
+                            IdBranch = int.Parse(CheckUsers.idBranch()),
+                            Status = 1,
+                            Phone = Phone,
+                            Address = Address,
+                            Description = Description,
+                            Code = Getcode_order(),
+                            Enable = true,
                         };
-                        var product = new ProductReceiptionDetail()
+                        var receiption = new WarehouseReceiption()
                         {
-                            IdProduct = idproduct,
-                            IdReceiption = ReceiptionId,
-                            Amount = soluongxuat,
-                            Price = dongia,
-                            TotalAmount = thanhtien,
-                            Discount = 0,
-                            Type = false
+                            Name = Name,
+                            Phone = Phone,
+                            //Address = (Address==null?"-":Address),
+                            Description = "Đơn hàng "+order.Code,
+                            Code = Getcode_receiption(false),
+                            Status = true,
+                            Type = false,
+                            Enable = true,
+                            IdUser = int.Parse(CheckUsers.iduser()),
+                            IdBranch = idbranch_hq,
+                            Credit = 0,
+                            Debit = 0,
+                            DateCreate = DateTime.Now,
                         };
-                        db.ProductReceiptionDetails.Add(product);
-                        db.OrderDetails.Add(details);
+                        db.Orders.Add(order);
+                        db.WarehouseReceiptions.Add(receiption);
                         db.SaveChanges();
+
+                        int OrderId = order.Id;
+                        int ReceiptionId = receiption.Id;
+                        for (int i = 1; i <= Count; i++)
+                        {
+                            int heso = int.Parse(Form["NumberOfPackage_" + i].ToString());
+                            int idproduct = int.Parse(Form["IdProduct_" + i].ToString());
+                            decimal dongia = Decimal.Parse(Form["Price_" + i].ToString());
+                            int soluong = int.Parse(Form["Amount_" + i].ToString());
+                            int soluongxuat = soluong * heso;
+                            Decimal thanhtien = Decimal.Parse(Form["TotalAmount_" + i].ToString().Replace(",", ""));
+
+                            if (soluong > 0)
+                            {
+                                var details = new OrderDetail()
+                                {
+                                    IdOrder = OrderId,
+                                    IdProduct = idproduct,
+                                    Amount = soluong,
+                                    Price = dongia,
+                                    TotalAmount = thanhtien,
+                                    Status = true
+                                };
+                                var product = new ProductReceiptionDetail()
+                                {
+                                    IdProduct = idproduct,
+                                    IdReceiption = ReceiptionId,
+                                    Amount = soluongxuat,
+                                    Price = dongia,
+                                    TotalAmount = thanhtien,
+                                    Discount = 0,
+                                    Type = false
+                                };
+                                db.ProductReceiptionDetails.Add(product);
+                                db.OrderDetails.Add(details);
+                            }
+                        }
+                        db.SaveChanges();
+
+                        scope.Complete(); // Complete the transaction
+                    }
+                    else
+                    {
+                        status = "Không tìm thấy vật tư cần đặt";
                     }
                 }
+                catch (Exception ex)
+                {
+                    status = "Đã xảy ra lỗi: " + ex.Message;
+                    // The transaction is automatically rolled back if scope.Complete() is not called.
+                }
             }
-            else
-            {
-                status = "Không tìm thấy vật tư cần đặt";
-            }
+
             var item = new
             {
                 status = status
@@ -830,13 +862,14 @@ namespace SuperbrainManagement.Controllers
                 reader.Close();
             }
         }
-
-        public ActionResult PrintOrder(int IdOrder)
+        public ActionResult PrintOrderDelivery(int IdOrder)
         {
             ViewBag.IdOrder = IdOrder;
+            var user = db.Users.Find(Convert.ToInt32(CheckUsers.iduser()));
+            ViewBag.NguoiIn = user.Name;
             return View();
         }
-        public ActionResult Loadlist_PrintOrder(int id) 
+        public ActionResult Loadlist_PrintOrderDelivery(int id) 
         {
             string str = "",strCode="",strTongtien="";
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
@@ -875,14 +908,74 @@ namespace SuperbrainManagement.Controllers
             string strTen =order.User.Name;
             string strDiachi=order.Address.ToString();
             string strdienthoai = order.Phone.ToString();
+            string strDescription=order.Description;
             string strDate = order.DateCreate.Value.ToString("dd/MM/yyyy");
             var item = new { 
                 str, strCode,strTongtien,
-                strCoso, strTen, strDiachi,strdienthoai,strDate
+                strCoso, strTen, strDiachi,strdienthoai,strDate,strDescription
             };
             return Json(item,JsonRequestBehavior.AllowGet); 
         }
-    
+        
+        public ActionResult PrintOrder(int IdOrder)
+        {
+            ViewBag.IdOrder = IdOrder;
+            return View();
+        }
+        public ActionResult Loadlist_PrintOrder(int id)
+        {
+            string str = "", strCode = "", strTongtien = "";
+            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "select p.Code as CodeProduct,p.Name,p.Unit,p.Image,od.Amount,od.Price,od.TotalAmount,o.Code as CodeOrder,o.Address,o.Phone,o.Description,o.Status,us.Name as Username,o.DateCreate,(select sum(TotalAmount) from OrderDetail where IdOrder=o.Id) as tongtien "
+                                    + " from OrderDetail od inner join [Order] o on o.id = od.IdOrder, Product p,[User] us"
+                                    + " where p.id=od.IdProduct and us.Id=o.IdUser and o.Id=" + id;
+                SqlCommand command = new SqlCommand(query, connection);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                double tongtien = 0;
+                int count = 0;
+                while (reader.Read())
+                {
+                    count++;
+                    double dongia = Double.Parse(reader["Price"].ToString());
+                    double thanhtien = Double.Parse(reader["TotalAmount"].ToString());
+                    tongtien += thanhtien;
+                    str += "<tr>"
+                            + "<td class='text-center'>" + count + "</td>"
+                            + "<td class=''>" + reader["Name"].ToString() + "</td>"
+                            + "<td class='text-center'>" + reader["Unit"].ToString() + "</td>"
+                            + "<td class='text-end'>" + string.Format("{0:N0}", dongia) + "</td>"
+                            + "<td class='text-center'>" + reader["Amount"].ToString() + "</td>"
+                            + "<td class='text-end'>" + string.Format("{0:N0}", thanhtien) + "</td>"
+                           + "</tr>";
+                    strCode = reader["CodeOrder"].ToString();
+                }
+                str += "<tr><td colspan=5 class='text-end'>Tổng tiền: </td><td class='text-end'>" + string.Format("{0:N0}", tongtien) + "</td></tr>";
+                strTongtien = string.Format("{0:N0}", tongtien);
+                reader.Close();
+            }
+            var order = db.Orders.Find(id);
+            string strCoso = order.Branch.Name;
+            string strTen = order.User.Name;
+            string strDiachi = order.Address.ToString();
+            string strdienthoai = order.Phone.ToString();
+            string strDate = order.DateCreate.Value.ToString("dd/MM/yyyy");
+            var item = new
+            {
+                str,
+                strCode,
+                strTongtien,
+                strCoso,
+                strTen,
+                strDiachi,
+                strdienthoai,
+                strDate
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult Statistics()
         {
             if (CheckUsers.iduser() == "")
@@ -901,11 +994,15 @@ namespace SuperbrainManagement.Controllers
                 return View();
             }
         }
-        public ActionResult Load_Statistics(DateTime Fromdate,DateTime Todate,int IdBranch)
+        public ActionResult Load_Statistics(DateTime Fromdate,DateTime Todate,int? IdBranch)
         {
             string str = "";
             int IdBranchHQ = db.Branches.SingleOrDefault(x => x.Code.ToLower() == "hq"&&x.Enable==true).Id;
             var list=db.Orders.Where(x=>x.DateCreate>=Fromdate&&x.DateCreate<=Todate);
+            if (IdBranch == null)
+            {
+                IdBranch = Convert.ToInt32(CheckUsers.idBranch());
+            }
             if(IdBranch != IdBranchHQ) //Khác HQ
             {
                 list= list.Where(x=>x.IdBranch==IdBranch);
@@ -973,13 +1070,16 @@ namespace SuperbrainManagement.Controllers
                 return View();
             }
         }
-        public ActionResult Load_DetailStatistics(DateTime Fromdate, DateTime Todate, int IdBranch)
+        public ActionResult Load_DetailStatistics(DateTime Fromdate, DateTime Todate, int? IdBranch)
         {
             string str = "";
             string querycn = "";
             int IdBranchHQ = db.Branches.SingleOrDefault(x => x.Code.ToLower() == "hq" && x.Enable == true).Id;
             var list = db.Orders.Where(x => x.DateCreate >= Fromdate && x.DateCreate <= Todate);
-
+            if (IdBranch == null)
+            {
+                IdBranch = Convert.ToInt32(CheckUsers.idBranch());
+            }
             if (IdBranch != IdBranchHQ) //Khác HQ
             {
                 querycn = " and o.IdBranch=" + IdBranch;

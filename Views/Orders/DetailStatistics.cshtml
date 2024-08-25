@@ -55,24 +55,24 @@
         $("#fromdate").val(formattedLastMonth);
         Loadlist();
     });
-     function Loadlist() {
-     $("#loading").html("<td colspan=10 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
-      $.ajax({
-          url: '@Url.Action("Load_DetailStatistics", "Orders")',
-          type: "GET",
-          data: {
-              idBranch: $("#IdBranch").val(),
-              Fromdate: $("#fromdate").val(),
-              Todate: $("#todate").val()
-          },
-          success: function (data) {
-             $("#loading").html("");
-              $('#showlist').html(data.str);    
-          },
-          error: function (xhr, error) {
-              console.log(error);
-          }
-      });
+    function Loadlist() {
+        $("#loading").html("<td colspan=10 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
+        $.ajax({
+            url: '@Url.Action("Load_DetailStatistics", "Orders")',
+            type: "GET",
+            data: {
+                IdBranch: $("#IdBranch").val(),
+                Fromdate: $("#fromdate").val(),
+                Todate: $("#todate").val()
+            },
+            success: function (data) {
+                $("#loading").html("");
+                $('#showlist').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
     }
     document.getElementById('exportButton').addEventListener('click', function () {
         var wb = XLSX.utils.table_to_book(document.getElementById('tableToPrint'), { sheet: "Sheet1" });

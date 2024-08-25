@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Superbrain Management Software</title>
+    <title>@ViewBag.Title - Phần mềm Quản Lý Superbrain</title>
     <link rel="shortcut icon" type="image/png" href="~/assets/images/logos/icon web.png" />
     <link rel="stylesheet" href="~/assets/css/styles.css" />
     <link href="~/assets/css/select2.css" rel="stylesheet" />
@@ -174,7 +174,7 @@
                             </ul>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="javascript:void(0)" aria-expanded="false">
+                            <a class="sidebar-link" href="/students" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-user fs-6"></i>
                                 </span>
@@ -224,7 +224,7 @@
                                 <span>
                                     <i class="ti ti-shopping-cart"></i>
                                 </span>
-                                <span class="hide-menu"> Quản lý Đơn hàng</span>
+                                <span class="hide-menu"> Đơn hàng</span>
                             </a>
                             <ul aria-expanded="false" class="collapse first-level base-level-line">
                                 <li class="sidebar-item">
@@ -234,7 +234,7 @@
                                 </li>
                                 <li class="sidebar-item">
                                     <a href="/orders" class="sidebar-link">
-                                        <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Đơn hàng</span>
+                                        <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Quản lý Đơn hàng</span>
                                     </a>
                                 </li>
                                 <li class="sidebar-item">
@@ -257,8 +257,8 @@
                                 <span class="hide-menu"> Quản lý Kho</span>
                             </a>
                             <ul aria-expanded="false" class="collapse first-level base-level-line">
-                                <li class="sidebar-item">
-                                    <a href="/products" class="sidebar-link @SuperbrainManagement.Controllers.CheckUsers.CheckHQ_Css()">
+                                <li class="sidebar-item @SuperbrainManagement.Controllers.CheckUsers.checkRole(3)">
+                                    <a href="/products" class="sidebar-link">
                                         <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Danh mục vật tư</span>
                                     </a>
                                 </li>
