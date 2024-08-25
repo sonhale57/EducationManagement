@@ -33,7 +33,7 @@ namespace SuperbrainManagement.Controllers
                 countcum++;
                 str += "<tr>" 
                     +"<td  class='text-success fw-bolder text-center'>"+countcum+"</td>" 
-                    +"<td colspan=6 class='text-success fw-bolder'>"+c.Name+"" 
+                    +"<td colspan=7 class='text-success fw-bolder'>"+c.Name+"" 
                         +"<a href=\"/productcategories/edit/" + c.Id + "\" class=\"ms-2\"><i class=\"ti ti-edit text-primary fw-bolder\"></i></a>"
                         + "<a href=\"javascript:Delete_category(" + c.Id + ")\" class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a>"
                     +"</td>" 
@@ -46,11 +46,9 @@ namespace SuperbrainManagement.Controllers
                         "<td class='text-center align-content-center'>"+count+"</td>" +
                         "<td class='text-center align-content-center'>" + cn2.Code+"</td>" +
                         "<td class='text-left align-content-center'>" + cn2.Name+"</td>" +
-                        "<td class='text-left align-content-start'>" +
-                        "Đang học: "+ count_student(cn2.Id) + "<br/>" +
-                        "Tính phí "+configTimePayment.Value.AddMonths(1).ToString("MM/yyyy")+": " + count_student(cn2.Id)  +
-                        "</td>" +
-                        "<td class='text-center align-content-center'>" + cn2.DateExpire+"</td>" +
+                        "<td class='text-center align-content-center'>" + (cn2.ContractExpire != null ? cn2.ContractExpire.Value.ToString("dd/MM/yyyy") : "-") +"</td>" +
+                        "<td class='text-center align-content-center'>" + (cn2.DateExpire != null ? cn2.DateExpire.Value.ToString("dd/MM/yyyy") : "-") +"</td>" +
+                        "<td class='text-center align-content-center'>" + (cn2.DateExpireOnline != null ? cn2.DateExpireOnline.Value.ToString("dd/MM/yyyy") : "-") +"</td>" +
                         "<td class='text-center align-content-center'>" + (cn2.StatusActiveOnline==true?"<span class='text-success'>Đã thanh toán</span>":"<span class='text-danger'>Chưa thanh toán</span>") + "</td>" +
                         "<td class='text-end align-content-center'>" +
                         "<a href='/branches/edit/"+cn2.Id+"'><i class='ti ti-edit text-primary'></i></a>" +

@@ -199,6 +199,14 @@ namespace SuperbrainManagement.Controllers
             return View();
         }
         public decimal Check_paymentRegistration(int IdRegistration) {
+            decimal vouc = 0;
+            var voucher = db.StudentVouchers.Where(x=>x.IdTransaction== IdRegistration);
+            if (voucher != null) {
+                foreach(var i in voucher)
+                {
+                    vouc +=(decimal)i.Voucher;
+                }
+            }
             decimal tongthanhtoan = 0;
             var trans = db.Transactions.Where(x => x.IdRegistration ==IdRegistration);
             if (trans.Count() > 0) {
@@ -211,7 +219,7 @@ namespace SuperbrainManagement.Controllers
             {
                 tongthanhtoan = 0;
             }
-            return tongthanhtoan;
+            return tongthanhtoan+vouc;
         }
         public ActionResult getData(string IdRegistration)
         {
@@ -1250,91 +1258,111 @@ namespace SuperbrainManagement.Controllers
             // Kiểm tra giá trị đầu vào
             if (Tienthu <= 0 && Voucher <= 0)
             {
-                status = "error";
-                message = "Số tiền thu không thể nhỏ hơn 0!";
-                return Json(new { status, message }, JsonRequestBehavior.AllowGet);
+                return Json(new { status = "error", message = "Số tiền thu không thể nhỏ hơn 0!" }, JsonRequestBehavior.AllowGet);
             }
 
             var registration = db.Registrations.Find(IdRegistration);
             if (registration == null)
             {
-                status = "error";
-                message = "Không tìm thấy đăng ký!";
-                return Json(new { status, message }, JsonRequestBehavior.AllowGet);
+                return Json(new { status = "error", message = "Không tìm thấy đăng ký!" }, JsonRequestBehavior.AllowGet);
             }
 
             try
             {
-                var rc = db.RegistrationCourses.Where(x => x.IdRegistration == IdRegistration).ToList();
-                var rp = db.RegistrationProducts.Where(x => x.IdRegistration == IdRegistration).ToList();
-                var ro = db.RegistrationOthers.Where(x => x.IdRegistration == IdRegistration).ToList();
-
-                var transaction = new Transaction()
+                using (var transaction = db.Database.BeginTransaction())
                 {
-                    IdBranch = registration.IdBranch,
-                    IdStudent = registration.IdStudent,
-                    DateCreate = DateTime.Now,
-                    Description = "Thu tiền phiếu đăng ký khóa học " + registration.Code,
-                    Discount = 0,
-                    Status = true,
-                    Address = registration.Student.Address,
-                    Phone = registration.Student.Phone,
-                    Name = registration.Student.Name,
-                    Type = true,
-                    Code = Getcode_transaction(true),
-                    TotalAmount = Tienthu,
-                    Amount = Tienthu,
-                    PaymentMethod = Method,
-                    IdUser = Convert.ToInt32(CheckUsers.iduser()),
-                    IdRegistration = IdRegistration
-                };
+                    var rc = db.RegistrationCourses.Where(x => x.IdRegistration == IdRegistration).ToList();
+                    var rp = db.RegistrationProducts.Where(x => x.IdRegistration == IdRegistration).ToList();
+                    var ro = db.RegistrationOthers.Where(x => x.IdRegistration == IdRegistration).ToList();
 
-                db.Transactions.Add(transaction);
-
-                // Cập nhật trạng thái đăng ký và các bản ghi liên quan
-                registration.Status = true;
-                db.Entry(registration).State = EntityState.Modified;
-
-                if (rc.Any())
-                {
-                    foreach (var i in rc)
+                    var newTransaction = new Transaction()
                     {
-                        i.Status = true;
-                        db.Entry(i).State = EntityState.Modified;
-                    }
-                }
+                        IdBranch = registration.IdBranch,
+                        IdStudent = registration.IdStudent,
+                        DateCreate = DateTime.Now,
+                        Description = "Thu tiền phiếu đăng ký khóa học " + registration.Code,
+                        Discount = 0,
+                        Status = true,
+                        Address = registration.Student.Address,
+                        Phone = registration.Student.Phone,
+                        Name = registration.Student.Name,
+                        Type = true,
+                        Code = Getcode_transaction(true),
+                        TotalAmount = Tienthu,
+                        Amount = Tienthu,
+                        PaymentMethod = Method,
+                        IdUser = Convert.ToInt32(CheckUsers.iduser()),
+                        IdRegistration = IdRegistration
+                    };
 
-                if (rp.Any())
-                {
-                    foreach (var i in rp)
+                    db.Transactions.Add(newTransaction);
+
+                    // Cập nhật trạng thái đăng ký và các bản ghi liên quan
+                    registration.Status = true;
+                    db.Entry(registration).State = EntityState.Modified;
+
+                    if (rc.Any())
                     {
-                        i.Status = true;
-                        db.Entry(i).State = EntityState.Modified;
+                        foreach (var i in rc)
+                        {
+                            i.Status = true;
+                            db.Entry(i).State = EntityState.Modified;
+                        }
                     }
-                }
 
-                if (ro.Any())
-                {
-                    foreach (var i in ro)
+                    if (rp.Any())
                     {
-                        i.Status = "1";
-                        db.Entry(i).State = EntityState.Modified;
+                        foreach (var i in rp)
+                        {
+                            i.Status = true;
+                            db.Entry(i).State = EntityState.Modified;
+                        }
                     }
+
+                    if (ro.Any())
+                    {
+                        foreach (var i in ro)
+                        {
+                            i.Status = "1";
+                            db.Entry(i).State = EntityState.Modified;
+                        }
+                    }
+
+                    if (Voucher > 0)
+                    {
+                        int? iddk = IdRegistration;
+                        var studentVoucher = new StudentVoucher()
+                        {
+                            Voucher = Voucher,
+                            IdStudent = registration.IdStudent,
+                            DateCreate = DateTime.Now,
+                            Description = "Sử dụng cho phiếu đăng ký " + registration.Code,
+                            IdUser = int.Parse(CheckUsers.iduser()),
+                            Active = true,
+                            Type = false,
+                            Enable = true,
+                            IdTransaction = IdRegistration
+                        };
+                        db.StudentVouchers.Add(studentVoucher);
+                    }
+
+                    db.SaveChanges();
+                    transaction.Commit();
+
+                    status = "ok";
+                    message = "Đã tạo phiếu thu thành công!";
                 }
-
-                db.SaveChanges();
-
-                status = "ok";
-                message = "Đã tạo phiếu thu thành công!";
             }
             catch (Exception ex)
             {
                 status = "error";
                 message = $"Lỗi hệ thống: {ex.Message}";
+                // Ghi log lỗi tại đây nếu cần thiết
             }
 
             return Json(new { status, message }, JsonRequestBehavior.AllowGet);
         }
+
 
         // GET: Students/Edit/5
         public ActionResult Edit(int? id)
@@ -1568,7 +1596,7 @@ namespace SuperbrainManagement.Controllers
             return Json(item, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult ShowTimeTableData(int? idClassShowTimeTbl, string fromDate, string toDate, int studentId)
+        public ActionResult ShowTimeTableData(int? idClassShowTimeTbl, string fromDate, string toDate, int studentId,int idCourse)
         {
             var schedulesbyClass = db.Schedules
                 .Where(x => x.IdClass == idClassShowTimeTbl && (bool)x.Active).Include(x => x.Employee).ToList()

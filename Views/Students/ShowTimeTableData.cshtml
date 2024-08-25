@@ -3,75 +3,68 @@
     int stt = 1;
     Layout = "";
 }
-<div class="card">
-    <div class="card-body">
-        <div class="d-sm-flex d-block align-items-center justify-content-between align-content-center mt-3 me-5">
-            <div>
-               
-            </div>
-            <div>
 
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Superbrain Management Software</title>
+    <link rel="shortcut icon" type="image/png" href="~/assets/images/logos/icon web.png" />
+    <link rel="stylesheet" href="~/assets/css/styles.css" />
+    <link href="~/assets/css/select2.css" rel="stylesheet" />
+    <script src="~/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+    <script src="~/assets/js/main.js"></script>
+    @Scripts.Render("~/bundles/jquery")
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/js/jquery-confirm.min.js"></script>
+
+    <style>
+        @@media print {
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="card-body">
+            <div class="d-sm-flex d-block align-items-center justify-content-between align-content-center mt-3 me-5">
+                <div>
+
+                </div>
+                <div>
+
+                </div>
             </div>
         </div>
     </div>
-</div>
-<hr>
-<div class="container">
-    <h1 class="text-center">THỜI KHOÁ BIỂU</h1>
-    <p>Tên học viên: @ViewBag.StudentName</p>
-    <p>Khoá: Pre Basic</p>
-    <p>Lớp: @ViewBag.ClassName</p>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Buổi</th>
-                <th>Ngày</th>
-                <th>Thứ</th>
-                <th>Giờ Học</th>
-            </tr>
-        </thead>
-        <tbody id="datarow">
-            @foreach (var item in ViewBag.timeTableData)
-            {
+    <div class="container">
+        <h3 class="text-center">THỜI KHOÁ BIỂU</h3>
+        <p>Tên học viên: @ViewBag.StudentName</p>
+        <p>Khoá học: @ViewBag.CourseName</p>
+        <p>Lớp: @ViewBag.ClassName</p>
+        <p>Ghi chú:</p>
+        <table class="table table-bordered">
+            <thead>
                 <tr>
-                    <td>@stt</td>
-                    <td>@item.Date</td>
-                    <td>@item.DayOfWeek</td>
-                    <td>@item.TimeSlot</td>
+                    <th class="text-center">Buổi</th>
+                    <th class="text-center">Ngày</th>
+                    <th class="text-center">Thứ</th>
+                    <th class="text-center">Giờ Học</th>
                 </tr>
-                stt++;
-            }
-        </tbody>
-    </table>
-    <p>Ghi chú:</p>
-</div>
-<style>
-    .text-center{
-        text-align:center;
-    }
-    .container{
-        width:85%;
-        margin:0 auto;
-    }
-    .table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .table th,
-    .table td {
-        padding: 8px;
-        text-align: center;
-        border: 1px solid #ddd;
-    }
-
-    .table thead th {
-        background-color: #f2f2f2;
-    }
-
-    .table tbody tr:nth-child(even) {
-        background-color: #f9f9f9;
-    }
-</style>
-
-
+            </thead>
+            <tbody id="datarow">
+                @foreach (var item in ViewBag.timeTableData)
+                {
+                    <tr>
+                        <td class="text-center">@stt</td>
+                        <td class="text-center">@item.Date</td>
+                        <td class="text-center">@item.DayOfWeek</td>
+                        <td class="text-center">@item.TimeSlot</td>
+                    </tr>
+                    stt++;
+                }
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
