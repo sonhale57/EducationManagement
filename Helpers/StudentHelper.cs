@@ -59,7 +59,7 @@ namespace SuperbrainManagement.Helpers
 
         private string GetStatus(int idStudent)
         {
-            var studentJoinClass = db.StudentJoinClasses.FirstOrDefault(x => x.IdStudent == idStudent);
+            var studentJoinClass = db.StudentJoinClasses.OrderByDescending(x => x.Id).FirstOrDefault(x => x.IdStudent == idStudent);
 
             if (studentJoinClass == null)
             {
@@ -72,20 +72,27 @@ namespace SuperbrainManagement.Helpers
 
                 else if (student.Registrations.Any(r => r.RegistrationCourses.Any(s => s.StatusJoinClass == false)))
                 {
-                    return "Chờ xét lớp";
+                    return "<span class='badge bg-secondary rounded-3 fw-semibold'>Chờ xét lớp</span>";
                 }
 
                 else
                 {
-                    return "Đã kết thúc";
+                    if (student.Registrations.Any(r => r.RegistrationCourses.Any(s => s.StatusJoinClass == false)))
+                    {
+                        return "<span class='badge bg-secondary rounded-3 fw-semibold'>Chờ xét lớp</span>";
+                    }
+                    return "<span class='badge bg-danger rounded-3 fw-semibold'>Đã kết thúc</span>";
                 }
             }
 
-            if (studentJoinClass.Fromdate <= DateTime.Now && DateTime.Now <= studentJoinClass.Todate)
-                return "Đang học";
+            if (studentJoinClass.Fromdate <= DateTime.Now && DateTime.Now <= studentJoinClass.Todate) { 
+                return "<span class='badge bg-success rounded-3 fw-semibold'>Đang học</span>";
+            }
 
             if (studentJoinClass.Todate < DateTime.Now)
-                return "Đã kết thúc";
+            {
+                return "<span class='badge bg-danger rounded-3 fw-semibold'>Đã kết thúc</span>";
+            }
 
             return "";
         }

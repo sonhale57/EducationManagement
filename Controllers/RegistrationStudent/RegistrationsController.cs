@@ -21,6 +21,22 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
             var registrations = db.Registrations.Include(r => r.Branch).Include(r => r.Student).Include(r => r.User);
             return View(await registrations.ToListAsync());
         }
+        public ActionResult Prints(int? IdRegistration)
+        {
+            var regis = db.Registrations.Find(IdRegistration);
+            if(regis == null || IdRegistration==null)
+            {
+                return HttpNotFound();
+            }
+            else
+            {
+                if (regis.Status != true)
+                {
+                    TempData["error"] = "<div class=\"alert alert-danger\" role=\"alert\">Phiếu đăng ký này chưa được thanh toán!</div>";
+                }
+            }
+            return View();
+        }
 
         // GET: Registrations/Details/5
         public async Task<ActionResult> Details(int? id)

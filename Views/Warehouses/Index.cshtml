@@ -1,5 +1,6 @@
 ﻿@{
-    ViewBag.Title = "Index";
+    ViewBag.Controller = "Quản lý kho";
+    ViewBag.Title = "Danh sách";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <style>
@@ -51,8 +52,8 @@
             <th class="text-center">STT</th>
             <th>Mã vật tư</th>
             <th>Tên vật tư</th>
-            <th>Đơn vị</th>
-            <th>Đơn giá</th>
+            <th class="text-center">Đơn vị</th>
+            <th class="text-end">Đơn giá</th>
             <th class="text-center">Định mức</th>
             <th class="text-center">Tồn kho</th>
         </tr>
@@ -115,6 +116,7 @@
                     </table>
                 </div>
                 <div class="modal-footer text-start">
+                    <span class="loader"></span>
                     <button type="button" class="btn btn-success" onclick="submit_nhap()">
                         <i class="ti ti-circle-plus"></i> Thêm vào phiếu
                     </button>
@@ -177,6 +179,7 @@
                     </table>
                 </div>
                 <div class="modal-footer text-start">
+                    <span class="loader"></span>
                     <button type="button" class="btn btn-success" onclick="submit_xuat()">
                         <i class="ti ti-circle-plus"></i> Thêm vào phiếu
                     </button>
@@ -290,7 +293,11 @@
         $("#tongtien_xuat").val(tongtien.toLocaleString());
     }
 
+    var isProcessing = false;
     function submit_nhap() {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
         $.ajax({
             url: '@Url.Action("Submit_nhap", "Warehouses")',
             type: "POST",
@@ -299,17 +306,27 @@
             success: function (data) {
                 if (data.status == "ok") {
                     $('#exampleModal').modal('hide');
-                    Loadlist();
                     showSuccess("Đã nhập thành công!", 3000);
+                    Loadlist();
                 }
                 else {
                     showError(data.status, 3000);
                 }
+                isProcessing = false; // Hoàn thành xử lý
+                $(".loader").html("");
             },
-            error: function () { showError('Lỗi!', 3000); }
+            error: function ()
+            {
+                showError('Lỗi!', 3000);
+                isProcessing = false; // Hoàn thành xử lý
+                $(".loader").html("");
+            }
         });
     }
     function submit_xuat() {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
         $.ajax({
             url: '@Url.Action("Submit_xuat", "Warehouses")',
             type: "POST",
@@ -318,14 +335,20 @@
             success: function (data) {
                 if (data.status == "ok") {
                     $('#exampleModal2').modal('hide');
+                    showSuccess("Đã xuất thành công!", 3000);
                     Loadlist();
-                    showSuccess("Đã nhập thành công!", 3000);
                 }
                 else {
                     showError(data.status, 3000);
                 }
+                isProcessing = false; // Hoàn thành xử lý
+                $(".loader").html("");
             },
-            error: function () { showError('Lỗi!', 3000); }
+            error: function () {
+                showError('Lỗi!', 3000);
+                isProcessing = false; // Hoàn thành xử lý
+                $(".loader").html("");
+            }
         });
     }
     $('#exampleModal').on('shown.bs.modal', function (e) {

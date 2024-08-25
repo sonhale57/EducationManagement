@@ -56,6 +56,10 @@ namespace SuperbrainManagement.Controllers
             {
                 querytype = " and trans.Type ='" + type + "'";
             }
+            else
+            {
+                querytype = " and trans.Type ='1'";
+            }
             if (!string.IsNullOrEmpty(sort))
             {
                 switch (sort)
@@ -112,7 +116,7 @@ namespace SuperbrainManagement.Controllers
         string Getcode_transaction(bool type)
         {
             string loai = "";
-            var idbranch = int.Parse(CheckUsers.iduser());
+            var idbranch = int.Parse(CheckUsers.idBranch());
             int nextCode = 0;
             if (type == false)
             {

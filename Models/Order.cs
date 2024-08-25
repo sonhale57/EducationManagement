@@ -29,14 +29,14 @@ namespace SuperbrainManagement.Models
         public string Code { get; set; }
 
         [StringLength(250)]
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         [Required]
         [StringLength(250)]
-        public string Address { get; set; }
+        public string Address { get; set; } = string.Empty;
 
         [StringLength(20)]
-        public string Phone { get; set; }
+        public string Phone { get; set; } = string.Empty;
 
         public int? IdCoupon { get; set; }
 

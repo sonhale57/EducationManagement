@@ -27,6 +27,7 @@ using System.Xml.Linq;
 using System.Data.Entity.Validation;
 using System.Data.Entity.Infrastructure;
 using System.Transactions;
+using Transaction = SuperbrainManagement.Models.Transaction;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -278,6 +279,13 @@ namespace SuperbrainManagement.Controllers
                     idobject = Convert.ToInt32(row["IdReference"]);
                     name = row["Name"].ToString();
                 }
+                string btn = "<a href='javascript:Delete_item(" + IdRegistration + "," + idobject + "," + type + ")' class='text-danger'>" +
+                        "<i class='ti ti-trash font-size-18'></i>" +
+                    "</a>";
+                if(registration.Status == true)
+                {
+                    btn = "";
+                }
                 var newRow = "<tr>" +
                     "<td class='text-center align-content-center'>" + i + "</td>" +
                     "<td class='text-start align-content-center'>" + name + "</td>" +
@@ -286,9 +294,7 @@ namespace SuperbrainManagement.Controllers
                     "<td class='text-end align-content-center'>" +  giam + "</td>" +
                     "<td class='text-end align-content-center'>" + thanhtien + "</td>" +
                     "<td class='text-center align-content-center'>" +
-                    "<a href='javascript:Delete_item(" + IdRegistration+","+idobject+","+type+")' class='text-danger'>" +
-                    "<i class='ti ti-trash font-size-18'></i>" +
-                    "</a>" +
+                    btn+
                     "</td>" +
                     "</tr>";
 
@@ -307,7 +313,8 @@ namespace SuperbrainManagement.Controllers
                 Conlai = string.Format("{0:N0}", conlai),
                 DateCreate = Convert.ToDateTime(registration.DateCreate).ToString("dd/MM/yyyy"),
                 idRegistrations = registration.Id,
-                Code = registration.Code
+                Code = registration.Code,
+                Status = registration.Status
             };
 
             return Json(result, JsonRequestBehavior.AllowGet);
@@ -529,14 +536,14 @@ namespace SuperbrainManagement.Controllers
                     Console.WriteLine("test:" +reader["NameClass"].ToString());   
                     count++;
                     str +="<tr>"
-                        + "<td>" + count + "</td>"
+                        + "<td class='text-center'>" + count + "</td>"
                         + "<td>" + reader["Code"].ToString() + "</td>"
                         + "<td>" + reader["NameCourse"].ToString() + "</td>"
                         + "<td>" + reader["NameClass"].ToString() + "</td>"
-                        + "<td>" + DateTime.Parse(reader["Fromdate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
-                        + "<td>" + DateTime.Parse(reader["Todate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
+                        + "<td class='text-center'>" + DateTime.Parse(reader["Fromdate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
+                        + "<td class='text-center'>" + DateTime.Parse(reader["Todate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
                         + "<td class='text-center'>0/" + reader["Sessions"].ToString() + "</td>"
-                        + "<td>" + DateTime.Parse(reader["DateCreate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
+                        + "<td class='text-center'>" + DateTime.Parse(reader["DateCreate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
                         + "<td class='text-center'>"+(DateTime.Parse(reader["DateCreate"].ToString())>DateTime.Now?"<i class='ti ti-circle-check text-danger' title='Đã kết khóa'></i>": "<i class='ti ti-circle-check text-success' title='Đang học'></i>") +"</td>"
                         + "</tr>";
                 }
@@ -545,47 +552,121 @@ namespace SuperbrainManagement.Controllers
             var data = new { str };
             return Json(data, JsonRequestBehavior.AllowGet);
         }
-        public ActionResult Load_khoadangky(int? idStudent) 
+        public ActionResult Load_khoadangky(int? idStudent)
         {
             string str = "";
-            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             int count = 0;
+
+            // Kiểm tra đầu vào
+            if (idStudent == null)
+            {
+                return Json(new { str = "ID sinh viên không hợp lệ" }, JsonRequestBehavior.AllowGet);
+            }
+
+            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "select s.Id,re.Id as IdRegistration,re.Code as Code,rec.IdCourse,course.Name as NameCourse ,re.DateCreate,rec.Status, rec.TotalAmount,rec.StatusExchangeCourse,rec.StatusJoinClass,rec.StatusExtend,rec.StatusReserve from Student s inner join registration re on re.IdStudent= s.id inner join RegistrationCourse rec on rec.IdRegistration = re.id, Course course where course.id= rec.IdCourse and s.id=" + idStudent;
+                // Truy vấn sử dụng tham số hóa để ngăn chặn SQL Injection
+                string query = @"
+                                SELECT s.Id, re.Id AS IdRegistration, re.Code AS Code, rec.IdCourse, course.Name AS NameCourse, 
+                                re.DateCreate, rec.Status, rec.TotalAmount, rec.StatusExchangeCourse, 
+                                rec.StatusJoinClass, rec.StatusExtend, rec.StatusReserve 
+                                FROM Student s 
+                                INNER JOIN Registration re ON re.IdStudent = s.Id 
+                                INNER JOIN RegistrationCourse rec ON rec.IdRegistration = re.Id 
+                                INNER JOIN Course course ON course.Id = rec.IdCourse 
+                                WHERE s.Id = @IdStudent";
+
                 SqlCommand command = new SqlCommand(query, connection);
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-                while (reader.Read())
+                command.Parameters.AddWithValue("@IdStudent", idStudent);
+
+                try
                 {
-                    // Status = reader["status"],
-                    // StatusExchangeCourse = reader["statusexchangecourse"].ToString(),
-                    // StatusJoinClass= reader["StatusJoinClass"].ToString(),
-                    // StatusExtend = reader["StatusExtend"].ToString()
-                    double amount = Double.Parse(reader["TotalAmount"].ToString());
-                    count++;
-                    str +="<tr>"
-                        +"<td>"+count+"</td>"
-                        +"<td>"+ reader["Code"].ToString() + "</td>"
-                        +"<td>"+reader["NameCourse"].ToString() + "</td>"
-                        +"<td>"+ string.Format("{0:N0} đ", amount) + "</td>"
-                        +"<td>"+ reader["DateCreate"].ToString() + "</td>"
-                        +"<td class='text-center'>"+ (Convert.ToBoolean(reader["Status"]) ? "<i class='ti ti-circle-check text-success'></i>" : "Chưa thanh toán") + "</td>"
-                        +"<td class='text-center'>"+ (Convert.ToBoolean(reader["StatusJoinClass"]) ? "<span class='text-success fw-bolder'>Đã xét lớp</span>" : "Chờ xét lớp") + "</td>"
-                        + "<td class='text-end'>"
-                        + "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">"
-                        +"<i class=\"ti ti-dots-vertical\"></i>"
-                        +"</a>"
-                        +"<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">"
-                        +"<li><a class=\"dropdown-item\" href='javascript:Xetlop_modal(" + reader["IdRegistration"] + "," + reader["IdCourse"] +")'><i class=\"ti ti-eye-check\"></i> Xét vào lớp</a></li>"
-                        +"</ul>"
-                        + "</td>"
-                        + "</tr>";
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        string btn = "";
+                        double amount = Convert.ToDouble(reader["TotalAmount"]);
+                        bool status = Convert.ToBoolean(reader["Status"]);
+                        bool statusJoinClass = Convert.ToBoolean(reader["StatusJoinClass"]);
+                        bool statusExtend = Convert.ToBoolean(reader["StatusExtend"]);
+                        bool statusReserve = Convert.ToBoolean(reader["StatusReserve"]);
+
+                        if (status)
+                        {
+                            if (statusJoinClass)
+                            {
+                                if (!statusExtend)
+                                {
+                                    btn += "<li><a class=\"dropdown-item\" href='javascript:Giahan_modal(" + reader["IdRegistration"] + "," + reader["IdCourse"] + ")'><i class=\"ti ti-plus\"></i> Gia hạn khóa học</a></li>";
+                                }
+                                if (!statusReserve)
+                                {
+                                    btn += "<li><a class=\"dropdown-item\" href='javascript:Baoluu_modal(" + reader["IdRegistration"] + "," + reader["IdCourse"] + ")'><i class=\"ti ti-album-off\"></i> Bảo lưu khóa học</a></li>";
+                                }
+                            }
+                            else
+                            {
+                                btn += "<li><a class=\"dropdown-item\" href='javascript:Xetlop_modal(" + reader["IdRegistration"] + "," + reader["IdCourse"] + ")'><i class=\"ti ti-eye-check\"></i> Xét vào lớp</a></li>";
+                            }
+                        }
+                        else
+                        {
+                            btn += "<li><a class=\"dropdown-item\" href='/students/AddCourseProgramOfStudents?IdStudent=" + idStudent + "&IdRegistration=" + reader["IdRegistration"] + "&modalPayment=True' target='_blank'><i class=\"ti ti-credit-card\"></i> Thu tiền</a></li>";
+                        }
+
+                        count++;
+                        str += "<tr>"
+                             + "<td class='text-center'>" + count + "</td>"
+                             + "<td>" + reader["Code"].ToString() + "</td>"
+                             + "<td>" + reader["NameCourse"].ToString() + "</td>"
+                             + "<td class='text-end'>" + string.Format("{0:N0} đ", amount) + "</td>"
+                             + "<td class='text-center'>" + Convert.ToDateTime(reader["DateCreate"]).ToString("dd/MM/yyyy") + "</td>"
+                             + "<td class='text-center'>" + (status ? "<i class='ti ti-circle-check text-success'></i>" : "Chưa thanh toán") + "</td>"
+                             + "<td class='text-center'>" + (statusJoinClass ? "<span class='text-success fw-bolder'>Đã xét lớp</span>" : "Chờ xét lớp") + "</td>"
+                             + "<td class='text-end'>"
+                             + "<a target='_blank' href='/students/AddCourseProgramOfStudents?IdStudent=" + idStudent + "&IdRegistration=" + reader["IdRegistration"] + "' class=\"text-warning\"><i class='ti ti-edit text-primary'></i></a>"
+                             + "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">"
+                             + "<i class=\"ti ti-dots-vertical\"></i>"
+                             + "</a>"
+                             + "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">"
+                             + btn
+                             + "</ul>"
+                             + "</td>"
+                             + "</tr>";
+                    }
+
+                    reader.Close();
                 }
-                reader.Close();
+                catch (Exception ex)
+                {
+                    // Xử lý lỗi và trả về thông báo lỗi
+                    return Json(new { str = "Lỗi khi tải dữ liệu: " + ex.Message }, JsonRequestBehavior.AllowGet);
+                }
             }
-            var data = new {str};
-            return Json(data,JsonRequestBehavior.AllowGet); 
+
+            return Json(new { str }, JsonRequestBehavior.AllowGet);
+        }
+        public bool Check_statusStudent(int? id)
+        {
+            var student = db.Students.FirstOrDefault(x => x.Id == id);
+
+            if (student == null)
+            {
+                return false;
+            }
+
+            else
+            {
+                if (student.StudentJoinClasses.Any(x => x.Todate > DateTime.Now))
+                {
+                    return false;
+                }
+                return true;
+            }
         }
         public ActionResult Load_xetlop(int idRegistration,string idCourse,int idStudent) {
             string str = "";
@@ -611,8 +692,9 @@ namespace SuperbrainManagement.Controllers
                 }
                 reader.Close();
             }
+            var statusStudent = Check_statusStudent(idStudent);
             var item = new { 
-                str,registrionCode
+                str,registrionCode,statusStudent
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
@@ -981,61 +1063,100 @@ namespace SuperbrainManagement.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "Id,Name,Image,Code,DateOfBirth,Sex,Username,Password,Enable,School,Class,Description,ParentName,Phone,Email,ParentDateOfBirth,City,District,Address,Relationship,Job,Facebook,Hopeful,Known,IdMKT,IdBranch,PowerScore,Balance,Presenter,Status,Power,StatusStudy")] Student student, HttpPostedFileBase file)
         {
-            int idBranch= Convert.ToInt32(CheckUsers.idBranch());
+            int idBranch = Convert.ToInt32(CheckUsers.idBranch());
             int IdUser = Convert.ToInt32(CheckUsers.iduser());
+
             if (ModelState.IsValid)
             {
-                if (Check_availidStudent(student.Name, student.Phone, student.Email) == "ok")
+                string checkResult = Check_availidStudent(student.Name, student.Phone, student.Email);
+                if (checkResult == "ok")
                 {
-                    if (file != null && file.ContentLength > 0)
+                    try
                     {
-                        // Generate a unique file name
-                        string fileName = Path.GetFileNameWithoutExtension(file.FileName);
-                        string extension = Path.GetExtension(file.FileName);
-                        fileName = $"{fileName}_{DateTime.Now:yyyyMMddHHmmssfff}{extension}";
-                        // Specify the path to save the file
-                        string _path = Path.Combine(Server.MapPath("~/Uploads/Images"), fileName);
-                        file.SaveAs(_path);
-                        student.Image = "/Uploads/Images/" + fileName;
+                        // Xử lý tải tệp lên
+                        if (file != null && file.ContentLength > 0)
+                        {
+                            // Generate a unique file name
+                            string fileName = Path.GetFileNameWithoutExtension(file.FileName);
+                            string extension = Path.GetExtension(file.FileName);
+                            fileName = $"{fileName}_{DateTime.Now:yyyyMMddHHmmssfff}{extension}";
+                            // Specify the path to save the file
+                            string _path = Path.Combine(Server.MapPath("~/Uploads/Images"), fileName);
+                            file.SaveAs(_path);
+                            student.Image = "/Uploads/Images/" + fileName;
+                        }
+
+                        // Xử lý thông tin chi nhánh
+                        if (student.IdBranch == null)
+                        {
+                            student.Code = Getcode_Student(idBranch);
+                            student.IdBranch = idBranch;
+                        }
+                        else
+                        {
+                            int IdBranch = Convert.ToInt32(student.IdBranch);
+                            student.Code = Getcode_Student(IdBranch);
+                            student.IdBranch = IdBranch;
+                        }
+
+                        // Gán các giá trị còn lại cho đối tượng student
+                        student.Username = Get_usernameStudent(student.Name, student.Phone);
+                        student.Password = "taptrung";
+                        student.DateCreate = DateTime.Now;
+                        student.IdUser = IdUser;
+                        student.Enable = true;
+
+                        // Thêm student vào cơ sở dữ liệu và lưu lại
+                        db.Students.Add(student);
+                        db.SaveChanges();
+
+                        return RedirectToAction("Index");
                     }
-                    if (student.IdBranch == null)
+                    catch (Exception ex)
                     {
-                        student.Code = Getcode_Student(idBranch);
-                        student.IdBranch = idBranch;
+                        // Thêm lỗi vào ModelState nếu có ngoại lệ
+                        ModelState.AddModelError("", "Có lỗi xảy ra khi tạo sinh viên: " + ex.Message);
                     }
-                    else
-                    {
-                        int IdBranch = Convert.ToInt32(student.IdBranch);
-                        student.Code = Getcode_Student(IdBranch);
-                        student.IdBranch = IdBranch;
-                    }
-                    student.Username=Get_usernameStudent(student.Name,student.Phone);
-                    student.Password = "taptrung";
-                    student.DateCreate = DateTime.Now;
-                    student.IdUser = IdUser;
-                    student.Enable = true;
-                    db.Students.Add(student);
-                    db.SaveChanges();
-                    return RedirectToAction("Index");
                 }
                 else
                 {
-                    TempData["error"] = "<div class='alert alert-danger'>" + Check_availidStudent(student.Name,student.Phone,student.Email)+"</div>";
+                    // Thêm lỗi kiểm tra vào ModelState
+                    ModelState.AddModelError("", checkResult);
                 }
             }
+
+            // Nếu ModelState không hợp lệ hoặc có lỗi, trả về View với các thông báo lỗi
             return View(student);
         }
-        public string Get_usernameStudent(string Name,string Phone) {
+
+        public string Get_usernameStudent(string Name, string Phone)
+        {
             ConvertText convi = new ConvertText();
-            string username = convi.fixtex(Name) + Phone;
-            var student  = db.Students.SingleOrDefault(x=>x.Username== username);
-            var st = db.Students.Where(x=>x.Username.Contains(username)).Count();
-            if(student == null)
+
+            // Tách lấy tên cuối cùng từ chuỗi tên đầy đủ
+            string[] nameParts = Name.Trim().Split(' ');
+            string lastName = nameParts.Length > 0 ? nameParts[nameParts.Length - 1] : "";
+
+            // Chuyển đổi tên cuối cùng sang định dạng thích hợp
+            string fixedLastName = convi.fixtex(lastName);
+
+            // Kết hợp tên cuối cùng với số điện thoại
+            string username = fixedLastName + Phone;
+
+            // Kiểm tra trong cơ sở dữ liệu xem tên người dùng đã tồn tại hay chưa
+            var student = db.Students.SingleOrDefault(x => x.Username == username);
+            var st = db.Students.Count(x => x.Username.Contains(username));
+
+            // Nếu chưa tồn tại, trả về tên người dùng mới tạo
+            if (student == null)
             {
                 return username;
             }
-            return username+"_"+st;
+
+            // Nếu đã tồn tại, trả về tên người dùng với một số bổ sung để đảm bảo tính duy nhất
+            return username + "_" + st;
         }
+
         public string Check_availidStudent(string Name,string Phone,string Email)
         {
             var student = db.Students.SingleOrDefault(x=>x.Name==Name && x.Phone==Phone &&x.Email==Email);
@@ -1101,16 +1222,118 @@ namespace SuperbrainManagement.Controllers
             };
             return Json(item,JsonRequestBehavior.AllowGet);
         }
-
-        public ActionResult Submit_paymentRegistration(int IdRegistration,decimal Tienthu,decimal Voucher)
+        string Getcode_transaction(bool type)
         {
-            string status="", message="";
+            string loai = "";
+            var idbranch = int.Parse(CheckUsers.idBranch());
+            int nextCode = 0;
+            if (type == false)
+            {
+                loai = "PC";
+                nextCode = db.Transactions.Where(x => x.IdBranch == idbranch && x.Type == false).Count() + 1;
+            }
+            else if (type == true)
+            {
+                loai = "PT";
+                nextCode = db.Transactions.Where(x => x.IdBranch == idbranch && x.Type == true).Count() + 1;
+            }
+            string code = nextCode.ToString().PadLeft(5, '0');
+            var cn = db.Branches.Find(idbranch);
+            string str = cn.Code + loai + DateTime.Now.Year + code;
+
+            return str;
+        }
+        public ActionResult Submit_paymentRegistration(int IdRegistration, decimal Tienthu, decimal Voucher, string Method)
+        {
+            string status = "", message = "";
+
+            // Kiểm tra giá trị đầu vào
+            if (Tienthu <= 0 && Voucher <= 0)
+            {
+                status = "error";
+                message = "Số tiền thu không thể nhỏ hơn 0!";
+                return Json(new { status, message }, JsonRequestBehavior.AllowGet);
+            }
+
             var registration = db.Registrations.Find(IdRegistration);
-            var item = new { 
-                status,
-                message
-            };
-            return Json(item, JsonRequestBehavior.AllowGet);
+            if (registration == null)
+            {
+                status = "error";
+                message = "Không tìm thấy đăng ký!";
+                return Json(new { status, message }, JsonRequestBehavior.AllowGet);
+            }
+
+            try
+            {
+                var rc = db.RegistrationCourses.Where(x => x.IdRegistration == IdRegistration).ToList();
+                var rp = db.RegistrationProducts.Where(x => x.IdRegistration == IdRegistration).ToList();
+                var ro = db.RegistrationOthers.Where(x => x.IdRegistration == IdRegistration).ToList();
+
+                var transaction = new Transaction()
+                {
+                    IdBranch = registration.IdBranch,
+                    IdStudent = registration.IdStudent,
+                    DateCreate = DateTime.Now,
+                    Description = "Thu tiền phiếu đăng ký khóa học " + registration.Code,
+                    Discount = 0,
+                    Status = true,
+                    Address = registration.Student.Address,
+                    Phone = registration.Student.Phone,
+                    Name = registration.Student.Name,
+                    Type = true,
+                    Code = Getcode_transaction(true),
+                    TotalAmount = Tienthu,
+                    Amount = Tienthu,
+                    PaymentMethod = Method,
+                    IdUser = Convert.ToInt32(CheckUsers.iduser()),
+                    IdRegistration = IdRegistration
+                };
+
+                db.Transactions.Add(transaction);
+
+                // Cập nhật trạng thái đăng ký và các bản ghi liên quan
+                registration.Status = true;
+                db.Entry(registration).State = EntityState.Modified;
+
+                if (rc.Any())
+                {
+                    foreach (var i in rc)
+                    {
+                        i.Status = true;
+                        db.Entry(i).State = EntityState.Modified;
+                    }
+                }
+
+                if (rp.Any())
+                {
+                    foreach (var i in rp)
+                    {
+                        i.Status = true;
+                        db.Entry(i).State = EntityState.Modified;
+                    }
+                }
+
+                if (ro.Any())
+                {
+                    foreach (var i in ro)
+                    {
+                        i.Status = "1";
+                        db.Entry(i).State = EntityState.Modified;
+                    }
+                }
+
+                db.SaveChanges();
+
+                status = "ok";
+                message = "Đã tạo phiếu thu thành công!";
+            }
+            catch (Exception ex)
+            {
+                status = "error";
+                message = $"Lỗi hệ thống: {ex.Message}";
+            }
+
+            return Json(new { status, message }, JsonRequestBehavior.AllowGet);
         }
 
         // GET: Students/Edit/5
@@ -1255,7 +1478,30 @@ namespace SuperbrainManagement.Controllers
 
             return Json(new { status, message }, JsonRequestBehavior.AllowGet);
         }
+        public ActionResult Submit_Delete(int? id)
+        {
+            if (id == null)
+            {
+                return Json(new { status = "error", message = "Không tìm thấy học viên cần xóa!" }, JsonRequestBehavior.AllowGet);
+            }
+            Student student = db.Students.Find(id);
+            if (student == null)
+            {
+                return Json(new { status = "error", message = "Không tìm thấy học viên cần xóa!" }, JsonRequestBehavior.AllowGet);
+            }
+            bool hasRelatedRecords = db.StudentJoinClasses.Any(cr => cr.IdStudent == id && cr.Todate>DateTime.Now);
+            if (hasRelatedRecords)
+            {
+                return Json(new { status = "error", message = "Học viên này đang học và không thể xóa!" }, JsonRequestBehavior.AllowGet);
+            }
 
+            // Vô hiệu hóa học viên
+            student.Enable = false;
+            db.Entry(student).State = EntityState.Modified;
+            db.SaveChanges();
+
+            return Json(new { status = "ok", message = "Đã xóa thành công!" }, JsonRequestBehavior.AllowGet);
+        }
         // GET: Students/Delete/5
         public ActionResult Delete(int? id)
         {
@@ -1270,8 +1516,10 @@ namespace SuperbrainManagement.Controllers
             }
             return View(student);
         }
-        public ActionResult GetSchedule(int idClass, string fromDate, string toDate)
+        public ActionResult GetSchedule(int idClass, string fromDate, string toDate,int? idCourse)
         {
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            var courseBranch = db.CourseBranches.Where(x=>x.IdCourse==idCourse&&x.IdBranch==idbranch).FirstOrDefault();
             var schedulesbyClass = db.Schedules
                 .Where(x => x.IdClass == idClass && (bool)x.Active).Include(x => x.Employee).ToList()
                 .Select(x => new ClassAssignmentDTO
@@ -1298,13 +1546,16 @@ namespace SuperbrainManagement.Controllers
 
                 if (scheduleMatched != null)
                 {
-                    timeTableData.Add(new TimeTableDTO
+                    if (timeTableData.Count() < courseBranch.Sessons)
                     {
-                        DayOfWeek = DayOfWeekVNCompared,
-                        Date = date.ToString("dd/MM/yyyy"),
-                        TimeSlot = scheduleMatched.TimeSlot,
-                        HourQuantity = scheduleMatched.HourQuantity
-                    }); ;
+                        timeTableData.Add(new TimeTableDTO
+                        {
+                            DayOfWeek = DayOfWeekVNCompared,
+                            Date = date.ToString("dd/MM/yyyy"),
+                            TimeSlot = scheduleMatched.TimeSlot,
+                            HourQuantity = scheduleMatched.HourQuantity
+                        });
+                    }
                 }
             }
 

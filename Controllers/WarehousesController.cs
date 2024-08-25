@@ -1,4 +1,5 @@
-﻿using Microsoft.Ajax.Utilities;
+﻿using Antlr.Runtime.Misc;
+using Microsoft.Ajax.Utilities;
 using Mysqlx.Crud;
 using PagedList;
 using PagedList.Mvc;
@@ -53,7 +54,7 @@ namespace SuperbrainManagement.Controllers
                 return View();
             }
         }
-        public ActionResult Load_thekho(string idBranch, string sort, string searchString, DateTime fromdate, DateTime todate)
+        public ActionResult Load_thekho(string idBranch, string sort, string searchString, DateTime fromdate, DateTime todate,int? Type)
         {
             string str = "";
             if (string.IsNullOrEmpty(idBranch))
@@ -65,6 +66,10 @@ namespace SuperbrainManagement.Controllers
             if (!string.IsNullOrEmpty(searchString))
             {
                 querysearch = " and vt.Name like N'" + searchString + "' or vt.Code like N'" + searchString + "'";
+            }
+            if(Type == null)
+            {
+                Type = 1;
             }
             if (!string.IsNullOrEmpty(sort))
             {
@@ -90,7 +95,7 @@ namespace SuperbrainManagement.Controllers
                 string query = "select vt.Image,vt.Code as ProductCode,vt.name,vt.Unit,pk.Price,pk.Amount,pk.TotalAmount,pk.type,pk.status,rec.Code as ReceiptionCode,rec.DateCreate,us.Name as Username"
                             + " from ProductReceiptionDetail pk inner join Product vt on vt.id = pk.IdProduct,WarehouseReceiption rec,[User] us"
                             + " where rec.id = pk.IdReceiption and us.Id = rec.IdUser and rec.DateCreate >= '" + fromdate + "' and rec.DateCreate <= '" + todate + "'" +querysearch
-                            + " and rec.IdBranch = '" + idBranch + "'"+querysort;
+                            + " and rec.IdBranch = '" + idBranch + "' and rec.type='"+Type+"' "+querysort;
                 SqlCommand command = new SqlCommand(query, connection);
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
@@ -129,27 +134,27 @@ namespace SuperbrainManagement.Controllers
             {
                 idBranch = CheckUsers.idBranch();
             }
-            string querysort = "";
+            string querysort = " order by p.Name";
             string querysearch = "";
             if (!string.IsNullOrEmpty(searchString))
             {
-                querysearch = " and p.Name like N'" + searchString + "' or p.Code like N'" + searchString + "'";
+                querysearch = " and (p.Name like N'" + searchString + "' or p.Code like N'" + searchString + "')";
             }
             if (!string.IsNullOrEmpty(sort))
             {
                 switch (sort)
                 {
-                    case "name":
-                        querysort = " order by p.Name";
-                        break;
-                    case "name_desc":
-                        querysort = " order by p.Name desc";
+                    case "date":
+                        querysort = " order by p.Id";
                         break;
                     case "date_desc":
                         querysort = " order by p.Id desc";
                         break;
+                    case "name_desc":
+                        querysort = " order by p.Name desc";
+                        break;
                     default:
-                        querysort = " order by p.Id";
+                        querysort = " order by p.Name";
                         break;
                 }
             }
@@ -157,7 +162,7 @@ namespace SuperbrainManagement.Controllers
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string queryCat = "SELECT * From ProductCategory where Active=1 and Enable=1";
+                string queryCat = "SELECT * From ProductCategory where Active=1 and Enable=1 order by DisplayOrder";
 
                 SqlCommand commandCat = new SqlCommand(queryCat, connection);
                 connection.Open();
@@ -179,13 +184,14 @@ namespace SuperbrainManagement.Controllers
                     SqlDataReader reader = command.ExecuteReader();
                     while (reader.Read())
                     {
+                        double dongia = Convert.ToInt32(reader["Price"].ToString());
                         count++;
                         str += "<tr>"
                                 + "<td class='text-center'>" + count + "</td>"
                                 + "<td>" + reader["code"].ToString() + "</td>"
-                                + "<td><img src='" + reader["Image"] + "' all='" + reader["Name"] + "' class=\"rounded-2 me-2\" height=\"40\"/>" + reader["Name"].ToString() + "</td>"
-                                + "<td>" + reader["Unit"].ToString() + "</td>"
-                                + "<td>" + reader["Price"].ToString() + "</td>"
+                                + "<td> <img src='" + reader["Image"].ToString() + "' alt='' class='rounded-2 me-2' height='40'>" + reader["Name"].ToString() + "</td>"
+                                + "<td class='text-center'>" + reader["Unit"].ToString() + "</td>"
+                                + "<td class='text-end'>" + string.Format("{0:N0}",dongia) + "</td>"
                                 + "<td class='text-center'>" + reader["Quota"].ToString() + "</td>"
                                 + "<td class='text-center'>" + reader["Tonkho"].ToString() + "</td>"
                                 + "</tr>";
@@ -206,8 +212,9 @@ namespace SuperbrainManagement.Controllers
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "SELECT p.Id,p.Name,p.Unit,p.Price,p.Code,p.Quota,p.Image FROM product p"
-                                        + " where p.enable=1 and p.active=1 ";
+                string query = "SELECT p.Id,p.Name,p.Unit,p.Price,p.Code,p.Quota,p.Image " 
+                               + " FROM product p join ProductCategory pc on p.IdCategory = pc.Id" 
+                               + " where pc.enable=1 and pc.active=1 and p.enable = 1 and p.active = 1 order by pc.DisplayOrder,p.Name";
                 SqlCommand command = new SqlCommand(query, connection);
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
@@ -218,7 +225,7 @@ namespace SuperbrainManagement.Controllers
                     count++;
                     str += "<tr>"
                             + "<td class='text-center align-content-center'>" + count + "</td>"
-                            + "<td class='w-25 align-content-center'> <img src='" + reader["Image"].ToString() + "' alt='" + reader["Name"].ToString() + "' class='rounded-2 me-2' height='40'><span class='text-success'>" + reader["code"].ToString() + "</span> - " + reader["Name"].ToString() + "</td>"
+                            + "<td class='w-25 align-content-center'> <img src='" + reader["Image"].ToString() + "' alt='' class='rounded-2 me-2' height='40'>" + reader["Name"].ToString() + "</td>"
                             + "<td class='w-25 align-content-center text-center'>" + reader["Unit"].ToString() + "</td>"
                             + "<td class='w-10 align-content-center text-center'>"
                             + "<input type='hidden' name='IdProduct_" + count + "' id='idproduct_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + reader["Id"].ToString() + "' class='form-control' onchange='javascript:update_thanhtien(" + count + ")'>"
@@ -247,8 +254,9 @@ namespace SuperbrainManagement.Controllers
                 string query = "SELECT p.Id,p.Image, p.Name,p.Unit,p.Price,p.Code,p.Quota,COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '1' AND re.IdBranch = " + idBranch + "), 0) -"
                                         + " COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '0' AND re.IdBranch = " + idBranch + "), 0) AS Tonkho"
                                         + " FROM product p"
-                                        + " where p.enable=1 and p.active=1 "
-                                        + " order by p.Name";
+                                        + " join ProductCategory pc on p.IdCategory=pc.Id"
+                                        + " where p.enable=1 and p.active=1 and pc.Enable=1 and pc.Active=1"
+                                        + " order by pc.DisplayOrder,p.Name";
                 SqlCommand command = new SqlCommand(query, connection);
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
@@ -260,13 +268,13 @@ namespace SuperbrainManagement.Controllers
                     int tonkho = int.Parse(reader["Tonkho"].ToString());
                     str += "<tr>"
                             + "<td class='text-center align-content-center'>" + count + "</td>"
-                            + "<td class='w-25 align-content-center'> <img src='" + reader["Image"].ToString() + "' alt='" + reader["Name"].ToString() + "' class='rounded-2 me-2' height='40'><span class='text-success'>" + reader["code"].ToString() + "</span> - " + reader["Name"].ToString() + "</td>"
+                            + "<td class='w-25 align-content-center'> <img src='" + reader["Image"].ToString() + "' alt='' class='rounded-2 me-2' height='40'>" + reader["Name"].ToString() + "</td>"
                             + "<td class='w-25 align-content-center text-center'>" + reader["Unit"].ToString() + "</td>"
                             + "<td class='w-10 align-content-center text-center'>"
                             + "<input type='hidden' name='IdProduct_" + count + "' id='idproduct_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + reader["Id"].ToString() + "' class='form-control' onchange='javascript:update_thanhtienxuat(" + count + ")'>"
                             + "<input type='text' name='Price_" + count + "' id='dongia_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + string.Format("{0:N0}", amount) + "' class='form-control text-end' onchange='javascript:update_thanhtienxuat(" + count + ")'>"
                             + "</td>"
-                            + "<td class='text-center w-5 align-content-center'><input type='text' name='Amount_" + count + "'  id='soluong_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' max='" + reader["Tonkho"].ToString() + "' class='form-control text-center soluong' onchange='javascript:update_thanhtienxuat(" + count + ")' " + (tonkho > 0 ? "" : "Disabled") + "></td>"
+                            + "<td class='text-center w-5 align-content-center'><input type='text' name='Amount_" + count + "'  id='soluong_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' max='" + reader["Tonkho"].ToString() + "' class='form-control text-center soluong " + (tonkho > 0 ? "" : "disabled") + "' onchange='javascript:update_thanhtienxuat(" + count + ")' ></td>"
                             + "<td class='text-center w-10 align-content-center'><input type='text' name='TotalAmount_" + count + "'  id='thanhtien_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' class='form-control text-end' readonly></td>"
                             + "</tr>";
                 }

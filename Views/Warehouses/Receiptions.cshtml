@@ -1,5 +1,6 @@
 ﻿@{
-    ViewBag.Title = "Receiptions";
+    ViewBag.Controller = "Quản lý kho";
+    ViewBag.Title = "Thẻ kho";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div class="row">
@@ -17,6 +18,16 @@
     </div>
     <div class="col col-md-6 col-sm-12 text-right" style="text-align:right;">
         <div class="me-0 btn btn-md p-0">
+            <button class="btn btn-md btn-outline-dark" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="ti ti-filter"></i>
+                <span id="filterEnum"></span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <li><a class="dropdown-item" href="@Url.Action("Receiptions", new { filterEnum = 1 })"> Phiếu nhập</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Receiptions", new {filterEnum = 0})"> Phiếu xuất</a></li>
+            </ul>
+        </div>
+        <div class="me-0 btn btn-md p-0">
             <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="ti ti-arrows-sort"></i> Sắp xếp theo
             </button>
@@ -27,12 +38,12 @@
                 <li><a class="dropdown-item" href="javascript:Loadlist('date_desc')"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
             </ul>
         </div>
-        <a href="javascript:Loadlist_nhap()" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        <button id="exportButton" class="btn btn-success">
             <i class="ti ti-file-download"></i> Xuất file
-        </a>
+        </button>
     </div>
 </div>
-<table class="table fs-3">
+<table class="table fs-3" id="tableToPrint">
     <thead class="bg-success text-white rounded-1">
         <tr>
             <th class="text-center">STT</th>
@@ -48,12 +59,20 @@
             <th class="text-center">Người thao tác</th>
         </tr>
     </thead>
+    <tbody id="showlist"></tbody>
     <tr id="loading">
     </tr>
-    <tbody id="showlist"></tbody>
 </table>
 <script>
+
     $(document).ready(function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('filterEnum') == 1 || urlParams.get('filterEnum') == null) {
+            $('#filterEnum').html("Phiếu nhập");
+        } else {
+            $('#filterEnum').html("Phiếu xuất");
+        }
+
         var currentDate = new Date();
         // Lấy ngày, tháng và năm hiện tại
         var currentDay = currentDate.getDate()+1;
@@ -75,6 +94,7 @@
         Loadlist();
     });
     function Loadlist(sort) {
+        const urlParams = new URLSearchParams(window.location.search);
         $("#loading").html("<td colspan=11 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
          $.ajax({
              url: '@Url.Action("Load_thekho", "Warehouses")',
@@ -84,7 +104,8 @@
                  fromdate: $("#fromdate").val(),
                  todate: $("#todate").val(),
                  sort: sort,
-                 searchString: $("#searchString").val()
+                 searchString: $("#searchString").val(),
+                 Type:urlParams.get('filterEnum')
              },
              success: function (data) {
                 $("#loading").html("");
@@ -95,4 +116,15 @@
              }
          });
     }
+
+    document.getElementById('exportButton').addEventListener('click', function () {
+        var wb = XLSX.utils.table_to_book(document.getElementById('tableToPrint'), { sheet: "Sheet1" });
+        var wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+
+        var blob = new Blob([wbout], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        var link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "ThongKeTheKho.xlsx";
+        link.click();
+    });
 </script>

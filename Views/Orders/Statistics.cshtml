@@ -1,5 +1,6 @@
 ﻿
 @{
+    ViewBag.Controller = "Đơn hàng";
     ViewBag.Title = "Thống kê đơn hàng";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -57,7 +58,7 @@
           url: '@Url.Action("Load_Statistics", "Orders")',
           type: "GET",
           data: {
-              idBranch: $("#IdBranch").val(),
+              IdBranch: $("#IdBranch").val(),
               Fromdate: $("#fromdate").val(),
               Todate: $("#todate").val()
           },

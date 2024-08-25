@@ -3,20 +3,56 @@
     int stt = 1;
     Layout = "";
 }
-<p>
-    37 Đường 19, Phường An Khánh, TP Thủ Đức
-    <br />090 674 8080 / 090 990 7311<br />
-    contact@superbrain.vn
-</p>
+<div class="card">
+    <div class="card-body">
+        <div class="d-sm-flex d-block align-items-center justify-content-between align-content-center mt-3 me-5">
+            <div>
+               
+            </div>
+            <div>
 
+            </div>
+        </div>
+    </div>
+</div>
 <hr>
-
-<h1 style="font-weight: bold; text-align: center;">THỜI KHOÁ BIỂU</h1>
-<h3 style="text-align: center;">@ViewBag.SubTitle</h3>
-<p>Tên học viên: @ViewBag.StudentName</p>
-<p>Khoá: Pre Basic</p>
-<p>Lớp: @ViewBag.ClassName</p>    
+<div class="container">
+    <h1 class="text-center">THỜI KHOÁ BIỂU</h1>
+    <p>Tên học viên: @ViewBag.StudentName</p>
+    <p>Khoá: Pre Basic</p>
+    <p>Lớp: @ViewBag.ClassName</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Buổi</th>
+                <th>Ngày</th>
+                <th>Thứ</th>
+                <th>Giờ Học</th>
+            </tr>
+        </thead>
+        <tbody id="datarow">
+            @foreach (var item in ViewBag.timeTableData)
+            {
+                <tr>
+                    <td>@stt</td>
+                    <td>@item.Date</td>
+                    <td>@item.DayOfWeek</td>
+                    <td>@item.TimeSlot</td>
+                </tr>
+                stt++;
+            }
+        </tbody>
+    </table>
+    <p>Ghi chú:</p>
+</div>
 <style>
+    .text-center{
+        text-align:center;
+    }
+    .container{
+        width:85%;
+        margin:0 auto;
+    }
     .table {
         width: 100%;
         border-collapse: collapse;
@@ -38,28 +74,4 @@
     }
 </style>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Buổi</th>
-            <th>Ngày</th>
-            <th>Thứ</th>
-            <th>Giờ Học</th>
-            @*<th>Số Giờ</th>*@
-        </tr>
-    </thead>
-    <tbody id="datarow">
-        @foreach (var item in ViewBag.timeTableData)
-        {
-            <tr>
-                <td>@stt</td>
-                <td>@item.Date</td>
-                <td>@item.DayOfWeek</td>
-                <td>@item.TimeSlot</td>
-                @*<td>@item.HourQuantity</td>*@
-            </tr>
-            stt++;
-        }
-    </tbody>
-</table>
-<p>Ghi chú:</p>
+
