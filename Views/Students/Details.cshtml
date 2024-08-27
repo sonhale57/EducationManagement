@@ -371,13 +371,15 @@
                 </div>
             </div>
             <div class="modal-footer text-start">
+                <span class="loader"></span>
                 <form action="/Students/ShowTimeTableData" method="get" target="_blank">
                     <input type="hidden" id="idClassShowTimeTbl" name="idClassShowTimeTbl" />
                     <input type="hidden" id="fromDateShowTimeTbl" name="fromDate" />
                     <input type="hidden" id="toDateShowTimeTbl" name="toDate" />
+                    <input type="hidden" id="idCourseShowTimeTbl" name="idCourse" />
                     <input type="hidden" id="studentId" name="studentId" value="@Model.Id" />
 
-                    <button type="submit" class="btn btn-info hideof">
+                    <button type="submit" class="btn btn-info hideof" id="btnPrintTkb">
                         <i class="ti ti-calendar"></i> In thời khoá biểu
                     </button>
                 </form>
@@ -581,7 +583,11 @@
         // Gán giá trị của ô nhập ngày kết thúc là ngày sau khi cộng thêm 3 tháng
         document.getElementById('todate').value = toDateValue;
     }
+    var isProcessing = false;
     function Submit_xetlop() {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
         $.ajax({
             url: '@Url.Action("Submit_xetlop", "Students")',
             type: "POST",
@@ -597,11 +603,16 @@
                 if (data.status = "ok") {
                     $('#exampleModal').modal('hide');
                     showSuccess("Đã xét lớp thành công!", 3000);
+                    $("#btnPrintTkb").removeClass("hideof");
+                } else {
+                    showError("Lỗi cập nhật!", 3000);
                 }
+                isProcessing = false; // Hoàn thành xử lý
+                $(".loader").html("");
             },
             error: function (xhr, error) {
-
-                console.log("lỗi"+error);
+                isProcessing = false; // Hoàn thành xử lý
+                $(".loader").html("");
             }
         });
     }
@@ -619,6 +630,7 @@
         const idCourse = $("#IdCourse").val();
 
         $("#idClassShowTimeTbl").val(parseInt(idClass));
+        $("#idCourseShowTimeTbl").val(parseInt(idCourse));
         $("#fromDateShowTimeTbl").val(fromDate);
         $("#toDateShowTimeTbl").val(toDate);
 

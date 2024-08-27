@@ -49,7 +49,7 @@ namespace SuperbrainManagement.Controllers
                             + "<td class='text-center text-success fw-bolder'>" + readerCat["Code"].ToString() + "</td>"
                             + "<td class='text-success fw-bolder' colspan=7>" + readerCat["Name"].ToString() + "</td>"
                             + "</tr>";
-                    string query = "select c.Id,c.Code,c.Name,c.Hours,c.Sessions,cb.PriceCourse,cb.PriceTest,cb.PriceAccount,DiscountPrice,cb.StatusDiscount"
+                    string query = "select c.Id,c.Code,c.Name,cb.Hour,cb.Sessons,cb.PriceCourse,cb.PriceTest,cb.PriceAccount,DiscountPrice,cb.StatusDiscount"
                                         + " from Course c inner join CourseBranch cb on c.Id = cb.IdCourse" 
                                         +" where c.IdProgram=" + readerCat["Id"] +" and cb.IdBranch="+IdBranch + " order by c.DisplayOrder";
                     SqlCommand command = new SqlCommand(query, connection);
@@ -66,8 +66,8 @@ namespace SuperbrainManagement.Controllers
                             + "<td class=''>" + reader["Name"].ToString() + "</td>"
                             + "<td class='text-center'>" + string.Format("{0:N0} đ", amount) + "</td>"
                             + "<td class='text-center'>" + string.Format("{0:N0} đ", amountAccount) + "</td>"
-                            + "<td class='text-center'>" + reader["Sessions"].ToString() + "</td>"
-                            + "<td class='text-center'>" + reader["Hours"].ToString() + "</td>"
+                            + "<td class='text-center'>" + reader["Sessons"].ToString() + "</td>"
+                            + "<td class='text-center'>" + reader["Hour"].ToString() + "</td>"
                             + "<td class='text-end'>" 
                             + "<a href='javascript:Edit_CourseBranch(" + IdBranch + "," + reader["Id"] +")' class=\"me-1\"><i class=\"ti ti-edit text-primary\"></i></a>"
                             + "<a href='javascript:Delete_CourseBranch(" + IdBranch + "," + reader["Id"] + ")' class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a>"
@@ -111,8 +111,10 @@ namespace SuperbrainManagement.Controllers
             var phi = c.PriceCourse;
             var phitest = c.PriceTest;
             var phitk = c.PriceAccount;
+            var sobuoi = c.Sessons;
+            var sogio = c.Hour;
             var item = new {
-                phi, phitest, phitk,
+                phi, phitest, phitk,sobuoi, sogio
             };
             return Json(item,JsonRequestBehavior.AllowGet);
         }
@@ -232,7 +234,7 @@ namespace SuperbrainManagement.Controllers
             ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", course.IdUser);
             return View(course);
         }
-        public ActionResult Submit_CourseBranch(int IdBranch, int IdCourse, decimal PriceCourse, decimal PriceOnline, decimal PriceTest,string Action)
+        public ActionResult Submit_CourseBranch(int IdBranch, int IdCourse, decimal PriceCourse, decimal PriceOnline, decimal PriceTest,string Action,int Sessons,int Hour)
         {
 
             string status = "ok";
@@ -248,7 +250,9 @@ namespace SuperbrainManagement.Controllers
                         IdBranch = IdBranch,
                         PriceCourse = PriceCourse,
                         PriceAccount = PriceOnline,
-                        PriceTest = PriceTest
+                        PriceTest = PriceTest,
+                        Sessons = Sessons,
+                        Hour = Hour
                     };
                     db.CourseBranches.Add(courseBranch);
                     db.SaveChanges();
@@ -273,6 +277,8 @@ namespace SuperbrainManagement.Controllers
                     cb.PriceAccount = PriceOnline;
                     cb.PriceTest = PriceTest;
                     cb.PriceCourse = PriceCourse;
+                    cb.Sessons = Sessons;
+                    cb.Hour = Hour;
                     db.Entry(cb);
                     db.SaveChanges();
                     status="ok";

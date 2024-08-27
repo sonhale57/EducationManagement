@@ -625,7 +625,32 @@ namespace SuperbrainManagement.Controllers
                         {
                             btn += "<li><a class=\"dropdown-item\" href='/students/AddCourseProgramOfStudents?IdStudent=" + idStudent + "&IdRegistration=" + reader["IdRegistration"] + "&modalPayment=True' target='_blank'><i class=\"ti ti-credit-card\"></i> Thu tiền</a></li>";
                         }
-
+                        string strStatusJoinClass = "";
+                        if (statusJoinClass)
+                        {
+                            int IdRegistration = Convert.ToInt32(reader["IdRegistration"]);
+                            int IdCourse = Convert.ToInt32(reader["IdCourse"]);
+                            var studentJoinClass = db.StudentJoinClasses.SingleOrDefault(x => x.IdStudent == idStudent && x.IdRegistration == IdRegistration && x.IdCourse == IdCourse);
+                            if (studentJoinClass != null)
+                            {
+                                if (studentJoinClass.Todate >= DateTime.Now)
+                                {
+                                    strStatusJoinClass = "<span class='badge bg-success rounded-3 fw-semibold'>Đang học</span>";
+                                }
+                                else
+                                {
+                                    strStatusJoinClass = "<span class='badge bg-danger rounded-3 fw-semibold'>Đã kết thúc</span>";
+                                }
+                            }
+                            else
+                            {
+                                strStatusJoinClass = "<span class='badge bg-secondary rounded-3 fw-semibold'>Chờ xét lớp</span>";
+                            }
+                        }
+                        else
+                        {
+                            strStatusJoinClass = "<span class='badge bg-secondary rounded-3 fw-semibold'>Chờ xét lớp</span>";
+                        }
                         count++;
                         str += "<tr>"
                              + "<td class='text-center'>" + count + "</td>"
@@ -634,7 +659,7 @@ namespace SuperbrainManagement.Controllers
                              + "<td class='text-end'>" + string.Format("{0:N0} đ", amount) + "</td>"
                              + "<td class='text-center'>" + Convert.ToDateTime(reader["DateCreate"]).ToString("dd/MM/yyyy") + "</td>"
                              + "<td class='text-center'>" + (status ? "<i class='ti ti-circle-check text-success'></i>" : "Chưa thanh toán") + "</td>"
-                             + "<td class='text-center'>" + (statusJoinClass ? "<span class='text-success fw-bolder'>Đã xét lớp</span>" : "Chờ xét lớp") + "</td>"
+                             + "<td class='text-center'>" + strStatusJoinClass + "</td>"
                              + "<td class='text-end'>"
                              + "<a target='_blank' href='/students/AddCourseProgramOfStudents?IdStudent=" + idStudent + "&IdRegistration=" + reader["IdRegistration"] + "' class=\"text-warning\"><i class='ti ti-edit text-primary'></i></a>"
                              + "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">"
@@ -792,6 +817,7 @@ namespace SuperbrainManagement.Controllers
                 while (reader.Read())
                 {
                     count++;
+                    decimal voucher = Convert.ToDecimal(reader["Voucher"]);
                     if (Convert.ToBoolean(reader["Type"]))
                     {
                         nhap += Convert.ToDecimal(reader["Voucher"]);
@@ -802,14 +828,15 @@ namespace SuperbrainManagement.Controllers
                     }
                     str += "<tr>"
                         +"<td>"+count+"</td>"
-                        +"<td>"+ reader["Voucher"] + "</td>"
+                        +"<td>"+ string.Format("{0:N0}",voucher) + "</td>"
                         +"<td>"+ reader["Description"] + "</td>"
                         +"<td>" + DateTime.Parse(reader["DateCreate"].ToString()).ToString("dd/MM/yyyy hh:mm tt") + "</td>"
                         +"<td>"+ reader["Name"] + "</td>"
                         + "<td class='text-center'>" + (Convert.ToBoolean(reader["Type"])?"Nạp":"Xuất")+"</td>"
                         + "</tr>";
                 }
-                str += "<tr class='bg-light'><td colspan=5 class='text-end'>Số dư:</td><td class='text-end'>"+(nhap-xuat)+"</td></tr>";
+                decimal tong = nhap - xuat;
+                str += "<tr class='bg-light'><td colspan=5 class='text-start'>Số dư:</td><td class='text-center'>"+string.Format("{0:N0}",tong)+"</td></tr>";
                 reader.Close();
             }
             var item = new
@@ -1596,8 +1623,10 @@ namespace SuperbrainManagement.Controllers
             return Json(item, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult ShowTimeTableData(int? idClassShowTimeTbl, string fromDate, string toDate, int studentId,int idCourse)
+        public ActionResult ShowTimeTableData(int? idClassShowTimeTbl, string fromDate, string toDate, int studentId, int idCourse)
         {
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            var courseBranch = db.CourseBranches.Where(x => x.IdCourse == idCourse && x.IdBranch == idbranch).FirstOrDefault();
             var schedulesbyClass = db.Schedules
                 .Where(x => x.IdClass == idClassShowTimeTbl && (bool)x.Active).Include(x => x.Employee).ToList()
                 .Select(x => new ClassAssignmentDTO
@@ -1624,24 +1653,26 @@ namespace SuperbrainManagement.Controllers
 
                 if (scheduleMatched != null)
                 {
-                    timeTableData.Add(new TimeTableDTO
+                    if (timeTableData.Count() < courseBranch.Sessons)
                     {
-                        DayOfWeek = DayOfWeekVNCompared,
-                        Date = date.ToString("dd/MM/yyyy"),
-                        TimeSlot = scheduleMatched.TimeSlot,
-                        HourQuantity = scheduleMatched.HourQuantity
-                    }); ;
+                        timeTableData.Add(new TimeTableDTO
+                        {
+                            DayOfWeek = DayOfWeekVNCompared,
+                            Date = date.ToString("dd/MM/yyyy"),
+                            TimeSlot = scheduleMatched.TimeSlot,
+                            HourQuantity = scheduleMatched.HourQuantity
+                        });
+                    }
                 }
             }
 
-            var student = db.Students.FirstOrDefault(x=> x.Id == studentId);
+            var student = db.Students.FirstOrDefault(x => x.Id == studentId);
 
             ViewBag.timeTableData = timeTableData;
-            ViewBag.SubTitle = "Ngày" + ":"+ fromDate + " - " + toDate;
-
+            ViewBag.SubTitle = "Ngày" + ":" + fromDate + " - " + toDate;
             ViewBag.StudentName = student.Name;
             ViewBag.ClassName = student.Class;
-
+            ViewBag.CourseName = courseBranch.Course.Name;
             return View();
         }
 

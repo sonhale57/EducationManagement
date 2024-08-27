@@ -1,7 +1,8 @@
 ﻿@model PagedList.IPagedList<SuperbrainManagement.Models.CourseBranch>
 @using PagedList.Mvc;
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Controller = "Khóa học";
+    ViewBag.Title = "Khóa học cơ sở";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var courses = Model;
 }        
@@ -37,8 +38,8 @@
     <tbody id="showlist"></tbody>
 </table>
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content" style="width:800px;">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" >
             <div class="modal-header">
                 <h5 class="modal-fullscreen" id="exampleModalLabel">Thêm khóa học</h5>
             </div>
@@ -61,6 +62,12 @@
 
                     <label class="text-success mt-3">Phí test đầu vào</label>
                     <input type="text" class="form-control" id="PriceTest" name="PriceTest" value="0" placeholder="Phí test đầu vào" />
+
+                    <label class="text-success mt-3">Số buổi</label>
+                    <input type="text" class="form-control" id="SessonCourse" name="SessonCourse" value="12" placeholder="Số buổi" />
+
+                    <label class="text-success mt-3">Số giờ</label>
+                    <input type="text" class="form-control" id="HourCourse" name="HourCourse" value="24" placeholder="Số giờ" />
                 </div>
                 <div class="modal-footer">
                     <a href="javascript:Submit_CourseBranch()" class="btn btn-success"> Lưu cập nhật</a>
@@ -116,6 +123,8 @@
                 $('#PriceTest').val(data.phitest);
                 $('#PriceCourse').val(data.phi);
                 $('#PriceOnline').val(data.phitk);
+                $('#SessonCourse').val(data.sobuoi);
+                $('#HourCourse').val(data.sogio);
                 $('#exampleModal').modal('show');
             },
             error: function (xhr, error) {
@@ -133,6 +142,8 @@
                 PriceCourse: $("#PriceCourse").val(),
                 PriceOnline: $("#PriceOnline").val(),
                 PriceTest: $("#PriceTest").val(),
+                Sessons: $("#SessonCourse").val(),
+                Hour: $("#HourCourse").val(),
                 Action: $("#typeaction").val()
             },
             success: function (data) {

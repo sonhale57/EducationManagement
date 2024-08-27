@@ -228,14 +228,17 @@ namespace SuperbrainManagement.Controllers
         }
 
         // GET: Classes/Filter/5
+        /*
         public ActionResult Filter(int? id, int? idCourse, string studentName)
         {
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
             var studentJoinedClass = db.StudentJoinClasses.Where(x => x.IdClass == id).ToList();
-
+            var course = db.Courses.Where(x => x.CourseBranches.Any(m => m.IdBranch == idbranch)).OrderBy(x => x.Program.DisplayOrder).OrderBy(x => x.DisplayOrder).ToList();
+            
             if (idCourse != null)
             {
                 studentJoinedClass = db.StudentJoinClasses.Where(x => x.IdCourse == idCourse).ToList();
-            }     
+            }
 
             if (!string.IsNullOrEmpty(studentName))
             {
@@ -301,46 +304,146 @@ namespace SuperbrainManagement.Controllers
 
                 timeTableData.Add(classFilterDTO);
             }
-
             ViewBag.ClassSelectedId = id;
-            ViewBag.IdClass = new SelectList(db.Classes, "Id", "Name");
-            ViewBag.IdCourse = new SelectList(db.Courses, "Id", "Name");
+            ViewBag.IdClass = new SelectList(db.Classes.Where(x=>x.Enable==true && x.IdBranch == idbranch), "Id", "Name");
+            ViewBag.IdCourse = new SelectList(course, "Id", "Name");
             ViewBag.StudentJoinedClass = studentJoinedClass;
             ViewBag.TimeTableData = timeTableData;
             ViewBag.SessionNumber = sessionNumber;
 
             return View();
         }
+        */
+        public ActionResult Filter(int? id, int? idCourse, string studentName)
+        {
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+
+            // Lọc sinh viên theo lớp học và khóa học
+            var studentJoinedClass = db.StudentJoinClasses.AsQueryable();
+
+            if (id != null)
+            {
+                studentJoinedClass = studentJoinedClass.Where(x => x.IdClass == id);
+            }
+
+            if (idCourse != null)
+            {
+                studentJoinedClass = studentJoinedClass.Where(x => x.IdCourse == idCourse);
+            }
+
+            if (!string.IsNullOrEmpty(studentName))
+            {
+                studentJoinedClass = studentJoinedClass.Where(x => x.Student.Name.ToLower().Contains(studentName.ToLower()));
+            }
+
+            var studentJoinedClassList = studentJoinedClass.ToList();
+
+            var course = db.Courses
+                           .Where(x => x.CourseBranches.Any(m => m.IdBranch == idbranch))
+                           .OrderBy(x => x.Program.DisplayOrder)
+                           .ThenBy(x => x.DisplayOrder)
+                           .ToList();
+
+            var schedulesbyClass = db.Schedules
+                                     .Where(x => x.IdClass == id && (bool)x.Active)
+                                     .Include(x => x.Employee)
+                                     .ToList()
+                                     .Select(x => scheduleHelper.GetDayName(x.IdWeek));
+
+            List<ClassFilterDTO> timeTableData = new List<ClassFilterDTO>();
+            int sessionNumber = 0;
+
+            foreach (var item in studentJoinedClassList)
+            {
+                ClassFilterDTO classFilterDTO = new ClassFilterDTO
+                {
+                    StudentID = (int)item.IdStudent,
+                    CourseName = item.Course.Name,
+                    StudentName = item.Student.Name
+                };
+
+                var sessions = new List<Session>();
+                for (var date = (DateTime)item.Fromdate; date <= item.Todate; date = date.AddDays(1))
+                {
+                    var DayOfWeekVNCompared = scheduleHelper.ConvertEnglishDayToVietnamese(date.DayOfWeek.ToString());
+                    var scheduleMatched = schedulesbyClass.FirstOrDefault(x => x == DayOfWeekVNCompared);
+
+                    if (scheduleMatched != null)
+                    {
+                        var studentCheckedIn = db.StudentCheckins
+                                                 .Where(x => x.IdStudent == item.IdStudent &&
+                                                             x.IdClass == id)
+                                                 .ToList();
+
+                        var DateCreate = studentCheckedIn
+                                         .Select(x => new { datetime = (DateTime)x.DateCreate, checkInStatus = x.StatusCheckin })
+                                         .Select(x => new { datetime = x.datetime.ToString("dd:MM:yyyy"), checkInStatus = x.checkInStatus })
+                                         .ToList();
+
+                        var dateChecked = DateCreate.FirstOrDefault(x => x.datetime == date.ToString("dd:MM:yyyy"));
+                        bool? isCheckedIn = null;
+
+                        if (studentCheckedIn != null && studentCheckedIn.Any() && dateChecked != null)
+                        {
+                            isCheckedIn = dateChecked.checkInStatus;
+                        }
+
+                        sessions.Add(new Session
+                        {
+                            DayOfWeek = DayOfWeekVNCompared,
+                            Date = date.ToString("dd/MM"),
+                            IsCheckedIn = isCheckedIn
+                        });
+                    }
+                }
+
+                classFilterDTO.Sessions = sessions;
+
+                sessionNumber = Math.Max(sessionNumber, sessions.Count);  // Cập nhật số lượng sessions tối đa
+                timeTableData.Add(classFilterDTO);
+            }
+
+            ViewBag.ClassSelectedId = id;
+            ViewBag.IdClass = new SelectList(db.Classes.Where(x => x.Enable == true && x.IdBranch == idbranch), "Id", "Name");
+            ViewBag.IdCourse = new SelectList(course, "Id", "Name");
+            ViewBag.StudentJoinedClass = studentJoinedClassList;
+            ViewBag.TimeTableData = timeTableData;
+            ViewBag.SessionNumber = sessionNumber;
+
+            return View();
+        }
+
+
 
         public ActionResult GetCheckedSessionDetaiByClass(int idClass, int studentId, string date)
         {
             var dateConverted = Convert.ToDateTime(date);
-            var StudentDetailCheckInByClassAndDate = db.StudentCheckins.FirstOrDefault(x => x.IdClass == idClass 
-            && x.IdStudent == studentId 
+            var StudentDetailCheckInByClassAndDate = db.StudentCheckins.FirstOrDefault(x => x.IdClass == idClass
+            && x.IdStudent == studentId
             && (DateTime)x.DateCreate == dateConverted);
 
-            var item = StudentDetailCheckInByClassAndDate == null ? 
+            var item = StudentDetailCheckInByClassAndDate == null ?
                 null
-                : 
+                :
                 new
-            {
-                StatusCheckin = StudentDetailCheckInByClassAndDate.StatusCheckin,
-                Lesson = StudentDetailCheckInByClassAndDate.Lesson,
-                Complete = StudentDetailCheckInByClassAndDate.Complete,
-                Exactly = StudentDetailCheckInByClassAndDate.Exactly,
-                OnClassNumber = StudentDetailCheckInByClassAndDate.OnClassNumber,
-                OnClassRow = StudentDetailCheckInByClassAndDate.OnClassRow,
-                OnClassPaper = StudentDetailCheckInByClassAndDate.OnClassPaper,
-                HomeComplete = StudentDetailCheckInByClassAndDate.HomeComplete,
-                HomeExactly = StudentDetailCheckInByClassAndDate.HomeExactly,
-                Focus = StudentDetailCheckInByClassAndDate.Focus,
-                Confident = StudentDetailCheckInByClassAndDate.Confident,
-                Remember = StudentDetailCheckInByClassAndDate.Remember,
-                Reflex = StudentDetailCheckInByClassAndDate.Reflex,
-                Other = StudentDetailCheckInByClassAndDate.Other,
-                Power = StudentDetailCheckInByClassAndDate.Power,
-                SendSMS = StudentDetailCheckInByClassAndDate.SendSMS
-            };
+                {
+                    StatusCheckin = StudentDetailCheckInByClassAndDate.StatusCheckin,
+                    Lesson = StudentDetailCheckInByClassAndDate.Lesson,
+                    Complete = StudentDetailCheckInByClassAndDate.Complete,
+                    Exactly = StudentDetailCheckInByClassAndDate.Exactly,
+                    OnClassNumber = StudentDetailCheckInByClassAndDate.OnClassNumber,
+                    OnClassRow = StudentDetailCheckInByClassAndDate.OnClassRow,
+                    OnClassPaper = StudentDetailCheckInByClassAndDate.OnClassPaper,
+                    HomeComplete = StudentDetailCheckInByClassAndDate.HomeComplete,
+                    HomeExactly = StudentDetailCheckInByClassAndDate.HomeExactly,
+                    Focus = StudentDetailCheckInByClassAndDate.Focus,
+                    Confident = StudentDetailCheckInByClassAndDate.Confident,
+                    Remember = StudentDetailCheckInByClassAndDate.Remember,
+                    Reflex = StudentDetailCheckInByClassAndDate.Reflex,
+                    Other = StudentDetailCheckInByClassAndDate.Other,
+                    Power = StudentDetailCheckInByClassAndDate.Power,
+                    SendSMS = StudentDetailCheckInByClassAndDate.SendSMS
+                };
 
             return Json(item, JsonRequestBehavior.AllowGet);
         }

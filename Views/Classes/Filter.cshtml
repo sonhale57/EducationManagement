@@ -1,58 +1,50 @@
-﻿<div class="row">
-    <div class="col col-md-12 col-sm-12">
-        <div class="row">
-            @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
-            {
-                <div class="col col-md-2 col-sm-12 text-right">
-                    <div class="me-0 btn btn-md p-0">
-                        <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="ti ti-filter"></i> Filter lớp học
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            @foreach (var item in ViewBag.IdClass)
-                            {
-                                <li><a class="dropdown-item" href="@Url.Action("Filter", new { id = item.Value })"> @item.Text</a></li>
-                            }
-                        </ul>
-                    </div>
-                </div>
-                <div class="col col-md-2 col-sm-12">
-                    <div class="me-0 btn btn-md p-0">
-                        <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="ti ti-filter"></i> Filter khoá học
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            @foreach (var item in ViewBag.IdCourse)
-                            {
-                                <li><a class="dropdown-item" href="@Url.Action("Filter", new { idCourse = item.Value })"> @item.Text</a></li>
-                            }
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="col col-md-6 col-sm-12">
-                    <form action="/classes/Filter" method="get">
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control" name="studentName" />
-                            <button class="input-group-text bg-success" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
-                        </div>
-                    </form>
-                </div>
-            }
-
+﻿@{ 
+    ViewBag.Controller = "Học viên";
+    ViewBag.Title = "Điểm danh";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="d-sm-flex d-block align-items-center justify-content-between align-content-center">
+    <div class="d-flex text-start">
+        <form action="/classes/Filter" method="get">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" name="studentName" placeholder="Tìm kiếm học viên"/>
+                <button class="input-group-text bg-success" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
+            </div>
+        </form>
+    </div>
+    <div class="d-flex text-end">
+        <div class="me-0 btn btn-md p-0">
+            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="ti ti-filter"></i> Filter khoá học
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                @foreach (var item in ViewBag.IdCourse)
+                {
+                    <li><a class="dropdown-item" href="@Url.Action("Filter", new { idCourse = item.Value })"> @item.Text</a></li>
+                }
+            </ul>
+        </div>
+        <div class="me-0 btn btn-md p-0">
+            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="ti ti-filter"></i> Filter lớp học
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                @foreach (var item in ViewBag.IdClass)
+                {
+                    <li><a class="dropdown-item" href="@Url.Action("Filter", new { id = item.Value })"> @item.Text</a></li>
+                }
+            </ul>
         </div>
     </div>
 </div>
-
-<table class="table fs-3">
+<table class="table table-bordered fs-3">
     <thead class="bg-success text-white rounded-1">
         <tr>
-            <th style="padding: 0 0" class="text-center">Học viên</th>
-            <th style="padding: 0 0" class="text-center">Khoá học</th>
-
+            <th class="text-center">Học viên</th>
+            <th class="text-center">Khoá học</th>
             @for (int i = 1; i <= ViewBag.SessionNumber; i++)
             {
-                <th style="padding: 0 0" class="text-center">Buổi @i</th>
+                <th class="text-center">Buổi @i</th>
             }
         </tr>
     </thead>
@@ -62,15 +54,15 @@
         @foreach (var item in ViewBag.TimeTableData)
         {
             <tr>
-                <td class="text-center">
+                <td class="text-center align-content-center">
                     @item.StudentName
                 </td>
-                <td class="text-center">
+                <td class="text-center align-content-center">
                     @item.CourseName
                 </td>
                 @foreach (var session in item.Sessions)
                 {
-                    <td class="text-center" style="padding: 0 0">
+                    <td class="text-center">
                         <div class="select-toggle">
                             @if (session.IsCheckedIn == null)
                             {
@@ -78,13 +70,12 @@
                             }
                             else if (session.IsCheckedIn)
                             {
-                                <input type="checkbox" checked="checked" data-bs-toggle="modal" onclick="storeSelected(@ViewBag.ClassSelectedId, @item.StudentID, '@session.Date')" data-bs-target="#scheduleModal" id="selectToggle" />
+                                <input type="checkbox" checked="checked" data-bs-toggle="modal" onclick="storeSelected(@ViewBag.ClassSelectedId, @item.StudentID, '@session.Date')" data-bs-target="#scheduleModal" id="selectToggle" class="text-success" />
                             }
                             else
                             {
-                                <input type="checkbox" data-bs-toggle="modal" data-bs-target="#scheduleModal" onclick="storeSelected(@ViewBag.ClassSelectedId, @item.StudentID, '@session.Date')" id="selectToggle" style="accent-color: red;" checked="checked" />
+                                <input type="checkbox" data-bs-toggle="modal" data-bs-target="#scheduleModal" onclick="storeSelected(@ViewBag.ClassSelectedId, @item.StudentID, '@session.Date')" id="selectToggle" style="accent-color: red;" class="text-danger" checked="checked" />
                             }
-
                         </div>
                         <div>
                             @session.Date <br />@session.DayOfWeek
@@ -97,39 +88,40 @@
 </table>
 
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" style="padding-right: -100px;margin-right: 110px;height: 100vh;">
+    <div class="modal-dialog modal-dialog-scrollable" style="padding-right: -100px;margin-right: 110px;">
         <form action="/Classes/CheckIn" method="post" enctype="multipart/form-data">
-            <div class="modal-content rounded-0" style="width: 600px;">
-                <input type="hidden" name="classId" id="classId" value="@ViewBag.ClassSelectedId" />
-                <input type="hidden" name="studentId" id="studentId"/>
-                <div class="modal-header bg-info">
-                    <h5 class="modal-title text-white" id="exampleModalLabel">Kết quả học tập ngày</h5>
+            <div class="modal-content" style="width: 600px;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Kết quả học tập ngày</h5>
                 </div>
+                <hr style="width:90%;margin:0 auto;" />
                 <div class="modal-body">
                     <div class="row">
-                        <div class="form-group row md-2">
+                        <input type="hidden" name="classId" id="classId" value="@ViewBag.ClassSelectedId" />
+                        <input type="hidden" name="studentId" id="studentId" />
+                        <div class="form-group row mb-2">
                             <label class="col-lg-3 col-form-label form-control-label">Điểm Danh</label>
                             <div class="col-lg-9">
                                 Có
-                                <input type="radio" name="checkIn" id="checkIn" autocomplete="off" value="True" checked />
-                                Không
+                                <input type="radio" name="checkIn" id="checkIn" autocomplete="off" value="True" checked  class="me-5"/>
+                                Vắng
                                 <input type="radio" name="checkIn" id="checkIn" autocomplete="off" value="False" />
                             </div>
                         </div>
-                        <div class="form-group row md-2">
+                        <div class="form-group row mb-2">
                             <label class="col-lg-3 col-form-label form-control-label">Ngày</label>
                             <div class="col-lg-9">
                                 <input type="text" class="form-control" name="dateCheckedIn" id="dateCheckedIn" />
                             </div>
                         </div>
-                        <div class="form-group row md-2">
+                        <div class="form-group row mb-2">
                             <label class="col-lg-3 col-form-label form-control-label">Bài Học</label>
                             <div class="col-lg-9">
                                 <input type="text" class="form-control" name="lesson" id="lesson" />
                             </div>
                         </div>
-                        <div class="form-group row md-2">
-                            <p><label style="color:blue" class="col-lg-3 col-form-label form-control-label">BTVN</label></p>
+                        <div class="form-group row mb-2">
+                            <p><label class="col-form-label form-control-label text-success">BÀI TẬP VỀ NHÀ</label></p>
                             <label class="col-lg-3 col-form-label form-control-label">Hoàn Thành</label>
                             <div class="col-lg-9">
                                 <select name="completely" id="completely" class="form-control">
@@ -139,7 +131,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group row md-2">
+                        <div class="form-group row mb-2">
                             <label class="col-lg-3 col-form-label form-control-label">Chính xác</label>
                             <div class="col-lg-9">
                                 <select name="exactRate" id="exactRate" class="form-control">
@@ -149,28 +141,26 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group row md-2">
-                            <p><label style="color:blue" class="col-lg-3 col-form-label form-control-label">LUYỆN TẬP ONLINE</label></p>
-                            <p><label style="color:blue" class="col-lg-3 col-form-label form-control-label">TRÊN LỚP</label></p>
+                        <div class="form-group row mb-2">
+                            <p><label class="col-form-label form-control-label text-success">LUYỆN TẬP ONLINE</label></p>
                             <label class="col-lg-3 col-form-label form-control-label">Chữ số (D)</label>
                             <div class="col-lg-9">
                                 <input type="text" class="form-control" name="textNumber" id="textNumber" />
                             </div>
                         </div>
-                        <div class="form-group row md-2">
+                        <div class="form-group row mb-2">
                             <label class="col-lg-3 col-form-label form-control-label">Hàng</label>
                             <div class="col-lg-9">
                                 <input type="text" class="form-control" name="row" id="row" />
                             </div>
                         </div>
-                        <div class="form-group row md-2">
+                        <div class="form-group row mb-2">
                             <label class="col-lg-3 col-form-label form-control-label">Giây (S)</label>
                             <div class="col-lg-9">
                                 <input type="text" class="form-control" name="second" id="second" />
                             </div>
                         </div>
-                        <div class="form-group row md-2">
-                            <p><label style="color:blue" class="col-lg-3 col-form-label form-control-label">Ở NHÀ</label></p>
+                        <div class="form-group row mb-2">
                             <label class="col-lg-3 col-form-label form-control-label">Hoàn Thành</label>
                             <div class="col-lg-9">
                                 <select name="home_completely" id="home_completely" class="form-control">
@@ -180,7 +170,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group row md-2">
+                        <div class="form-group row mb-2">
                             <label class="col-lg-3 col-form-label form-control-label">Chính xác</label>
                             <div class="col-lg-9">
                                 <select name="home_exactRate" id="home_exactRate" class="form-control">
@@ -190,9 +180,8 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group row md-2">
-                            <p><label style="color:blue" class="col-lg-3 col-form-label form-control-label">NHẬN XÉT <label></p>
-                            <p><label style="color:blue" class="col-lg-3 col-form-label form-control-label">KỸ NĂNG</label></p>
+                        <div class="form-group row mb-2">
+                            <p><label  class="col-form-label form-control-label text-success">NHẬN XÉT KỸ NĂNG</label></p>
                             <label class="col-lg-3 col-form-label form-control-label">Tập Trung</label>
                             <div class="col-lg-9">
                                 <select name="focusRate" id="focusRate" class="form-control">
@@ -202,7 +191,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group row md-2">
+                        <div class="form-group row mb-2">
                             <label class="col-lg-3 col-form-label form-control-label">Tự Tin</label>
                             <div class="col-lg-9">
                                 <select name="confidentRate" id="confidentRate" class="form-control">
@@ -212,7 +201,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group row md-2">
+                        <div class="form-group row mb-2">
                             <label class="col-lg-3 col-form-label form-control-label">Ghi Nhớ</label>
                             <div class="col-lg-9">
                                 <select name="rememberRate" id="rememberRate" class="form-control">
@@ -222,7 +211,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group row md-2">
+                        <div class="form-group row mb-2">
                             <label class="col-lg-3 col-form-label form-control-label">Phản xạ</label>
                             <div class="col-lg-9">
                                 <select name="reflexRate" id="reflexRate" class="form-control">
@@ -232,23 +221,23 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group row md-2">
+                        <div class="form-group row mb-2">
                             <label class="col-lg-3 col-form-label form-control-label">Khác</label>
                             <div class="col-lg-9">
                                 <input type="text" class="form-control" name="other" id="other" />
                             </div>
                         </div>
-                        <div class="form-group row md-2">
+                        <div class="form-group row mb-2">
                             <label class="col-lg-3 col-form-label form-control-label">Power</label>
                             <div class="col-lg-9">
                                 <input type="number" class="form-control" name="power" id="power" />
                             </div>
                         </div>
-                        <div class="form-group row md-2">
-                            <label class="col-lg-3 col-form-label form-control-label">Gửi SMS</label>
+                        <div class="form-group row mb-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Gửi SMS | Email</label>
                             <div class="col-lg-9">
                                 Có
-                                <input type="radio" name="isSMS" id="isSMS" autocomplete="off" value="True" checked />
+                                <input type="radio" name="isSMS" id="isSMS" autocomplete="off" value="True" checked  class="me-5"/>
                                 Không
                                 <input type="radio" name="isSMS" id="isSMS" autocomplete="off" value="False" />
                             </div>
@@ -267,7 +256,7 @@
 
 <script>
     function GetDropDownIndex(value){
-            switch(value) 
+            switch(value)
             {
               case "Excellent":
                     return 0;
@@ -284,76 +273,72 @@
     }
 
     function storeSelected(classId, studentId, date) {
-            let today = new Date();
-            document.getElementById("studentId").value = studentId;
-            document.getElementById("dateCheckedIn").value = date + "/" + today.getFullYear();
-            document.getElementById("lesson").value = "";
-            document.getElementById("textNumber").value = "";
-            document.getElementById("row").value = "";
-            document.getElementById("second").value = "";
-            document.getElementById("other").value = "";
-            document.getElementById("power").value = "";
+        event.preventDefault();
+        let today = new Date();
+        document.getElementById("studentId").value = studentId;
+        document.getElementById("dateCheckedIn").value = date + "/" + today.getFullYear();
+        document.getElementById("lesson").value = "";
+        document.getElementById("textNumber").value = "";
+        document.getElementById("row").value = "";
+        document.getElementById("second").value = "";
+        document.getElementById("other").value = "";
+        document.getElementById("power").value = "";
 
-         $.ajax({
-     url: '@Url.Action("GetCheckedSessionDetaiByClass", "Classes")',
-     type: "GET",
-     data: {
-         idClass: classId,
-         studentId: studentId,
-         date:  date + "/" + today.getFullYear()
-     },
-     success: function (data) {
-        if (data != null)
-        {
-            document.getElementById("lesson").value = data.Lesson;
-            document.getElementById("textNumber").value = data.OnClassNumber;
-            document.getElementById("row").value = data.OnClassRow;
-            document.getElementById("second").value = data.OnClassPaper;
-            document.getElementById("other").value = data.Other;
-            document.getElementById("power").value = data.Power;
+        $.ajax({
+            url: '@Url.Action("GetCheckedSessionDetaiByClass", "Classes")',
+            type: "GET",
+            data: {
+                idClass: classId,
+                studentId: studentId,
+                date: date + "/" + today.getFullYear()
+            },
+            success: function (data) {
+                if (data != null) {
+                    document.getElementById("lesson").value = data.Lesson;
+                    document.getElementById("textNumber").value = data.OnClassNumber;
+                    document.getElementById("row").value = data.OnClassRow;
+                    document.getElementById("second").value = data.OnClassPaper;
+                    document.getElementById("other").value = data.Other;
+                    document.getElementById("power").value = data.Power;
 
-            var checkInCb =  document.getElementsByName("checkIn");
+                    var checkInCb = document.getElementsByName("checkIn");
 
-            var smsCb =  document.getElementsByName("isSMS");
+                    var smsCb = document.getElementsByName("isSMS");
 
-            if (data.StatusCheckin)
-            {
-                checkInCb[0].checked = true;    
-                checkInCb[1].checked = false;
+                    if (data.StatusCheckin) {
+                        checkInCb[0].checked = true;
+                        checkInCb[1].checked = false;
+                    }
+
+                    else {
+                        checkInCb[0].checked = false;
+                        checkInCb[1].checked = true;
+                    }
+
+                    if (data.SendSMS) {
+                        smsCb[0].checked = true;
+                        smsCb[1].checked = false;
+                    }
+
+                    else {
+                        smsCb[0].checked = false;
+                        smsCb[1].checked = true;
+                    }
+
+                    document.getElementById("completely").selectedIndex = GetDropDownIndex(data.Complete);
+                    document.getElementById("exactRate").selectedIndex = GetDropDownIndex(data.Exactly);
+                    document.getElementById("home_completely").selectedIndex = GetDropDownIndex(data.HomeComplete);
+                    document.getElementById("home_exactRate").selectedIndex = GetDropDownIndex(data.HomeExactly);
+                    document.getElementById("focusRate").selectedIndex = GetDropDownIndex(data.Focus);
+                    document.getElementById("confidentRate").selectedIndex = GetDropDownIndex(data.Confident);
+                    document.getElementById("rememberRate").selectedIndex = GetDropDownIndex(data.Remember);
+                    document.getElementById("reflexRate").selectedIndex = GetDropDownIndex(data.Reflex);
+                }
+            },
+            error: function (xhr, error) {
+                console.log("error: " + error);
             }
-
-            else
-            {
-                checkInCb[0].checked = false;
-                checkInCb[1].checked = true;
-            }
-
-             if (data.SendSMS)
-             {
-                 smsCb[0].checked = true;    
-                 smsCb[1].checked = false;
-             }
-
-             else
-             {
-                 smsCb[0].checked = false;
-                 smsCb[1].checked = true;
-             }
-
-            document.getElementById("completely").selectedIndex = GetDropDownIndex(data.Complete);
-            document.getElementById("exactRate").selectedIndex = GetDropDownIndex(data.Exactly);
-            document.getElementById("home_completely").selectedIndex = GetDropDownIndex(data.HomeComplete);
-            document.getElementById("home_exactRate").selectedIndex = GetDropDownIndex(data.HomeExactly);
-            document.getElementById("focusRate").selectedIndex = GetDropDownIndex(data.Focus);
-            document.getElementById("confidentRate").selectedIndex = GetDropDownIndex(data.Confident);
-            document.getElementById("rememberRate").selectedIndex = GetDropDownIndex(data.Remember);
-            document.getElementById("reflexRate").selectedIndex = GetDropDownIndex(data.Reflex);
-        }
-     },
-     error: function (xhr, error) {
-         console.log("error: " + error);
-     }
- });
+        });
     }
     $("#scheduleModal").on("hidden.bs.modal", function () {
     location.reload();
