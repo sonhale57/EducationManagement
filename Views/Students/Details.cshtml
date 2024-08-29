@@ -17,7 +17,7 @@
                                 <img src="@(Model.Image != null ? Model.Image : "/Assets/images/profile/user-1.jpg")" height="100" width="100" alt="user avatar" class="rounded-circle">
                                 <a href="javascript:void(0)" class="bg-success rounded-circle p-2 text-white d-inline-flex position-absolute bottom-0 end-0 mb-n3 me-3" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Add To Cart"><i class="ti ti-user-check fs-4"></i></a>
                                 <h5 class="text-success mt-2">@Model.Name</h5>
-                                <h6 class="text-muted">@(Model.DateOfBirth==null?"":Model.DateOfBirth.Value.ToString("dd/MM/yyyy"))</h6>
+                                <h6 class="text-muted">@(Model.DateOfBirth == null ? "" : Model.DateOfBirth.Value.ToString("dd/MM/yyyy"))</h6>
                             </div>
                         </div>
                     </div>
@@ -76,7 +76,7 @@
                                         <div class="col-lg-12">
                                             @{
                                                 var sex = new List<SelectListItem>
-                                                 {
+                                                                                     {
                                                     new SelectListItem { Text = "Nam", Value = "Nam" },
                                                     new SelectListItem { Text = "Nữ", Value = "Nữ" }
                                                 };
@@ -87,7 +87,7 @@
                                     <div class="form-group row mt-2">
                                         <label class="form-control-label ms-2">Sinh nhật</label>
                                         <div class="col-lg-12">
-                                            @Html.EditorFor(model => model.DateOfBirth, new { htmlAttributes = new { @class = "form-control" } })
+                                            @Html.EditorFor(model => model.DateOfBirth, new { htmlAttributes = new { @class = "form-control", @placeholder = "MM/dd/yyyy" } })
                                         </div>
                                     </div>
                                     <div class="form-group row mt-2">
@@ -134,7 +134,7 @@
                                     <div class="form-group row mt-2">
                                         <label class="form-control-label ms-2">Ngày sinh</label>
                                         <div class="col-lg-12">
-                                            @Html.EditorFor(model => model.ParentDateOfBirth, new { htmlAttributes = new { @class = "form-control" } })
+                                            @Html.EditorFor(model => model.ParentDateOfBirth, new { htmlAttributes = new { @class = "form-control", @placeholder = "MM/dd/yyyy" } })
                                         </div>
                                     </div>
                                     <div class="form-group row mt-2">
@@ -142,13 +142,13 @@
                                         <div class="col-lg-12">
                                             @{
                                                 var relationship = new List<SelectListItem>
-                                                            {
+                                                                                                {
                                                                 new SelectListItem { Text = "--", Value = "" },
                                                                 new SelectListItem { Text = "Cha mẹ", Value = "Cha mẹ" },
                                                                 new SelectListItem { Text = "Ông bà", Value = "Ông bà" },
                                                                 new SelectListItem { Text = "Khác", Value = "Khác" }
                                                             };
-                                                }
+                                            }
                                             @Html.DropDownListFor(model => model.Relationship, relationship, new { @class = "form-control", id = "Relationship" })
                                         </div>
                                     </div>
@@ -178,8 +178,8 @@
                                         <div class="col-lg-6">
                                             <label class="form-control-label ms-2">Phụ huynh biết qua</label>
                                             @{
-                                                    var bietqua = new List<SelectListItem>
-                                                            {
+                                                var bietqua = new List<SelectListItem>
+                                                                                                {
                                                                 new SelectListItem { Text = "--", Value = "" },
                                                                 new SelectListItem { Text = "Bạn bè", Value = "Bạn bè" },
                                                                 new SelectListItem { Text = "Website", Value = "Website" },
@@ -190,8 +190,8 @@
                                                                 new SelectListItem { Text = "Tờ rơi", Value = "Tờ rơi" },
                                                                 new SelectListItem { Text = "Khác", Value = "Khác" }
                                                             };
-                                                }
-                                                @Html.DropDownListFor(model => model.Known, bietqua, new { @class = "form-control", id = "Known" })
+                                            }
+                                            @Html.DropDownListFor(model => model.Known, bietqua, new { @class = "form-control", id = "Known" })
                                         </div>
                                         <div class="col-lg-6">
                                             <label class="form-control-label ms-2">Chương trình MKT</label>
@@ -205,7 +205,8 @@
                                     @Html.HiddenFor(model => model.IdUser)
                                 </div>
                             </div>
-                            <a href="javascript:Submit_editStudent()" class="btn btn-success btn-sm mt-3"><i class="ti ti-edit"></i> Chỉnh sửa thông tin</a>
+                            <a href="javascript:Submit_editStudent()" class="btn btn-success btn-md mt-3"><i class="ti ti-edit"></i> Chỉnh sửa thông tin</a>
+                            <span class="loader"></span>
                         </form>
                     </div>
                     <div class="tab-pane fade p-2" id="profile" role="tabpanel" aria-labelledby="profile-tab">
@@ -391,7 +392,208 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="giahanModal" tabindex="-1" aria-labelledby="giahanModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable" style="padding-right: -100px;margin-right: 110px;">
+        <div class="modal-content" style="width: 600px;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="giahanModalLabel">Gia hạn khóa học</h5>
+            </div>
+            <hr style="width:90%;margin:0 auto;" />
+            <div class="modal-body">
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Mã đăng ký</label>
+                    <div class="col-lg-9">
+                        <input type="hidden" class="form-control" name="IdRegistration" id="IdRegistration_giahan" />
+                        <input class="form-control disabled" name="RegistrationCode" id="RegistrationCode_giahan" />
+                    </div>
+                </div>
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Khóa học</label>
+                    <div class="col-lg-9">
+                        <select id="IdCourse_giahan" class="form-control disabled">
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Lớp học</label>
+                    <div class="col-lg-9">
+                        <select id="IdClass_giahan" class="form-control disabled">
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Ngày bắt đầu</label>
+                    <div class="col-lg-9">
+                        <input type="text" name="fromdate" value="" id="fromdate_giahan" class="form-control disabled" />
+                    </div>
+                </div>
+
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Ngày kết thúc</label>
+                    <div class="col-lg-9">
+                        <input type="text" name="todate" value="" id="todate_giahan" class="form-control disabled" />
+                    </div>
+                </div>
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Gia hạn</label>
+                    <div class="col-lg-9">
+                        <input type="date" name="todate" value="" id="todate_giahannew" class="form-control" onchange="Check_max(this)"/>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer text-start">
+                <span class="loader"></span>
+                <button type="button" class="btn btn-success" onclick="Submit_giahan()" id="btnSubmitGiahan">
+                    <i class="ti ti-circle-plus"></i> Gia hạn khóa học
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deactiveModal" tabindex="-1" aria-labelledby="deactiveModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable" style="padding-right: -100px;margin-right: 110px;">
+        <div class="modal-content" style="width: 600px;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deactiveModalLabel">Kích hoạt khóa học</h5>
+            </div>
+            <hr style="width:90%;margin:0 auto;" />
+            <div class="modal-body">
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Mã đăng ký</label>
+                    <div class="col-lg-9">
+                        <input type="hidden" class="form-control" name="IdRegistration" id="IdRegistration_deactive" />
+                        <input class="form-control disabled" name="RegistrationCode" id="RegistrationCode_deactive"  />
+                    </div>
+                </div>
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Khóa học</label>
+                    <div class="col-lg-9">
+                        <select id="IdCourse_deactive" class="form-control disabled">
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Lớp học</label>
+                    <div class="col-lg-9">
+                        <select id="IdClass_deactive" class="form-control" onchange="onchangeSchedule()">
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Ngày bắt đầu</label>
+                    <div class="col-lg-9">
+                        <input type="text" name="fromdate" value="" id="fromdate_deactive" class="form-control disabled"/>
+                    </div>
+                </div>
+
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Ngày kết thúc</label>
+                    <div class="col-lg-9">
+                        <input type="text" name="todate" value="" id="todate_deactive" class="form-control disabled" />
+                        <p class="fst-italic text-success mt-2" id="spanTimeStudied">***</p>
+                    </div>
+                </div>
+                <b class="mt-3">Thời khóa biểu</b>
+                <div class="form-group row mt-2">
+                    <table cellpadding="0" cellspacing="0" border="0" class="table">
+                        <thead>
+                            <tr>
+                                <th class="text-center">STT</th>
+                                <th class="text-center">Thứ</th>
+                                <th class="text-start">Giờ Học</th>
+                                <th class="text-center">Số Giờ</th>
+                                <th class="text-start">Giáo viên</th>
+                            </tr>
+                        </thead>
+                        <tbody id="datarow_deactive">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer text-start">
+                <span class="loader"></span>
+                <button type="button" class="btn btn-success" onclick="Submit_deactive()" id="btnSubmitKichhoatlai">
+                    <i class="ti ti-circle-plus"></i> Kích hoạt lại khóa học
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="exchangeCourseModal" tabindex="-1" aria-labelledby="exchangeCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable" style="padding-right: -100px;margin-right: 110px;">
+        <div class="modal-content" style="width: 600px;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exchangeCourseModalLabel">Cập nhật khóa học</h5>
+            </div>
+            <hr style="width:90%;margin:0 auto;" />
+            <div class="modal-body">
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Mã đăng ký</label>
+                    <div class="col-lg-9">
+                        <input type="hidden" class="form-control" name="IdRegistration" id="IdRegistration_exchange" />
+                        <input class="form-control disabled" name="RegistrationCode" id="RegistrationCode_exchange" />
+                    </div>
+                </div>
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Khóa học</label>
+                    <div class="col-lg-9">
+                        <select id="IdCourse_exchange" class="form-control disabled">
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Lớp học</label>
+                    <div class="col-lg-9">
+                        <select id="IdClass_exchange" class="form-control" onchange="onchangeSchedule()">
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Ngày bắt đầu</label>
+                    <div class="col-lg-9">
+                        <input type="text" name="fromdate" value="" id="fromdate_exchange" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Ngày kết thúc</label>
+                    <div class="col-lg-9">
+                        <input type="text" name="todate" value="" id="todate_exchange" class="form-control" />
+                    </div>
+                </div>
+                <h6 class="mt-3"><i class="ti ti-calendar"></i> Thời khóa biểu</h6>
+                <div class="form-group row mt-2">
+                    <table cellpadding="0" cellspacing="0" border="0" class="table">
+                        <thead>
+                            <tr>
+                                <th class="text-center">STT</th>
+                                <th class="text-center">Thứ</th>
+                                <th class="text-start">Giờ Học</th>
+                                <th class="text-center">Số Giờ</th>
+                                <th class="text-start">Giáo viên</th>
+                            </tr>
+                        </thead>
+                        <tbody id="datarow_exchange">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer text-start">
+                <span class="loader"></span>
+                <button type="button" class="btn btn-success" onclick="Submit_exchange()" id="btnSubmitCapnhat">
+                    <i class="ti ti-circle-plus"></i> Cập nhật khóa học
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
 <script>
+    var isProcessing = false;
     Loadlist_tuvan();
     function Loadlist_tuvan() {
         var idStudent = $("#idStudent").val();
@@ -459,7 +661,10 @@
         });
     }
 
-     function Submit_tuvan() {
+    function Submit_tuvan() {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
          $.ajax({
              url: '@Url.Action("Submit_tuvan", "Students")',
              type: "POST",
@@ -474,40 +679,51 @@
                      $("#Ngayhen").val("");
                      Loadlist_tuvan();
                      showSuccess("Đã cập nhật tư vấn thành công!", 3000);
+                     isProcessing = false;
+                     $(".loader").html("");
                  }
              },
              error: function (xhr, error) {
-
+                 isProcessing = false;
+                 $(".loader").html("");
                  console.log("lỗi"+error);
              }
          });
     }
-     function Submit_taikhoan() {
-     $.ajax({
-         url: '@Url.Action("Submit_taikhoan", "Students")',
-         type: "POST",
-         data: {
-             Noidung: $("#Noidungnap").val(),
-             Sotien: $("#Sotien").val(),
-             idStudent: $("#idStudent").val()
-         },
-         success: function (data) {
-             if (data.status = "ok") {
-                 $("#Sotien").val("");
-                 $("#Noidungnap").val("");
-                 Loadlist_taikhoan();
-                 showSuccess("Đã nạp tài khoản thành công!", 3000);
-             }
-         },
-         error: function (xhr, error) {
-
-             console.log("lỗi"+error);
-         }
-     });
+    function Submit_taikhoan() {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        $.ajax({
+            url: '@Url.Action("Submit_taikhoan", "Students")',
+            type: "POST",
+            data: {
+                Noidung: $("#Noidungnap").val(),
+                Sotien: $("#Sotien").val(),
+                idStudent: $("#idStudent").val()
+            },
+            success: function (data) {
+                if (data.status = "ok") {
+                    $("#Sotien").val("");
+                    $("#Noidungnap").val("");
+                    Loadlist_taikhoan();
+                    showSuccess("Đã nạp tài khoản thành công!", 3000);
+                    isProcessing = false;
+                    $(".loader").html("");
+                }
+            },
+            error: function (xhr, error) {
+                isProcessing = false;
+                $(".loader").html("");
+                console.log("lỗi" + error);
+            }
+        });
     }
     function Submit_editStudent() {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
         var formData = new FormData(document.getElementById("form_editStudent"));
-
         $.ajax({
             url: '@Url.Action("Submit_editStudent", "Students")',
             type: "POST",
@@ -520,8 +736,12 @@
                 } else {
                     showError(data.message, 3000);
                 }
+                isProcessing = false;
+                $(".loader").html("");
             },
             error: function (xhr, error) {
+                isProcessing = false;
+                $(".loader").html("");
                 console.log("Lỗi: " + error);
             }
         });
@@ -583,7 +803,6 @@
         // Gán giá trị của ô nhập ngày kết thúc là ngày sau khi cộng thêm 3 tháng
         document.getElementById('todate').value = toDateValue;
     }
-    var isProcessing = false;
     function Submit_xetlop() {
         if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
         isProcessing = true; // Đặt cờ đang xử lý
@@ -622,7 +841,7 @@
         // Mở modal
         $('#exampleModal').modal('show');
     }
-    loadSchedule();
+    //loadSchedule();
     function loadSchedule() {
         const idClass = $("#IdClass").val();
         const fromDate = $("#fromdate").val();
@@ -651,9 +870,7 @@
                     let index = 1;
                     let stt = 1;
                     $.each(data.schedulesbyClass, function (key, value) {
-                        $('#datarow')
-                            .append('<tr><td>' + index++ + '</td><td>' + value.DayOfWeek + '</td><td>' + value.TimeSlot + '</td><td>' + value.HourQuantity + '</td><td>' + value.TeacherName +'</td></tr>');
-
+                        $('#datarow').append('<tr><td class="text-center">' + index++ + '</td><td class="text-center">' + value.DayOfWeek + '</td><td>' + value.TimeSlot + '</td><td class="text-center">' + value.HourQuantity + '</td><td>' + value.TeacherName + '</td></tr>');
                     });
 
                     $.each(data.timeTableData, function (index, value) {
@@ -667,6 +884,253 @@
                 console.log("error: " + error);
             }
         });
+    }
+    function Baoluu_modal(IdRegistration, IdCourse) {
+        if (confirm('Bạn có muốn bảo lưu khóa học cho học viên này?')) {
+            $.ajax({
+                url: '@Url.Action("Submit_Reserve", "Students")',
+                type: 'POST',
+                data: {
+                    IdRegistration: IdRegistration,
+                    IdCourse: IdCourse
+                },
+                success: function (data) {
+                    if (data.status == "ok") {
+                        showSuccess(data.message, 3000);
+                        location.reload();
+                    } else {
+                        showError(data.message, 3000);
+                    }
+                },
+                error: function () {
+                    showError('Error deleting student', 3000);
+                }
+            });
+            return false;
+        }
+    }
+    function Giahan_modal(idregistration, idcourse) {
+        $.ajax({
+            url: '@Url.Action("Load_giahan", "Students")',
+            type: "GET",
+            data: {
+                idCourse: idcourse,
+                idRegistration: idregistration
+            },
+            success: function (data) {
+                $('#IdRegistration_giahan').val(idregistration);
+                $('#RegistrationCode_giahan').val(data.registrionCode);
+                $('#IdCourse_giahan').html(data.strCourse);
+                $('#IdClass_giahan').html(data.str);
+                $('#fromdate_giahan').val(data.fromdate);
+                $('#todate_giahan').val(data.todate);
+
+                if (data.StatusStudent == false) {
+                    $("#btnSubmitGiahan").addClass("hideof");
+                    showError("Không thể gia hạn khóa học cho học viên này!", 5000);
+                }
+                $('#giahanModal').modal('show');
+            },
+            error: function (xhr, error) {
+
+                console.log("lỗi" + error);
+            }
+        });
+    }
+    function Check_max(input) {
+        // Lấy giá trị từ các trường ngày
+        var todate_giahan = document.getElementById("todate_giahan").value;
+        var todate_giahannew = input.value;
+
+        // Chuyển đổi chuỗi ngày thành đối tượng Date
+        var dateGiaHan = new Date(todate_giahan);
+        var dateGiaHanNew = new Date(todate_giahannew);
+
+        // Tính toán sự chênh lệch ngày
+        var differenceInTime = dateGiaHanNew.getTime() - dateGiaHan.getTime();
+        var differenceInDays = differenceInTime / (1000 * 3600 * 24);
+
+        // Kiểm tra nếu chênh lệch vượt quá 14 ngày
+        if (differenceInDays > 14) {
+            showError("Ngày gia hạn mới không được vượt quá 14 ngày so với ngày kết thúc.",3000);
+            // Đặt lại giá trị ngày về rỗng
+            input.value = "";
+        }
+    }
+    function Submit_giahan() {
+        // Kiểm tra nếu người dùng chưa chọn ngày mới để gia hạn
+        if ($("#todate_giahannew").val() === "") {
+            showError("Vui lòng chọn thời gian để gia hạn khóa học này!", 3000);
+            return false;  // Dừng hàm nếu chưa chọn ngày
+        }
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        $.ajax({
+            url: '@Url.Action("Submit_giahan", "Students")',
+            type: 'POST',
+            data: {
+                IdRegistration: $("#IdRegistration_giahan").val(),
+                IdCourse: $("#IdCourse_giahan").val(),
+                Todate: $("#todate_giahannew").val()
+            },
+            success: function (data) {
+                if (data.status == "ok") {
+                    showSuccess(data.message, 3000);
+                    Loadlist_khoadangky();
+                    Loadlist_lophoc();
+                    $('#giahanModal').modal('hide');
+                } else {
+                    showError(data.message, 3000);
+                }
+                isProcessing = false;
+                $(".loader").html("");
+            },
+            error: function () {
+                showError('Error extend student', 3000);
+                isProcessing = false;
+                $(".loader").html("");
+            }
+        });
+        return false;
+    }
+    function Deactive_modal(idregistration, idcourse) {
+        $.ajax({
+            url: '@Url.Action("Load_deactive", "Students")',
+            type: "GET",
+            data: {
+                idCourse: idcourse,
+                idRegistration: idregistration
+            },
+            success: function (data) {
+                $('#IdRegistration_deactive').val(idregistration);
+                $('#RegistrationCode_deactive').val(data.registrionCode);
+                $('#IdCourse_deactive').html(data.strCourse);
+                $('#IdClass_deactive').html(data.str);
+                $('#fromdate_deactive').val(data.fromdate);
+                $('#todate_deactive').val(data.newTodate);
+                $('#spanTimeStudied').html("** Thời gian đã học: " + data.daysStudied + " ngày.");
+                if (data.StatusStudent == false) {
+                    $("#btnSubmitGiahan").addClass("hideof");
+                    showError("Đã quá thời hạn kích hoạt lại khóa học cho học viên này!", 5000);
+                }
+                onchangeSchedule();
+                $('#deactiveModal').modal('show');
+            },
+            error: function (xhr, error) {
+                console.log("lỗi" + error);
+            }
+        });
+    }
+    function Submit_deactive() {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        $.ajax({
+            url: '@Url.Action("Submit_deactive", "Students")',
+            type: 'POST',
+            data: {
+                IdRegistration: $("#IdRegistration_deactive").val(),
+                IdCourse: $("#IdCourse_deactive").val(),
+                IdClass: $("#IdClass_deactive").val(),
+                Todate: $("#todate_deactive").val()
+            },
+            success: function (data) {
+                if (data.status == "ok") {
+                    showSuccess(data.message, 3000);
+                    Loadlist_khoadangky();
+                    Loadlist_lophoc();
+                    $('#deactiveModal').modal('hide');
+                } else {
+                    showError(data.message, 3000);
+                }
+                isProcessing = false;
+                $(".loader").html("");
+            },
+            error: function () {
+                showError('Error extend student', 3000);
+                isProcessing = false;
+                $(".loader").html("");
+            }
+        });
+        return false;
+    }
+    function onchangeSchedule() {
+        $("#datarow_deactive").html("");
+        $.ajax({
+            url: '@Url.Action("Onchange_schedule", "Students")',
+            type: "GET",
+            data: {
+                idClass: $("#IdClass_deactive").val()
+            },
+            success: function (data) {
+                if (data.status = "ok") {
+                    let index = 1;
+                    $.each(data.schedulesbyClass, function (key, value) {
+                        $('#datarow_deactive').append('<tr><td class="text-center">' + index++ + '</td><td class="text-center">' + value.DayOfWeek + '</td><td>' + value.TimeSlot + '</td><td class="text-center">' + value.HourQuantity + '</td><td>' + value.TeacherName + '</td></tr>');
+                    });
+                }
+            },
+            error: function (xhr, error) {
+                console.log("error: " + error);
+            }
+        });
+    }
+    function Capnhat_modal(idregistration, idcourse) {
+        $.ajax({
+            url: '@Url.Action("Load_exchange", "Students")',
+            type: "GET",
+            data: {
+                idCourse: idcourse,
+                idRegistration: idregistration
+            },
+            success: function (data) {
+                $('#IdRegistration_exchange').val(idregistration);
+                $('#RegistrationCode_exchange').val(data.registrionCode);
+                $('#IdCourse_exchange').html(data.strCourse);
+                $('#IdClass_exchange').html(data.str);
+                $('#fromdate_exchange').val(data.fromdate);
+                $('#todate_exchange').val(data.todate);
+                $('#exchangeCourseModal').modal('show');
+            },
+            error: function (xhr, error) {
+                console.log("lỗi" + error);
+            }
+        });
+    }
+    function Submit_exchange() {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        $.ajax({
+            url: '@Url.Action("Submit_exchange", "Students")',
+            type: 'POST',
+            data: {
+                IdRegistration: $("#IdRegistration_exchange").val(),
+                IdCourse: $("#IdCourse_exchange").val(),
+                IdClass: $("#IdClass_exchange").val(),
+                Todate: $("#todate_exchange").val(),
+                Fromdate: $("#fromdate_exchange").val()
+            },
+            success: function (data) {
+                if (data.status == "ok") {
+                    showSuccess(data.message, 3000);
+                    Loadlist_khoadangky();
+                    Loadlist_lophoc();
+                    $('#exchangeCourseModal').modal('hide');
+                } else {
+                    showError(data.message, 3000);
+                }
+                isProcessing = false;
+                $(".loader").html("");
+            },
+            error: function () {
+                showError('Error extend student', 3000);
+                isProcessing = false;
+                $(".loader").html("");
+            }
+        });
+        return false;
     }
     function myFunction() {
         var x = document.getElementById("Password");

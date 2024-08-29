@@ -1,0 +1,78 @@
+﻿@{
+    ViewBag.Controller = "Học viên";
+    ViewBag.Title = "Danh sách sinh nhật";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}   
+<div class="row">
+    <div class="col col-md-4 col-sm-12">
+        <div class="input-group mb-3">
+            @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
+            {
+                @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", onchange = "Loadlist();" })
+            }
+            <select class="form-control ms-1 rounded-1" id="thang" onchange="Loadlist()">
+                <option value="1">Tháng 01</option>
+                <option value="2">Tháng 02</option>
+                <option value="3">Tháng 03</option>
+                <option value="4">Tháng 04</option>
+                <option value="5">Tháng 05</option>
+                <option value="6">Tháng 06</option>
+                <option value="7">Tháng 07</option>
+                <option value="8">Tháng 08</option>
+                <option value="9">Tháng 09</option>
+                <option value="10">Tháng 10</option>
+                <option value="11">Tháng 11</option>
+                <option value="12">Tháng 12</option>
+            </select>
+        </div>
+    </div>
+    <div class="col col-md-8 col-sm-12 text-end">
+        <a href="javascript:Print_Order()" class="btn btn-sm btn-outline-dark"><i class="ti ti-printer"></i> In danh sách</a>
+    </div>    
+</div>
+<div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch">
+        <div class="card w-100 shadow">
+            <div class="card-body p-4">
+                <div class="mb-4">
+                    <h5 class="text-success ms-5 fw-semibold"><i class="ti ti-cake"></i> Danh sách sinh nhật trong tháng <span id="thangduocchon"></span></h5>
+                </div>
+                <ul class="timeline-widget position-relative ms-5 pb-5 text-center m-auto" id="showlist">
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        var today = new Date();
+        var currentMonth = today.getMonth() + 1;  // Get the current month (1-12)
+
+        // Set the selected attribute on the option with the current month
+        $("#thang option[value='" + currentMonth + "']").attr("selected", "selected");
+        Loadlist();
+    });
+    function Loadlist() {
+        // Hiển thị loader khi bắt đầu tải dữ liệu
+        $(".loader").html("Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+
+        // Gửi yêu cầu AJAX đến server
+        $.ajax({
+            url: '@Url.Action("Loadlist_birthday", "Students")', // URL của action method
+            type: "GET",
+            data: {
+                IdBranch: $("#IdBranch").val(), // Lấy giá trị từ phần tử select hoặc input có id là IdBranch
+                Month: $("#thang").val()  // Lấy giá trị từ phần tử select hoặc input có id là IdCourse
+            },
+            success: function (data) {
+                $('#thangduocchon').html($("#thang").val()); // Cập nhật HTML cho tbody với id showlist
+                $('#showlist').html(data.str); // Cập nhật HTML cho tbody với id showlist
+                $(".loader").html(""); // Xóa loader sau khi dữ liệu được tải thành công
+            },
+            error: function (xhr, error) {
+                console.log("Lỗi: " + error); // Ghi lỗi vào console nếu có
+                $(".loader").html(""); // Xóa loader nếu có lỗi xảy ra
+            }
+        });
+    }
+</script>

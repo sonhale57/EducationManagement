@@ -937,6 +937,8 @@
     <Content Include="Views\Students\DeletedList.cshtml" />
     <Content Include="Views\Registrations\Prints.cshtml" />
     <Content Include="Views\Orders\PrintOrderDelivery.cshtml" />
+    <Content Include="Views\Students\BirthDayList.cshtml" />
+    <Content Include="Views\Students\EndingSoon.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

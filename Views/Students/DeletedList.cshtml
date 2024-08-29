@@ -5,15 +5,15 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div class="row">
-    <div class="col col-md-6 col-sm-12">
-        <form action="/students" method="get">
+    <div class="col col-md-4 col-sm-12">
+        <form action="/students/deletedlist" method="get">
             <div class="input-group mb-3">
                 @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
                 {
-                    @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", onchange = "this.form.submit();" })
+                    @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", onchange = "Loadlist();" })
                 }
-                <input type="text" class="form-control" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
-                <button class="input-group-text bg-success" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
+                <input type="text" class="form-control ms-1 rounded-1" name="searchString" placeholder="Tìm kiếm" id="searchString" value="@ViewBag.CurrentFilter">
+                <a class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" href="javascript:Loadlist()"><i class="ti ti-search text-white"></i></a>
             </div>
         </form>
     </div>
@@ -22,14 +22,64 @@
     <thead class="bg-success text-white rounded-1">
         <tr>
             <th class="text-center">STT</th>
-            <th>Mã học viên</th>
+            <th class="text-center">Mã học viên</th>
             <th>Họ tên</th>
+            <th>Tên đăng nhập</th>
             <th class="text-center">Năm sinh</th>
             <th class="text-center">Giới tính</th>
-            <th class="text-center">Trạng thái</th>
             <th>Quản lý</th>
             <th class="text-end">Thao tác</th>
         </tr>
     </thead>
     <tbody id="showlist"></tbody>
+    <tr id="loader"></tr>
 </table>
+<script>
+    var isProcessing = false;
+    Loadlist();
+    function Loadlist() {
+        $(".loader").html("Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        $.ajax({
+            url: '@Url.Action("Loadlist_deleted", "Students")',
+            type: "GET",
+            data: {
+                IdBranch: $("#IdBranch").val(),
+                searchString: $("#searchString").val()
+            },
+            success: function (data) {
+                $('#showlist').html(data.str);
+                $(".loader").html("");
+            },
+            error: function (xhr, error) {
+                console.log("lỗi"+error);
+            }
+        });
+    }
+    function restore_Student(IdStudent) {
+        if (confirm('Bạn có muốn khôi phục viên này?')) {
+            if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+            isProcessing = true; // Đặt cờ đang xử lý
+            $.ajax({
+                url: '@Url.Action("Restore_student", "Students")',
+                type: 'POST',
+                data: {
+                    Id: IdStudent
+                },
+                success: function (data) {
+                    if (data.status == "ok") {
+                        showSuccess(data.message, 3000);
+                        Loadlist();
+                    } else {
+                        showError(data.message, 3000);
+                    }
+                    isProcessing = false;
+                },
+                error: function () {
+                    showError('Error restore student', 3000);
+                    isProcessing = false;
+                }
+            });
+            return false;
+        }
+    }
+</script>

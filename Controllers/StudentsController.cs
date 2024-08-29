@@ -28,6 +28,7 @@ using System.Data.Entity.Validation;
 using System.Data.Entity.Infrastructure;
 using System.Transactions;
 using Transaction = SuperbrainManagement.Models.Transaction;
+using Microsoft.Ajax.Utilities;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -177,9 +178,9 @@ namespace SuperbrainManagement.Controllers
             // Generate a random number
             Random random = new Random();
             int randomNumber = random.Next(1000, 9999); // Adjust range as needed
-
+            var registation = db.Registrations.Where(x=>x.IdBranch==IdBranch).Count();
             // Generate the new code
-            string newCode = $"{prefix}_{randomNumber}";
+            string newCode = $"{prefix}_{registation+1}";
 
             return newCode;
         }
@@ -225,7 +226,7 @@ namespace SuperbrainManagement.Controllers
         {
             DataTable dataTableCourse = Connect.SelectAll("SELECT cour.Name AS NameCourse, rescourse.IdCourse, res.Id, rescourse.Price, pro.Name AS NameProgram, res.Amount, rescourse.TotalAmount, res.Code, res.DateCreate, rescourse.Discount FROM Registration res INNER JOIN RegistrationCourse rescourse ON rescourse.IdRegistration = res.Id INNER JOIN Course cour ON cour.Id = rescourse.IdCourse INNER JOIN Program pro ON pro.Id = cour.IdProgram WHERE res.Id = '" + IdRegistration + "'");
             DataTable dataTableProduct = Connect.SelectAll("SELECT resproduct.Discount,pro.Name, resproduct.Price, resproduct.TotalAmount, res.Id, resproduct.IdProduct FROM Registration res INNER JOIN RegistrationProduct resproduct ON res.Id = resproduct.IdRegistration INNER JOIN Product pro ON pro.Id = resproduct.IdProduct WHERE res.Id = '" + IdRegistration + "'");
-            DataTable dataTableOther = Connect.SelectAll("select revenue.Name,revenue.Price,revenue.Discount,other.Amount,other.TotalAmount,res.Id,other.IdReference from Registration res inner join RegistrationOther other on other.IdRegistration = res.Id inner join RevenueReference revenue on revenue.Id = other.IdReference where other.IdRegistration = '"+IdRegistration+"'");
+            DataTable dataTableOther = Connect.SelectAll("select revenue.Name,revenue.Price,other.Discount,other.Amount,other.TotalAmount,res.Id,other.IdReference from Registration res inner join RegistrationOther other on other.IdRegistration = res.Id inner join RevenueReference revenue on revenue.Id = other.IdReference where other.IdRegistration = '"+IdRegistration+"'");
             Registration registration = Connect.SelectSingle<Registration>("SELECT * FROM Registration WHERE Id = '" + IdRegistration + "'");
 
             var data = new StringBuilder();
@@ -356,7 +357,7 @@ namespace SuperbrainManagement.Controllers
                             Code = GenerateCode(IdBranch),
                             TotalAmount = totalamount,
                             DateCreate = DateTime.Now,
-                            Status = true,
+                            Status = false,
                             Enable = true,
                             Description = Description,
                             IdBranch = student.IdBranch
@@ -401,7 +402,6 @@ namespace SuperbrainManagement.Controllers
                             }
                             else
                             {
-                                var listproduct = db.ProductCourses.Where(x => x.IdCourse == IdObject);
                                 RegistrationCourse NewregistrationCourse = new RegistrationCourse
                                 {
                                     Status = false,
@@ -419,25 +419,29 @@ namespace SuperbrainManagement.Controllers
                                 db.RegistrationCourses.Add(NewregistrationCourse);
                                 db.SaveChanges();
 
+                                var listproduct = db.ProductCourses.Where(x => x.IdCourse == IdObject);
                                 if (listproduct.Any())
                                 {
                                     foreach (var p in listproduct)
                                     {
-                                        RegistrationProduct NewregistrationProduct = new RegistrationProduct
-                                        {
-                                            IdRegistration = registration.Id,
-                                            IdProduct = Convert.ToInt32(p.IdProduct),
-                                            Status = false,
-                                            Price = p.Product.Price,
-                                            Amount = p.Amount,
-                                            TotalAmount = p.Product.Price,
-                                            Discount = 0
-                                        };
-                                        db.RegistrationProducts.Add(NewregistrationProduct);
-                                        db.SaveChanges();
+                                        int IdProduct = Convert.ToInt32(p.IdProduct);
+                                        //if (Check_tonkho(p.IdProduct))
+                                        //{
+                                            RegistrationProduct NewregistrationProduct = new RegistrationProduct
+                                            {
+                                                IdRegistration = registration.Id,
+                                                IdProduct = IdProduct,
+                                                Status = false,
+                                                Price = p.Product.Price,
+                                                Amount = p.Amount,
+                                                TotalAmount = p.Product.Price,
+                                                Discount = 0
+                                            };
+                                            db.RegistrationProducts.Add(NewregistrationProduct);
+                                            db.SaveChanges();
+                                        //}
                                     }
                                 }
-
                                 scope.Complete(); // Commit transaction
                                 return Json(NewregistrationCourse.IdRegistration);
                             }
@@ -475,6 +479,25 @@ namespace SuperbrainManagement.Controllers
                 }
             }
         }
+        public bool Check_tonkho(int? IdObject)
+        {
+            int IdBranch = Convert.ToInt32(CheckUsers.idBranch());
+            // Calculate the total stock (tonkho) for the given product and branch using LINQ
+            var incomingStock = db.ProductReceiptionDetails
+                .Where(d => d.IdProduct == IdObject && d.Type == true && d.WarehouseReceiption.IdBranch == IdBranch)
+                .Sum(d => (int?)d.Amount) ?? 0;
+
+            var outgoingStock = db.ProductReceiptionDetails
+                .Where(d => d.IdProduct == IdObject && d.Type == false && d.WarehouseReceiption.IdBranch == IdBranch)
+                .Sum(d => (int?)d.Amount) ?? 0;
+
+            // Calculate the current stock
+            int tonkho = incomingStock - outgoingStock;
+
+            // Return true if stock is greater than zero
+            return tonkho > 0;
+        }
+
         [HttpPost]
         public ActionResult Submit_deleteItem(int IdRegistration, int Id, int Type)
         {
@@ -535,13 +558,24 @@ namespace SuperbrainManagement.Controllers
             int count = 0;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "select course.Id as IdCourse,re.id as IdRegistration,re.Code,course.Name as NameCourse,c.Name as NameClass,joinclass.Sessions,joinclass.DateCreate,joinclass.Fromdate,joinclass.Todate,us.Name as NameUser from StudentJoinClass joinclass inner join Registration re on re.id=joinclass.IdRegistration,Course course,Class c,[User] us where course.Id = joinclass.IdCourse and c.id=joinclass.IdClass and us.id=joinclass.IdUser and re.IdStudent=" + idStudent;
+                string query = "select course.Id as IdCourse,re.id as IdRegistration,re.Code,course.Name as NameCourse,c.Name as NameClass,joinclass.Sessions,joinclass.DateCreate,joinclass.Fromdate,joinclass.Todate,us.Name as NameUser " +
+                                "from StudentJoinClass joinclass inner join Registration re on re.id=joinclass.IdRegistration,Course course,Class c,[User] us " +
+                                "where course.Id = joinclass.IdCourse and c.id=joinclass.IdClass and us.id=joinclass.IdUser and re.IdStudent=" + idStudent;
                 SqlCommand command = new SqlCommand(query, connection);
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    Console.WriteLine("test:" +reader["NameClass"].ToString());   
+                    var todate = DateTime.Parse(reader["Todate"].ToString());
+                    string StatusStudent = "";
+                    if (todate > DateTime.Now)
+                    {
+                        StatusStudent = "<span class='badge bg-success rounded-3'>Đang học</span>";
+                    }
+                    else
+                    {
+                        StatusStudent = "<span class='badge bg-danger rounded-3'>Đã kết thúc</span>";
+                    }
                     count++;
                     str +="<tr>"
                         + "<td class='text-center'>" + count + "</td>"
@@ -552,7 +586,7 @@ namespace SuperbrainManagement.Controllers
                         + "<td class='text-center'>" + DateTime.Parse(reader["Todate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
                         + "<td class='text-center'>0/" + reader["Sessions"].ToString() + "</td>"
                         + "<td class='text-center'>" + DateTime.Parse(reader["DateCreate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
-                        + "<td class='text-center'>"+(DateTime.Parse(reader["DateCreate"].ToString())>DateTime.Now?"<i class='ti ti-circle-check text-danger' title='Đã kết khóa'></i>": "<i class='ti ti-circle-check text-success' title='Đang học'></i>") +"</td>"
+                        + "<td class='text-center'>"+StatusStudent+"</td>"
                         + "</tr>";
                 }
                 reader.Close();
@@ -596,60 +630,79 @@ namespace SuperbrainManagement.Controllers
 
                     while (reader.Read())
                     {
+                        int IdRegistration = Convert.ToInt32(reader["IdRegistration"]);
+                        int IdCourse = Convert.ToInt32(reader["IdCourse"]);
+                        var studentJoinClass = db.StudentJoinClasses.SingleOrDefault(x => x.IdStudent == idStudent && x.IdRegistration == IdRegistration && x.IdCourse == IdCourse);
+                        var fromdateJoinClass = studentJoinClass?.Fromdate;
+                        var todateJoinClass = studentJoinClass?.Todate;
                         string btn = "";
                         double amount = Convert.ToDouble(reader["TotalAmount"]);
                         bool status = Convert.ToBoolean(reader["Status"]);
                         bool statusJoinClass = Convert.ToBoolean(reader["StatusJoinClass"]);
                         bool statusExtend = Convert.ToBoolean(reader["StatusExtend"]);
                         bool statusReserve = Convert.ToBoolean(reader["StatusReserve"]);
-
+                        bool statusExchangeCourse = Convert.ToBoolean(reader["StatusExchangeCourse"]);
+                        string strStatusJoinClass = "";
                         if (status)
                         {
                             if (statusJoinClass)
                             {
-                                if (!statusExtend)
+                                if (studentJoinClass.Todate >= DateTime.Now)
                                 {
-                                    btn += "<li><a class=\"dropdown-item\" href='javascript:Giahan_modal(" + reader["IdRegistration"] + "," + reader["IdCourse"] + ")'><i class=\"ti ti-plus\"></i> Gia hạn khóa học</a></li>";
+                                    strStatusJoinClass = "<span class='badge bg-success rounded-3'>Đang học</span>";
+                                    if (!statusReserve && todateJoinClass.Value.AddDays(30) > DateTime.Now)
+                                    {
+                                        btn += "<li><a class=\"dropdown-item\" href='javascript:Baoluu_modal(" + reader["IdRegistration"] + "," + reader["IdCourse"] + ")'><i class=\"ti ti-album-off\"></i> Bảo lưu khóa học</a></li>";
+                                    }
+                                    if (!statusExtend)
+                                    {
+                                        btn += "<li><a class=\"dropdown-item\" href='javascript:Giahan_modal(" + reader["IdRegistration"] + "," + reader["IdCourse"] + ")'><i class=\"ti ti-plus\"></i> Gia hạn khóa học</a></li>";
+                                    }
+                                    if (!statusExchangeCourse)
+                                    {
+                                        btn += "<li><a class=\"dropdown-item\" href='javascript:Capnhat_modal(" + reader["IdRegistration"] + "," + reader["IdCourse"] + ")'><i class=\"ti ti-exchange\"></i> Cập nhật khóa học</a></li>";
+                                    }
                                 }
-                                if (!statusReserve)
+                                else
                                 {
-                                    btn += "<li><a class=\"dropdown-item\" href='javascript:Baoluu_modal(" + reader["IdRegistration"] + "," + reader["IdCourse"] + ")'><i class=\"ti ti-album-off\"></i> Bảo lưu khóa học</a></li>";
+                                    // Kiểm tra khoảng thời gian từ ngày bắt đầu đến ngày kết thúc
+                                    //bool isLessThanThreeMonths = false;
+                                    var duration = todateJoinClass.Value - fromdateJoinClass.Value;
+                                    if (duration.TotalDays < 90) // Kiểm tra nếu khoảng thời gian ít hơn 3 tháng (90 ngày)
+                                    {
+                                        //isLessThanThreeMonths = true;
+                                        if (statusReserve)
+                                        {
+                                            strStatusJoinClass = "<span class='badge bg-info rounded-3'>Đang bảo lưu</span>";
+                                            btn += "<li><a class=\"dropdown-item\" href='javascript:Deactive_modal(" + reader["IdRegistration"] + "," + reader["IdCourse"] + ")'><i class=\"ti ti-album\"></i> Kích hoạt lại</a></li>";
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (!statusExtend && todateJoinClass.Value.AddDays(16) > DateTime.Now)
+                                        {
+                                            strStatusJoinClass = "<span class='badge bg-danger rounded-3'>Đã kết thúc</span>";
+                                            btn += "<li><a class=\"dropdown-item\" href='javascript:Giahan_modal(" + reader["IdRegistration"] + "," + reader["IdCourse"] + ")'><i class=\"ti ti-plus\"></i> Gia hạn khóa học</a></li>";
+                                        }
+                                        else
+                                        {
+                                            strStatusJoinClass = "<span class='badge bg-danger rounded-3'>Đã kết thúc</span>";
+                                            btn += "<li><a class=\"dropdown-item\" href='javascript:void(0)'><i class=\"ti ti-cancel\"></i> Khóa học kết thúc</a></li>";
+                                        }
+                                    }
+
                                 }
                             }
                             else
                             {
+                                strStatusJoinClass = "<span class='badge bg-secondary rounded-3'>Chờ xét lớp</span>";
                                 btn += "<li><a class=\"dropdown-item\" href='javascript:Xetlop_modal(" + reader["IdRegistration"] + "," + reader["IdCourse"] + ")'><i class=\"ti ti-eye-check\"></i> Xét vào lớp</a></li>";
                             }
                         }
                         else
                         {
+                            strStatusJoinClass = "<span class='badge bg-secondary rounded-3'>Chờ xét lớp</span>";
                             btn += "<li><a class=\"dropdown-item\" href='/students/AddCourseProgramOfStudents?IdStudent=" + idStudent + "&IdRegistration=" + reader["IdRegistration"] + "&modalPayment=True' target='_blank'><i class=\"ti ti-credit-card\"></i> Thu tiền</a></li>";
-                        }
-                        string strStatusJoinClass = "";
-                        if (statusJoinClass)
-                        {
-                            int IdRegistration = Convert.ToInt32(reader["IdRegistration"]);
-                            int IdCourse = Convert.ToInt32(reader["IdCourse"]);
-                            var studentJoinClass = db.StudentJoinClasses.SingleOrDefault(x => x.IdStudent == idStudent && x.IdRegistration == IdRegistration && x.IdCourse == IdCourse);
-                            if (studentJoinClass != null)
-                            {
-                                if (studentJoinClass.Todate >= DateTime.Now)
-                                {
-                                    strStatusJoinClass = "<span class='badge bg-success rounded-3 fw-semibold'>Đang học</span>";
-                                }
-                                else
-                                {
-                                    strStatusJoinClass = "<span class='badge bg-danger rounded-3 fw-semibold'>Đã kết thúc</span>";
-                                }
-                            }
-                            else
-                            {
-                                strStatusJoinClass = "<span class='badge bg-secondary rounded-3 fw-semibold'>Chờ xét lớp</span>";
-                            }
-                        }
-                        else
-                        {
-                            strStatusJoinClass = "<span class='badge bg-secondary rounded-3 fw-semibold'>Chờ xét lớp</span>";
                         }
                         count++;
                         str += "<tr>"
@@ -683,6 +736,90 @@ namespace SuperbrainManagement.Controllers
 
             return Json(new { str }, JsonRequestBehavior.AllowGet);
         }
+        public ActionResult Submit_exchange(int IdRegistration, int IdCourse, int IdClass, DateTime Todate,DateTime Fromdate)
+        {
+            try
+            {
+                int idBranch = int.Parse(CheckUsers.idBranch());
+
+                // Kiểm tra xem bản ghi joinclass có tồn tại không
+                var joinclass = db.StudentJoinClasses.SingleOrDefault(x => x.IdRegistration == IdRegistration && x.IdCourse == IdCourse);
+                if (joinclass == null)
+                {
+                    return Json(new { status = "error", message = "Không tìm thấy lớp học của sinh viên." }, JsonRequestBehavior.AllowGet);
+                }
+                // Cập nhật thông tin
+                joinclass.Fromdate = Fromdate;
+                joinclass.Todate = Todate;
+                joinclass.IdClass = IdClass;
+                db.Entry(joinclass).State = EntityState.Modified;
+
+                // Lưu thay đổi
+                db.SaveChanges();
+
+                var item = new { status = "ok", message = "Đã gia hạn thành công!" };
+                return Json(item, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                // Xử lý lỗi và trả về thông báo lỗi
+                return Json(new { status = "error", message = "Lỗi khi gia hạn: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+        public ActionResult Load_exchange(int idRegistration, int idCourse)
+        {
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            string str = "", strCourse = "";
+            bool StatusStudent = true;
+            var registrion = db.RegistrationCourses.Where(x => x.IdRegistration == idRegistration && x.IdCourse == idCourse);
+            var joinClass = db.StudentJoinClasses.SingleOrDefault(x => x.IdRegistration == idRegistration && x.IdCourse == idCourse);
+
+            if (joinClass == null)
+            {
+                str += "<option value='0' selected>Chưa có lớp học</option>";
+                StatusStudent = false;
+            }
+
+            var classes = db.Classes.Where(x => x.IdBranch == idbranch && x.Enable == true);
+
+            if (classes == null || !classes.Any())
+            {
+                str += "<option value='0' selected>Không tìm thấy lớp khả dụng</option>";
+            }
+            else
+            {
+                foreach (var c in classes)
+                {
+                    string selected = c.Id == joinClass.IdClass ? " selected" : "";
+                    str += "<option value='" + c.Id + "' " + selected + ">" + c.Name + "</option>";
+                }
+            }
+
+            if (joinClass != null)
+            {
+                strCourse += "<option value='" + joinClass.IdCourse + "' selected>" + joinClass.Course.Name + "</option>";
+
+                DateTime fromdate = joinClass.Fromdate.Value;
+                DateTime todate = joinClass.Todate.Value;
+                
+                var item = new
+                {
+                    str,
+                    strCourse,
+                    fromdate = fromdate.ToString("MM/dd/yyyy"),
+                    todate = todate.ToString("MM/dd/yyyy"),
+                    registrionCode = registrion.First().Registration.Code,
+                    StatusStudent
+                };
+
+                return Json(item, JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                return Json(new { error = "Không tìm thấy lớp học." }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
         public bool Check_statusStudent(int? id)
         {
             var student = db.Students.FirstOrDefault(x => x.Id == id);
@@ -699,6 +836,114 @@ namespace SuperbrainManagement.Controllers
                     return false;
                 }
                 return true;
+            }
+        }
+        public ActionResult Onchange_schedule(int idClass)
+        {
+            var schedulesbyClass = db.Schedules
+                .Where(x => x.IdClass == idClass && (bool)x.Active).Include(x => x.Employee).ToList()
+                .Select(x => new ClassAssignmentDTO
+                {
+                    DayOfWeek = scheduleHelper.GetDayName(x.IdWeek),
+                    TeacherName = x.Employee.Name,
+                    TimeSlot = scheduleHelper.GetTimeSlot((DateTime)x.FromHour, (DateTime)x.ToHour),
+                    HourQuantity = scheduleHelper.GetHourQuantity((DateTime)x.FromHour, (DateTime)x.ToHour).ToString(),
+                });
+            return Json(new {status="ok",schedulesbyClass},JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Submit_deactive(int IdRegistration, int IdCourse, int IdClass, DateTime Todate)
+        {
+            try
+            {
+                int idBranch = int.Parse(CheckUsers.idBranch());
+
+                // Kiểm tra xem bản ghi joinclass có tồn tại không
+                var joinclass = db.StudentJoinClasses.SingleOrDefault(x => x.IdRegistration == IdRegistration && x.IdCourse == IdCourse);
+                if (joinclass == null)
+                {
+                    return Json(new { status = "error", message = "Không tìm thấy lớp học của sinh viên." }, JsonRequestBehavior.AllowGet);
+                }
+                // Cập nhật thông tin
+                joinclass.Todate = Todate;
+                joinclass.IdClass = IdClass;
+                db.Entry(joinclass).State = EntityState.Modified;
+
+                // Lưu thay đổi
+                db.SaveChanges();
+
+                var item = new { status = "ok", message = "Đã gia hạn thành công!" };
+                return Json(item, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                // Xử lý lỗi và trả về thông báo lỗi
+                return Json(new { status = "error", message = "Lỗi khi gia hạn: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+        public ActionResult Load_deactive(int idRegistration, int idCourse)
+        {
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            string str = "", strCourse = "";
+            bool StatusStudent = true;
+            var registrion = db.RegistrationCourses.Where(x => x.IdRegistration == idRegistration && x.IdCourse == idCourse);
+            var joinClass = db.StudentJoinClasses.SingleOrDefault(x => x.IdRegistration == idRegistration && x.IdCourse == idCourse);
+
+            if (joinClass == null)
+            {
+                str += "<option value='0' selected>Chưa có lớp học</option>";
+                StatusStudent = false;
+            }
+
+            var classes = db.Classes.Where(x => x.IdBranch == idbranch && x.Enable == true);
+
+            if (classes == null || !classes.Any())
+            {
+                str += "<option value='0' selected>Không tìm thấy lớp khả dụng</option>";
+            }
+            else
+            {
+                foreach (var c in classes)
+                {
+                    string selected = c.Id == joinClass.IdClass ? " selected" : "";
+                    str += "<option value='" + c.Id + "' " + selected + ">" + c.Name + "</option>";
+                }
+            }
+
+            if (joinClass != null)
+            {
+                strCourse += "<option value='" + joinClass.IdCourse + "' selected>" + joinClass.Course.Name + "</option>";
+
+                DateTime fromdate = joinClass.Fromdate.Value;
+                DateTime todate = joinClass.Todate.Value;
+                TimeSpan timeStudied = todate - fromdate;
+
+                // Tính thời gian đã học
+                int daysStudied = timeStudied.Days;
+
+                // Tính todate mới
+                DateTime today = DateTime.Now;
+                int remainingDays = 90 - daysStudied;
+                DateTime newTodate = today.AddDays(remainingDays);
+
+                // Chuẩn bị dữ liệu trả về
+                var item = new
+                {
+                    str,
+                    strCourse,
+                    fromdate = fromdate.ToString("MM/dd/yyyy"),
+                    todate = todate.ToString("MM/dd/yyyy"),
+                    newTodate = newTodate.ToString("MM/dd/yyyy"),
+                    daysStudied = daysStudied,
+                    registrionCode = registrion.First().Registration.Code,
+                    StatusStudent
+                };
+
+                return Json(item, JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                return Json(new { error = "Không tìm thấy lớp học." }, JsonRequestBehavior.AllowGet);
             }
         }
         public ActionResult Load_xetlop(int idRegistration,string idCourse,int idStudent) {
@@ -729,6 +974,47 @@ namespace SuperbrainManagement.Controllers
             var item = new { 
                 str,registrionCode,statusStudent
             };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Load_giahan(int idRegistration, int idCourse)
+        {
+            string str = "",strCourse="";
+            bool StatusStudent = true;
+            var registrion = db.RegistrationCourses.Where(x=>x.IdRegistration==idRegistration&&x.IdCourse==idCourse);
+            var joinClass=db.StudentJoinClasses.SingleOrDefault(x=>x.IdRegistration== idRegistration&&x.IdCourse==idCourse);
+            if (joinClass == null)
+            {
+                str += "<option value='0' selected>Chưa có lớp học</option>";
+                StatusStudent = false;
+            }
+            str += "<option value='"+joinClass.IdClass+"' selected>"+joinClass.Class.Name+"</option>";
+            strCourse += "<option value='"+joinClass.IdCourse+"' selected>"+joinClass.Course.Name+"</option>";
+            var item = new
+            {
+                str,
+                strCourse,
+                fromdate = joinClass.Fromdate.Value.ToString("MM/dd/yyyy"),
+                todate = joinClass.Todate.Value.ToString("MM/dd/yyyy"),
+
+                registrionCode =registrion.First().Registration.Code,
+                StatusStudent
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Submit_giahan(int IdRegistration, int IdCourse, DateTime Todate)
+        {
+            int idBranch = int.Parse(CheckUsers.idBranch());
+            int month = DateTime.Now.Month + 1;
+            int year = DateTime.Now.Year;
+            var joinclass = db.StudentJoinClasses.SingleOrDefault(x => x.IdRegistration == IdRegistration && x.IdCourse == IdCourse);
+            var rec = db.RegistrationCourses.SingleOrDefault(x => x.IdRegistration == IdRegistration && x.IdCourse == IdCourse);
+            rec.DateExtend = DateTime.Today;
+            rec.StatusExtend = true;
+            joinclass.Todate = Todate;
+            db.Entry(rec).State = EntityState.Modified;
+            db.Entry(joinclass).State = EntityState.Modified;
+            db.SaveChanges();
+            var item = new { status = "ok",message="Đã gia hạn thành công!" };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
         public ActionResult Submit_xetlop(int idRegistration,int idCourse,int idStudent,int idClass,DateTime fromdate,DateTime todate)
@@ -767,6 +1053,8 @@ namespace SuperbrainManagement.Controllers
             var item = new { status="ok"};
             return Json(item,JsonRequestBehavior.AllowGet);
         }
+
+
         public ActionResult Load_tuvan(int idStudent)
         {
             string str = "";int count = 0;
@@ -1017,7 +1305,8 @@ namespace SuperbrainManagement.Controllers
                                 " from Course c join CourseBranch cb on c.id = cb.IdCourse" +
                                 " where cb.IdBranch = '" + idBranch + "' and c.Id=" + IdCourse + " order by c.DisplayOrder";
 
-                string querykho = "select p.Id,p.Name,p.Unit,p.Price,pc.Amount" +
+                string querykho = "select p.Id,p.Name,p.Unit,p.Price,pc.Amount,COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '1' AND re.IdBranch = " + idBranch + "), 0) -" +
+                                " COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '0' AND re.IdBranch = " + idBranch + "), 0) AS Tonkho                                      " +
                                 " from ProductCourse pc " +
                                 " join Product p on p.id=pc.IdProduct" +
                                 " where pc.IdCourse=" + IdCourse;
@@ -1036,8 +1325,20 @@ namespace SuperbrainManagement.Controllers
                 while (readerkho.Read())
                 {
                     double dongia = Double.Parse(readerkho["Price"].ToString(), 0);
-                    strtable += "<tr>"
-                        + "<td class='text-center'></td>"
+                    int tonkho = Convert.ToInt32(readerkho["tonkho"]);
+                    string css = "",check="";
+                    if (tonkho <= 0)
+                    {
+                        check = "";
+                        css = "text-decoration-line-through text-danger";
+                    }
+                    else
+                    {
+                        check = "checked";
+                        css = "";
+                    }
+                    strtable += "<tr class='"+css+"'>"
+                        + "<td class='text-center'><input class='form-control disabled' type='checkbox' id='IdProduct_" + readerkho["Id"] +"' "+check+"/></td>"
                         + "<td>" + readerkho["Name"] + "</td>"
                         + "<td class='text-center'>" + readerkho["Unit"].ToString() + "</td>"
                         + "<td class='text-end'>" + string.Format("{0:N0}", dongia) + "</td>"
@@ -1086,8 +1387,9 @@ namespace SuperbrainManagement.Controllers
         // GET: Students/Create
         public ActionResult Create()
         {
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Name");
-            ViewBag.IdMKT = new SelectList(db.MKTCampaigns, "Id", "Name");
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            ViewBag.IdBranch = new SelectList(db.Branches.Where(x=>x.Enable==true), "Id", "Name");
+            ViewBag.IdMKT = new SelectList(db.MKTCampaigns.Where(x=>x.Enable==true && x.IdBranch==idbranch), "Id", "Name");
             return View();
         }
 
@@ -1159,7 +1461,8 @@ namespace SuperbrainManagement.Controllers
                     ModelState.AddModelError("", checkResult);
                 }
             }
-
+            ViewBag.IdBranch = new SelectList(db.Branches.Where(x=>x.Enable==true), "Id", "Name",student.IdBranch);
+            ViewBag.IdMKT = new SelectList(db.MKTCampaigns.Where(x => x.Enable == true&&x.IdBranch==idBranch), "Id", "Name");
             // Nếu ModelState không hợp lệ hoặc có lỗi, trả về View với các thông báo lỗi
             return View(student);
         }
@@ -1403,7 +1706,7 @@ namespace SuperbrainManagement.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Name", student.IdBranch);
+            ViewBag.IdBranch = new SelectList(db.Branches.Where(x => x.Enable == true), "Id", "Name", student.IdBranch);
             ViewBag.IdMKT = new SelectList(db.MKTCampaigns, "Id", "Name", student.IdMKT);
             return View(student);
         }
@@ -1432,8 +1735,8 @@ namespace SuperbrainManagement.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Name", student.IdBranch);
-            ViewBag.IdMKT = new SelectList(db.MKTCampaigns, "Id", "Name", student.IdMKT);
+            ViewBag.IdBranch = new SelectList(db.Branches.Where(x=>x.Enable==true), "Id", "Name", student.IdBranch);
+            ViewBag.IdMKT = new SelectList(db.MKTCampaigns.Where(x => x.Enable == true), "Id", "Name", student.IdMKT);
             return View(student);
         }
         [HttpPost]
@@ -1553,6 +1856,32 @@ namespace SuperbrainManagement.Controllers
             // Vô hiệu hóa học viên
             student.Enable = false;
             db.Entry(student).State = EntityState.Modified;
+            db.SaveChanges();
+
+            return Json(new { status = "ok", message = "Đã xóa thành công!" }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Submit_Reserve(int IdRegistration, int IdCourse)
+        {
+            var rec = db.RegistrationCourses.SingleOrDefault(x=>x.IdRegistration==IdRegistration&&x.IdCourse==IdCourse);
+            if (rec == null)
+            {
+                return Json(new { status = "error", message = "Không tìm thấy khóa học cần bảo lưu!" }, JsonRequestBehavior.AllowGet);
+            }
+            bool hasRelatedRecords = db.StudentJoinClasses.Any(cr => cr.IdRegistration == IdRegistration && cr.IdCourse==IdCourse && cr.Todate > DateTime.Now);
+            if (!hasRelatedRecords)
+            {
+                return Json(new { status = "error", message = "Khóa học này đã kết thúc!" }, JsonRequestBehavior.AllowGet);
+            }
+            var joinClass = db.StudentJoinClasses.FirstOrDefault(x => x.IdRegistration == IdRegistration && x.IdCourse == IdCourse);
+            if (joinClass == null)
+            {
+                return Json(new { status = "error", message = "Khóa học chưa được xét lớp" }, JsonRequestBehavior.AllowGet);
+            }
+            joinClass.Todate = DateTime.Now;
+            rec.StatusReserve = true;
+            rec.DateReserve = DateTime.Now;
+            db.Entry(joinClass).State= EntityState.Modified;
+            db.Entry(rec).State = EntityState.Modified;
             db.SaveChanges();
 
             return Json(new { status = "ok", message = "Đã xóa thành công!" }, JsonRequestBehavior.AllowGet);
@@ -1691,9 +2020,211 @@ namespace SuperbrainManagement.Controllers
             ViewBag.IdBranch = new SelectList(db.Branches.ToList(), "Id", "Name");
             return View();
         }
-        public ActionResult Loadlist_deleted()
+        public ActionResult Loadlist_deleted(int IdBranch,string searchString)
         {
+            var student = db.Students.Where(x => x.IdBranch == IdBranch && x.Enable==false);
+            string str = "";
+            int count = 0;
+            if(!string.IsNullOrEmpty(searchString))
+            {
+                student = student.Where(x=>x.Name.Contains(searchString));
+            }
+            foreach(var s in student)
+            {
+                count++;
+                str += "<tr>"
+                    +"<td class='text-center'>"+count+"</td>"
+                    +"<td class='text-center'>"+s.Code+"</td>"
+                    +"<td>"+s.Name+"</td>"
+                    +"<td>"+s.Username+ "</td>"
+                    + "<td class='text-center'>" +(s.DateOfBirth==null?"-":s.DateOfBirth.Value.ToString("dd/MM/yyyy"))+"</td>"
+                    +"<td class='text-center'>" +s.Sex+"</td>"
+                    +"<td>"+s.User.Name+"</td>"
+                    +"<td class='text-end'>" +
+                    "<a href='javascript:restore_Student("+s.Id+")' class='btn btn-sm btn-danger'><i class='ti ti-refresh text-white'></i> Khôi phục</a>" +
+                    "</td>"
+                    + "</tr>";
+            }
+            return Json(new {status="ok",str},JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Restore_student(int? Id)
+        {
+            if (Id == null)
+            {
+                return Json(new { status = "error", message = "Không tìm thấy học viên cần khôi phục!" }, JsonRequestBehavior.AllowGet);
+            }
+            Student student = db.Students.Find(Id);
+            if (student == null)
+            {
+                return Json(new { status = "error", message = "Không tìm thấy học viên cần Khôi phục!" }, JsonRequestBehavior.AllowGet);
+            }
+
+            // Vô hiệu hóa học viên
+            student.Enable = true;
+            db.Entry(student).State = EntityState.Modified;
+            db.SaveChanges();
+
+            return Json(new { status = "ok", message = "Đã khôi phục thành công!" }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult EndingSoon()
+        {
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            ViewBag.IdBranch = new SelectList(db.Branches.Where(x => x.Enable == true).ToList(), "Id", "Name");
+            var courses = db.Courses.OrderBy(x => x.Program.DisplayOrder)
+                        .ThenBy(x => x.DisplayOrder)
+                        .ToList();
+
+            // Create a list to hold the select options, starting with "All Courses"
+            var courseList = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "0", Text = "Tất cả khóa học" }
+            };
+
+            // Add the rest of the courses to the list
+            courseList.AddRange(courses.Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name }));
+
+            // Create the SelectList with the course list
+            ViewBag.IdCourse = new SelectList(courseList, "Value", "Text");
             return View();
+        }
+        public ActionResult Loadlist_endingSoon(int IdBranch, int IdCourse)
+        {
+            string str = "";
+            DateTime today = DateTime.Now;
+            DateTime thresholdDate = today.AddDays(14);
+
+            // Query to get data from database
+            var query = db.StudentJoinClasses
+                .Where(x => x.Class.IdBranch == IdBranch
+                            && x.Todate.HasValue
+                            && x.Todate.Value <= thresholdDate);
+
+            if (IdCourse!=0)
+            {
+                query = query.Where(x => x.IdCourse == IdCourse);
+            }
+
+            // Execute query and fetch data to memory
+            var students = query
+                .Select(x => new
+                {
+                    IdStudent = x.IdStudent,
+                    IdRegistration = x.IdRegistration,
+                    IdCourse = x.IdCourse,
+                    CourseName = x.Course.Name,
+                    CodeStudent = x.Student.Code,
+                    NameStudent = x.Student.Name,
+                    UsernameStudent = x.Student.Username,
+                    DateOfBirth = x.Student.DateOfBirth,
+                    Sex = x.Student.Sex, // Assuming this is a bool for simplicity
+                    Fromdate = x.Fromdate,
+                    Todate = x.Todate,
+                    Status = x.Todate.HasValue && x.Todate.Value <= thresholdDate && x.Todate.Value > today ? "Sắp kết khóa" : "",
+                    ClassStatus = x.Registration.RegistrationCourses.Any(m => m.StatusJoinClass == false) ? "Chờ xét lớp" : "Đã xét lớp"
+                })
+                .ToList() // Fetch data into memory
+                .Select(s => new
+                {
+                    s.IdStudent,
+                    s.IdRegistration,
+                    s.IdCourse,
+                    s.CourseName,
+                    s.CodeStudent,
+                    s.NameStudent,
+                    s.UsernameStudent,
+                    DateOfBirth = s.DateOfBirth.HasValue ? s.DateOfBirth.Value.ToString("dd/MM/yyyy") : "",
+                    Sex = s.Sex, // Assuming Sex is a boolean where true = Male and false = Female
+                    Fromdate = s.Fromdate.HasValue ? s.Fromdate.Value.ToString("dd/MM/yyyy") : "",
+                    Todate = s.Todate.HasValue ? s.Todate.Value.ToString("dd/MM/yyyy") : "",
+                    s.Status,
+                    s.ClassStatus
+                })
+                .ToList();
+
+            int count = 0;
+            if (students.Count > 0)
+            {
+                foreach (var s in students)
+                {
+                    var rec = db.RegistrationCourses.Any(x=>x.Registration.IdStudent == s.IdStudent && x.StatusJoinClass==false);
+                    string statusStudent = "";
+                    if (rec)
+                    {
+                        statusStudent = "<span class='badge bg-success text-white'>Đã tái khóa</span>";
+                    }
+                    else
+                    {
+                        statusStudent = "<span class='badge bg-danger text-white'>Chưa tái khóa</span>";
+                    }
+                    count++;
+                    str += "<tr>"
+                        + "<td class='text-center'>" + count + "</td>"
+                        + "<td class='text-center'>" + s.CodeStudent + "</td>"
+                        + "<td>" + s.NameStudent + "</td>"
+                        + "<td>" + s.UsernameStudent + "</td>"
+                        + "<td class='text-center'>" + s.DateOfBirth + "</td>"
+                        + "<td class='text-center'>" + s.Sex + "</td>"
+                        + "<td>" + s.CourseName + "</td>"
+                        + "<td class='text-center'>" + s.Todate + "</td>"
+                        + "<td>" + statusStudent + "</td>"
+                        + "</tr>";
+                }
+            }
+            else
+            {
+                str = "<tr><td colspan='9' class='text-center'>Không có học viên sắp kết khóa</td></tr>";
+            }
+
+            var item = new
+            {
+                str
+            };
+
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+
+
+        public ActionResult BirthDayList()
+        {
+            ViewBag.IdBranch = new SelectList(db.Branches.Where(x=>x.Enable==true).ToList(), "Id", "Name");
+            return View();
+        }
+        public ActionResult Loadlist_birthday(int IdBranch,int Month)
+        {
+            string str = "";
+            var student = db.Students.Where(x=>x.IdBranch==IdBranch && x.DateOfBirth.Value.Month== Month).OrderBy(x=>x.DateOfBirth);
+            if (student.Count() > 0)
+            {
+                foreach (var s in student)
+                {
+                    var check = db.RegistrationCourses.Any(x => x.StatusJoinClass == false && x.Registration.IdStudent == s.Id);
+                    var checkStatus = db.StudentJoinClasses.Any(x => x.IdStudent == s.Id && x.Todate > DateTime.Now);
+                    if (check || checkStatus)
+                    {
+                        str += "<li class='timeline-item d-flex position-relative overflow-hidden'>"
+                                + "<div class='timeline-time text-dark flex-shrink-0 text-end'>"+s.DateOfBirth.Value.ToString("dd/MM/yyyy")+"</div>"
+                                    + "<div class='timeline-badge-wrap d-flex flex-column align-items-center'>"
+                                        + "<span class='timeline-badge border-2 border border-info flex-shrink-0 my-8'></span>"
+                                        + "<span class='timeline-badge-border d-block flex-shrink-0'></span>"
+                                    + "</div>"
+                                + "<div class='timeline-desc fs-3 text-dark mt-n1 fw-semibold'>"+s.Name+"</div>"
+                            + "</li>";
+                    }
+                }
+            }
+            else
+            {
+                str += "<li class='timeline-item d-flex position-relative overflow-hidden'>"
+                                + "<div class='timeline-time text-dark flex-shrink-0 text-end'>0</div>"
+                                    + "<div class='timeline-badge-wrap d-flex flex-column align-items-center'>"
+                                        + "<span class='timeline-badge border-2 border border-info flex-shrink-0 my-8'></span>"
+                                        + "<span class='timeline-badge-border d-block flex-shrink-0'></span>"
+                                    + "</div>"
+                                + "<div class='timeline-desc fs-3 text-dark mt-n1 fw-semibold'>Không có học viên sinh nhật trong tháng!</div>"
+                            + "</li>";
+            }
+            var item = new { str};
+            return Json(item, JsonRequestBehavior.AllowGet);
         }
         protected override void Dispose(bool disposing)
         {

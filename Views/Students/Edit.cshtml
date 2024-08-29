@@ -38,7 +38,7 @@
     <div class="form-group col-md-6 mt-2">
         @Html.LabelFor(model => model.DateOfBirth, htmlAttributes: new { @class = "control-labelcol-md-12" })
         <div class="col-md-12">
-            @Html.EditorFor(model => model.DateOfBirth, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.EditorFor(model => model.DateOfBirth, new { htmlAttributes = new { @class = "form-control",@placeholder="MM/dd/yyyy" } })
             @Html.ValidationMessageFor(model => model.DateOfBirth, "", new { @class = "text-danger" })
         </div>
     </div>
@@ -121,7 +121,7 @@
     <div class="form-group col-md-12 mt-2">
         @Html.LabelFor(model => model.ParentDateOfBirth, htmlAttributes: new { @class = "control-labelcol-md-12" })
         <div class="col-md-12">
-            @Html.EditorFor(model => model.ParentDateOfBirth, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.EditorFor(model => model.ParentDateOfBirth, new { htmlAttributes = new { @class = "form-control",@placeholder="MM/dd/yyyy" } })
             @Html.ValidationMessageFor(model => model.ParentDateOfBirth, "", new { @class = "text-danger" })
         </div>
     </div>
