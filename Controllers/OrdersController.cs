@@ -781,6 +781,7 @@ namespace SuperbrainManagement.Controllers
                     Credit = 0,
                     Debit = 0,
                     DateCreate = DateTime.Now,
+                    Cat="donhang"
                 };
                 db.WarehouseReceiptions.Add(receiption);
                 db.SaveChanges();
@@ -836,6 +837,7 @@ namespace SuperbrainManagement.Controllers
                     Credit = 0,
                     Debit = 0,
                     DateCreate = DateTime.Now,
+                    Cat="donhang"
                 };
                 db.WarehouseReceiptions.Add(receiption);
                 db.SaveChanges();

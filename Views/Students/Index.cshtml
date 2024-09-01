@@ -2,7 +2,7 @@
 @using PagedList.Mvc;
 @{
     ViewBag.Controller = "Học viên";
-    ViewBag.Title = "Danh sách";
+    ViewBag.Title = "Danh sách học viên";
     Layout = "~/Views/Shared/_Layout.cshtml";
     int stt = 1;
 }
@@ -57,12 +57,12 @@
     <thead class="bg-success text-white rounded-1">
         <tr>
             <th class="text-center">STT</th>
-            <th>MÃ HỌC VIÊN</th>
-            <th>HỌ TÊN</th>
-            <th class="text-center">SINH NHẬT</th>
-            <th class="text-center">TRẠNG THÁI</th>
-            <th>QUẢN LÝ</th>
-            <th class="text-end">THAO TÁC</th>
+            <th>Mã học viên</th>
+            <th>Họ tên</th>
+            <th class="text-center">Sinh nhật</th>
+            <th class="text-center">Trạng thái</th>
+            <th>Quản lý</th>
+            <th class="text-end">Thao tác</th>
         </tr>
     </thead>
 
@@ -96,7 +96,7 @@
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     <li><a class="dropdown-item" href="@Url.Action("AddCourseProgramOfStudents","Students",new {IdStudent = item.Id})"><i class="ti ti-script-plus"></i> Đăng ký khóa học</a></li>
-                    <li><a class="dropdown-item" href="javascript:Exchange_branch(@item.Id)"><i class="ti ti-exchange"></i> Chuyển cơ sở</a></li>
+                    <li><a class="dropdown-item" href="javascript:exchangeBranch(@item.Id)"><i class="ti ti-exchange"></i> Chuyển cơ sở</a></li>
                 </ul>
             </td>
         </tr>
@@ -108,6 +108,37 @@
         @Html.PagedListPager(Model, page => Url.Action("Index", new { page }), new PagedListRenderOptions { LiElementClasses = new string[] { "page-item" } })
     </ul>
 </nav>
+<div class="modal fade" id="exchangeBranchModal" tabindex="-1" aria-labelledby="exchangeBranchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content" style="width: 600px;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exchangeBranchModalLabel">Chuyển cơ sở</h5>
+            </div>
+            <hr style="width:90%;margin:0 auto;" />
+            <div class="modal-body">
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Chuyển sang: </label>
+                    <div class="col-lg-9">
+                        <input type="hidden" class="form-control" name="IdStudent" id="IdStudent_exchangeBranch" />
+                        <select id="IdBranch_exchangeBranch" class="form-control" onchange="Onchange_exchangeBranch()"></select>
+                    </div>
+                </div>
+                <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Người quản lý</label>
+                    <div class="col-lg-9">
+                        <select id="IdUser_exchangeBranch" class="form-control"></select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer text-start">
+                <span class="loader"></span>
+                <button type="button" class="btn btn-success" onclick="Submit_chuyencoso()" id="btnSubmitChuyencoso">
+                    <i class="ti ti-arrows-exchange"></i> Chuyển cơ sở
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     function Submit_Delete(Id) {
         if (confirm('Bạn có muốn xóa học viên này?')) {
@@ -131,5 +162,71 @@
             });
             return false;
         }
+    }
+    isProcessing = false;
+    function Submit_chuyencoso(Id) {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        if (confirm('Bạn có muốn chuyển cơ sở cho học viên này?')) {
+            $.ajax({
+                url: '@Url.Action("Submit_exchangeBranch", "Students")',
+                type: 'POST',
+                data: {
+                    IdStudent: $("#IdStudent_exchangeBranch").val(),
+                    IdBranch: $("#IdBranch_exchangeBranch").val(),
+                    IdUser: $("#IdUser_exchangeBranch").val()
+                },
+                success: function (data) {
+                    if (data.status=="ok") {
+                        showSuccess(data.message, 3000);
+                        location.reload();
+                    } else {
+                        showError(data.message,3000);
+                    }
+                    $(".loader").html("");
+                    isProcessing = false;
+                },
+                error: function () {
+                    $(".loader").html("");
+                    isProcessing = false;
+                    showError('Error deleting student',3000);
+                }
+            });
+            return false;
+        }
+    }
+    function exchangeBranch(IdStudent) {
+        $('#IdStudent_exchangeBranch').val(IdStudent);
+        $.ajax({
+            url: '@Url.Action("Load_exchangeBranch", "Students")',
+            type: "GET",
+            data: {
+                IdStudent: IdStudent
+            },
+            success: function (data) {
+                $('#IdBranch_exchangeBranch').html(data.str);
+                Onchange_exchangeBranch();
+                $('#exchangeBranchModal').modal('show');
+            },
+            error: function (xhr, error) {
+                console.log("lỗi" + error);
+            }
+        });
+    }
+    function Onchange_exchangeBranch() {
+        $.ajax({
+            url: '@Url.Action("Onchange_exchangeBranch", "Students")',
+            type: "GET",
+            data: {
+                IdBranch: $("#IdBranch_exchangeBranch").val()
+            },
+            success: function (data) {
+                $('#IdUser_exchangeBranch').html(data.strUser);
+            },
+            error: function (xhr, error) {
+                console.log("lỗi" + error);
+            }
+        });
     }
 </script>

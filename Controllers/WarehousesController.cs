@@ -305,7 +305,6 @@ namespace SuperbrainManagement.Controllers
             string code = nextCode.ToString().PadLeft(7, '0');
             var cn = db.Branches.Find(int.Parse(CheckUsers.idBranch()));
             string str = cn.Code + loai + code;
-
             return str;
         }
         [HttpPost]
@@ -337,6 +336,7 @@ namespace SuperbrainManagement.Controllers
                     Active = true,
                     Type = true,
                     Enable = true,
+                    Cat="khac"
                 };
                 db.WarehouseReceiptions.Add(phieunhap);
                 db.SaveChanges();
@@ -406,6 +406,7 @@ namespace SuperbrainManagement.Controllers
                     Active = true,
                     Type = false,
                     Enable = true,
+                    Cat="khac"
                 };
                 db.WarehouseReceiptions.Add(phieuxuat);
                 db.SaveChanges();

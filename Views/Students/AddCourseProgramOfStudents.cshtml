@@ -95,7 +95,7 @@
     </tr>
 </table>
 
-<div class="d-sm-flex d-block align-items-center justify-content-between align-content-center mt-3 me-5">
+<div class="d-sm-flex d-block align-items-center justify-content-between align-content-center mt-3">
     <div class="">
         <button type="button" class="btn btn-success" onclick="getDataCombobox(0,0,1)" data-bs-toggle="modal" data-bs-target="#exampleModal" id="btnAddCourse">
             <i class="ti ti-certificate"></i> Thêm khóa học
@@ -109,6 +109,7 @@
     </div>
     <div class="d-flex text-end">
         <a href="javascript:Payment_registration()" class="btn btn-success me-1" id="btnThutien"><i class="ti ti-credit-card"></i> Thu tiền</a>
+        <a href="javascript:Submit_xuatkho()" class="btn btn-outline-dark me-1 hideof" id="btnXuatkho"><i class="ti ti-outbound"></i> Xuất kho</a>
     </div>
 </div>
 <!-- Modal -->
@@ -424,7 +425,7 @@
                 LoadList(idRegistration);
             }
             else {
-                $("#btnThutien").addClass("hideof");                
+                $("#btnThutien").addClass("hideof");
             }
 
             // Kiểm tra nếu modalPayment là "True" và IdRegistration có giá trị
@@ -783,6 +784,12 @@
                         $("#btnAddCourse").addClass("hideof");
                         $("#btnAddProduct").addClass("hideof");
                         $("#btnAddOther").addClass("hideof");
+                        if (data.checkStatusProduct) {
+                            $("#btnXuatkho").addClass("hideof");
+                        }
+                        else {
+                            $("#btnXuatkho").removeClass("hideof");
+                        }
                     }
                 },
                 error: function (xhr, status, error) {
@@ -853,6 +860,7 @@
                 dataType: "json",
                 success: function (data) {
                     LoadList(data);
+                    $("#btnThutien").removeClass("hideof");
                     isProcessing = false;
                     $(".loader").html("");
                 },
@@ -862,6 +870,36 @@
                     showError("Error saving cart item", 3000);
                 }
             });
+        }
+        function Submit_xuatkho() {
+            if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+            isProcessing = true; // Đặt cờ đang xử lý
+            $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+            if (confirm('Bạn có muốn xuất vật tư của phiếu đăng ký?')) {
+                $.ajax({
+                    url: '@Url.Action("Submit_xuatkho", "Students")', // Thay thế bằng URL xóa của bạn
+                    type: 'POST',
+                    data: {
+                        IdRegistration: $("#IdRegistration").val(),
+                    },
+                    success: function (data) {
+                        if (data.status == "ok") {
+                            showSuccess(data.message, 3000);
+                            LoadList($("#IdRegistration").val());
+                            isProcessing = false;
+                            $(".loader").html("");
+                        }
+                        showError(data.message, 3000);
+                        isProcessing = false;
+                        $(".loader").html("");
+                    },
+                    error: function (xhr, status, error) {
+                        isProcessing = false;
+                        $(".loader").html("");
+                        console.error('Error deleting cart item:', error);
+                    }
+                });
+            }
         }
     </script>
 }

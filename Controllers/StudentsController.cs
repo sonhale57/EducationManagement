@@ -312,6 +312,7 @@ namespace SuperbrainManagement.Controllers
             tongthanhtoan = tongtien - chietkhau;
             dathanhtoan = Check_paymentRegistration(Convert.ToInt32(IdRegistration));
             conlai = tongthanhtoan - dathanhtoan;
+            var checkStatusProduct = db.RegistrationProducts.Any(x=>x.Status==false);
             var result = new
             {
                 datalist = data.ToString(),
@@ -323,7 +324,8 @@ namespace SuperbrainManagement.Controllers
                 DateCreate = Convert.ToDateTime(registration.DateCreate).ToString("dd/MM/yyyy"),
                 idRegistrations = registration.Id,
                 Code = registration.Code,
-                Status = registration.Status
+                Status = registration.Status,
+                checkStatusProduct = checkStatusProduct
             };
 
             return Json(result, JsonRequestBehavior.AllowGet);
@@ -419,14 +421,15 @@ namespace SuperbrainManagement.Controllers
                                 db.RegistrationCourses.Add(NewregistrationCourse);
                                 db.SaveChanges();
 
-                                var listproduct = db.ProductCourses.Where(x => x.IdCourse == IdObject);
+                                var listproduct = db.ProductCourses.Where(x => x.IdCourse == IdObject).ToList(); // Convert to list for multiple enumerations
                                 if (listproduct.Any())
                                 {
                                     foreach (var p in listproduct)
                                     {
                                         int IdProduct = Convert.ToInt32(p.IdProduct);
-                                        //if (Check_tonkho(p.IdProduct))
-                                        //{
+                                        // Check if tonkho is greater than 0 before creating RegistrationProduct
+                                        if (Check_tonkho( IdProduct)) // Ensure to pass IdBranch parameter if needed in Check_tonkho
+                                        {
                                             RegistrationProduct NewregistrationProduct = new RegistrationProduct
                                             {
                                                 IdRegistration = registration.Id,
@@ -434,13 +437,14 @@ namespace SuperbrainManagement.Controllers
                                                 Status = false,
                                                 Price = p.Product.Price,
                                                 Amount = p.Amount,
-                                                TotalAmount = p.Product.Price,
-                                                Discount = 0
+                                                TotalAmount = p.Product.Price * p.Amount, // Assuming TotalAmount should be price multiplied by amount
+                                                Discount = 0,
                                             };
                                             db.RegistrationProducts.Add(NewregistrationProduct);
-                                            db.SaveChanges();
-                                        //}
+                                        }
                                     }
+                                    // Save all changes in one go to improve performance
+                                    db.SaveChanges();
                                 }
                                 scope.Complete(); // Commit transaction
                                 return Json(NewregistrationCourse.IdRegistration);
@@ -1337,6 +1341,7 @@ namespace SuperbrainManagement.Controllers
                         check = "checked";
                         css = "";
                     }
+                    int IdProduct = Convert.ToInt32(readerkho["Id"].ToString());  
                     strtable += "<tr class='"+css+"'>"
                         + "<td class='text-center'><input class='form-control disabled' type='checkbox' id='IdProduct_" + readerkho["Id"] +"' "+check+"/></td>"
                         + "<td>" + readerkho["Name"] + "</td>"
@@ -1389,7 +1394,7 @@ namespace SuperbrainManagement.Controllers
         {
             int idbranch = Convert.ToInt32(CheckUsers.idBranch());
             ViewBag.IdBranch = new SelectList(db.Branches.Where(x=>x.Enable==true), "Id", "Name");
-            ViewBag.IdMKT = new SelectList(db.MKTCampaigns.Where(x=>x.Enable==true && x.IdBranch==idbranch), "Id", "Name");
+            ViewBag.IdMKT = new SelectList(db.MKTCampaigns.Where(x=>x.Enable==true && x.IdBranch==idbranch || x.IsPublic==true), "Id", "Name");
             return View();
         }
 
@@ -1640,15 +1645,6 @@ namespace SuperbrainManagement.Controllers
                         }
                     }
 
-                    if (rp.Any())
-                    {
-                        foreach (var i in rp)
-                        {
-                            i.Status = true;
-                            db.Entry(i).State = EntityState.Modified;
-                        }
-                    }
-
                     if (ro.Any())
                     {
                         foreach (var i in ro)
@@ -1691,6 +1687,111 @@ namespace SuperbrainManagement.Controllers
             }
 
             return Json(new { status, message }, JsonRequestBehavior.AllowGet);
+        }
+
+        string Getcode_receiption(bool type)
+        {
+            string loai = "";
+            int idBranch = int.Parse(CheckUsers.idBranch());
+            int nextCode = 0;
+            if (type == false)
+            {
+                loai = "XK";
+                nextCode = db.WarehouseReceiptions.Where(x => x.IdBranch == idBranch && x.Type == false).Count() + 1;
+            }
+            else if (type == true)
+            {
+                loai = "NK";
+                nextCode = db.WarehouseReceiptions.Where(x => x.IdBranch == idBranch && x.Type == true).Count() + 1;
+            }
+            string code = nextCode.ToString().PadLeft(7, '0');
+            var cn = db.Branches.Find(int.Parse(CheckUsers.idBranch()));
+            string str = cn.Code + loai + code;
+            return str;
+        }
+        public ActionResult Submit_xuatkho(int IdRegistration)
+        {
+            string status = "error";
+            string message = "Có lỗi xảy ra!";
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+
+            using (var transaction = db.Database.BeginTransaction())
+            {
+                try
+                {
+                    var rec = db.RegistrationProducts.Where(x => x.IdRegistration == IdRegistration && x.Status==false).ToList(); // Fetch list to avoid multiple queries
+                    var reg = db.Registrations.Find(IdRegistration);
+
+                    if (reg == null)
+                    {
+                        message = "Đăng ký không tồn tại!";
+                        return Json(new { status = status, message = message }, JsonRequestBehavior.AllowGet);
+                    }
+
+                    if (rec.Count == 0)
+                    {
+                        message = "Không có sản phẩm nào để xuất kho!";
+                        return Json(new { status = status, message = message }, JsonRequestBehavior.AllowGet);
+                    }
+
+                    // Create warehouse receipt
+                    var phieunhap = new WarehouseReceiption()
+                    {
+                        DateCreate = DateTime.Now,
+                        IdUser = Convert.ToInt32(CheckUsers.iduser()),
+                        IdBranch = idbranch,
+                        TotalAmount = 0,
+                        Status = true,
+                        Name = reg.Student.Name,
+                        Phone = reg.Student.Phone,
+                        Address = reg.Student.Address,
+                        Description = "Phiếu đăng ký khóa học " + reg.Code,
+                        Code = Getcode_receiption(false),
+                        Credit = 0,
+                        Debit = 0,
+                        Active = true,
+                        Type = false,
+                        Enable = true,
+                        Cat="hocvien"
+                    };
+                    db.WarehouseReceiptions.Add(phieunhap);
+                    db.SaveChanges();
+
+                    int warehouseReceiptionId = phieunhap.Id;
+
+                    // Process each product registration and add details
+                    foreach (var p in rec)
+                    {
+                        p.Status = true;
+                        var details = new ProductReceiptionDetail()
+                        {
+                            IdReceiption = warehouseReceiptionId,
+                            IdProduct = p.IdProduct,
+                            Amount = (int)p.Amount,
+                            Price = (decimal)p.Price,
+                            TotalAmount = (decimal)p.TotalAmount,
+                            Status = true,
+                            Type = false,
+                            Discount = 0
+                        };
+                        db.Entry(p).State= EntityState.Modified;
+                        db.ProductReceiptionDetails.Add(details);
+                    }
+
+                    db.SaveChanges(); // Save all changes at once
+                    transaction.Commit(); // Commit transaction
+
+                    status = "ok";
+                    message = "Đã xuất kho thành công!";
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback(); // Rollback transaction if there's an error
+                    message = "Có lỗi xảy ra: " + ex.Message;
+                }
+            }
+
+            return Json(new { status = status, message = message }, JsonRequestBehavior.AllowGet);
         }
 
 
@@ -1741,7 +1842,99 @@ namespace SuperbrainManagement.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Submit_editStudent(int Id, string Code, string Name, DateTime DateOfBirth, string Sex, string Username, string Password, string School, string Class, string Description, string ParentName, string Phone, string Email, DateTime ParentDateOfBirth, string City, string District, string Address, string Relationship, string Job, string Facebook, string Hopeful, string Known, int IdMKT, HttpPostedFileBase Image)
+        public ActionResult Submit_createStudent(bool? Enable, int? IdBranch, string Name, DateTime DateOfBirth, string Sex, string Username, string Password, string School, string Class, string Description, string ParentName, string Phone, string Email, DateTime ParentDateOfBirth, string City, string District, string Address, string Relationship, string Job, string Facebook, string Hopeful, string Known, int? IdMKT, HttpPostedFileBase Image)
+        {
+            string status = "", message = "";
+            try
+            {
+                // Check if the student already exists
+                string checkResult = Check_availidStudent(Name, Phone, Email);
+
+                if (checkResult != "ok")
+                {
+                    return Json(new { status = "error", message = checkResult }, JsonRequestBehavior.AllowGet);
+                }
+                
+                // Initialize the new student object
+                var student = new Student
+                {
+                   Code = Getcode_Student(IdBranch ?? Convert.ToInt32(CheckUsers.idBranch())),
+                    Username = string.IsNullOrEmpty(Username) ? Get_usernameStudent(Name, Phone) : Username,
+                    Password = string.IsNullOrEmpty(Password) ? "taptrung" : Password,
+                    DateOfBirth = DateOfBirth,
+                    Name = Name,
+                    Sex = Sex,
+                    School = School,
+                    Class = Class,
+                    Description = Description,
+                    ParentName = ParentName,
+                    Phone = Phone,
+                    Email = Email,
+                    ParentDateOfBirth = ParentDateOfBirth,
+                    City = City,
+                    District = District,
+                    Address = Address,
+                    Relationship = Relationship,
+                    Job = Job,
+                    Facebook = Facebook,
+                    Hopeful = Hopeful,
+                    Known = Known,
+                    IdMKT = IdMKT,
+                    IdBranch = IdBranch ?? Convert.ToInt32(CheckUsers.idBranch()),
+                    DateCreate = DateTime.Now,
+                    IdUser = Convert.ToInt32(CheckUsers.iduser()),
+                    Enable = Enable ?? true  // Defaulting Enable to true if null
+                };
+
+                // Process the image upload if any
+                if (Image != null && Image.ContentLength > 0)
+                {
+                    string fileName = Path.GetFileNameWithoutExtension(Image.FileName);
+                    string extension = Path.GetExtension(Image.FileName);
+                    fileName = $"{fileName}_{DateTime.Now:yyyyMMddHHmmssfff}{extension}";
+                    string path = Path.Combine(Server.MapPath("~/Uploads/Images"), fileName);
+
+                    if (!Directory.Exists(Server.MapPath("~/Uploads/Images")))
+                    {
+                        Directory.CreateDirectory(Server.MapPath("~/Uploads/Images"));
+                    }
+
+                    Image.SaveAs(path);
+                    student.Image = "/Uploads/Images/" + fileName;
+                }
+
+                db.Students.Add(student);
+                db.SaveChanges();
+                status = "ok";
+                message = "Đã thêm mới thành công!";
+            }
+            catch (DbEntityValidationException ex)
+            {
+                status = "error";
+                message = "Đã xảy ra lỗi khi lưu học viên: ";
+                foreach (var validationErrors in ex.EntityValidationErrors)
+                {
+                    foreach (var validationError in validationErrors.ValidationErrors)
+                    {
+                        message += $"{validationError.PropertyName}: {validationError.ErrorMessage} ";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                status = "error";
+                message = "Đã xảy ra lỗi: " + ex.Message;
+            }
+
+            var item = new { status, message };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Submit_editStudent(int Id, string Code, string Name, DateTime DateOfBirth, string Sex, string Username, string Password, string School, string Class, string Description, string ParentName, string Phone, string Email, DateTime ParentDateOfBirth, string City, string District, string Address, string Relationship, string Job, string Facebook, string Hopeful, string Known, int? IdMKT, HttpPostedFileBase Image)
         {
             string status="", message="";
             var student = db.Students.Find(Id);
@@ -2087,8 +2280,12 @@ namespace SuperbrainManagement.Controllers
             ViewBag.IdCourse = new SelectList(courseList, "Value", "Text");
             return View();
         }
-        public ActionResult Loadlist_endingSoon(int IdBranch, int IdCourse)
+        public ActionResult Loadlist_endingSoon(int? IdBranch, int IdCourse)
         {
+            if (IdBranch == null)
+            {
+                IdBranch = Convert.ToInt32(CheckUsers.idBranch());
+            }
             string str = "";
             DateTime today = DateTime.Now;
             DateTime thresholdDate = today.AddDays(14);
@@ -2189,8 +2386,12 @@ namespace SuperbrainManagement.Controllers
             ViewBag.IdBranch = new SelectList(db.Branches.Where(x=>x.Enable==true).ToList(), "Id", "Name");
             return View();
         }
-        public ActionResult Loadlist_birthday(int IdBranch,int Month)
+        public ActionResult Loadlist_birthday(int? IdBranch,int Month)
         {
+            if(IdBranch == null)
+            {
+                IdBranch = Convert.ToInt32(CheckUsers.idBranch());
+            }
             string str = "";
             var student = db.Students.Where(x=>x.IdBranch==IdBranch && x.DateOfBirth.Value.Month== Month).OrderBy(x=>x.DateOfBirth);
             if (student.Count() > 0)
@@ -2226,6 +2427,86 @@ namespace SuperbrainManagement.Controllers
             var item = new { str};
             return Json(item, JsonRequestBehavior.AllowGet);
         }
+       
+        public ActionResult Load_exchangeBranch(int IdStudent)
+        {
+            var cn = db.Branches.Where(x => x.Enable == true);
+            string str = "";
+            foreach (var items in cn)
+            {
+                str += "<option value='" + items.Id + "'>" + items.Name + "</option>";
+            }
+            return Json(new {str}, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Onchange_exchangeBranch(int IdBranch)
+        {
+            var user = db.Users.Where(x => x.IdBranch == IdBranch && x.Enable == true);
+            string strUser="";
+            foreach (var items in user)
+            {
+                strUser += "<option value='" + items.Id + "'>" + items.Name + "</option>";
+            }
+            var item = new
+            {
+                strUser
+            };
+            return Json(item, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Submit_exchangeBranch(int IdStudent, int IdBranch, int IdUser)
+        {
+            using (var transaction = db.Database.BeginTransaction())
+            {
+                try
+                {
+                    var student = db.Students.Find(IdStudent);
+                    if (student == null)
+                    {
+                        return Json(new { status = "error", message = "Student not found!" }, JsonRequestBehavior.AllowGet);
+                    }
+
+                    // Update student details
+                    student.IdBranch = IdBranch;
+                    student.IdUser = IdUser;
+                    db.Entry(student).State = EntityState.Modified;
+
+                    // Fetch registrations and transactions only if needed
+                    var registrations = db.Registrations.Where(x => x.IdStudent == IdStudent && x.IdBranch != IdBranch).ToList();
+                    var transactions = db.Transactions.Where(x => x.IdStudent == IdStudent && x.IdBranch != IdBranch).ToList();
+
+                    // Update registrations if there are any
+                    if (registrations.Count > 0)
+                    {
+                        foreach (var reg in registrations)
+                        {
+                            reg.IdBranch = IdBranch;
+                            db.Entry(reg).State = EntityState.Modified;
+                        }
+                    }
+
+                    // Update transactions if there are any
+                    if (transactions.Count > 0)
+                    {
+                        foreach (var tr in transactions)
+                        {
+                            tr.IdBranch = IdBranch;
+                            db.Entry(tr).State = EntityState.Modified;
+                        }
+                    }
+
+                    // Save all changes at once
+                    db.SaveChanges();
+                    transaction.Commit(); // Commit transaction
+
+                    return Json(new { status = "ok", message = "Branch exchange completed successfully." }, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback(); // Rollback transaction in case of error
+                    return Json(new { status = "error", message = "An error occurred: " + ex.Message }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
