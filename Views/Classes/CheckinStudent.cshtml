@@ -1,0 +1,294 @@
+﻿@{
+    ViewBag.Controller = "Lớp học";
+    ViewBag.Title = "Điểm danh học viên";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="d-sm-flex d-block align-items-center justify-content-between align-content-center">
+    <div class="d-flex text-start">
+        <form action="/classes/Filter" method="get">
+            <div class="input-group mb-3">
+                @Html.DropDownList("IdCourse", null, htmlAttributes: new { @class = "form-control ms-1 rounded-1", onchange = "Loadlist();" })
+                @Html.DropDownList("IdClass", null, htmlAttributes: new { @class = "form-control ms-1 rounded-1", onchange = "Loadlist();" })
+                <input type="text" class="form-control ms-1 rounded-1" name="studentName" placeholder="Tìm kiếm học viên" />
+                <button class="input-group-text bg-success" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
+            </div>
+        </form>
+    </div>
+    <div class="d-flex text-end">
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-bordered mt-2" id="showlist">
+    </table>
+</div>
+
+<div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <form action="/Classes/CheckIn" method="post" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header modal-dialog-scrollable">
+                    <h5 class="modal-title" id="exampleModalLabel">Kết quả học tập ngày</h5>
+                </div>
+                <hr style="width:90%;margin:0 auto;" />
+                <div class="modal-body">
+                    <div class="row">
+                        <input type="hidden" name="classId" id="classId" value="@ViewBag.ClassSelectedId" />
+                        <input type="hidden" name="studentId" id="studentId" />
+                        <div class="form-group row mb-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Điểm Danh</label>
+                            <div class="col-lg-9">
+                                Có
+                                <input type="radio" name="checkIn" id="checkIn" autocomplete="off" value="True" checked class="me-5" />
+                                Vắng
+                                <input type="radio" name="checkIn" id="checkIn" autocomplete="off" value="False" />
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Ngày</label>
+                            <div class="col-lg-9">
+                                <input type="text" class="form-control" name="dateCheckedIn" id="dateCheckedIn" />
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Bài Học</label>
+                            <div class="col-lg-9">
+                                <input type="text" class="form-control" name="lesson" id="lesson" />
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <p><label class="col-form-label form-control-label text-success">BÀI TẬP VỀ NHÀ</label></p>
+                            <label class="col-lg-3 col-form-label form-control-label">Hoàn Thành</label>
+                            <div class="col-lg-9">
+                                <select name="completely" id="completely" class="form-control">
+                                    <option value="Excellent">Rất tốt</option>
+                                    <option value="Very Good">Tốt</option>
+                                    <option value="Good">Khá</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Chính xác</label>
+                            <div class="col-lg-9">
+                                <select name="exactRate" id="exactRate" class="form-control">
+                                    <option value="Excellent">Rất tốt</option>
+                                    <option value="Very Good">Tốt</option>
+                                    <option value="Good">Khá</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <p><label class="col-form-label form-control-label text-success">LUYỆN TẬP ONLINE</label></p>
+                            <label class="col-lg-3 col-form-label form-control-label">Chữ số (D)</label>
+                            <div class="col-lg-9">
+                                <input type="text" class="form-control" name="textNumber" id="textNumber" />
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Hàng</label>
+                            <div class="col-lg-9">
+                                <input type="text" class="form-control" name="row" id="row" />
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Giây (S)</label>
+                            <div class="col-lg-9">
+                                <input type="text" class="form-control" name="second" id="second" />
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Hoàn Thành</label>
+                            <div class="col-lg-9">
+                                <select name="home_completely" id="home_completely" class="form-control">
+                                    <option value="Excellent">Rất tốt</option>
+                                    <option value="Very Good">Tốt</option>
+                                    <option value="Good">Khá</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Chính xác</label>
+                            <div class="col-lg-9">
+                                <select name="home_exactRate" id="home_exactRate" class="form-control">
+                                    <option value="Excellent">Rất tốt</option>
+                                    <option value="Very Good">Tốt</option>
+                                    <option value="Good">Khá</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <p><label class="col-form-label form-control-label text-success">NHẬN XÉT KỸ NĂNG</label></p>
+                            <label class="col-lg-3 col-form-label form-control-label">Tập Trung</label>
+                            <div class="col-lg-9">
+                                <select name="focusRate" id="focusRate" class="form-control">
+                                    <option value="Excellent">Rất tốt</option>
+                                    <option value="Very Good">Tốt</option>
+                                    <option value="Good">Khá</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Tự Tin</label>
+                            <div class="col-lg-9">
+                                <select name="confidentRate" id="confidentRate" class="form-control">
+                                    <option value="Excellent">Rất tốt</option>
+                                    <option value="Very Good">Tốt</option>
+                                    <option value="Good">Khá</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Ghi Nhớ</label>
+                            <div class="col-lg-9">
+                                <select name="rememberRate" id="rememberRate" class="form-control">
+                                    <option value="Excellent">Rất tốt</option>
+                                    <option value="Very Good">Tốt</option>
+                                    <option value="Good">Khá</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Phản xạ</label>
+                            <div class="col-lg-9">
+                                <select name="reflexRate" id="reflexRate" class="form-control">
+                                    <option value="Excellent">Rất tốt</option>
+                                    <option value="Very Good">Tốt</option>
+                                    <option value="Good">Khá</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Khác</label>
+                            <div class="col-lg-9">
+                                <input type="text" class="form-control" name="other" id="other" />
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Power</label>
+                            <div class="col-lg-9">
+                                <input type="number" class="form-control" name="power" id="power" />
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Gửi SMS | Email</label>
+                            <div class="col-lg-9">
+                                Có
+                                <input type="radio" name="isSMS" id="isSMS" autocomplete="off" value="True" checked class="me-5" />
+                                Không
+                                <input type="radio" name="isSMS" id="isSMS" autocomplete="off" value="False" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer text-start">
+                    <button type="submit" class="btn btn-info">
+                        <i class="ti ti-calendar"></i> Nhập kết quả
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    Loadlist();
+    function Loadlist() {
+        $.ajax({
+            url: '@Url.Action("GetStudentSchedule", "Classes")',
+            type: "GET",
+            data: {
+                IdCourse: $("#IdCourse").val(),
+                IdClass: $("#IdClass").val()
+            },
+            success: function (data) {
+                $('#showlist').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+    function GetDropDownIndex(value){
+            switch(value)
+            {
+              case "Excellent":
+                    return 0;
+                break;
+              case "Very Good":
+                    return 1;
+                break;
+              case "Good":
+                    return 2;
+                break;
+              default:
+                return 0;
+            }
+    }
+
+    function storeSelected(classId, studentId, date) {
+        event.preventDefault();
+        let today = new Date();
+        document.getElementById("classId").value = classId;
+        document.getElementById("studentId").value = studentId;
+        document.getElementById("dateCheckedIn").value = date + "/" + today.getFullYear();
+        document.getElementById("lesson").value = "";
+        document.getElementById("textNumber").value = "";
+        document.getElementById("row").value = "";
+        document.getElementById("second").value = "";
+        document.getElementById("other").value = "";
+        document.getElementById("power").value = "";
+        $.ajax({
+            url: '@Url.Action("GetCheckedSessionDetaiByClass", "Classes")',
+            type: "GET",
+            data: {
+                idClass: classId,
+                studentId: studentId,
+                date: date + "/" + today.getFullYear()
+            },
+            success: function (data) {
+                if (data != null) {
+                    document.getElementById("lesson").value = data.Lesson;
+                    document.getElementById("textNumber").value = data.OnClassNumber;
+                    document.getElementById("row").value = data.OnClassRow;
+                    document.getElementById("second").value = data.OnClassPaper;
+                    document.getElementById("other").value = data.Other;
+                    document.getElementById("power").value = data.Power;
+
+                    var checkInCb = document.getElementsByName("checkIn");
+
+                    var smsCb = document.getElementsByName("isSMS");
+
+                    if (data.StatusCheckin) {
+                        checkInCb[0].checked = true;
+                        checkInCb[1].checked = false;
+                    }
+
+                    else {
+                        checkInCb[0].checked = false;
+                        checkInCb[1].checked = true;
+                    }
+
+                    if (data.SendSMS) {
+                        smsCb[0].checked = true;
+                        smsCb[1].checked = false;
+                    }
+
+                    else {
+                        smsCb[0].checked = false;
+                        smsCb[1].checked = true;
+                    }
+
+                    document.getElementById("completely").selectedIndex = GetDropDownIndex(data.Complete);
+                    document.getElementById("exactRate").selectedIndex = GetDropDownIndex(data.Exactly);
+                    document.getElementById("home_completely").selectedIndex = GetDropDownIndex(data.HomeComplete);
+                    document.getElementById("home_exactRate").selectedIndex = GetDropDownIndex(data.HomeExactly);
+                    document.getElementById("focusRate").selectedIndex = GetDropDownIndex(data.Focus);
+                    document.getElementById("confidentRate").selectedIndex = GetDropDownIndex(data.Confident);
+                    document.getElementById("rememberRate").selectedIndex = GetDropDownIndex(data.Remember);
+                    document.getElementById("reflexRate").selectedIndex = GetDropDownIndex(data.Reflex);
+                }
+            },
+            error: function (xhr, error) {
+                console.log("error: " + error);
+            }
+        });
+    }
+</script>
