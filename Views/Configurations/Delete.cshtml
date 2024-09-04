@@ -1,0 +1,121 @@
+﻿@model SuperbrainManagement.Models.Configuration
+
+@{
+    ViewBag.Title = "Delete";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Configuration</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.User.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.User.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.VAT)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.VAT)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.UsageFee)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.UsageFee)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.AccountFee)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.AccountFee)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TimePayment)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TimePayment)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DiscountGroup1)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DiscountGroup1)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DiscountGroup2)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DiscountGroup2)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DiscountGroup3)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DiscountGroup3)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DiscountGroup4)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DiscountGroup4)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DiscountGroup5)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DiscountGroup5)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DiscountGroup6)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DiscountGroup6)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DiscountGroup7)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DiscountGroup7)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default" /> |
+            @Html.ActionLink("Back to List", "Index")
+        </div>
+    }
+</div>

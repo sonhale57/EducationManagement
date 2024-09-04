@@ -1,0 +1,20 @@
+﻿@model IEnumerable<SuperbrainManagement.Models.Configuration>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<a class="card setting-toggle" href="#settings-offcanvas" data-bs-toggle="offcanvas">
+    <small class="text-uppercase text-body-tertiary fw-bold py-2 pe-2 ps-1 rounded-end">customize</small>
+</a>
+<div class="offcanvas offcanvas-end settings-panel border-0 show" id="settings-offcanvas" tabindex="-1" aria-labelledby="settings-offcanvas" aria-modal="true" role="dialog">
+    <div class="offcanvas-body scrollbar px-card" id="themeController">
+        <h5 class="setting-panel-item-title">Thiết lập chung</h5>
+        <form action="/" method="post">
+            <div class="row">
+
+            </div>
+        </form>
+        <a class="bun btn-primary d-grid mb-3 text-white mt-5 btn btn-primary" href="">Lưu thay đổi</a>
+    </div>
+</div>
