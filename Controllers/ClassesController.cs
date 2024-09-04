@@ -14,6 +14,8 @@ using static SuperbrainManagement.MvcApplication;
 using SuperbrainManagement.Helpers;
 using System.Threading.Tasks;
 using System.Globalization;
+using System.Text;
+using System.Web.UI.WebControls;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -26,6 +28,11 @@ namespace SuperbrainManagement.Controllers
         // GET: Classes
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, string idBranch)
         {
+
+            if (CheckUsers.iduser() == "")
+            {
+                return Redirect("/authentication");
+            }
             var branches = db.Branches.ToList();
             int idbranch = int.Parse(CheckUsers.idBranch());
             if (!CheckUsers.CheckHQ())
@@ -100,6 +107,174 @@ namespace SuperbrainManagement.Controllers
 
             return View(pagedData);
         }
+        public ActionResult CheckinStudent()
+        {
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            var linq = from c in db.Courses
+                       join cb in db.CourseBranches on c.Id equals cb.IdCourse
+                       where cb.IdBranch == idbranch
+                       orderby c.Program.DisplayOrder, c.DisplayOrder
+                       select c;
+            ViewBag.IdClass = new SelectList(db.Classes.Where(x => x.Enable == true && x.IdBranch == idbranch), "Id", "Name");
+            ViewBag.IdCourse = new SelectList(linq, "Id", "Name");
+            return View();
+        }
+        public ActionResult GetStudentSchedule(int? IdClass, int? IdCourse)
+        {
+            int idBranch = Convert.ToInt32(CheckUsers.idBranch());
+            string str = "";
+
+            // Lấy danh sách học viên còn đang học (Todate > DateTime.Now)
+            var students = db.StudentJoinClasses
+                             .Where(s => s.Todate > DateTime.Now &&
+                                         (IdClass == null || s.IdClass == IdClass) &&
+                                         (IdCourse == null || s.IdCourse == IdCourse))
+                             .Select(s => new
+                             {
+                                 s.Id,
+                                 s.Student.Name,
+                                 ClassName = s.Class.Name,
+                                 CourseName = s.Course.Name,
+                                 s.Fromdate,
+                                 s.Todate
+                             })
+                             .ToList();
+
+            // Lấy số buổi của khóa học từ bảng CourseBranch
+            var courseBranch = db.CourseBranches
+                                 .Where(cb => cb.IdBranch == idBranch && cb.IdCourse == IdCourse)
+                                 .FirstOrDefault();
+
+            int numberOfSessions = courseBranch?.Sessons ?? 0;
+
+            // Lấy thời khóa biểu từ bảng Schedule
+            var schedule = db.Schedules
+                             .Where(sc => (IdClass == null || sc.IdClass == IdClass))
+                             .OrderBy(sc => sc.IdWeek)
+                             .ThenBy(sc => sc.FromHour)
+                             .ToList();
+
+            str += "<thead class='bg-success text-white'><tr>"
+                + "<th class='text-center'>STT</th>"
+                + "<th style='min-width:200px;'>TÊN</th>"
+                + "<th style='min-width:200px;'>KHÓA HỌC</th>"
+                + "<th style='min-width:200px;'>LỚP HỌC</th>";
+
+            for (int i = 1; i <= numberOfSessions; i++)
+            {
+                str += "<th class='text-center' style='min-width:120px;'>Buổi " + i + "</th>";
+            }
+
+            str += "</tr></thead>";
+            int stt = 1;
+
+            foreach (var student in students)
+            {
+                str += "<tr>"
+                    + "<td class='text-center' class='align-content-center'>" + stt + "</td>"
+                    + "<td style='min-width:200px;' class='align-content-center'>" + student.Name + "</td>"
+                    + "<td style='min-width:200px;' class='align-content-center'>" + student.CourseName + "</td>"
+                    + "<td style='min-width:200px;' class='align-content-center'>" + student.ClassName + "</td>";
+
+                // Tính toán ngày của từng buổi học
+                DateTime startDate = student.Fromdate ?? DateTime.Now;
+                List<DateTime> sessionDates = new List<DateTime>();
+
+                // Lấy danh sách các ngày trong tuần có lịch học
+                var daysOfWeek = schedule.Select(sc => sc.IdWeek).Distinct().ToList();
+
+                // Tạo danh sách các buổi học dựa trên lịch học và số buổi yêu cầu
+                for (int sessionCount = 1; sessionCount <= numberOfSessions;)
+                {
+                    // Kiểm tra từng ngày trong tuần có lịch học
+                    foreach (var dayOfWeek in daysOfWeek)
+                    {
+                        if (sessionCount > numberOfSessions) break;
+
+                        // Tính toán ngày học tiếp theo dựa trên ngày bắt đầu và ngày trong tuần
+                        DateTime nextSessionDate = GetNextDateForDay(startDate, dayOfWeek);
+
+                        if (nextSessionDate > student.Todate) break;
+
+                        // Thêm ngày vào danh sách
+                        sessionDates.Add(nextSessionDate);
+
+                        // Cập nhật ngày bắt đầu là ngày kế tiếp
+                        startDate = nextSessionDate.AddDays(1);
+
+                        sessionCount++;
+                    }
+                }
+
+                // Thêm thông tin các buổi học vào chuỗi trả về
+                for (int i = 0; i < numberOfSessions; i++)
+                {
+                    
+                    if (i < sessionDates.Count)
+                    {
+                        var studentCheckedIn = db.StudentCheckins
+                       .Where(x => x.IdStudent == student.Id &&
+                       x.IdClass == IdClass).ToList();
+
+                        var DateCreate = studentCheckedIn
+                                     .Select(x => new { datetime = (DateTime)x.DateCreate, checkInStatus = x.StatusCheckin })
+                                     .Select(x => new { datetime = x.datetime.ToString("dd:MM:yyyy"), checkInStatus = x.checkInStatus })
+                                     .ToList();
+
+                        var dateChecked = DateCreate.FirstOrDefault(x => x.datetime == sessionDates[i].ToString("dd:MM:yyyy"));
+
+                        bool? isCheckedIn = null;
+
+
+
+                        if (studentCheckedIn != null && studentCheckedIn.Any() && dateChecked != null)
+                        {
+                            isCheckedIn = dateChecked.checkInStatus;
+                            if (isCheckedIn == true)
+                            {
+                                str += "<td class='text-center' style='min-width:120px;'>"
+                                + "<input type=\"checkbox\" data-bs-toggle=\"modal\" data-bs-target=\"#scheduleModal\" id=\"selectToggle\" onclick=\"storeSelected(" + IdClass + ", " + student.Id + ", '" + sessionDates[i].ToString("dd/MM") + "')\"  style=\"accent-color: green;\" />"
+                                + sessionDates[i].ToString("dd/MM/yyyy")
+                                + "</td>";
+                            }
+                            else
+                            {
+                                str += "<td class='text-center' style='min-width:120px;'>"
+                                                                + "<input type=\"checkbox\" data-bs-toggle=\"modal\" data-bs-target=\"#scheduleModal\" id=\"selectToggle\" onclick=\"storeSelected(" + IdClass + ", " + student.Id + ", '" + sessionDates[i].ToString("dd/MM") + "')\"  style=\"accent-color: red;\" />"
+                                                                + sessionDates[i].ToString("dd/MM/yyyy")
+                                                                + "</td>";
+                            }
+                            
+                        }
+                        else
+                        {
+                            str += "<td class='text-center' style='min-width:120px;'>"
+                                                        + "<input type=\"checkbox\" data-bs-toggle=\"modal\" data-bs-target=\"#scheduleModal\" id=\"selectToggle\" onclick=\"storeSelected(" + IdClass + ", " + student.Id + ", '" + sessionDates[i].ToString("dd/MM") + "')\" />"
+                                                        + sessionDates[i].ToString("dd/MM/yyyy")
+                                                        + "</td>";
+                        }
+                    }
+                    else
+                    {
+                        str += "<td class='text-center'>-</td>";
+                    }
+                }
+
+                str += "</tr>";
+                stt++;
+            }
+
+            // Trả về chuỗi JSON
+            return Json(new { str }, JsonRequestBehavior.AllowGet);
+        }
+
+        // Hàm tính toán ngày học tiếp theo dựa trên ngày bắt đầu và ngày trong tuần
+        private DateTime GetNextDateForDay(DateTime startDate, int dayOfWeek)
+        {
+            int daysToAdd = ((int)dayOfWeek - (int)startDate.DayOfWeek + 7) % 7;
+            return startDate.AddDays(daysToAdd == 0 ? 7 : daysToAdd);
+        }
+
 
         [HttpPost]
         public ActionResult UpdateScheduleBulk(
@@ -228,13 +403,13 @@ namespace SuperbrainManagement.Controllers
         }
 
         // GET: Classes/Filter/5
-        /*
+
         public ActionResult Filter(int? id, int? idCourse, string studentName)
         {
             int idbranch = Convert.ToInt32(CheckUsers.idBranch());
             var studentJoinedClass = db.StudentJoinClasses.Where(x => x.IdClass == id).ToList();
             var course = db.Courses.Where(x => x.CourseBranches.Any(m => m.IdBranch == idbranch)).OrderBy(x => x.Program.DisplayOrder).OrderBy(x => x.DisplayOrder).ToList();
-            
+
             if (idCourse != null)
             {
                 studentJoinedClass = db.StudentJoinClasses.Where(x => x.IdCourse == idCourse).ToList();
@@ -258,7 +433,7 @@ namespace SuperbrainManagement.Controllers
                 ClassFilterDTO classFilterDTO = new ClassFilterDTO
                 {
                     StudentID = (int)item.IdStudent,
-                    CourseName = item.Course.Name, 
+                    CourseName = item.Course.Name,
                     StudentName = item.Student.Name
                 };
 
@@ -305,7 +480,7 @@ namespace SuperbrainManagement.Controllers
                 timeTableData.Add(classFilterDTO);
             }
             ViewBag.ClassSelectedId = id;
-            ViewBag.IdClass = new SelectList(db.Classes.Where(x=>x.Enable==true && x.IdBranch == idbranch), "Id", "Name");
+            ViewBag.IdClass = new SelectList(db.Classes.Where(x => x.Enable == true && x.IdBranch == idbranch), "Id", "Name");
             ViewBag.IdCourse = new SelectList(course, "Id", "Name");
             ViewBag.StudentJoinedClass = studentJoinedClass;
             ViewBag.TimeTableData = timeTableData;
@@ -313,7 +488,7 @@ namespace SuperbrainManagement.Controllers
 
             return View();
         }
-        */
+        /*
         public ActionResult Filter(int? id, int? idCourse, string studentName)
         {
             int idbranch = Convert.ToInt32(CheckUsers.idBranch());
@@ -412,7 +587,7 @@ namespace SuperbrainManagement.Controllers
 
             return View();
         }
-
+*/
 
 
         public ActionResult GetCheckedSessionDetaiByClass(int idClass, int studentId, string date)
@@ -450,12 +625,12 @@ namespace SuperbrainManagement.Controllers
 
         // POST: Classes/CheckIn
         [HttpPost]
-        public ActionResult CheckIn(int? classId, 
+        public ActionResult CheckIn(int? classId,
             int studentId,
             bool checkIn,
-            string dateCheckedIn, 
-            string lesson, 
-            string completely, 
+            string dateCheckedIn,
+            string lesson,
+            string completely,
             string exactRate,
             string textNumber,
             string row,
@@ -512,6 +687,46 @@ namespace SuperbrainManagement.Controllers
             db.SaveChanges();
 
             return RedirectToAction("Filter", new { id = classId });
+        }
+        public ActionResult Loadedit_class(int id) { 
+            var c = db.Classes.Find(id);
+            return Json(new {id=c.Id,name=c.Name,description=c.Description},JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public ActionResult Submit_savechanges(string action, int? Id, string Name, string Description)
+        {
+            int iduser= Convert.ToInt32(CheckUsers.iduser());
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            string status = "",message="";
+            if (action == "create")
+            {
+                Class cla = new Class()
+                {
+                    Name = Name,
+                    Description = Description,
+                    DateCreate =DateTime.Now,
+                    IdBranch = idbranch,
+                    IdUser = iduser,
+                    Enable = true,
+                    Active = true
+                };
+                db.Classes.Add(cla);
+                db.SaveChanges();
+                status = "ok";
+                message = "Đã thêm thành công!";
+            }
+            else
+            {
+                var c = db.Classes.Find(Id);
+                c.Name = Name;
+                c.Description = Description;
+                db.Entry(c).State=EntityState.Modified;
+                db.SaveChanges();
+                status = "ok";
+                message = "Đã cập nhật thành công!";
+
+            }
+            return Json(new {status,message},JsonRequestBehavior.AllowGet);
         }
 
         public async Task<ActionResult> Delete_Classes(int id)

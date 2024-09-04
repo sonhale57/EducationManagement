@@ -940,11 +940,15 @@
     <Content Include="Views\Orders\PrintOrderDelivery.cshtml" />
     <Content Include="Views\Students\BirthDayList.cshtml" />
     <Content Include="Views\Students\EndingSoon.cshtml" />
+
     <Content Include="Views\Configurations\Create.cshtml" />
     <Content Include="Views\Configurations\Delete.cshtml" />
     <Content Include="Views\Configurations\Details.cshtml" />
     <Content Include="Views\Configurations\Edit.cshtml" />
     <Content Include="Views\Configurations\Index.cshtml" />
+
+    <Content Include="Views\Classes\CheckinStudent.cshtml" />
+
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

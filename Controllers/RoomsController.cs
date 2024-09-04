@@ -20,6 +20,10 @@ namespace SuperbrainManagement.Controllers
         // GET: Rooms
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, string idBranch)
         {
+            if (CheckUsers.iduser() == "")
+            {
+                return Redirect("/authentication");
+            }
             var branches = db.Branches.ToList();
             int idbranch = int.Parse(CheckUsers.idBranch());
             if (!CheckUsers.CheckHQ())
@@ -84,7 +88,45 @@ namespace SuperbrainManagement.Controllers
             ViewBag.PagedListRenderOptions = pagedListRenderOptions;
             return View(pagedData);
         }
+        public ActionResult Loadedit_room(int id)
+        {
+            var c = db.Rooms.Find(id);
+            return Json(new { id = c.Id, name = c.Name, description = c.Description }, JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public ActionResult Submit_savechanges(string action, int? Id, string Name, string Description)
+        {
+            int iduser = Convert.ToInt32(CheckUsers.iduser());
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            string status = "", message = "";
+            if (action == "create")
+            {
+                Room cla = new Room()
+                {
+                    Name = Name,
+                    Description = Description,
+                    DateCreate = DateTime.Now,
+                    IdBranch = idbranch,
+                    IdUser = iduser
+                };
+                db.Rooms.Add(cla);
+                db.SaveChanges();
+                status = "ok";
+                message = "Đã thêm thành công!";
+            }
+            else
+            {
+                var c = db.Rooms.Find(Id);
+                c.Name = Name;
+                c.Description = Description;
+                db.Entry(c).State = EntityState.Modified;
+                db.SaveChanges();
+                status = "ok";
+                message = "Đã cập nhật thành công!";
 
+            }
+            return Json(new { status, message }, JsonRequestBehavior.AllowGet);
+        }
 
         // GET: Rooms/Details/5
         public ActionResult Details(int? id)
