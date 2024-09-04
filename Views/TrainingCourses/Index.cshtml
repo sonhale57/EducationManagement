@@ -160,18 +160,111 @@
                         <tbody id="showlist_dangky"></tbody>
                     </table>
                     <div class="text-center">
-                        <button type="button" class="btn btn-success" onclick="Submit_payment()">
+                        <a href="javascript:Payment_fee()" class="btn btn-success">
                             <i class="ti ti-credit-card"></i> Thanh toán phí tham gia
-                        </button>
-                        <button type="button" class="btn btn-outline-dark" onclick="close_modal()">
-                            <i class="ti ti-door-exit"></i> Thoát
-                        </button>
+                        </a>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalPayment" tabindex="-1" aria-labelledby="modalPaymentLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content" style="">
+            <form action="/" method="post" id="form_payment" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title text-success" id="modalPaymentLabel">
+                        Thanh toán phí đào tạo
+                    </h5>
+                </div>
+                <hr style="width:90%;margin:0 auto;" />
+                <div class="modal-body">
+                    <input type="hidden" name="IdTraining" id="IdTrainingPayment" value="" />
+                    <div class="row" id="showinfo_payment">
+
+                        <div class="col-md-4 mt-3">
+                            <label>Khóa đào tạo</label>
+                            <div class="col-md-12">
+                                <input type="text" name="NameCourse" id="NameCourse" class="form-control" value="" />
+                            </div>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <label>Phí đào tạo</label>
+                            <div class="col-md-12">
+                                <input type="text" name="PriceCourse" id="PriceCourse" class="form-control" value="" />
+                            </div>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <label>Số tiền cần thanh toán</label>
+                            <div class="col-md-12">
+                                <input type="text" name="TotalAmount" id="TotalAmount" class="form-control" value="" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mt-3">
+                            <label>Upload chứng từ thanh toán</label>
+                            <div class="col-md-12">
+                                <input type="file" id="Image" name="Image" accept="image/*" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mt-3">
+                            <label>Ghi chú kèm theo</label>
+                            <div class="col-md-12">
+                                <input type="text" name="Description" id="Description" class="form-control" value="" />
+                            </div>
+                        </div>
+                    </div>
+                    <blockquote class="mt-3 fs-2 border-success border-2" id="blockthanhtoan">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th style="width:150px;text-align:left">Tên TK:</th>
+                                    <td><b>CÔNG TY CỔ PHẦN SUPERBRAIN GROUP</b></td>
+                                </tr>
+                                <tr>
+                                    <th style="width:150px;text-align:left">Số TK: </th>
+                                    <td>007 100 131 9979</td>
+                                    <td>Ngân <span class="il">hàng</span> Vietcombank CN TP.HCM.</td>
+                                </tr>
+                                <tr>
+                                    <th style="width:150px;text-align:left">Số TK: </th>
+                                    <td>009 979 979 999</td>
+                                    <td>Ngân <span class="il">hàng</span> MB Bank - CN An Phú.</td>
+                                </tr>
+                                <tr>
+                                    <th style="width:150px;text-align:left">Số TK: </th>
+                                    <td>190 366 4766 1012</td>
+                                    <td>Ngân <span class="il">hàng</span> Techcombank CN Trần Não.</td>
+                                </tr>
+                                <tr>
+                                    <th style="width:150px;text-align:left">Nội dung:</th>
+                                    <td><i>[Tên cơ sở] thanh toan DH [mã đơn hàng 1, mã đơn hàng 2,…]</i></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </blockquote>
+                    <p class="text-muted fw-bold">Tình trạng: <span id="statusPayment"></span></p>
+                    <a href="javascript:Submit_payment()" class="btn btn-success"><i class="ti ti-credit-card"></i> Cập nhật thanh toán</a>
+                    <p class="text-muted fw-bold mt-3 text-decoration-underline"><i class="ti ti-file-analytics"></i> Danh sách đính kèm</p>
+                    <table class="table ">
+                        <tr class="bg-success text-white">
+                            <th class="text-center">STT</th>
+                            <th class="text-left">Họ tên</th>
+                            <th class="text-center">Điện thoại</th>
+                            <th class="text-left">Email</th>
+                            <th class="text-left">Cơ sở</th>
+                            <th class="text-center">Trạng thái</th>
+                        </tr>
+                        <tbody id="showlist_payment"></tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="modalRating" tabindex="-1" aria-labelledby="modalRatingLabel2" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content" style="">
@@ -208,6 +301,7 @@
         </div>
     </div>
 </div>
+
 <div class="modal fade" id="modalRatingEmployees" tabindex="-1" aria-labelledby="modalRatingEmployeesLabel2" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content" style="">
@@ -377,6 +471,29 @@
             success: function (data) {
                 $('#showlist_rating').html(data.str);
                 $('#showinfo').html(data.strinfo);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function Payment_fee() {
+        $.ajax({
+            url: '@Url.Action("Load_payment", "TrainingCourses")',
+            type: "GET",
+            data: {
+                id: $("#IdTraining").val(),
+            },
+            success: function (data) {
+                $('#IdTrainingPayment').val($("#IdTraining").val());
+                $('#NameCourse').val(data.strName);
+                $('#PriceCourse').val(data.strphi);
+                $('#TotalAmount').val(data.strtongtien);
+                $('#statusPayment').html(data.strStatus);
+                $('#showlist_payment').html(data.str);
+                $('#modalRegistration').modal('hide');
+                $('#modalPayment').modal('show');
             },
             error: function (xhr, error) {
                 console.log(error);

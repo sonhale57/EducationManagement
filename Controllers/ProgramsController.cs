@@ -23,7 +23,7 @@ namespace SuperbrainManagement.Controllers
             return View(programs.ToList());
         }
         [HttpPost]
-        public ActionResult Submit_addProgram(string action,int Id,string Code,string Name,int DisplayOrder,string Description)
+        public ActionResult Submit_addProgram(string action,int? Id,string Code,string Name,int DisplayOrder,string Description)
         {
             string status = "ok";
             string message = "";

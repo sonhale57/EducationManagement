@@ -39,9 +39,10 @@ namespace SuperbrainManagement.Controllers
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "select Id,Code,Name,ResgistrationDeadline,Fromdate,Todate,Number,(select COUNT(IdEmployee) from RegistrationTraining where IdTraining=Id "+querybranch+") as Soluongdk"
-                            +" from TrainingCourse"
-                            +" where Enable=1";
+                string query = "select tc.Id,tc.Code,tc.Name,tc.ResgistrationDeadline,tc.Fromdate,tc.Todate,tc.Number,cat.Name as NameCat,(select COUNT(IdEmployee) from RegistrationTraining where IdTraining=tc.Id " + querybranch+") as Soluongdk"
+                            +" from TrainingCourse tc"
+                            + " join TrainingType cat on cat.Id=tc.IdType"
+                            + " where tc.Enable=1";
                 SqlCommand command = new SqlCommand(query, connection);
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
@@ -138,14 +139,14 @@ namespace SuperbrainManagement.Controllers
                     }
 
                     str += "<tr>"
-                            + "<td class='text-center'>" + count + "</td>"
-                            + "<td>" + reader["name"].ToString() + "</td>"
-                            + "<td class='text-center'>" + DateTime.Parse(reader["ResgistrationDeadline"].ToString()).ToString("dd/MM/yyyy") + "</td>"
-                            + "<td class='text-center'>" + DateTime.Parse(reader["Fromdate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
-                            + "<td class='text-center'>" + DateTime.Parse(reader["Todate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
-                            + "<td class='text-center'><a href='javascript:View_registration(" + reader["Id"] +")' class='fw-bolder'>" + reader["Soluongdk"].ToString() + "</a></td>"
-                            + "<td class='text-center'>" + strStatus + "</td>"
-                            + "<td class='text-end'>" + strbtn + "</td>"
+                            + "<td class='text-center align-content-center'>" + count + "</td>"
+                            + "<td class='align-content-center'>" + reader["name"].ToString() + "<br/> <small class='fst-italic text-primary'>" + reader["NameCat"] +"</small></td>"
+                            + "<td class='text-center align-content-center'>" + DateTime.Parse(reader["ResgistrationDeadline"].ToString()).ToString("dd/MM/yyyy") + "</td>"
+                            + "<td class='text-center align-content-center'>" + DateTime.Parse(reader["Fromdate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
+                            + "<td class='text-center align-content-center'>" + DateTime.Parse(reader["Todate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
+                            + "<td class='text-center align-content-center'><a href='javascript:View_registration(" + reader["Id"] +")' class='fw-bolder'>" + reader["Soluongdk"].ToString() + "</a></td>"
+                            + "<td class='text-center align-content-center'>" + strStatus + "</td>"
+                            + "<td class='text-end align-content-center'>" + strbtn + "</td>"
                             + "</tr>";
                 }
                 reader.Close();
@@ -261,6 +262,64 @@ namespace SuperbrainManagement.Controllers
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
+        public ActionResult Load_payment(int id)
+        {
+            string str = "",strName="",strStatus="";
+            int count_chuadongphi = 0;
+            double price = 0;
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            var tr = db.TrainingCourses.Find(id);
+            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "select tc.Id,tc.Name as NameCourse,tc.Price,tjoin.IdEmployee,e.Email,e.Name as NameEmployee,e.Phone,e.DateOfBirth,b.Name as NameBranch,tjoin.StatusPayment,tjoin.IdBranch" +
+                    " from TrainingCourse tc" +
+                    " join RegistrationTraining tjoin on tc.Id = tjoin.IdTraining" +
+                    " join Employee e on tjoin.IdEmployee = e.Id" +
+                    " join Branch b on b.Id = e.IdBranch" +
+                    " where tjoin.IdTraining = " + id + " and tjoin.IdBranch = " + idbranch;
+                SqlCommand command = new SqlCommand(query, connection);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                int count = 0;
+                while (reader.Read())
+                {
+                    price = Double.Parse(reader["Price"].ToString());
+                    strName = reader["NameCourse"].ToString();
+                    count++;
+                    str += "<tr>"
+                        + "<td class='text-center'>" + count + "</td>"
+                        + "<td>" + reader["NameEmployee"] + "</td>"
+                        + "<td class='text-center'> " + reader["Phone"] + "</td>"
+                        + "<td class='text-center'> " + reader["Email"] + "</td>"
+                        + "<td>" + reader["NameBranch"] + "</td>"
+                        + "<td class='text-center'>" + (reader["StatusPayment"].ToString() == "False" ? "<span class='text-danger'>Chưa đóng phí</span>" : "<span class='text-success'>Đã đóng phí</span>") + "</td>"
+                        + "</tr>";
+                    if (reader["StatusPayment"].ToString() == "False")
+                    {
+                        count_chuadongphi++;
+                    }
+                }
+                reader.Close();
+            }
+            double tong = price * count_chuadongphi;
+            string strphi = string.Format("{0:N0}", price);
+            string strtongtien = string.Format("{0:N0}", tong);
+            if(count_chuadongphi > 0)
+            {
+                strStatus = "<span class='text-danger fw-bold'>Có "+count_chuadongphi+" chưa đóng phí.</span>";
+            }
+            else
+            {
+                strStatus = "<span class='text-success'>Đã đóng phí.</span>";
+            }
+            if (tr == null)
+            {
+                return Json(new { status = "error", message = "Không tìm thấy khóa đào tạo này!" }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { str,strtongtien,count_chuadongphi,strphi,strName,strStatus}, JsonRequestBehavior.AllowGet);
+        }
+
         [HttpPost]
         public ActionResult Submit_createtype(string Code, string Name, string Description)
         {
