@@ -1,25 +1,26 @@
 ﻿@model PagedList.IPagedList<SuperbrainManagement.Models.VacationSchedule>
 @using PagedList.Mvc;
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Controller = "Cài đặt";
+    ViewBag.Title = "Lịch nghỉ";
     Layout = "~/Views/Shared/_Layout.cshtml";
     int stt = 1;
 }
 
 <div class="row">
-    <div class="col col-md-6 col-sm-12">
+    <div class="col col-md-4 col-sm-12">
         <form action="/vacationschedules" method="get" id="formload">
             <div class="input-group mb-3">
                 @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
                 {
                     @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2" })
                 }
-                <input type="text" class="form-control" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
-                <button class="input-group-text bg-success" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
+                <input type="text" class="form-control ms-1 rounded-1" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
+                <button class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
             </div>
         </form>
     </div>
-    <div class="col col-md-6 col-sm-12 text-right" style="text-align:right;">
+    <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
         <div class="me-0 btn btn-md p-0">
             <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="ti ti-arrows-sort"></i> Sắp xếp theo
@@ -40,9 +41,9 @@
         <tr>
             <th class="text-center">STT</th>
             <th>Mô tả</th>
-            <th>Ngày bắt đầu</th>
-            <th>Ngày kết thúc</th>
-            <th class="text-center">Thao tác</th>
+            <th class="text-center">Ngày bắt đầu</th>
+            <th class="text-center">Ngày kết thúc</th>
+            <th class="text-end">Thao tác</th>
         </tr>
     </thead>
 
@@ -55,13 +56,13 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Description)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Fromdate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Todate)
+            <td class="text-center">
+                @item.Fromdate.Value.ToString("dd/MM/yyyy")
             </td>
             <td class="text-center">
+                @item.Todate.Value.ToString("dd/MM/yyyy")
+            </td>
+            <td class="text-end">
                 <a href="/vacationschedules/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
                 <a href="/vacationschedules/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
                 <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
@@ -80,3 +81,41 @@
         @Html.PagedListPager(Model, page => Url.Action("Index", new { page }), new PagedListRenderOptions { LiElementClasses = new string[] { "page-item" } })
     </ul>
 </nav>
+
+<div class="modal fade" id="modaladdVacation" tabindex="-1" aria-labelledby="modaladdVacationLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="width:800px;">
+            <form action="/" method="post" id="form_nhap">
+                <div class="modal-header">
+                    <h5 class="modal-title text-success" id="modaladdVacationLabel">Thêm lịch nghỉ</h5>
+                </div>
+                <hr style="width:90%;margin:0 auto;" />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col-md-12 mt-2">
+                            <label>Mã chương trình</label>
+                            <input type="hidden" name="action" value="" class="form-control" id="action" placeholder="Mã chương trình" />
+                            <input type="hidden" name="IdVacation" value="" class="form-control" id="IdVacation" placeholder="Mã chương trình" />
+                            <input type="text" name="CodeVacation" value="" class="form-control" id="CodeVacation" placeholder="Mã chương trình" />
+                        </div>
+
+                        <div class="form-group col-md-12 mt-2">
+                            <label>Tên chương trình</label>
+                            <input type="text" name="NameVacation" value="" class="form-control" id="NameVacation" placeholder="Tên chương trình" />
+                        </div>
+
+                        <div class="form-group col-md-12 mt-2">
+                            <label>Mô tả ngắn</label>
+                            <input type="text" name="DescriptionVacation" value="" class="form-control" id="DescriptionVacation" placeholder="Mô tả ngắn" />
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-success text-center" onclick="Submit_AddVacation()" id="btnActionVacation">
+                            <i class="ti ti-circle-plus"></i> Thêm mới
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

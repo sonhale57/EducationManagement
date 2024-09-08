@@ -1,24 +1,25 @@
 ﻿@model PagedList.IPagedList<SuperbrainManagement.Models.MKTCampaign>
 @using PagedList.Mvc;
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Controller = "Cài đặt";
+    ViewBag.Title = "Chương trình MKT";
     Layout = "~/Views/Shared/_Layout.cshtml";
     int stt = 1;
 }
 <div class="row">
-    <div class="col col-md-6 col-sm-12">
+    <div class="col col-md-4 col-sm-12">
         <form action="/marketingcampaigns" method="get" id="formload">
             <div class="input-group mb-3">
                 @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
                 {
                     @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2" })
                 }
-                <input type="text" class="form-control" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
-                <button class="input-group-text bg-success" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
+                <input type="text" class="form-control ms-1 rounded-1" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
+                <button class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
             </div>
         </form>
     </div>
-    <div class="col col-md-6 col-sm-12 text-right" style="text-align:right;">
+    <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
         <div class="me-0 btn btn-md p-0">
             <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="ti ti-arrows-sort"></i> Sắp xếp theo

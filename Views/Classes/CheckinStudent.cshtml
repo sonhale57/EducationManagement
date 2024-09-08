@@ -5,12 +5,12 @@
 }
 <div class="d-sm-flex d-block align-items-center justify-content-between align-content-center">
     <div class="d-flex text-start">
-        <form action="/classes/Filter" method="get">
+        <form action="" method="get" onsubmit="return Loadlist()">
             <div class="input-group mb-3">
                 @Html.DropDownList("IdCourse", null, htmlAttributes: new { @class = "form-control ms-1 rounded-1", onchange = "Loadlist();" })
                 @Html.DropDownList("IdClass", null, htmlAttributes: new { @class = "form-control ms-1 rounded-1", onchange = "Loadlist();" })
-                <input type="text" class="form-control ms-1 rounded-1" name="studentName" placeholder="Tìm kiếm học viên" />
-                <button class="input-group-text bg-success" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
+                <input type="text" class="form-control ms-1 rounded-1" id="searchString" name="searchString" placeholder="Tìm kiếm học viên" />
+                <a class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" href="javascript:Loadlist()"><i class="ti ti-search text-white"></i></a>
             </div>
         </form>
     </div>
@@ -18,15 +18,16 @@
     </div>
 </div>
 <div class="table-responsive">
+    <span class="loader"></span>
     <table class="table table-bordered mt-2" id="showlist">
     </table>
 </div>
 
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <form action="/Classes/CheckIn" method="post" enctype="multipart/form-data">
             <div class="modal-content">
-                <div class="modal-header modal-dialog-scrollable">
+                <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">Kết quả học tập ngày</h5>
                 </div>
                 <hr style="width:90%;margin:0 auto;" />
@@ -169,6 +170,12 @@
                             </div>
                         </div>
                         <div class="form-group row mb-2">
+                            <label class="col-lg-3 col-form-label form-control-label">Nhận xét chung</label>
+                            <div class="col-lg-9">
+                                <textarea class="form-control" name="description" id="description" ></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
                             <label class="col-lg-3 col-form-label form-control-label">Gửi SMS | Email</label>
                             <div class="col-lg-9">
                                 Có
@@ -180,9 +187,10 @@
                     </div>
                 </div>
                 <div class="modal-footer text-start">
-                    <button type="submit" class="btn btn-info">
+                    <span class="loader"></span>
+                    <a href="javascript:Submit_checkinStudent()" class="btn btn-success">
                         <i class="ti ti-calendar"></i> Nhập kết quả
-                    </button>
+                    </a>
                 </div>
             </div>
         </form>
@@ -191,20 +199,26 @@
 <script>
     Loadlist();
     function Loadlist() {
+        $(".loader").html("Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");        
+        $('#showlist').html("");
         $.ajax({
             url: '@Url.Action("GetStudentSchedule", "Classes")',
             type: "GET",
             data: {
                 IdCourse: $("#IdCourse").val(),
+                searchString: $("#searchString").val(),
                 IdClass: $("#IdClass").val()
             },
             success: function (data) {
                 $('#showlist').html(data.str);
+                $(".loader").html("");        
             },
             error: function (xhr, error) {
                 console.log(error);
+                $(".loader").html("");        
             }
         });
+        return false;
     }
     function GetDropDownIndex(value){
             switch(value)
@@ -222,10 +236,67 @@
                 return 0;
             }
     }
+    var isProcessing = false;
+    function Submit_checkinStudent() {
 
+        // Thu thập dữ liệu từ form
+        var formData = {
+            classId: $('#classId').val(),
+            studentId: $('#studentId').val(),
+            checkIn: $('input[name="checkIn"]:checked').val(),
+            dateCheckedIn: $('#dateCheckedIn').val(),
+            lesson: $('#lesson').val(),
+            completely: $('#completely').val(),
+            exactRate: $('#exactRate').val(),
+            textNumber: $('#textNumber').val(),
+            row: $('#row').val(),
+            second: $('#second').val(),
+            home_completely: $('#home_completely').val(),
+            home_exactRate: $('#home_exactRate').val(),
+            focusRate: $('#focusRate').val(),
+            confidentRate: $('#confidentRate').val(),
+            rememberRate: $('#rememberRate').val(),
+            reflexRate: $('#reflexRate').val(),
+            other: $('#other').val(),
+            power: $('#power').val(),
+            description: $('#description').val(),
+            isSMS: $('input[name="isSMS"]:checked').val()
+        };
+
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        // Gửi dữ liệu qua AJAX
+        $.ajax({
+            url: '/Classes/CheckIn',  // Đường dẫn đến action
+            type: 'POST',
+            data: formData,           // Dữ liệu form
+            success: function (response) {
+                // Xử lý kết quả trả về từ server
+                if (response.status === "success") {
+                    showSuccess(response.message,3000); // Hiển thị thông báo thành công
+                    $('#scheduleModal').modal('hide'); // Đóng modal sau khi thành công
+                    Loadlist();
+                } else {
+                    showError(response.message,3000); // Hiển thị thông báo lỗi nếu có
+                }
+                isProcessing = false; // Hoàn thành xử lý khi có lỗi
+                $(".loader").html("");
+            },
+            error: function (xhr, status, error) {
+                // Xử lý lỗi khi request không thành công
+                showError("Đã xảy ra lỗi khi gửi dữ liệu: " + error,3000);
+                isProcessing = false; // Hoàn thành xử lý khi có lỗi
+                $(".loader").html("");
+            }
+        });
+    }
     function storeSelected(classId, studentId, date) {
         event.preventDefault();
+
         let today = new Date();
+
+        // Đặt giá trị vào form
         document.getElementById("classId").value = classId;
         document.getElementById("studentId").value = studentId;
         document.getElementById("dateCheckedIn").value = date + "/" + today.getFullYear();
@@ -235,8 +306,11 @@
         document.getElementById("second").value = "";
         document.getElementById("other").value = "";
         document.getElementById("power").value = "";
+        document.getElementById("description").value = "";
+
+        // Gửi yêu cầu đến server để lấy thông tin check-in trước đó
         $.ajax({
-            url: '@Url.Action("GetCheckedSessionDetaiByClass", "Classes")',
+            url: '@Url.Action("GetCheckedSessionDetaiByClass", "Classes")', // Action để lấy dữ liệu check-in
             type: "GET",
             data: {
                 idClass: classId,
@@ -245,37 +319,36 @@
             },
             success: function (data) {
                 if (data != null) {
-                    document.getElementById("lesson").value = data.Lesson;
-                    document.getElementById("textNumber").value = data.OnClassNumber;
-                    document.getElementById("row").value = data.OnClassRow;
-                    document.getElementById("second").value = data.OnClassPaper;
-                    document.getElementById("other").value = data.Other;
-                    document.getElementById("power").value = data.Power;
+                    // Nếu có dữ liệu check-in trước đó, điền các thông tin vào form
+                    document.getElementById("lesson").value = data.Lesson || "";
+                    document.getElementById("textNumber").value = data.OnClassNumber || "";
+                    document.getElementById("row").value = data.OnClassRow || "";
+                    document.getElementById("second").value = data.OnClassPaper || "";
+                    document.getElementById("other").value = data.Other || "";
+                    document.getElementById("power").value = data.Power || "";
+                    document.getElementById("description").value = data.Description || "";
 
+                    // Cập nhật trạng thái check-in
                     var checkInCb = document.getElementsByName("checkIn");
-
-                    var smsCb = document.getElementsByName("isSMS");
-
                     if (data.StatusCheckin) {
-                        checkInCb[0].checked = true;
-                        checkInCb[1].checked = false;
-                    }
-
-                    else {
+                        checkInCb[0].checked = true;  // Đã check-in
+                        checkInCb[1].checked = false; // Không check-in
+                    } else {
                         checkInCb[0].checked = false;
                         checkInCb[1].checked = true;
                     }
 
+                    // Cập nhật trạng thái gửi SMS
+                    var smsCb = document.getElementsByName("isSMS");
                     if (data.SendSMS) {
-                        smsCb[0].checked = true;
-                        smsCb[1].checked = false;
-                    }
-
-                    else {
+                        smsCb[0].checked = true;   // Đã gửi SMS
+                        smsCb[1].checked = false;  // Không gửi SMS
+                    } else {
                         smsCb[0].checked = false;
                         smsCb[1].checked = true;
                     }
 
+                    // Cập nhật dropdowns các đánh giá khác
                     document.getElementById("completely").selectedIndex = GetDropDownIndex(data.Complete);
                     document.getElementById("exactRate").selectedIndex = GetDropDownIndex(data.Exactly);
                     document.getElementById("home_completely").selectedIndex = GetDropDownIndex(data.HomeComplete);
@@ -284,11 +357,15 @@
                     document.getElementById("confidentRate").selectedIndex = GetDropDownIndex(data.Confident);
                     document.getElementById("rememberRate").selectedIndex = GetDropDownIndex(data.Remember);
                     document.getElementById("reflexRate").selectedIndex = GetDropDownIndex(data.Reflex);
+                } else {
+                    // Nếu không có dữ liệu check-in, thiết lập mặc định
+                    console.log("No check-in data found for this session.");
                 }
             },
             error: function (xhr, error) {
-                console.log("error: " + error);
+                console.log("Error loading check-in data: " + error);
             }
         });
     }
+    
 </script>

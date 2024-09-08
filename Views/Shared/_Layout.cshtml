@@ -1,17 +1,31 @@
 ﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
+    <!-- Meta và tiêu đề -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title : Phần mềm Quản Lý Superbrain</title>
+
+    <!-- Favicon và CSS -->
     <link rel="shortcut icon" type="image/png" href="~/assets/images/logos/icon web.png" />
     <link rel="stylesheet" href="~/assets/css/styles.css" />
-    <link href="~/assets/css/select2.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/assets/css/select2.css"/>
+
+    <!-- jQuery tải trước -->
+    <script src="~/assets/js/jquery-3.4.1.min.js"></script>
+
+    <!-- jQuery UI -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <!-- Bootstrap và các thư viện khác -->
     <script src="~/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
     <script src="~/assets/js/main.js"></script>
-    <script src="~/assets/js/jquery-3.4.1.min.js"></script>
+
+    <!-- jQuery Confirm -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.min.css">
     <script src="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/js/jquery-confirm.min.js"></script>
+
 
     <style>
         .custom-scrollbar {
@@ -41,7 +55,7 @@
         }
 
             body::-webkit-scrollbar {
-                height:5px;
+                height: 5px;
                 width: 5px;
             }
 
@@ -77,19 +91,20 @@
             max-height: calc(100vh - 300px);
             overflow-y: auto;
         }
-        .modal-dialog-scrollable .modal-body::-webkit-scrollbar {
-            height:5px;
-            width: 5px;
-        }
 
-        .modal-dialog-scrollable .modal-body::-webkit-scrollbar-track {
-            background-color: #fafafa;
-        }
+            .modal-dialog-scrollable .modal-body::-webkit-scrollbar {
+                height: 5px;
+                width: 5px;
+            }
 
-        .modal-dialog-scrollable .modal-body::-webkit-scrollbar-thumb {
-            background-image: linear-gradient(-45deg, #189599, #00411a);
-            border-radius: 50px;
-        }
+            .modal-dialog-scrollable .modal-body::-webkit-scrollbar-track {
+                background-color: #fafafa;
+            }
+
+            .modal-dialog-scrollable .modal-body::-webkit-scrollbar-thumb {
+                background-image: linear-gradient(-45deg, #189599, #00411a);
+                border-radius: 50px;
+            }
     </style>
 </head>
 <body>
@@ -126,7 +141,7 @@
                 <nav class="sidebar-nav scroll-sidebar mt-2" data-simplebar="">
                     <ul id="sidebarnav">
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="/." aria-expanded="false">
+                            <a class="sidebar-link" href="/" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-layout-dashboard"></i>
                                 </span>
@@ -134,7 +149,7 @@
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="javascript:void(0)" aria-expanded="false">
+                            <a class="sidebar-link" href="/programs" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-award fs-6"></i>
                                 </span>
@@ -159,7 +174,7 @@
                             </ul>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="javascript:void(0)" aria-expanded="false">
+                            <a class="sidebar-link" href="/classes" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-abacus"></i>
                                 </span>
@@ -182,7 +197,7 @@
                                     </a>
                                 </li>
                                 <li class="sidebar-item">
-                                    <a href="javascript:void(0)" class="sidebar-link">
+                                    <a href="/classes/resultcourse" class="sidebar-link">
                                         <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Nhập điểm</span>
                                     </a>
                                 </li>
@@ -305,7 +320,7 @@
                             </ul>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="javascript:void(0)" aria-expanded="false">
+                            <a class="sidebar-link" href="/transactions" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-report-money fs-6"></i>
                                 </span>
@@ -344,7 +359,7 @@
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="javascript:void(0)" aria-expanded="false">
+                            <a class="sidebar-link" href="/employees" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-users fs-6"></i>
                                 </span>

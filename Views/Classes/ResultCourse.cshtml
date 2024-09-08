@@ -1,0 +1,419 @@
+﻿
+@{
+    ViewBag.Controller = "Lớp học";
+    ViewBag.Title = "Nhập điểm khóa học";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .ui-widget.ui-widget-content {
+        z-index: 9999;
+        border: 1px solid #dddcdc;
+        border-radius: 5px;
+        color: #76849a;
+    }
+</style>
+<div class="d-sm-flex d-block align-items-center justify-content-between align-content-center">
+    <div class="d-flex text-start">
+        <form action="#" method="get" onsubmit="return Loadlist()">
+            <div class="input-group mb-3">
+                @Html.DropDownList("IdCourse", null, htmlAttributes: new { @class = "form-control ms-1 rounded-1", onchange = "Loadlist();" })
+                @Html.DropDownList("IdClass", null, htmlAttributes: new { @class = "form-control ms-1 rounded-1", onchange = "Loadlist();" })
+                <input type="text" class="form-control ms-1 rounded-1" id="searchString" name="searchString" placeholder="Tìm kiếm học viên" />
+                <a class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" href="javascript:Loadlist()"><i class="ti ti-search text-white"></i></a>
+            </div>
+        </form>
+    </div>
+    <div class="d-flex text-end">
+    </div>
+</div>
+<div class="table-responsive">
+    <span class="loader"></span>
+    <table class="table table-bordered mt-2">
+        <thead class="bg-success text-white">
+            <tr>
+                <th class="text-center">STT</th>
+                <th>TÊN HỌC VIÊN</th>
+                <th>KHÓA HỌC</th>
+                <th>LỚP HỌC</th>
+                <th class="text-center">NGÀY BẮT ĐẦU</th>
+                <th class="text-center">NGÀY KẾT THÚC</th>
+                <th class="text-center">ĐIỂM GIỮA KỲ</th>
+                <th class="text-center">ĐIỂM CUỐI KỲ</th>
+            </tr>
+        </thead>
+        <tbody id="showlist"></tbody>
+    </table>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Kết quả học tập ngày</h5>
+                </div>
+                <hr style="width:90%;margin:0 auto;" />
+            <div class="modal-body">
+                <div class="row">
+                    <input type="hidden" name="IdStudent" value="" id="IdStudent" />
+                    <input type="hidden" name="IdRegistration" value="" id="IdRegistration" />
+                    <input type="hidden" name="IdClass" value="" id="IdClass" />
+                    <input type="hidden" name="IdCourse" value="" id="IdCourse" />
+                    <input type="hidden" name="type" value="" id="type" />
+
+                    <div class="prf-contacts sttng">
+                        <h6 class="text-success"> 1. Bảng Điểm</h6>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group">
+                            <label class="control-label">Nghe </label>
+                            <input type="text" value="" id="nghe" name="nghe" class="form-control" onchange="Sum_tongdiem()">
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group">
+                            <label class="control-label">Nhìn </label>
+                            <input type="text" value="" id="nhin" name="nhin" class="form-control" onchange="Sum_tongdiem()">
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group">
+                            <label class="control-label">Tốc ký </label>
+                            <input type="text" value="" id="tocky" name="tocky" class="form-control" onchange="Sum_tongdiem()">
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group">
+                            <label class="control-label">Online D/R/S </label>
+                            <input type="text" value="" id="online" name="online" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="control-label">Tổng Điểm </label>
+                            <input type="text" value="" id="tongdiem" name="tongdiem" class="form-control">
+                        </div>
+                    </div>
+                    <div class="prf-contacts sttng">
+                        <h6 class="text-success mt-3"> 2. Kỹ năng tập trung</h6>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label class="control-label">Đạt Được </label>
+                            <a class="text-end" href="javascript:add_context(100)"><i class="ti ti-playlist-add text-muted"></i></a>
+                            <textarea id="taptrung_datduoc" name="taptrung_datduoc" class="form-control ui-autocomplete-input" maxlength="500"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label class="control-label">Cải thiện </label>
+                            <a class="text-end" href="javascript:add_context(101)"><i class="ti ti-playlist-add text-muted"></i></a>
+                            <textarea id="taptrung_caithien" name="taptrung_caithien" class="form-control ui-autocomplete-input" maxlength="500"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="prf-contacts sttng">
+                        <h6 class="text-success mt-3"> 3. Kỹ năng tự tin</h6>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label class="control-label">Đạt Được </label>
+                            <a class="text-end" href="javascript:add_context(102)"><i class="ti ti-playlist-add text-muted"></i></a>
+                            <textarea id="tutin_datduoc" name="tutin_datduoc" class="form-control ui-autocomplete-input" maxlength="500" autocomplete="off"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label class="control-label">Cải Thiện </label>
+                            <a class="text-end" href="javascript:add_context(103)"><i class="ti ti-playlist-add text-muted"></i></a>
+                            <textarea id="tutin_caithien" name="tutin_caithien" class="form-control ui-autocomplete-input" maxlength="500" autocomplete="off"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="prf-contacts sttng">
+                        <h6 class="text-success mt-3"> 4. Kỹ năng nhớ</h6>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label class="control-label">Đạt Được </label>
+                            <a class="text-end" href="javascript:add_context(104)"><i class="ti ti-playlist-add text-muted"></i></a>
+                            <textarea id="nho_datduoc" name="nho_datduoc" class="form-control ui-autocomplete-input" maxlength="500" autocomplete="off"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label class="control-label">Cải Thiện </label>
+                            <a class="text-end" href="javascript:add_context(105)"><i class="ti ti-playlist-add text-muted"></i></a>
+                            <textarea id="nho_caithien" name="nho_caithien" class="form-control ui-autocomplete-input" maxlength="500" autocomplete="off"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="prf-contacts sttng">
+                        <h6 class="text-success mt-3"> 5. Kỹ năng phản xạ - tính toán nhanh</h6>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label class="control-label">Đạt Được </label>
+                            <a class="text-end" href="javascript:add_context(106)"><i class="ti ti-playlist-add text-muted"></i></a>
+                            <textarea id="phanxa_datduoc" name="phanxa_datduoc" class="form-control ui-autocomplete-input" maxlength="500" autocomplete="off"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label class="control-label">Cải Thiện </label>
+                            <a class="text-end" href="javascript:add_context(107)"><i class="ti ti-playlist-add text-muted"></i></a>
+                            <textarea id="phanxa_caithien" name="phanxa_caithien" class="form-control ui-autocomplete-input" maxlength="500" autocomplete="off"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-12 mt-3">
+                        <div class="form-group">
+                            <label class="control-label">Nhận xét chung </label>
+                            <textarea id="nhanxetchung" name="nhanxetchung" class="form-control" maxlength="500"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 mt-3">
+                        <div class="form-group">
+                            <label class="control-label">Định hướng khóa tiếp theo </label>
+                            <textarea id="dinhhuongkhoatiep" name="dinhhuongkhoatiep" class="form-control" maxlength="500"></textarea>
+                        </div>
+                    </div>
+                </div> <!--End row-->
+            </div>
+            <div class="modal-footer">
+                <span class="loader"></span>
+                <a href="javascript:Submit_savechangeResult()" class="btn btn-success">
+                    <i class="ti ti-shield-check"></i> Nhập kết quả
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#taptrung_datduoc").autocomplete({
+            source: '@Url.Action("GetAutocompleteSuggestions", "DataSuggests", new { type = 100 })',
+            minLength: 0
+        }).bind('focus', function () { $(this).autocomplete("search"); });
+
+        $("#taptrung_caithien").autocomplete({
+            source: '@Url.Action("GetAutocompleteSuggestions", "DataSuggests", new { type = 100 })',
+            minLength: 0
+        }).bind('focus', function () { $(this).autocomplete("search"); });
+
+        // Autocomplete for confident skills
+        $("#tutin_datduoc").autocomplete({
+            source: '@Url.Action("GetAutocompleteSuggestions", "DataSuggests", new { type = 100 })',
+            minLength: 0
+        }).bind('focus', function () { $(this).autocomplete("search"); });
+
+        $("#tutin_caithien").autocomplete({
+            source: '@Url.Action("GetAutocompleteSuggestions", "DataSuggests", new { type = 103 })',
+            minLength: 0
+        }).bind('focus', function () { $(this).autocomplete("search"); });
+
+        // Autocomplete for memory skills
+        $("#nho_datduoc").autocomplete({
+            source: '@Url.Action("GetAutocompleteSuggestions", "DataSuggests", new { type = 104 })',
+            minLength: 0
+        }).bind('focus', function () { $(this).autocomplete("search"); });
+
+        $("#nho_caithien").autocomplete({
+            source: '@Url.Action("GetAutocompleteSuggestions", "DataSuggests", new { type = 105 })',
+            minLength: 0
+        }).bind('focus', function () { $(this).autocomplete("search"); });
+
+        // Autocomplete for reflex skills
+        $("#phanxa_datduoc").autocomplete({
+            source: '@Url.Action("GetAutocompleteSuggestions", "DataSuggests", new { type = 106 })',
+            minLength: 0
+        }).bind('focus', function () { $(this).autocomplete("search"); });
+
+        $("#phanxa_caithien").autocomplete({
+            source: '@Url.Action("GetAutocompleteSuggestions", "DataSuggests", new { type = 107 })',
+            minLength: 0
+        }).bind('focus', function () { $(this).autocomplete("search"); });
+    });
+    Loadlist();
+    function Loadlist() {
+        $(".loader").html("Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        $('#showlist').html("");
+        $.ajax({
+            url: '@Url.Action("GetStudentsOnClass", "Classes")',
+            type: "GET",
+            data: {
+                IdCourse: $("#IdCourse").val(),
+                searchString: $("#searchString").val(),
+                IdClass: $("#IdClass").val()
+            },
+            success: function (data) {
+                $('#showlist').html(data.str);
+                $(".loader").html("");
+            },
+            error: function (xhr, error) {
+                console.log(error);
+                $(".loader").html("");
+            }
+        });
+        return false;
+    }
+
+    function loadResultData(IdRegistration,IdCourse,IdClass, IdStudent, Type) {
+        event.preventDefault();
+        $('#IdRegistration').val(IdRegistration);
+        $('#IdCourse').val(IdCourse);
+        $('#IdClass').val(IdClass);
+        $('#IdStudent').val(IdStudent);
+        $('#type').val(Type);
+
+        // Gửi request AJAX để lấy dữ liệu dựa trên IdRegistration, IdStudent, Type
+        $.ajax({
+            url: '/Classes/GetResultData',  // Đường dẫn đến action lấy dữ liệu
+            type: 'GET',
+            data: {
+                IdRegistration: IdRegistration,
+                IdStudent: IdStudent,
+                IdCourse: IdCourse,
+                Type: Type
+            },
+            success: function (response) {
+                if (response.status === "success") {
+                    var data = response.data;
+
+                    // Nếu có dữ liệu, load vào các input
+                    $('#nghe').val(data.listen || "");
+                    $('#nhin').val(data.view || "");
+                    $('#tocky').val(data.speed || "");
+                    $('#online').val(data.online || "");
+                    $('#tongdiem').val(data.totalScore || "");
+
+                    $('#taptrung_datduoc').val(data.focusGet || "");
+                    $('#taptrung_caithien').val(data.focusNeed || "");
+
+                    $('#tutin_datduoc').val(data.confidentGet || "");
+                    $('#tutin_caithien').val(data.confidentNeed || "");
+
+                    $('#nho_datduoc').val(data.rememberGet || "");
+                    $('#nho_caithien').val(data.rememberNeed || "");
+
+                    $('#phanxa_datduoc').val(data.reflexGet || "");
+                    $('#phanxa_caithien').val(data.reflexNeed || "");
+
+                    $('#nhanxetchung').val(data.description || "");
+                    $('#dinhhuongkhoatiep').val(data.orentation || "");
+                } else {
+                    // Nếu không có dữ liệu, đặt các input về trống
+                    $('#nghe').val("");
+                    $('#nhin').val("");
+                    $('#tocky').val("");
+                    $('#online').val("");
+                    $('#tongdiem').val("");
+
+                    $('#taptrung_datduoc').val("");
+                    $('#taptrung_caithien').val("");
+
+                    $('#tutin_datduoc').val("");
+                    $('#tutin_caithien').val("");
+
+                    $('#nho_datduoc').val("");
+                    $('#nho_caithien').val("");
+
+                    $('#phanxa_datduoc').val("");
+                    $('#phanxa_caithien').val("");
+
+                    $('#nhanxetchung').val("");
+                    $('#dinhhuongkhoatiep').val("");
+                }
+                $('#resultModal').modal('show');
+            },
+            error: function (xhr, status, error) {
+                console.error("Lỗi khi tải dữ liệu: " + error);
+                // Đặt tất cả các trường về trống trong trường hợp lỗi
+                $('#nghe').val("");
+                $('#nhin').val("");
+                $('#tocky').val("");
+                $('#online').val("");
+                $('#tongdiem').val("");
+
+                $('#taptrung_datduoc').val("");
+                $('#taptrung_caithien').val("");
+
+                $('#tutin_datduoc').val("");
+                $('#tutin_caithien').val("");
+
+                $('#nho_datduoc').val("");
+                $('#nho_caithien').val("");
+
+                $('#phanxa_datduoc').val("");
+                $('#phanxa_caithien').val("");
+
+                $('#nhanxetchung').val("");
+                $('#dinhhuongkhoatiep').val("");
+            }
+        });
+    }
+
+    var isProcessing = false;
+    function Submit_savechangeResult() {
+        // Thu thập dữ liệu từ form
+        var formData = {
+            type: $('#type').val(),
+            studentId: $('#IdStudent').val(),
+            classId: $('#IdClass').val(),
+            courseId: $('#IdCourse').val(),
+            registrationId: $('#IdRegistration').val(),
+
+            listen: $('#nghe').val(),
+            view: $('#nhin').val(),
+            speed: $('#tocky').val(),
+            online: $('#online').val(),
+            totalScore: $('#tongdiem').val(),
+
+            focusGet: $('#taptrung_datduoc').val(),
+            focusNeed: $('#taptrung_caithien').val(),
+
+            confidentGet: $('#tutin_datduoc').val(),
+            confidentNeed: $('#tutin_caithien').val(),
+
+            rememberGet: $('#nho_datduoc').val(),
+            rememberNeed: $('#nho_caithien').val(),
+
+            reflexGet: $('#phanxa_datduoc').val(),
+            reflexNeed: $('#phanxa_caithien').val(),
+
+            orentation: $('#dinhhuongkhoatiep').val(),
+            description: $('#nhanxetchung').val()
+        };
+
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        // Gửi dữ liệu qua AJAX
+        $.ajax({
+            url: '/Classes/Submit_savechangeResult',  // Đường dẫn đến action
+            type: 'POST',
+            data: formData,           // Dữ liệu form
+            success: function (response) {
+                // Xử lý kết quả trả về từ server
+                if (response.status === "success") {
+                    showSuccess(response.message, 3000); // Hiển thị thông báo thành công
+                    $('#resultModal').modal('hide'); // Đóng modal sau khi thành công
+                    Loadlist();
+                } else {
+                    showError(response.message, 3000); // Hiển thị thông báo lỗi nếu có
+                }
+                isProcessing = false; // Hoàn thành xử lý khi có lỗi
+                $(".loader").html("");
+            },
+            error: function (xhr, status, error) {
+                // Xử lý lỗi khi request không thành công
+                showError("Đã xảy ra lỗi khi gửi dữ liệu: " + error, 3000);
+                isProcessing = false; // Hoàn thành xử lý khi có lỗi
+                $(".loader").html("");
+            }
+        });
+    }
+</script>

@@ -52,6 +52,7 @@ namespace SuperbrainManagement.Controllers
                         "<td class='text-center align-content-center'>" + (cn2.StatusActiveOnline==true?"<span class='text-success'>Đã thanh toán</span>":"<span class='text-danger'>Chưa thanh toán</span>") + "</td>" +
                         "<td class='text-end align-content-center'>" +
                         "<a href='/branches/edit/"+cn2.Id+"'><i class='ti ti-edit text-primary'></i></a>" +
+                        "<a href='javascript:Delete_branches("+cn2.Id+")' class='ms-1'><i class='ti ti-trash text-danger'></i></a>" +
                         "</td>" +
                         "</tr>";
                 }

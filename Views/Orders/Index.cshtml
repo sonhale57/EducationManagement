@@ -1,5 +1,6 @@
 ﻿@{
-    ViewBag.Title = "Index";
+    ViewBag.Controller = "Đơn hàng";
+    ViewBag.Title = "Quản lý đơn hàng";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <style>
@@ -194,8 +195,8 @@
             {
                 @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", @onchange = "Loadlist(1)" })
             }
-            <input type="text" class="form-control" name="searchString" id="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
-            <a class="input-group-text bg-success" id="basic-addon2" href="javascript:Loadlist()"><i class="ti ti-search text-white"></i></a>
+            <input type="text" class="form-control ms-1 rounded-1" name="searchString" id="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
+            <a class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" href="javascript:Loadlist()"><i class="ti ti-search text-white"></i></a>
         </div>
     </div>
     <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
@@ -270,17 +271,15 @@
                                 </td>
                                 <td><input type="text" name="tongtien" value="0" class="form-control text-end" id="tongtien" /></td>
                             </tr>
-                            <tr>
-                                <td colspan="6" class="text-end">
-                                    <span class="loader"></span>
-                                    <button type="button" class="btn btn-success" onclick="submit_order()">
-                                        <i class="ti ti-shopping-cart-plus"></i> Xác nhận đặt hàng
-                                    </button>
-                                </td>                        
-                            </tr>
                         </tfoot>
-                        
                     </table>
+                </div>
+
+                <div class="modal-footer">
+                    <span class="loader"></span>
+                    <button type="button" class="btn btn-success" onclick="submit_order()">
+                        <i class="ti ti-shopping-cart-plus"></i> Xác nhận đặt hàng
+                    </button>
                 </div>
             </form>
         </div>

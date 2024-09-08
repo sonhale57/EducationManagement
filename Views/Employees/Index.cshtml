@@ -1,7 +1,8 @@
 ﻿@model PagedList.IPagedList<SuperbrainManagement.Models.Employee>
 @using PagedList.Mvc;
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Controller = "Nhân sự";
+    ViewBag.Title = "Danh sách nhân sự";
     Layout = "~/Views/Shared/_Layout.cshtml";
     int stt = 1;
 }
@@ -13,8 +14,8 @@
                 {
                     @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2" })
                 }
-                <input type="text" class="form-control" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
-                <button class="input-group-text bg-success" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
+                <input type="text" class="form-control ms-1 rounded-1" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
+                <button class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
             </div>
         </form>
     </div>

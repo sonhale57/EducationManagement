@@ -9,7 +9,7 @@ namespace SuperbrainManagement.Models
     [Table("ResultCourse")]
     public partial class ResultCourse
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         public int? EmailSendCount { get; set; }
@@ -47,46 +47,46 @@ namespace SuperbrainManagement.Models
         [StringLength(50)]
         public string TotalScore { get; set; }
 
-        [StringLength(50)]
+        [StringLength(500)]
         public string Focus { get; set; }
 
-        [StringLength(50)]
+        [StringLength(500)]
         public string FocusGet { get; set; }
 
-        [StringLength(50)]
+        [StringLength(500)]
         public string FocusNeed { get; set; }
 
-        [StringLength(50)]
+        [StringLength(500)]
         public string Confident { get; set; }
 
-        [StringLength(50)]
+        [StringLength(500)]
         public string ConfidentGet { get; set; }
 
-        [StringLength(50)]
+        [StringLength(500)]
         public string ConfidentNeed { get; set; }
 
-        [StringLength(50)]
+        [StringLength(500)]
         public string Remember { get; set; }
 
-        [StringLength(50)]
+        [StringLength(500)]
         public string RememberGet { get; set; }
 
-        [StringLength(50)]
+        [StringLength(500)]
         public string RememberNeed { get; set; }
 
-        [StringLength(50)]
+        [StringLength(500)]
         public string Reflex { get; set; }
 
-        [StringLength(50)]
+        [StringLength(500)]
         public string ReflexGet { get; set; }
 
-        [StringLength(50)]
+        [StringLength(500)]
         public string ReflexNeed { get; set; }
 
-        [StringLength(250)]
+        [StringLength(500)]
         public string Description { get; set; }
 
-        [StringLength(250)]
+        [StringLength(500)]
         public string Orentation { get; set; }
 
         public int? Power { get; set; }

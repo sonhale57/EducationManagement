@@ -83,7 +83,7 @@ namespace SuperbrainManagement.Controllers
             {
                 string query = "select trans.Id,trans.Code,trans.Name,trans.Description,trans.Amount,trans.Discount,trans.TotalAmount,trans.DateCreate,trans.Image,trans.Type,trans.Status,trans.PaymentMethod,us.Name as Username"
                             + " from [Transaction] trans,[User] us"
-                            + " where us.id = trans.IdUser and trans.IdBranch = " + idBranch + querytype + querysearch + querysort;
+                            + " where us.id = trans.IdUser and trans.DateCreate>='"+fromdate+"' and trans.DateCreate<='"+todate+"' and trans.IdBranch = " + idBranch + querytype + querysearch + querysort;
                 SqlCommand command = new SqlCommand(query, connection);
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
