@@ -34,6 +34,48 @@ namespace SuperbrainManagement.Controllers
 
             return Json(suggestions, JsonRequestBehavior.AllowGet);
         }
+        public ActionResult GetDataSuggest(int type)
+        {
+            var datesuggest = db.DataSuggests.Where(x => x.Type == type);
+            string str = "";
+            int stt = 0;
+            if (datesuggest.Count() > 0)
+            {
+
+                foreach (var d in datesuggest)
+                {
+                    stt++;
+                    str += "<tr>"
+                        + "<td class='text-center'>" + d.Id + "</td>"
+                        + "<td>" + d.Name + "</td>"
+                        + (CheckUsers.CheckHQ() == true ? "<td><a class='text-end' href='javascript:Delete_dataSuggest(" + d.Id + ")' ><i class='ti ti-trash text-danger'></i></a></td>" : "")
+                        + "</tr>";
+                }
+            }
+            else
+            {
+                str = "<tr><td colspan=2>Không tìm thấy dữ liệu</td></tr>";
+            }
+            return Json(new {str},JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public ActionResult Submit_addDataSuggess(string Description,int type)
+        {
+            var data = new DataSuggest()
+            {
+                Name = Description,
+                Description = Description,
+                Type = type,
+                Enable = true,
+                Active = true,
+                IdBranch = Convert.ToInt32(CheckUsers.idBranch()),
+                IdUser = Convert.ToInt32(CheckUsers.iduser()),
+                DateCreate = DateTime.Now
+            };
+            db.DataSuggests.Add(data);
+            db.SaveChanges();
+            return Json(new {status ="ok",message="Đã thêm thành công!"},JsonRequestBehavior.AllowGet);
+        }
         // GET: DataSuggests/Details/5
         public ActionResult Details(int? id)
         {

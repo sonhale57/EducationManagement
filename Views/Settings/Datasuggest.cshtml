@@ -1,0 +1,66 @@
+﻿<div class="offcanvas offcanvas-end settings-panel border-0" id="settings-offcanvas" tabindex="-1" aria-labelledby="settings-offcanvas" aria-modal="true" role="dialog" style="z-index:9999;min-width:700px;">
+    <div class="offcanvas-header align-items-start border-bottom flex-column border-translucent">
+        <div class="pt-1 w-100 mb-6 d-flex justify-content-between align-items-start">
+            <div>
+                <h5 class="text-success"><i class="ti ti-thermometer"></i> Nhập gợi ý</h5>
+                <p class="mb-0 fs-9">Explore different styles according to your preferences</p>
+            </div>
+            <a  class="fw-bolder mt-0" href="" data-bs-dismiss="offcanvas" aria-label="Close"><i class="ti ti-x text-muted"></i></a>
+        </div>
+    </div>
+    <div class="offcanvas-body scrollbar px-card" id="themeController">
+        <form action="/" method="post">
+            <input type="hidden" name="Type" id="TypeSuggest" value="" />
+            <textarea class="form-control" placeholder="Nhập gợi ý" id="DescriptionSuggest" name="Description"></textarea>
+        </form>
+        <span class="loader"></span>
+        <a class="btn btn-success btn-sm text-center mt-2" href="javascript:Submit_add()">
+            <i class="ti ti-plus"></i> Thêm mới
+        </a>
+        <table class="table table-bordered mt-3">
+            <thead class="bg-light">
+                <tr>
+                    <th class="text-center">Mã tham chiếu</th>
+                    <th>Nội dung</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="showlist_datasuggest"></tbody>
+        </table>
+    </div>
+</div>
+<script>
+    isProcessing = false;
+    function Submit_add() {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        // Gửi dữ liệu qua AJAX
+        $.ajax({
+            url: '/DataSuggests/Submit_addDataSuggess',  // Đường dẫn đến action
+            type: 'POST',
+            data: {
+                type: $("#TypeSuggest").val(),
+                Description: $("#DescriptionSuggest").val()
+            }, 
+            success: function (response) {
+                // Xử lý kết quả trả về từ server
+                if (response.status === "ok") {
+                    showSuccess(response.message, 3000); // Hiển thị thông báo thành công
+                    Add_suggest($("#TypeSuggest").val());
+                    $("#DescriptionSuggest").val("")
+                } else {
+                    showError(response.message, 3000); // Hiển thị thông báo lỗi nếu có
+                }
+                isProcessing = false; // Hoàn thành xử lý khi có lỗi
+                $(".loader").html("");
+            },
+            error: function (xhr, status, error) {
+                // Xử lý lỗi khi request không thành công
+                showError("Đã xảy ra lỗi khi gửi dữ liệu: " + error, 3000);
+                isProcessing = false; // Hoàn thành xử lý khi có lỗi
+                $(".loader").html("");
+            }
+        });
+    }
+</script>

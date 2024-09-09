@@ -953,6 +953,7 @@
     <Content Include="Views\DataSuggests\Details.cshtml" />
     <Content Include="Views\DataSuggests\Edit.cshtml" />
     <Content Include="Views\DataSuggests\Index.cshtml" />
+    <Content Include="Views\Settings\Datasuggest.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
