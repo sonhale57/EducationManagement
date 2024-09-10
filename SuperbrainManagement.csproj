@@ -429,6 +429,7 @@
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="assets\css\choices.min.css" />
     <Content Include="assets\css\icons\tabler-icons\fonts\tabler-icons.svg" />
     <Content Include="assets\css\icons\tabler-icons\tabler-icons.css" />
     <Content Include="assets\css\select2.css" />
@@ -445,6 +446,7 @@
     <Content Include="assets\images\products\s7.jpg" />
     <Content Include="assets\images\profile\user-1.jpg" />
     <Content Include="assets\js\app.min.js" />
+    <Content Include="assets\js\choices.min.js" />
     <Content Include="assets\js\dashboard.js" />
     <Content Include="assets\js\jquery-3.4.1.js" />
     <Content Include="assets\js\jquery-3.4.1.min.js" />
@@ -954,6 +956,7 @@
     <Content Include="Views\DataSuggests\Edit.cshtml" />
     <Content Include="Views\DataSuggests\Index.cshtml" />
     <Content Include="Views\Settings\Datasuggest.cshtml" />
+    <Content Include="Views\Classes\Schedules.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -1936,56 +1936,96 @@ namespace SuperbrainManagement.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Submit_editStudent(int Id, string Code, string Name, DateTime DateOfBirth, string Sex, string Username, string Password, string School, string Class, string Description, string ParentName, string Phone, string Email, DateTime ParentDateOfBirth, string City, string District, string Address, string Relationship, string Job, string Facebook, string Hopeful, string Known, int? IdMKT, HttpPostedFileBase Image)
         {
-            string status="", message="";
-            var student = db.Students.Find(Id);
-            if (student != null)
-            {
-                student.DateOfBirth = DateOfBirth;
-                student.Code = Code;
-                student.Name = Name;
-                student.Sex = Sex;
-                student.Username = Username;
-                student.Password = Password;
-                student.School = School;
-                student.Class = Class;
-                student.Description = Description;
-                student.ParentName = ParentName;
-                student.Phone = Phone;
-                student.Email = Email;
-                student.ParentDateOfBirth = ParentDateOfBirth;
-                student.City = City;
-                student.District = District;
-                student.Address = Address;
-                student.Relationship = Relationship;
-                student.Job = Job;
-                student.Facebook = Facebook;
-                student.Hopeful = Hopeful;
-                student.Known = Known;
-                student.IdMKT = IdMKT;
+            string status = "", message = "";
 
-                // Xử lý upload file ảnh
-                if (Image != null && Image.ContentLength > 0)
+            if (ModelState.IsValid) // Kiểm tra tính hợp lệ của dữ liệu
+            {
+                var student = db.Students.Find(Id);
+                if (student != null)
                 {
-                    string fileName = Path.GetFileNameWithoutExtension(Image.FileName);
-                    string extension = Path.GetExtension(Image.FileName);
-                    fileName = $"{fileName}_{DateTime.Now:yyyyMMddHHmmssfff}{extension}";
-                    string path = Path.Combine(Server.MapPath("~/Uploads/Images"), fileName);
-                    Image.SaveAs(path);
-                    student.Image = "/Uploads/Images/" + fileName;
+                    try
+                    {
+                        // Cập nhật thông tin học viên
+                        student.DateOfBirth = DateOfBirth;
+                        student.Code = Code;
+                        student.Name = Name;
+                        student.Sex = Sex;
+                        student.Username = Username;
+                        student.Password = Password;
+                        student.School = School;
+                        student.Class = Class;
+                        student.Description = Description;
+                        student.ParentName = ParentName;
+                        student.Phone = Phone;
+                        student.Email = Email;
+                        student.ParentDateOfBirth = ParentDateOfBirth;
+                        student.City = City;
+                        student.District = District;
+                        student.Address = Address;
+                        student.Relationship = Relationship;
+                        student.Job = Job;
+                        student.Facebook = Facebook;
+                        student.Hopeful = Hopeful;
+                        student.Known = Known;
+                        student.IdMKT = IdMKT;
+
+                        // Xử lý upload file ảnh
+                        if (Image != null && Image.ContentLength > 0)
+                        {
+                            string fileName = Path.GetFileNameWithoutExtension(Image.FileName);
+                            string extension = Path.GetExtension(Image.FileName);
+                            fileName = $"{fileName}_{DateTime.Now:yyyyMMddHHmmssfff}{extension}";
+                            string path = Path.Combine(Server.MapPath("~/Uploads/Images"), fileName);
+
+                            try
+                            {
+                                Image.SaveAs(path);
+                                student.Image = "/Uploads/Images/" + fileName;
+                            }
+                            catch (Exception ex)
+                            {
+                                status = "error";
+                                message = "Không thể lưu ảnh: " + ex.Message;
+                                return Json(new { status, message }, JsonRequestBehavior.AllowGet);
+                            }
+                        }
+
+                        db.Entry(student).State = EntityState.Modified;
+                        db.SaveChanges();
+
+                        status = "ok";
+                        message = "Cập nhật thành công!";
+                    }
+                    catch (DbEntityValidationException dbEx) // Bắt lỗi từ Entity Framework
+                    {
+                        var errors = dbEx.EntityValidationErrors
+                                        .SelectMany(e => e.ValidationErrors)
+                                        .Select(e => e.PropertyName + ": " + e.ErrorMessage)
+                                        .ToList();
+                        status = "error";
+                        message = "Lỗi khi cập nhật: " + string.Join("; ", errors);
+                    }
+                    catch (Exception ex)
+                    {
+                        status = "error";
+                        message = "Đã xảy ra lỗi: " + ex.Message;
+                    }
                 }
-                status = "ok";
-                db.Entry(student).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                else
+                {
+                    status = "error";
+                    message = "Không tìm thấy học viên này!";
+                }
             }
             else
             {
-                status = "Error";
-                message = "Không tìm thấy học viên này!";
+                status = "error";
+                message = "Dữ liệu không hợp lệ!";
             }
-            var item = new { status, message };
-            return Json(item, JsonRequestBehavior.AllowGet);
+
+            return Json(new { status, message }, JsonRequestBehavior.AllowGet);
         }
+
         [HttpPost]
         public ActionResult Delete_Students(int id)
         {

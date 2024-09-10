@@ -2,7 +2,7 @@
     ViewBag.Controller = "Học viên";
     ViewBag.Title = "Danh sách sinh nhật";
     Layout = "~/Views/Shared/_Layout.cshtml";
-}   
+}
 <div class="row">
     <div class="col col-md-4 col-sm-12">
         <div class="input-group mb-3">
@@ -28,18 +28,19 @@
     </div>
     <div class="col col-md-8 col-sm-12 text-end">
         <a href="javascript:Print_Order()" class="btn btn-sm btn-outline-dark"><i class="ti ti-printer"></i> In danh sách</a>
-    </div>    
+    </div>
 </div>
-<div class="row">
-    <div class="col-lg-12 d-flex align-items-stretch">
-        <div class="card w-100 shadow">
-            <div class="card-body p-4">
-                <div class="mb-4">
-                    <h5 class="text-success ms-5 fw-semibold"><i class="ti ti-cake"></i> Danh sách sinh nhật trong tháng <span id="thangduocchon"></span></h5>
-                </div>
-                <ul class="timeline-widget position-relative ms-5 pb-5 text-center m-auto" id="showlist">
-                </ul>
+<div class="row gx-xl-8 gx-xxl-11">
+    <div class="col-xl-5 p-xxl-7">
+        <div class="ms-xxl-3 d-none d-xl-block position-sticky" style="top: 30%"><img class="d-dark-none img-fluid" src="https://prium.github.io/phoenix/v1.19.0/assets/img/spot-illustrations/timeline.png" alt=""><img class="d-light-none img-fluid" src="../assets/img/spot-illustrations/timeline-dark.png" alt=""></div>
+    </div>
+    <div class="col-xl-7 scrollbar">
+        <div>
+            <div class="mb-4">
+                <h5 class="text-success ms-5 fw-semibold"><i class="ti ti-cake"></i> Danh sách sinh nhật trong tháng <span id="thangduocchon"></span></h5>
             </div>
+            <ul class="timeline-widget position-relative ms-5 pb-5 text-center m-auto" id="showlist">
+            </ul>
         </div>
     </div>
 </div>

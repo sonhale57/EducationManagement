@@ -142,7 +142,7 @@
                                         <div class="col-lg-12">
                                             @{
                                                 var relationship = new List<SelectListItem>
-                                                                                                {
+                                                                                                                                                                                                            {
                                                                 new SelectListItem { Text = "--", Value = "" },
                                                                 new SelectListItem { Text = "Cha mẹ", Value = "Cha mẹ" },
                                                                 new SelectListItem { Text = "Ông bà", Value = "Ông bà" },
@@ -179,7 +179,7 @@
                                             <label class="form-control-label ms-2">Phụ huynh biết qua</label>
                                             @{
                                                 var bietqua = new List<SelectListItem>
-                                                                                                {
+                                                                                                                                                                                                            {
                                                                 new SelectListItem { Text = "--", Value = "" },
                                                                 new SelectListItem { Text = "Bạn bè", Value = "Bạn bè" },
                                                                 new SelectListItem { Text = "Website", Value = "Website" },
@@ -198,6 +198,34 @@
                                             @Html.DropDownList("IdMKT", null, htmlAttributes: new { @class = "form-control" })
                                         </div>
                                     </div>
+                                    <div class="form-group mt-2">
+                                        <label class="col-md-12" for="mongmuon">Phụ huynh mong muốn</label>
+                                        <label class="radio col-md-4 mt-1">
+                                            <input value="Phát triển trí não" name="mongmuon" id="mongmuon" type="checkbox"> Phát triển trí não
+                                        </label>
+                                        <label class="radio col-md-4 mt-1">
+                                            <input value="Phát triển trí nhớ" name="mongmuon" id="mongmuon" type="checkbox"> Phát triển trí nhớ
+                                        </label>
+                                        <label class="radio col-md-4 mt-1">
+                                            <input value="Tăng sự tập trung" name="mongmuon" id="mongmuon" type="checkbox"> Tăng sự tập trung
+                                        </label>
+                                        <label class="radio col-md-4 mt-1">
+                                            <input value="Nâng cao kết quả học tập" name="mongmuon" id="mongmuon" type="checkbox"> Nâng cao kết quả học tập
+                                        </label>
+                                        <label class="radio col-md-4 mt-1">
+                                            <input value="Làm toán siêu tốc" name="mongmuon" id="mongmuon" type="checkbox"> Làm toán siêu tốc
+                                        </label>
+                                        <label class="radio col-md-4 mt-1">
+                                            <input value="Tăng sự tự tin" name="mongmuon" id="mongmuon" type="checkbox"> Tăng sự tự tin
+                                        </label>
+                                        <label class="radio col-md-4 mt-1">
+                                            <input value="Phát triển tư duy" name="mongmuon" id="mongmuon" type="checkbox"> Phát triển tư duy
+                                        </label>
+                                        <label class="radio col-md-4 mt-1">
+                                            <input value="Khác" name="mongmuon" id="mongmuon" type="checkbox"> Khác
+                                        </label>
+                                    </div>
+                                    <input type="hidden" name="Hopeful" id="Hopeful" value="" />
                                     <input type="hidden" name="DateCreate" id="DateCreate" value="@Model.DateCreate.ToShortDateString()" />
                                     @Html.HiddenFor(model => model.IdBranch)
                                     @Html.HiddenFor(model => model.Status)
@@ -594,6 +622,15 @@
 </div>
 
 <script>
+    $(document).ready(function () {
+        var hopefulValues = "@Model.Hopeful".split(', '); // Chia nhỏ các giá trị đã lưu
+        // Tick các checkbox tương ứng với giá trị đã lưu
+        $.each(hopefulValues, function (index, value) {
+            // Sử dụng hàm trên để giải mã
+            $("input[name='mongmuon'][value='" + value + "']").prop('checked', true);
+            console.log(value);
+        });
+    });
     var isProcessing = false;
     Loadlist_tuvan();
     function Loadlist_tuvan() {
@@ -724,6 +761,11 @@
         if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
         isProcessing = true; // Đặt cờ đang xử lý
         $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        var mongmuons = [];
+        $.each($("input[name='mongmuon']:checked"), function () {
+            mongmuons.push($(this).val());
+        });
+        $("#Hopeful").val(mongmuons.join(', '));
         var formData = new FormData(document.getElementById("form_editStudent"));
         $.ajax({
             url: '@Url.Action("Submit_editStudent", "Students")',

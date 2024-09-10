@@ -108,6 +108,11 @@ namespace SuperbrainManagement.Controllers
 
             return View(pagedData);
         }
+        public ActionResult Schedules()
+        {
+            ViewBag.IdBranch = new SelectList(db.Branches.Where(x => x.Enable == true), "Name", "Id");
+            return View();
+        }
         public ActionResult ResultCourse()
         {
             int idbranch = Convert.ToInt32(CheckUsers.idBranch());

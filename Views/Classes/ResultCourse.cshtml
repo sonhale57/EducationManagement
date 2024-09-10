@@ -262,6 +262,26 @@
     }
 
     function Add_suggest(type) {
+        if (type ==100) {
+            $("#span_mota").html("Nhập gợi ý cho: Kỹ năng tập trung - Đạt Được.");
+        } else if (type == 101) {
+            $("#span_mota").html("Nhập gợi ý cho: Kỹ năng tập trung - Cải thiện.");
+        } else if (type == 102) {
+            $("#span_mota").html("Nhập gợi ý cho: Kỹ năng tự tin - Đạt Được.");
+        } else if (type == 103) {
+            $("#span_mota").html("Nhập gợi ý cho: Kỹ năng tự tin - Cải thiện.");
+        } else if (type == 104) {
+            $("#span_mota").html("Nhập gợi ý cho: Kỹ năng ghi nhớ - Đạt Được.");
+        } else if (type == 105) {
+            $("#span_mota").html("Nhập gợi ý cho: Kỹ năng ghi nhớ - Cải thiện.");
+        } else if (type == 106) {
+            $("#span_mota").html("Nhập gợi ý cho: Kỹ năng phản xạ - Đạt Được.");
+        } else if (type == 107) {
+            $("#span_mota").html("Nhập gợi ý cho: Kỹ năng phản xạ - Cải thiện.");
+        }
+        else {
+            $("#span_mota").html("Nhập gợi ý");
+        }
         $.ajax({
             url: '@Url.Action("GetDataSuggest", "DataSuggests")',
             type: "GET",
