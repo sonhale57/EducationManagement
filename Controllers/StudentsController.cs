@@ -636,7 +636,8 @@ namespace SuperbrainManagement.Controllers
                     {
                         int IdRegistration = Convert.ToInt32(reader["IdRegistration"]);
                         int IdCourse = Convert.ToInt32(reader["IdCourse"]);
-                        var studentJoinClass = db.StudentJoinClasses.SingleOrDefault(x => x.IdStudent == idStudent && x.IdRegistration == IdRegistration && x.IdCourse == IdCourse);
+                        var studentJoinClass = db.StudentJoinClasses.FirstOrDefault(x => x.IdStudent == idStudent && x.IdRegistration == IdRegistration && x.IdCourse == IdCourse);
+
                         var fromdateJoinClass = studentJoinClass?.Fromdate;
                         var todateJoinClass = studentJoinClass?.Todate;
                         string btn = "";
@@ -683,7 +684,7 @@ namespace SuperbrainManagement.Controllers
                                     }
                                     else
                                     {
-                                        if (!statusExtend && todateJoinClass.Value.AddDays(16) > DateTime.Now)
+                                        if (!statusExtend && todateJoinClass.Value.AddDays(14) > DateTime.Now)
                                         {
                                             strStatusJoinClass = "<span class='badge bg-danger rounded-3'>Đã kết thúc</span>";
                                             btn += "<li><a class=\"dropdown-item\" href='javascript:Giahan_modal(" + reader["IdRegistration"] + "," + reader["IdCourse"] + ")'><i class=\"ti ti-plus\"></i> Gia hạn khóa học</a></li>";
@@ -2136,6 +2137,11 @@ namespace SuperbrainManagement.Controllers
         public ActionResult GetSchedule(int idClass, string fromDate, string toDate,int? idCourse)
         {
             int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            // Lấy lịch nghỉ của cơ sở hiện tại
+            var vacationSchedules = db.VacationSchedules
+                                      .Where(vs => vs.IdBranch == idbranch)
+                                      .ToList();
+
             var courseBranch = db.CourseBranches.Where(x=>x.IdCourse==idCourse&&x.IdBranch==idbranch).FirstOrDefault();
             var schedulesbyClass = db.Schedules
                 .Where(x => x.IdClass == idClass && (bool)x.Active).Include(x => x.Employee).ToList()
@@ -2158,6 +2164,15 @@ namespace SuperbrainManagement.Controllers
 
             for (DateTime date = fromDateTime; date <= toDateTime; date = date.AddDays(1))
             {
+                // Kiểm tra ngày hiện tại có trùng lịch nghỉ không
+                bool isVacation = vacationSchedules.Any(vs => vs.Fromdate <= date && vs.Todate >= date);
+
+                if (isVacation)
+                {
+                    // Nếu ngày này trùng lịch nghỉ, bỏ qua và tiếp tục
+                    continue;
+                }
+
                 var DayOfWeekVNCompared = scheduleHelper.ConvertEnglishDayToVietnamese(date.DayOfWeek.ToString());
                 var scheduleMatched = schedulesbyClass.FirstOrDefault(x => x.DayOfWeek == DayOfWeekVNCompared);
 

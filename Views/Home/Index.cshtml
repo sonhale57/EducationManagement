@@ -1,5 +1,6 @@
 ﻿@{
     ViewBag.Title = "Trang chủ";
+    ViewBag.Title = "Trang chủ";
 }
 <div class="row">
     <div class="col-md-3 stretch-card grid-margin">
@@ -72,12 +73,13 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-lg-7 d-flex align-items-strech card shadow">
-            <div class="card-header p-1 ps-3 pt-3 bg-success">
+    <div class="col-lg-8 stretch-card grid-margin  d-flex align-items-strech">
+        <div class="card">
+            <div class="card-header p-2 ps-3 pt-3 bg-success">
                 <div class="d-sm-flex d-block align-items-center justify-content-between align-content-center">
                     <h5 class="text-white fw-bolder"><i class="ti ti-bell-ringing"></i> Thông báo</h5>
                     <div class="align-content-center pb-2 pe-3">
-                        <a href="/feeds" class="btn btn-sm btn-light"><i class="ti ti-eye"></i> Xem tất cả</a>
+                        <a href="/feeds" class="text-white"><i class="ti ti-eye"></i> Xem tất cả</a>
                     </div>
                 </div>
             </div>
@@ -86,16 +88,93 @@
                 <div class="row" id="showlist_thongbao">
                 </div>
             </div>
+
+        </div>
     </div>
-    <div class="col-lg-5 card shadow">
-        <div class="card-header p-1 ps-3 pt-3 bg-success">
-            <div class="d-sm-flex d-block align-items-center justify-content-between align-content-center">
-                <h5 class="text-white fw-bolder"><i class="ti ti-bell-ringing"></i> Thông báo vật tư</h5>
+    <div class="col-lg-4  stretch-card grid-margin">
+        <div class="card">
+            <div class="card-header p-2 ps-3 pt-3 bg-success">
+                <div class="d-sm-flex d-block align-items-center justify-content-between align-content-center">
+                    <h5 class="text-white fw-bolder"><i class="ti ti-bell-ringing"></i> Thông báo vật tư</h5>
+                </div>
+            </div>
+            <div class="card-body simplebar-scrollbar">
+                <div id="loading"></div>
+                <div class="d-block" id="showlist_vattu">
+                </div>
             </div>
         </div>
-        <div class="card-body">
-            <div id="loading"></div>
-            <div class="d-block" id="showlist_vattu">
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title d-flex align-items-center gap-2 mb-4">
+                    Traffic Overview
+                    <span>
+                        <iconify-icon icon="solar:question-circle-bold" class="fs-7 d-flex text-muted" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" data-bs-title="Traffic Overview"></iconify-icon>
+                    </span>
+                </h5>
+                <div id="traffic-overview" style="min-height: 335px;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title d-flex align-items-center gap-2 mb-5 pb-3">
+                    Sessions by
+                    device<span><iconify-icon icon="solar:question-circle-bold" class="fs-7 d-flex text-muted" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" data-bs-title="Locations"></iconify-icon></span>
+                </h5>
+                <div class="row">
+                    <div class="col-4">
+                        <span class="fs-11 mt-2 d-block text-nowrap">Computers</span>
+                        <h4 class="mb-0 mt-1">87%</h4>
+                    </div>
+                    <div class="col-4">
+                        <span class="fs-11 mt-2 d-block text-nowrap">Smartphone</span>
+                        <h4 class="mb-0 mt-1">9.2%</h4>
+                    </div>
+                    <div class="col-4">
+                        <span class="fs-11 mt-2 d-block text-nowrap">Tablets</span>
+                        <h4 class="mb-0 mt-1">3.1%</h4>
+                    </div>
+                </div>
+
+                <div class="vstack gap-4 mt-7 pt-2">
+                    <div>
+                        <div class="hstack justify-content-between">
+                            <span class="fs-3 fw-medium">Computers</span>
+                            <h6 class="fs-3 fw-medium text-dark lh-base mb-0">87%</h6>
+                        </div>
+                        <div class="progress mt-6" role="progressbar" aria-label="Warning example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar bg-primary" style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="hstack justify-content-between">
+                            <span class="fs-3 fw-medium">Smartphones</span>
+                            <h6 class="fs-3 fw-medium text-dark lh-base mb-0">9.2%</h6>
+                        </div>
+                        <div class="progress mt-6" role="progressbar" aria-label="Warning example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar bg-secondary" style="width: 50%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="hstack justify-content-between">
+                            <span class="fs-3 fw-medium">Tablets</span>
+                            <h6 class="fs-3 fw-medium text-dark lh-base mb-0">3.1%</h6>
+                        </div>
+                        <div class="progress mt-6" role="progressbar" aria-label="Warning example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar bg-success" style="width: 35%"></div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>

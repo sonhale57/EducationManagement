@@ -28,8 +28,6 @@ namespace SuperbrainManagement.Controllers
             }
             else
             {
-
-
                 var branches = db.Branches.ToList();
                 int idbranch = int.Parse(CheckUsers.idBranch());
                 if (!CheckUsers.CheckHQ())

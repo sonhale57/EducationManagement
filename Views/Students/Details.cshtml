@@ -356,14 +356,14 @@
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Ngày bắt đầu</label>
                     <div class="col-lg-9">
-                        <input type="date" name="fromdate" value="" id="fromdate" class="form-control" onchange="javascript: Onchange_todate()" />
+                        <input type="text" name="ngaybatdau" value="" id="ngaybatdau" class="form-control" onchange="javascript: Onchange_todate()" />
                     </div>
                 </div>
 
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Ngày kết thúc</label>
                     <div class="col-lg-9">
-                        <input type="date" name="todate" value="" id="todate" class="form-control" disabled />
+                        <input type="text" name="ngayketthuc" value="" id="ngayketthuc" class="form-control disabled" />
                     </div>
                 </div><br />
                 <b>Thời khóa biểu</b>
@@ -698,7 +698,6 @@
             }
         });
     }
-
     function Submit_tuvan() {
         if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
         isProcessing = true; // Đặt cờ đang xử lý
@@ -791,31 +790,14 @@
     }
 
     function Loadlist_xetlop(idregistration, idcourse) {
-        var today = new Date();
-
-        // Định dạng ngày hôm nay thành chuỗi "yyyy-MM-dd" (định dạng của ô nhập ngày)
-        var formattedToday = today.toISOString().split('T')[0];
-        // Đặt giá trị mặc định cho ô nhập ngày bắt đầu là ngày hôm nay
-        document.getElementById('fromdate').value = formattedToday;
-
-        var fromDateValue = document.getElementById('fromdate').value;
-        var fromDate = new Date(fromDateValue);
-
-        fromDate.setMonth(fromDate.getMonth() + 3);
-
-        // Chuyển đổi ngày kết thúc thành chuỗi theo định dạng "yyyy-MM-dd" (để phù hợp với ô nhập ngày)
-        var toDateValue = fromDate.toISOString().slice(0, 10);
-
-        // Gán giá trị của ô nhập ngày kết thúc là ngày sau khi cộng thêm 3 tháng
-        document.getElementById('todate').value = toDateValue;
-
         $.ajax({
             url: '@Url.Action("Load_xetlop", "Students")',
             type: "GET",
             data: {
                 idCourse: idcourse,
                 idRegistration: idregistration,
-                idStudent: $("#idStudent").val()
+                idStudent: $("#idStudent").val(),
+                fromdate: $("ngaybatdau").val()
             },
             success: function (data) {
                 $('#IdRegistration').val(idregistration);
@@ -833,19 +815,17 @@
             }
         });
     }
-    function Onchange_todate() {
-        var fromDateValue = document.getElementById('fromdate').value;
-        var fromDate = new Date(fromDateValue);
 
-        // Cộng thêm 3 tháng vào ngày bắt đầu
-        fromDate.setMonth(fromDate.getMonth() + 3);
+    $(function () {
+        //$("#ngaybatdau").datepicker({ dateFormat: "dd/mm/yy" });
+        $("#ngayketthuc").datepicker({ dateFormat: "dd/mm/yy" });
+        $("#ngaybatdau").datepicker({ dateFormat: "dd/mm/yy", minDate: 0 });
+        $("#ngaybatdau").attr("readonly", "readonly");
+        if ($("#ngaybatdau").val() == "") {
+            $("#ngaybatdau").datepicker("setDate", new Date());
+        }
+    });
 
-        // Chuyển đổi ngày kết thúc thành chuỗi theo định dạng "yyyy-MM-dd" (để phù hợp với ô nhập ngày)
-        var toDateValue = fromDate.toISOString().slice(0, 10);
-
-        // Gán giá trị của ô nhập ngày kết thúc là ngày sau khi cộng thêm 3 tháng
-        document.getElementById('todate').value = toDateValue;
-    }
     function Submit_xetlop() {
         if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
         isProcessing = true; // Đặt cờ đang xử lý
@@ -857,8 +837,8 @@
                 idCourse: $("#IdCourse").val(),
                 idRegistration: $("#IdRegistration").val(),
                 idClass: $("#IdClass").val(),
-                fromdate: $("#fromdate").val(),
-                todate: $("#todate").val(),
+                fromdate: $("#ngaybatdau").val(),
+                todate: $("#ngayketthuc").val(),
                 idStudent: $("#idStudent").val()
             },
             success: function (data) {
@@ -918,7 +898,7 @@
 
                     $.each(data.timeTableData, function (index, value) {
                         $('#timetable_datarow')
-                            .append('<tr><td>Buổi ' + stt++ + '</td><td>' + value.Date + '</td><td>' + value.DayOfWeek + '</td><td>' + value.TimeSlot + '</td><td>' + value.HourQuantity + '</td></tr>');
+                            .append('<tr style="height:30px;"><td>Buổi ' + stt++ + '</td><td>' + value.Date + '</td><td>' + value.DayOfWeek + '</td><td>' + value.TimeSlot + '</td><td>' + value.HourQuantity + '</td></tr>');
                     });
                 }
             },

@@ -1,4 +1,5 @@
-﻿using SuperbrainManagement.Models;
+﻿using SuperbrainManagement.Controllers;
+using SuperbrainManagement.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,10 @@ namespace SuperbrainManagement.Helpers
 
         public List<Schedule> GetScheduleDefault(int idClass)
         {
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            var cla = db.Classes.FirstOrDefault(c => c.Id == idClass);
+            var room = db.Rooms.FirstOrDefault(r => r.IdBranch == idbranch);
+            var emp = db.Employees.FirstOrDefault(e => e.IdBranch == idbranch && e.Enable == true && e.IsOfficial == true);
             List<Schedule> schedules = new List<Schedule>
             {
                 new Schedule()
@@ -21,8 +26,8 @@ namespace SuperbrainManagement.Helpers
                     Active = false,
                     FromHour = DateTime.Now,
                     ToHour = DateTime.Now,
-                    IdEmployee = 1,
-                    IdRoom = 6
+                    IdEmployee = (emp==null?0:emp.Id),
+                    IdRoom =(room==null?0:room.Id),
                 },
                 new Schedule()
                 {
@@ -31,8 +36,8 @@ namespace SuperbrainManagement.Helpers
                     Active = false,
                     FromHour = DateTime.Now,
                     ToHour = DateTime.Now,
-                    IdEmployee = 1,
-                    IdRoom = 6
+                    IdEmployee = (emp==null?0:emp.Id),
+                    IdRoom =(room==null?0:room.Id),
                 },
                 new Schedule()
                 {
@@ -41,8 +46,8 @@ namespace SuperbrainManagement.Helpers
                     Active = false,
                     FromHour = DateTime.Now,
                     ToHour = DateTime.Now,
-                    IdEmployee = 1,
-                    IdRoom = 6
+                    IdEmployee = (emp==null?0:emp.Id),
+                    IdRoom =(room==null?0:room.Id),
                 },
                 new Schedule()
                 {
@@ -51,8 +56,8 @@ namespace SuperbrainManagement.Helpers
                     Active = false,
                     FromHour = DateTime.Now,
                     ToHour = DateTime.Now,
-                    IdEmployee = 1,
-                    IdRoom = 6
+                    IdEmployee = (emp==null?0:emp.Id),
+                    IdRoom =(room==null?0:room.Id),
                 },
                 new Schedule()
                 {
@@ -61,8 +66,8 @@ namespace SuperbrainManagement.Helpers
                     Active = false,
                     FromHour = DateTime.Now,
                     ToHour = DateTime.Now,
-                    IdEmployee = 1,
-                    IdRoom = 6
+                    IdEmployee = (emp==null?0:emp.Id),
+                    IdRoom =(room==null?0:room.Id),
                 },
                 new Schedule()
                 {
@@ -71,8 +76,8 @@ namespace SuperbrainManagement.Helpers
                     Active = false,
                     FromHour = DateTime.Now,
                     ToHour = DateTime.Now,
-                    IdEmployee = 1,
-                    IdRoom = 6
+                    IdEmployee = (emp==null?0:emp.Id),
+                    IdRoom =(room==null?0:room.Id),
                 },
                 new Schedule()
                 {
@@ -81,8 +86,8 @@ namespace SuperbrainManagement.Helpers
                     Active = false,
                     FromHour = DateTime.Now,
                     ToHour = DateTime.Now,
-                    IdEmployee = 1,
-                    IdRoom = 6
+                    IdEmployee = (emp==null?0:emp.Id),
+                    IdRoom =(room==null?0:room.Id),
                 },
             };
             return schedules;
@@ -127,16 +132,15 @@ namespace SuperbrainManagement.Helpers
         public string ConvertEnglishDayToVietnamese(string englishDay)
         {
             Dictionary<string, string> englishToVietnameseDays = new Dictionary<string, string>()
-        {
-           { "Monday", "Thứ 2" },
-            { "Tuesday", "Thứ 3" },
-            { "Wednesday", "Thứ 4" },
-            { "Thursday", "Thứ 5" },
-            { "Friday", "Thứ 6" },
-            { "Saturday", "Thứ 7" },
-            { "Sunday", "Chủ nhật" }
-        };
-
+            {
+               { "Monday", "Thứ 2" },
+                { "Tuesday", "Thứ 3" },
+                { "Wednesday", "Thứ 4" },
+                { "Thursday", "Thứ 5" },
+                { "Friday", "Thứ 6" },
+                { "Saturday", "Thứ 7" },
+                { "Sunday", "Chủ nhật" }
+            };
             if (englishToVietnameseDays.ContainsKey(englishDay))
             {
                 return englishToVietnameseDays[englishDay];

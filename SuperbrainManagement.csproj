@@ -435,6 +435,7 @@
     <Content Include="assets\css\select2.css" />
     <Content Include="assets\css\select2.min.css" />
     <Content Include="assets\css\styles.css" />
+    <Content Include="assets\css\ui-custom.css" />
     <Content Include="assets\images\backgrounds\rocket.png" />
     <Content Include="assets\images\loading.gif" />
     <Content Include="assets\images\logos\icon web.png" />
