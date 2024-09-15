@@ -23,7 +23,7 @@
             </div>
 
             <div class="col-md-12 mt-3">
-                @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-12" })
+                <label>Tên cơ sở</label>
                 <div class="col-md-12">
                     @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
                     @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
@@ -31,7 +31,7 @@
             </div>
 
             <div class="col-md-12 mt-3">
-                @Html.LabelFor(model => model.CompanyName, htmlAttributes: new { @class = "control-label col-md-12" })
+                <label>Tên công ty</label>
                 <div class="col-md-12">
                     @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
                     @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
@@ -47,7 +47,7 @@
             </div>
 
             <div class="col-md-6 mt-3">
-                <label>Địa chỉ</label>
+                <label>Địa chỉ Email</label>
                 <div class="col-md-12">
                     @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control" } })
                     @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
@@ -70,7 +70,8 @@
             <div class="col-md-12 mt-2">
                 <label>Ngày khai trương</label>
                 <div class="col-md-12">
-                    @Html.EditorFor(model => model.GrandOpeningDay, new { htmlAttributes = new { @class = "form-control",@type="date" } })
+                    <input type="text" id="ngaykhaitruong" name="ngaykhaitruong" value="" placeholder="" class="form-control" onchange="Updatedate()" />
+                    @Html.HiddenFor(model => model.GrandOpeningDay, new { htmlAttributes = new { @class = "form-control", @type = "text" } })
                     @Html.ValidationMessageFor(model => model.GrandOpeningDay, "", new { @class = "text-danger" })
                 </div>
             </div>
@@ -86,7 +87,8 @@
             <div class="col-md-6 mt-2">
                 <label>Ngày hết hạn hợp đồng</label>
                 <div class="col-md-12">
-                    @Html.EditorFor(model => model.ContractExpire, new { htmlAttributes = new { @class = "form-control",@type="date" } })
+                    <input type="text" id="ngayhethanhopdong" name="ngayhethanhopdong" value="" placeholder="" class="form-control" onchange="Updatedate()" />
+                    @Html.HiddenFor(model => model.ContractExpire, new { htmlAttributes = new { @class = "form-control", @type = "text" } })
                     @Html.ValidationMessageFor(model => model.ContractExpire, "", new { @class = "text-danger" })
                 </div>
             </div>
@@ -140,3 +142,15 @@
 
     </div>
 }
+<script>
+    function Updatedate() {
+        var grandopen = $("#ngaykhaitruong").val().split("/").reverse().join("-");
+        var expire = $("#ngayhethanhopdong").val().split("/").reverse().join("-");
+        $("#GrandOpeningDay").val(grandopen);
+        $("#ContractExpire").val(expire);
+    }
+    $(function () {
+        $("#ngaykhaitruong").datepicker({ dateFormat: "dd/mm/yy" });
+        $("#ngayhethanhopdong").datepicker({ dateFormat: "dd/mm/yy" });
+    });
+</script>

@@ -274,6 +274,7 @@
     <Compile Include="Controllers\CoursesController.cs" />
     <Compile Include="Controllers\DataSuggestsController.cs" />
     <Compile Include="Controllers\EmployeesController.cs" />
+    <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\FeedsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\Language.cs" />
@@ -314,6 +315,7 @@
     <Compile Include="Helpers\ScheduleHelper.cs" />
     <Compile Include="Helpers\StudentHelper.cs" />
     <Compile Include="Helpers\VNPayHelper.cs" />
+    <Compile Include="Helpers\VnPayLibrary.cs" />
     <Compile Include="Models\AchievementEmployee.cs" />
     <Compile Include="Models\AggregatedCounter.cs" />
     <Compile Include="Models\ApproveLeave.cs" />
@@ -437,6 +439,10 @@
     <Content Include="assets\css\styles.css" />
     <Content Include="assets\css\ui-custom.css" />
     <Content Include="assets\images\backgrounds\rocket.png" />
+    <Content Include="assets\images\ui\Datepickers-footer.jpg" />
+    <Content Include="assets\images\eArrow.png" />
+    <Content Include="assets\images\handle.png" />
+    <Content Include="assets\images\inner-shadow.png" />
     <Content Include="assets\images\loading.gif" />
     <Content Include="assets\images\logos\icon web.png" />
     <Content Include="assets\images\logos\logo.png" />
@@ -446,6 +452,11 @@
     <Content Include="assets\images\products\s5.jpg" />
     <Content Include="assets\images\products\s7.jpg" />
     <Content Include="assets\images\profile\user-1.jpg" />
+    <Content Include="assets\images\sliderBg.png" />
+    <Content Include="assets\images\sliderBgVert.png" />
+    <Content Include="assets\images\sliderOverlay.png" />
+    <Content Include="assets\images\sliderOverlayVert.png" />
+    <Content Include="assets\images\wArrow.png" />
     <Content Include="assets\js\app.min.js" />
     <Content Include="assets\js\choices.min.js" />
     <Content Include="assets\js\dashboard.js" />
@@ -958,6 +969,13 @@
     <Content Include="Views\DataSuggests\Index.cshtml" />
     <Content Include="Views\Settings\Datasuggest.cshtml" />
     <Content Include="Views\Classes\Schedules.cshtml" />
+    <Content Include="Views\Students\PrintSchedule.cshtml" />
+    <Content Include="Views\Error\E404.cshtml" />
+    <Content Include="Views\TrainingCourses\Statistics.cshtml" />
+    <Content Include="Views\TrainingCourses\PaymentStatistics.cshtml" />
+    <Content Include="Views\Branches\PaymentList.cshtml" />
+    <Content Include="Views\Payment\PaymentReturn.cshtml" />
+    <Content Include="Views\Payment\TestPage.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

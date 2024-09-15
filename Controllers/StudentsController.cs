@@ -588,7 +588,7 @@ namespace SuperbrainManagement.Controllers
                         + "<td>" + reader["NameClass"].ToString() + "</td>"
                         + "<td class='text-center'>" + DateTime.Parse(reader["Fromdate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
                         + "<td class='text-center'>" + DateTime.Parse(reader["Todate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
-                        + "<td class='text-center'>0/" + reader["Sessions"].ToString() + "</td>"
+                        + "<td class='text-center'>0/" + reader["Sessions"].ToString() + " <a target='_blank' href='/students/printschedule?IdRegistration=" + reader["IdRegistration"] +"&IdCourse=" + reader["IdCourse"] +"'><i class='ti ti-printer text-success'></i></a></td>"
                         + "<td class='text-center'>" + DateTime.Parse(reader["DateCreate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
                         + "<td class='text-center'>"+StatusStudent+"</td>"
                         + "</tr>";
@@ -811,8 +811,8 @@ namespace SuperbrainManagement.Controllers
                 {
                     str,
                     strCourse,
-                    fromdate = fromdate.ToString("MM/dd/yyyy"),
-                    todate = todate.ToString("MM/dd/yyyy"),
+                    fromdate = fromdate.ToString("dd/MM/yyyy"),
+                    todate = todate.ToString("dd/MM/yyyy"),
                     registrionCode = registrion.First().Registration.Code,
                     StatusStudent
                 };
@@ -877,13 +877,13 @@ namespace SuperbrainManagement.Controllers
                 // Lưu thay đổi
                 db.SaveChanges();
 
-                var item = new { status = "ok", message = "Đã gia hạn thành công!" };
+                var item = new { status = "ok", message = "Đã kích hoạt lại khóa học thành công!" };
                 return Json(item, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
                 // Xử lý lỗi và trả về thông báo lỗi
-                return Json(new { status = "error", message = "Lỗi khi gia hạn: " + ex.Message }, JsonRequestBehavior.AllowGet);
+                return Json(new { status = "error", message = "Lỗi khi kích hoạt lại: " + ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
         public ActionResult Load_deactive(int idRegistration, int idCourse)
@@ -892,7 +892,9 @@ namespace SuperbrainManagement.Controllers
             string str = "", strCourse = "";
             bool StatusStudent = true;
             var registrion = db.RegistrationCourses.Where(x => x.IdRegistration == idRegistration && x.IdCourse == idCourse);
-            var joinClass = db.StudentJoinClasses.SingleOrDefault(x => x.IdRegistration == idRegistration && x.IdCourse == idCourse);
+            var joinClass = db.StudentJoinClasses.FirstOrDefault(x => x.IdRegistration == idRegistration && x.IdCourse == idCourse);
+
+           
 
             if (joinClass == null)
             {
@@ -931,14 +933,40 @@ namespace SuperbrainManagement.Controllers
                 int remainingDays = 90 - daysStudied;
                 DateTime newTodate = today.AddDays(remainingDays);
 
+                // Lấy danh sách lịch nghỉ của chi nhánh
+                var vacationSchedules = db.VacationSchedules
+                                          .Where(vs => vs.IdBranch == idbranch && vs.Fromdate <= newTodate && vs.Todate >= fromdate)
+                                          .ToList();
+
+                int extraDays = 0;
+                foreach (var vacation in vacationSchedules)
+                {
+                    DateTime vacationStart = (DateTime)vacation.Fromdate;
+                    DateTime vacationEnd = (DateTime)vacation.Todate;
+
+                    // Tính số ngày nghỉ trong khoảng từ fromdate đến todate
+                    if (vacationStart < fromdate)
+                        vacationStart = fromdate; // Bắt đầu tính từ fromdate nếu ngày nghỉ bắt đầu trước fromdate
+
+                    if (vacationEnd > todate)
+                        vacationEnd = todate; // Dừng tính tại todate nếu ngày nghỉ kéo dài sau todate
+
+                    // Thêm số ngày nghỉ vào extraDays
+                    extraDays += (vacationEnd - vacationStart).Days + 1; // +1 để tính cả ngày cuối cùng
+                }
+
+                // Cộng số ngày nghỉ vào todate
+                newTodate = newTodate.AddDays(extraDays);
+
+
                 // Chuẩn bị dữ liệu trả về
                 var item = new
                 {
                     str,
                     strCourse,
-                    fromdate = fromdate.ToString("MM/dd/yyyy"),
-                    todate = todate.ToString("MM/dd/yyyy"),
-                    newTodate = newTodate.ToString("MM/dd/yyyy"),
+                    fromdate = fromdate.ToString("dd/MM/yyyy"),
+                    todate = todate.ToString("dd/MM/yyyy"),
+                    newTodate = newTodate.ToString("dd/MM/yyyy"),
                     daysStudied = daysStudied,
                     registrionCode = registrion.First().Registration.Code,
                     StatusStudent
@@ -951,10 +979,38 @@ namespace SuperbrainManagement.Controllers
                 return Json(new { error = "Không tìm thấy lớp học." }, JsonRequestBehavior.AllowGet);
             }
         }
-        public ActionResult Load_xetlop(int idRegistration,string idCourse,int idStudent) {
+        public ActionResult Load_xetlop(int idRegistration,string idCourse,int idStudent,DateTime fromdate) {
             string str = "";
             string registrionCode =db.Registrations.Find(idRegistration).Code;
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+            // Bắt đầu với todate là 90 ngày từ fromdate
+            DateTime todate = fromdate.AddDays(90);
+
+            // Lấy danh sách lịch nghỉ của chi nhánh
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            var vacationSchedules = db.VacationSchedules
+                                      .Where(vs => vs.IdBranch == idbranch && vs.Fromdate <= todate && vs.Todate >= fromdate)
+                                      .ToList();
+            int extraDays = 0;
+            foreach (var vacation in vacationSchedules)
+            {
+                DateTime vacationStart = (DateTime)vacation.Fromdate;
+                DateTime vacationEnd = (DateTime)vacation.Todate;
+
+                // Tính số ngày nghỉ trong khoảng từ fromdate đến todate
+                if (vacationStart < fromdate)
+                    vacationStart = fromdate; // Bắt đầu tính từ fromdate nếu ngày nghỉ bắt đầu trước fromdate
+
+                if (vacationEnd > todate)
+                    vacationEnd = todate; // Dừng tính tại todate nếu ngày nghỉ kéo dài sau todate
+
+                // Thêm số ngày nghỉ vào extraDays
+                extraDays += (vacationEnd - vacationStart).Days + 1; // +1 để tính cả ngày cuối cùng
+            }
+
+            // Cộng số ngày nghỉ vào todate
+            todate = todate.AddDays(extraDays);
+
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 string query = "select rec.IdCourse,c.Name,rec.Status from RegistrationCourse rec inner join Registration re on re.id= rec.IdRegistration, Course c where c.id=rec.IdCourse and re.IdStudent = "+idStudent;
@@ -963,21 +1019,13 @@ namespace SuperbrainManagement.Controllers
                 SqlDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    if (reader["IdCourse"].ToString()==idCourse)
-                    {
                         str += "<option value='" + reader["IdCourse"] +"' data-status='" + reader["Status"] +"' selected>" + reader["Name"] +"</option>";
-                    }
-                    else
-                    {
-                        str += "<option value='" + reader["IdCourse"] +"' data-status='" + reader["Status"] +"'>" + reader["Name"] +"</option>";
-                    }
-                    
                 }
                 reader.Close();
             }
             var statusStudent = Check_statusStudent(idStudent);
             var item = new { 
-                str,registrionCode,statusStudent
+                str,registrionCode,statusStudent,todate =todate.ToString("dd/MM/yyyy")
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
@@ -986,7 +1034,7 @@ namespace SuperbrainManagement.Controllers
             string str = "",strCourse="";
             bool StatusStudent = true;
             var registrion = db.RegistrationCourses.Where(x=>x.IdRegistration==idRegistration&&x.IdCourse==idCourse);
-            var joinClass=db.StudentJoinClasses.SingleOrDefault(x=>x.IdRegistration== idRegistration&&x.IdCourse==idCourse);
+            var joinClass=db.StudentJoinClasses.FirstOrDefault(x=>x.IdRegistration== idRegistration&&x.IdCourse==idCourse);
             if (joinClass == null)
             {
                 str += "<option value='0' selected>Chưa có lớp học</option>";
@@ -998,8 +1046,8 @@ namespace SuperbrainManagement.Controllers
             {
                 str,
                 strCourse,
-                fromdate = joinClass.Fromdate.Value.ToString("MM/dd/yyyy"),
-                todate = joinClass.Todate.Value.ToString("MM/dd/yyyy"),
+                fromdate = joinClass.Fromdate.Value.ToString("dd/MM/yyyy"),
+                todate = joinClass.Todate.Value.ToString("dd/MM/yyyy"),
 
                 registrionCode =registrion.First().Registration.Code,
                 StatusStudent
@@ -1935,7 +1983,7 @@ namespace SuperbrainManagement.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Submit_editStudent(int Id, string Code, string Name, DateTime DateOfBirth, string Sex, string Username, string Password, string School, string Class, string Description, string ParentName, string Phone, string Email, DateTime ParentDateOfBirth, string City, string District, string Address, string Relationship, string Job, string Facebook, string Hopeful, string Known, int? IdMKT, HttpPostedFileBase Image)
+        public ActionResult Submit_editStudent(int Id, string Code, string Name, DateTime? Ngaysinh, string Sex, string Username, string Password, string School, string Class, string Description, string ParentName, string Phone, string Email, DateTime? Ngaysinhphuhuynh, string City, string District, string Address, string Relationship, string Job, string Facebook, string Hopeful, string Known, int? IdMKT, HttpPostedFileBase Image)
         {
             string status = "", message = "";
 
@@ -1947,7 +1995,7 @@ namespace SuperbrainManagement.Controllers
                     try
                     {
                         // Cập nhật thông tin học viên
-                        student.DateOfBirth = DateOfBirth;
+                        student.DateOfBirth = Ngaysinh;
                         student.Code = Code;
                         student.Name = Name;
                         student.Sex = Sex;
@@ -1959,7 +2007,7 @@ namespace SuperbrainManagement.Controllers
                         student.ParentName = ParentName;
                         student.Phone = Phone;
                         student.Email = Email;
-                        student.ParentDateOfBirth = ParentDateOfBirth;
+                        student.ParentDateOfBirth = Ngaysinhphuhuynh;
                         student.City = City;
                         student.District = District;
                         student.Address = Address;
@@ -2561,6 +2609,95 @@ namespace SuperbrainManagement.Controllers
                 }
             }
         }
+        public ActionResult PrintSchedule(int? IdRegistration, int? IdCourse)
+        {
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+
+            // Tìm thông tin lớp học và học viên đăng ký
+            var joinClass = db.StudentJoinClasses
+                              .FirstOrDefault(x => x.IdCourse == IdCourse && x.IdRegistration == IdRegistration);
+
+            if (joinClass == null)
+            {
+                return Redirect("/error/e404");
+            }
+
+            int? IdClass = joinClass.IdClass;
+            int? IdStudent = joinClass.IdStudent;
+
+            // Lấy thông tin khóa học và chi nhánh
+            var courseBranch = db.CourseBranches
+                                 .FirstOrDefault(x => x.IdCourse == IdCourse && x.IdBranch == idbranch);
+
+
+
+            // Lấy lịch nghỉ của cơ sở hiện tại
+            var vacationSchedules = db.VacationSchedules
+                                      .Where(vs => vs.IdBranch == idbranch)
+                                      .ToList();
+
+            var schedulesbyClass = db.Schedules
+                .Where(x => x.IdClass == IdClass && (bool)x.Active).Include(x => x.Employee).ToList()
+                .Select(x => new ClassAssignmentDTO
+                {
+                    DayOfWeek = scheduleHelper.GetDayName(x.IdWeek),
+                    TeacherName = x.Employee.Name,
+                    TimeSlot = scheduleHelper.GetTimeSlot((DateTime)x.FromHour, (DateTime)x.ToHour),
+                    HourQuantity = scheduleHelper.GetHourQuantity((DateTime)x.FromHour, (DateTime)x.ToHour).ToString(),
+                    RoomName = scheduleHelper.GetRoomName((int)IdClass,x.IdWeek)
+                });
+
+            List<TimeTableDTO> timeTableData = new List<TimeTableDTO>();
+
+            // Lấy ngày bắt đầu và kết thúc từ joinClass
+            DateTime fromDate = (DateTime)joinClass.Fromdate;
+            DateTime toDate = (DateTime)joinClass.Todate;
+
+            for (DateTime date = fromDate; date <= toDate; date = date.AddDays(1))
+            {
+                // Kiểm tra ngày hiện tại có trùng lịch nghỉ không
+                bool isVacation = vacationSchedules.Any(vs => vs.Fromdate <= date && vs.Todate >= date);
+
+                if (isVacation)
+                {
+                    // Nếu ngày này trùng lịch nghỉ, bỏ qua và tiếp tục
+                    continue;
+                }
+
+                var DayOfWeekVNCompared = scheduleHelper.ConvertEnglishDayToVietnamese(date.DayOfWeek.ToString());
+                var scheduleMatched = schedulesbyClass.FirstOrDefault(x => x.DayOfWeek == DayOfWeekVNCompared);
+
+                if (scheduleMatched != null)
+                {
+                    if (timeTableData.Count() < courseBranch.Sessons)
+                    {
+                        timeTableData.Add(new TimeTableDTO
+                        {
+                            DayOfWeek = DayOfWeekVNCompared,
+                            Date = date.ToString("dd/MM/yyyy"),
+                            TimeSlot = scheduleMatched.TimeSlot,
+                            HourQuantity = scheduleMatched.HourQuantity,
+                            TeacherName = scheduleMatched.TeacherName,
+                            RoomName = scheduleMatched.RoomName
+                        });
+                    }
+                }
+            }
+
+            // Lấy thông tin học viên và lớp học
+            var student = db.Students.Find(IdStudent);
+            var clas = db.Classes.Find(IdClass);
+
+            // Gửi dữ liệu ra View để hiển thị thời khóa biểu
+            ViewBag.timeTableData = timeTableData;
+            ViewBag.SubTitle = "Ngày" + ": " + fromDate.ToString("dd/MM/yyyy") + " - " + toDate.ToString("dd/MM/yyyy");
+            ViewBag.StudentName = student.Name;
+            ViewBag.ClassName = clas.Name;
+            ViewBag.CourseName = courseBranch.Course.Name;
+
+            return View();
+        }
+
 
         protected override void Dispose(bool disposing)
         {

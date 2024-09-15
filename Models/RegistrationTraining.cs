@@ -27,8 +27,7 @@ namespace SuperbrainManagement.Models
 
         public bool? StatusPayment { get; set; }
 
-        [StringLength(50)]
-        public string StatusJoin { get; set; }
+        public bool? StatusJoin { get; set; }
 
         public bool? IsPass { get; set; }
 

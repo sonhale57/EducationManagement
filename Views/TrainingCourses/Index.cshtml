@@ -48,7 +48,7 @@
         <tbody id="showlist"></tbody>
 </table>
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel2" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <form action="/" method="post" id="form_xuat">
                 <div class="modal-header">
@@ -109,7 +109,7 @@
     </div>
 </div>
 <div class="modal fade" id="modalRegistration" tabindex="-1" aria-labelledby="exampleModalLabel2" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
         <div class="modal-content" style="">
             <form action="/" method="post" id="form_xuat">
                 <div class="modal-header">
@@ -156,11 +156,12 @@
                             <th class="text-center">Cơ sở</th>
                             <th class="text-center">Trạng thái</th>
                             <th class="text-center">Đăng ký lưu trú</th>
+                            <th class="text-center">Thao tác</th>
                         </tr>
                         <tbody id="showlist_dangky"></tbody>
                     </table>
                     <div class="text-center">
-                        <a href="javascript:Payment_fee()" class="btn btn-success">
+                        <a href="javascript:Load_paymentFee()" class="btn btn-success">
                             <i class="ti ti-credit-card"></i> Thanh toán phí tham gia
                         </a>
                     </div>
@@ -171,7 +172,7 @@
 </div>
 
 <div class="modal fade" id="modalPayment" tabindex="-1" aria-labelledby="modalPaymentLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
         <div class="modal-content" style="">
             <form action="/" method="post" id="form_payment" enctype="multipart/form-data">
                 <div class="modal-header">
@@ -193,6 +194,8 @@
                         <div class="col-md-4 mt-3">
                             <label>Phí đào tạo</label>
                             <div class="col-md-12">
+                                <input type="hidden" name="NumberPayment" id="NumberPayment" class="form-control" value="" />
+                                <input type="hidden" name="NumberDiscount" id="NumberDiscount" class="form-control" value="" />
                                 <input type="text" name="PriceCourse" id="PriceCourse" class="form-control" value="" />
                             </div>
                         </div>
@@ -200,6 +203,7 @@
                             <label>Số tiền cần thanh toán</label>
                             <div class="col-md-12">
                                 <input type="text" name="TotalAmount" id="TotalAmount" class="form-control" value="" />
+                                <span id="statusDiscount"></span>
                             </div>
                         </div>
 
@@ -246,7 +250,8 @@
                         </table>
                     </blockquote>
                     <p class="text-muted fw-bold">Tình trạng: <span id="statusPayment"></span></p>
-                    <a href="javascript:Submit_payment()" class="btn btn-success"><i class="ti ti-credit-card"></i> Cập nhật thanh toán</a>
+                    <a href="javascript:Submit_paymentFee()" class="btn btn-success"><i class="ti ti-credit-card"></i> Cập nhật thanh toán</a>
+                    <span class="loader"></span>
                     <p class="text-muted fw-bold mt-3 text-decoration-underline"><i class="ti ti-file-analytics"></i> Danh sách đính kèm</p>
                     <table class="table ">
                         <tr class="bg-success text-white">
@@ -266,7 +271,7 @@
 </div>
 
 <div class="modal fade" id="modalRating" tabindex="-1" aria-labelledby="modalRatingLabel2" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
         <div class="modal-content" style="">
             <form action="/" method="post" id="form_xuat">
                 <div class="modal-header">
@@ -303,7 +308,7 @@
 </div>
 
 <div class="modal fade" id="modalRatingEmployees" tabindex="-1" aria-labelledby="modalRatingEmployeesLabel2" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
         <div class="modal-content" style="">
             <form action="/" method="post" id="form-danhgia">
                 <div class="modal-header">
@@ -396,6 +401,7 @@
                         </div>
                     </div>
                     <div class="text-center mt-3">
+                        <span class="loader"></span>
                         <button type="button" class="btn btn-success" onclick="Submit_rating()">
                             <i class="ti ti-rating-12-plus"></i> Cập nhật đánh giá
                         </button>
@@ -409,6 +415,7 @@
     </div>
 </div>
 <script>
+    var isProcessing = false;
     Loadlist();
     function Loadlist() {
         $.ajax({
@@ -478,7 +485,7 @@
         });
     }
 
-    function Payment_fee() {
+    function Load_paymentFee() {
         $.ajax({
             url: '@Url.Action("Load_payment", "TrainingCourses")',
             type: "GET",
@@ -491,6 +498,9 @@
                 $('#PriceCourse').val(data.strphi);
                 $('#TotalAmount').val(data.strtongtien);
                 $('#statusPayment').html(data.strStatus);
+                $('#statusDiscount').html(data.strDiscount);
+                $('#NumberDiscount').val(data.discount);
+                $('#NumberPayment').val(data.count_chuadongphi);
                 $('#showlist_payment').html(data.str);
                 $('#modalRegistration').modal('hide');
                 $('#modalPayment').modal('show');
@@ -500,29 +510,108 @@
             }
         });
     }
+    function Submit_paymentFee() {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
 
-    function Rating_Employee(IdTrainning, IdEmployee) {
-        Load_infoRating(IdTrainning, IdEmployee);
-        $("#modalRatingEmployees").modal('show');
-    }
-    function Load_infoRating(IdTrainning,IdEmployee) {
+        var tongtien = parseFloat($("#TotalAmount").val().replace(/,/g, '')); // Remove all commas
+        var fileInput = $("#Image")[0];
+        var file = fileInput.files[0];
+
+        // Tạo FormData để gửi tệp cùng với các dữ liệu khác
+        var formData = new FormData();
+        formData.append("IdTrainingCourse", $("#IdTrainingPayment").val());
+        formData.append("Number", $("#NumberPayment").val());
+        formData.append("Discount", $("#NumberDiscount").val());
+        formData.append("Tongtien", tongtien);
+        formData.append("Description", $("#Description").val());
+
+        // Kiểm tra nếu có file, thêm vào FormData
+        if (file) {
+            formData.append("file", file);
+        }
+
         $.ajax({
-            url: '@Url.Action("Load_infoRating", "TrainingCourses")',
-            type: "GET",
-            data: {
-                IdTrainning: IdTrainning,
-                IdEmployee: IdEmployee
-            },
+            url: '@Url.Action("Submit_paymentFee", "TrainingCourses")',
+            type: "POST",
+            data: formData, // Gửi FormData
+            processData: false,  // Không xử lý dữ liệu (FormData sẽ xử lý)
+            contentType: false,  // Không đặt content type vì FormData tự xử lý
+            dataType: "json",
             success: function (data) {
-                $('#rateIdEmployee').val(IdEmployee);
-                $('#rateIdTrainning').val(IdTrainning);
-                $('#rateNameEmployee').val(data.strNameE);
-                $('#rateNameTrainning').val(data.strNameT);
+                if (data.status == "ok") {
+                    $('#modalPayment').modal('hide');
+                    showSuccess(data.message, 3000);
+                    Loadlist();
+                } else {
+                    showError(data.message, 3000);
+                }
+                isProcessing = false; // Hoàn thành xử lý
+                $(".loader").html("");
             },
-            error: function (xhr, error) {
-                console.log(error);
+            error: function () {
+                showError('Lỗi!', 3000);
+                isProcessing = false; // Hoàn thành xử lý
+                $(".loader").html("");
             }
         });
+    }
+
+
+    function loadRatingModal(IdTrainingCourse, IdEmployee) {
+        $.ajax({
+            url: '@Url.Action("LoadRating", "TrainingCourses")',
+            type: "POST",
+            data: {
+                IdTrainingCourse: IdTrainingCourse,
+                IdEmployee: IdEmployee
+            },
+            dataType: "json",
+            success: function (data) {
+                if (data.status === "ok") {
+                    var rating = data.data;
+
+                    // Điền dữ liệu vào các trường trong modal với giá trị mặc định nếu chưa có kết quả
+                    $("#rateIdTrainning").val(rating.IdTrainingCourse);
+                    $("#rateIdEmployee").val(rating.IdEmployee);
+                    $("#rateNameEmployee").val(rating.nameEmployee);
+                    $("#rateNameTrainning").val(rating.nameCourse);
+                    $("#rateResult").val(rating.Result);
+                    $("#rateNumberofCertificate").val(rating.NumberCertification || "");
+                    $("#rateTotalScore").val(rating.TotalScore || 0);
+                    $("#rateSuperbrainScore").val(rating.SuperbrainScore || "");
+                    $("#rateBrandScore").val(rating.BrandScore || "");
+                    $("#rateTeachScore").val(rating.TeachScore || "");
+                    $("#rateSaleScore").val(rating.SaleScore || "");
+                    $("#rateMindsetScore").val(rating.MindsetScore || "");
+                    $("#rateSorobanScore").val(rating.SorobanScore || "");
+                    $("#rateOnlineScore").val(rating.OnlineScore || "");
+                    $("#rateCompleteScore").val(rating.CompleteScore || "");
+                    $("#rateParticipationScore").val(rating.ParticipationScore || "");
+                    $("#rateDemeanorScore").val(rating.DemeanorScore || "");
+                    $("#rateProactiveScore").val(rating.ProactiveScore || "");
+                    $("#rateDescription").val(rating.Description || "");
+
+                    // Hiển thị modal
+                    $('#modalRating').modal('hide');
+                    $('#modalRatingEmployees').modal('show');
+                    loadResultSelect(rating.Result);
+                } else {
+                    showError(data.message, 3000);
+                }
+            },
+            error: function () {
+                showError('Lỗi trong quá trình tải dữ liệu!', 3000);
+            }
+        });
+    }
+    function loadResultSelect(result) {
+        if (result === true) {
+            $('#rateResult').val('true');  // Nếu Result là true, chọn "Đã đạt"
+        } else if (result === false) {
+            $('#rateResult').val('false');  // Nếu Result là false, chọn "Chưa đạt"
+        }
     }
 
     function Submit_rating() {
@@ -562,7 +651,6 @@
         error: function () { showError('Lỗi!', 3000); }
         });
     }
-
 
     function Load_dangky(id) {
         Load_infoByTrainingCourse(id);
@@ -633,5 +721,113 @@
         },
         error: function () { showError('Lỗi!', 3000); }
         });
+    }
+
+    function Confirm_reg(Id,IdEmployee) {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đánh dấu là đang xử lý
+        if (confirm('Bạn có muốn xác nhận thanh toán cho nhân sự này?')) {
+            $.ajax({
+                url: '@Url.Action("Confirm_reg", "TrainingCourses")',
+                type: 'POST',
+                data: {
+                    IdTrainning: Id,
+                    IdEmployee: IdEmployee
+                },
+                success: function (data) {
+                    if (data.status=="ok") {
+                        showSuccess(data.message, 3000);
+                        location.reload();
+                    } else {
+                        showError(data.message,3000);
+                    }
+                    isProcessing = false;
+                },
+                error: function () {
+                    showError('Error deleting employee',3000);
+                    isProcessing = false;
+                }
+            });
+        }
+    }
+    function Return_reg(Id,IdEmployee) {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đánh dấu là đang xử lý
+        if (confirm('Bạn có muốn hủy xác nhận thanh toán cho nhân sự này?')) {
+            $.ajax({
+                url: '@Url.Action("Return_reg", "TrainingCourses")',
+                type: 'POST',
+                data: {
+                    IdTrainning: Id,
+                    IdEmployee: IdEmployee
+                },
+                success: function (data) {
+                    if (data.status=="ok") {
+                        showSuccess(data.message, 3000);
+                        location.reload();
+                    } else {
+                        showError(data.message,3000);
+                    }
+                    isProcessing = false;
+                },
+                error: function () {
+                    showError('Error deleting employee',3000);
+                    isProcessing = false;
+                }
+            });
+        }
+    }
+    function Cancel_reg(Id,IdEmployee) {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đánh dấu là đang xử lý
+        if (confirm('Bạn có muốn hủy tham gia cho nhân sự này?')) {
+            $.ajax({
+                url: '@Url.Action("Cancel_reg", "TrainingCourses")',
+                type: 'POST',
+                data: {
+                    IdTrainning: Id,
+                    IdEmployee: IdEmployee
+                },
+                success: function (data) {
+                    if (data.status=="ok") {
+                        showSuccess(data.message, 3000);
+                        location.reload();
+                    } else {
+                        showError(data.message,3000);
+                    }
+                    isProcessing = false;
+                },
+                error: function () {
+                    showError('Error deleting employee',3000);
+                    isProcessing = false;
+                }
+            });
+        }
+    }
+    function Delete_trainning(Id) {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đánh dấu là đang xử lý
+        if (confirm('Bạn có xóa khóa đào tạo này?')) {
+            $.ajax({
+                url: '@Url.Action("Delete_trainning", "TrainingCourses")',
+                type: 'POST',
+                data: {
+                    id: Id,
+                },
+                success: function (data) {
+                    if (data.status=="ok") {
+                        showSuccess(data.message, 3000);
+                        location.reload();
+                    } else {
+                        showError(data.message,3000);
+                    }
+                    isProcessing = false;
+                },
+                error: function () {
+                    showError('Lỗi khi xóa khóa đào tạo',3000);
+                    isProcessing = false;
+                }
+            });
+        }
     }
 </script>

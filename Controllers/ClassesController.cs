@@ -17,6 +17,7 @@ using System.Globalization;
 using System.Text;
 using System.Web.UI.WebControls;
 using System.Data.Entity.Validation;
+using System.Web.Security;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -34,7 +35,7 @@ namespace SuperbrainManagement.Controllers
             {
                 return Redirect("/authentication");
             }
-            var branches = db.Branches.ToList();
+            var branches = db.Branches.Where(x=>x.Enable==true).ToList();
             int idbranch = int.Parse(CheckUsers.idBranch());
             if (!CheckUsers.CheckHQ())
             {
@@ -232,6 +233,52 @@ namespace SuperbrainManagement.Controllers
                 // Không có dữ liệu
                 return Json(new { status = "not_found" },JsonRequestBehavior.AllowGet);
             }
+        }
+
+        public ActionResult LoadSchedulebyClass(int? IdClass)
+        {
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            string str = "";
+            var schedule = db.Schedules.Where(x=>x.IdClass == IdClass);
+            if (schedule == null)
+            {
+                return Json(new { status = "error",message="Không tìm thấy thời khóa biểu của lớp này." },JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                var employees = db.Employees.Where(e => e.IdBranch == idbranch&&e.Enable==true&&e.IsOfficial==true).ToList();
+                var rooms = db.Rooms.Where(r => r.IdBranch == idbranch).ToList();
+                foreach (var sc in schedule)
+                {
+                    // Tạo danh sách các options cho select giáo viên
+                    string employeeOptions = "";
+                    foreach (var employee in employees)
+                    {
+                        employeeOptions += $"<option value='{employee.Id}' {(sc.IdEmployee == employee.Id ? "selected" : "")}>{employee.Name}</option>";
+                    }
+
+                    // Tạo danh sách các options cho select phòng học
+                    string roomOptions = "";
+                    foreach (var room in rooms)
+                    {
+                        roomOptions += $"<option value='{room.Id}' {(sc.IdRoom == room.Id ? "selected" : "")}>{room.Name}</option>";
+                    }
+                    str += "<tr>"
+                        + "<td class='text-center align-content-center'><input type='checkbox' id='myCheckbox' name='myCheckbox' " + (sc.Active == true ? "checked" : "") + " /><input type='hidden' name='IdWeek' value='"+sc.IdWeek+"'/></td>"
+                        + "<td class='text-center align-content-center'>" + scheduleHelper.GetDayName(sc.IdWeek) + "</td>"
+                        + "<td class='text-center align-content-center'><input type=\"text\" name=\"fromHourtxt\" value=\""+sc.FromHour.Value.ToString("hh:mm tt")+"\" class=\"form-control\"></td>"
+                        + "<td class='text-center align-content-center'><input type=\"text\" name=\"toHourtxt\" value=\""+sc.ToHour.Value.ToString("hh:mm tt")+"\" class=\"form-control\"></td>"
+                        + "<td class='text-center align-content-center'><select class='form-control' id='employeeId" + sc.IdWeek + IdClass + "' name='employeeId" + sc.IdWeek + IdClass + "'>"
+                        + employeeOptions
+                        + "</select></td>"
+                        // Tạo select cho phòng học
+                        + "<td class='text-center align-content-center'><select class='form-control' id='roomId" + sc.IdWeek + IdClass + "' name='roomId" + sc.IdWeek + IdClass + "'>"
+                        + roomOptions
+                        + "</select></td>"
+                        + "</tr>"; 
+                }
+            }
+            return Json(new { status = "ok", str },JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
@@ -560,28 +607,37 @@ namespace SuperbrainManagement.Controllers
 
 
         [HttpPost]
-        public ActionResult UpdateScheduleBulk(
-            string selectedClassId,
-            string scheduleData)
+        public ActionResult UpdateScheduleBulk(List<ScheduleUpdateModel> schedules)
         {
-            if (ModelState.IsValid)
+            try
             {
-                var updatedData = JsonConvert.DeserializeObject<List<ScheduleViewDTO>>(scheduleData);
-
-                var scheduleDataUpdated = AutoMapperConfig.Mapper.Map<List<Schedule>>(updatedData);
-                scheduleDataUpdated.ForEach(x =>
+                // Duyệt qua danh sách các schedule và cập nhật từng mục
+                foreach (var schedule in schedules)
                 {
-                    db.Entry(x).State = EntityState.Modified;
-                });
+                    var dbSchedule = db.Schedules.FirstOrDefault(s => s.IdWeek == schedule.ScheduleId && s.IdClass==schedule.ClassId);  // Tìm schedule trong DB
+                    if (dbSchedule != null)
+                    {
+                        dbSchedule.Active = schedule.IsActive;
+                        dbSchedule.FromHour =schedule.FromHour;
+                        dbSchedule.ToHour = schedule.ToHour;
+                        dbSchedule.IdEmployee = schedule.EmployeeId;
+                        dbSchedule.IdRoom = schedule.RoomId;
 
-                db.SaveChanges();
+                        // Lưu thay đổi vào DB
+                        db.SaveChanges();
+                    }
+                }
 
-                return RedirectToAction("Index");
+                // Trả về kết quả thành công
+                return Json(new { status = "ok", message = "Lưu thay đổi thành công." });
             }
-
-            // If ModelState is not valid, return the view with validation errors
-            return View();
+            catch (Exception ex)
+            {
+                // Trả về kết quả lỗi
+                return Json(new { status = "error", message = ex.Message });
+            }
         }
+
 
         [HttpPost]
         public ActionResult UpdateStatus(int id, int status)

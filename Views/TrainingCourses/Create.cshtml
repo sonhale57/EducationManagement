@@ -1,7 +1,8 @@
 ﻿@model SuperbrainManagement.Models.TrainingCourse
 
 @{
-    ViewBag.Title = "Create";
+    ViewBag.Controller = "Khóa đào tạo";
+    ViewBag.Title = "Thêm mới";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -30,7 +31,7 @@
             </div>
 
             <div class="form-group mt-3">
-                @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-12" })
+                <label>Mô tả ngắn</label>
                 <div class="col-md-12">
                     @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
                     @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
@@ -55,7 +56,8 @@
             <div class="col-md-4 mt-3">
                 @Html.LabelFor(model => model.Fromdate, htmlAttributes: new { @class = "control-label col-md-12" })
                 <div class="col-md-12">
-                    @Html.EditorFor(model => model.Fromdate, new { htmlAttributes = new { @class = "form-control", @type = "date" } })
+                    <input type="text" name="ngaybatdau" value="" id="ngaybatdau" class="form-control" onchange="Updatedate()"/>
+                    @Html.HiddenFor(model => model.Fromdate, new { htmlAttributes = new { @class = "form-control", @type = "date" } })
                     @Html.ValidationMessageFor(model => model.Fromdate, "", new { @class = "text-danger" })
                 </div>
             </div>
@@ -63,7 +65,8 @@
             <div class="col-md-4 mt-3">
                 @Html.LabelFor(model => model.Todate, htmlAttributes: new { @class = "control-label col-md-12" })
                 <div class="col-md-12">
-                    @Html.EditorFor(model => model.Todate, new { htmlAttributes = new { @class = "form-control", @type = "date" } })
+                    <input type="text" name="ngayketthuc" value="" id="ngayketthuc" class="form-control" onchange="Updatedate()"/>
+                    @Html.HiddenFor(model => model.Todate, new { htmlAttributes = new { @class = "form-control", @type = "date" } })
                     @Html.ValidationMessageFor(model => model.Todate, "", new { @class = "text-danger" })
                 </div>
             </div>
@@ -72,7 +75,8 @@
             <div class="col-md-4 mt-3">
                 @Html.LabelFor(model => model.ResgistrationDeadline, htmlAttributes: new { @class = "control-label col-md-12" })
                 <div class="col-md-12">
-                    @Html.EditorFor(model => model.ResgistrationDeadline, new { htmlAttributes = new { @class = "form-control", @type = "date" } })
+                    <input type="text" name="handangky" value="" id="handangky" class="form-control" onchange="Updatedate()"/>
+                    @Html.HiddenFor(model => model.ResgistrationDeadline, new { htmlAttributes = new { @class = "form-control", @type = "date" } })
                     @Html.ValidationMessageFor(model => model.ResgistrationDeadline, "", new { @class = "text-danger" })
                 </div>
             </div>
@@ -89,7 +93,7 @@
                                 <div class="col-12 col-sm-6 col-xl-12">
                                     <div class="mb-4">
                                         <div class="d-flex flex-wrap mb-2">
-                                            <h5 class="mb-0 text-body-highlight me-2">Loại khóa đào tạo</h5><a class="fw-bold fs-9" href="javascript:Create_type()">Thêm mới</a>
+                                            <h5 class="mb-0 text-body-highlight me-2">Loại khóa đào tạo</h5><a class="fw-bold fs-9" href="javascript:Create_type()">+    Thêm mới</a>
                                         </div>
                                         @Html.DropDownList("IdType", null, htmlAttributes: new { @class = "form-control" })
                                     </div>
@@ -105,7 +109,7 @@
                                 </div>
                                 <div class="form-group mt-3">
                                     <div class="col-md-offset-2 col-md-12">
-                                        <input type="submit" value="Thêm mới" class="btn btn-success" />
+                                        <input type="submit" value="+ Thêm mới" class="btn btn-success" />
                                     </div>
                                 </div>
                             </div>
@@ -142,12 +146,10 @@
                         </div>
                     </div>
                     <div class="text-center mt-4">
-                        <button type="button" class="btn btn-success" onclick="Submit_createtype()">
-                            <i class="ti ti-registered"></i> Thêm mới
+                        <button type="button" class="btn btn-sm btn-success" onclick="Submit_createtype()">
+                            <i class="ti ti-plus"></i> Thêm mới
                         </button>
-                        <button type="button" class="btn btn-outline-dark" onclick="close_modal()">
-                            <i class="ti ti-door-exit"></i> Thoát
-                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="close_modal()">Thoát</button>
                     </div>
                 </div>
             </form>
@@ -161,6 +163,19 @@
     function close_modal() {
         $("#exampleModal").modal('hide');
     }
+    function Updatedate() {
+        var fromDate = $("#ngaybatdau").val().split("/").reverse().join("-");
+        var toDate = $("#ngayketthuc").val().split("/").reverse().join("-");
+        var deadlineDate = $("#handangky").val().split("/").reverse().join("-");
+        $("#Fromdate").val(fromDate);
+        $("#Todate").val(toDate);
+        $("#ResgistrationDeadline").val(deadlineDate);
+    }
+    $(function () {
+        $("#ngaybatdau").datepicker({ dateFormat: "dd/mm/yy", minDate: 0 });
+        $("#ngayketthuc").datepicker({ dateFormat: "dd/mm/yy", minDate: 0 });
+        $("#handangky").datepicker({ dateFormat: "dd/mm/yy", minDate: 0 });
+    });
     function Submit_createtype() {
         $.ajax({
             url: '@Url.Action("Submit_createtype", "TrainingCourses")',

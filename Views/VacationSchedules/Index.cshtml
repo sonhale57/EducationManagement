@@ -32,7 +32,7 @@
                 <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
             </ul>
         </div>
-        <a href="/vacationschedules/create" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
+        <a href="javascript:Add_vacation()" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>
     </div>
 </div>
 
@@ -63,8 +63,8 @@
                 @item.Todate.Value.ToString("dd/MM/yyyy")
             </td>
             <td class="text-end">
-                <a href="/vacationschedules/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
-                <a href="/vacationschedules/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
+                <a href="javascript:Edit_vacation(@item.Id)" class="me-1"><i class="ti ti-edit text-primary"></i></a>
+                <a href="javascript:Delete_vacation(@item.Id)" class="me-1"><i class="ti ti-trash text-danger"></i></a>
                 <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="ti ti-dots-vertical"></i>
                 </a>
@@ -82,7 +82,7 @@
     </ul>
 </nav>
 
-<div class="modal fade" id="modaladdVacation" tabindex="-1" aria-labelledby="modaladdVacationLabel" aria-hidden="true">
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="modaladdVacationLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content" style="width:800px;">
             <form action="/" method="post" id="form_nhap">
@@ -93,29 +93,124 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="form-group col-md-12 mt-2">
-                            <label>Mã chương trình</label>
+                            <label>Mô tả</label>
                             <input type="hidden" name="action" value="" class="form-control" id="action" placeholder="Mã chương trình" />
                             <input type="hidden" name="IdVacation" value="" class="form-control" id="IdVacation" placeholder="Mã chương trình" />
-                            <input type="text" name="CodeVacation" value="" class="form-control" id="CodeVacation" placeholder="Mã chương trình" />
+                            <input type="text" name="NameVacation" value="" class="form-control" id="NameVacation" placeholder="Mô tả" />
                         </div>
 
                         <div class="form-group col-md-12 mt-2">
-                            <label>Tên chương trình</label>
-                            <input type="text" name="NameVacation" value="" class="form-control" id="NameVacation" placeholder="Tên chương trình" />
+                            <label>Ngày bắt đầu</label>
+                            <input type="text" name="FromdateVacation" value="" class="form-control" id="FromdateVacation" placeholder="" />
                         </div>
 
                         <div class="form-group col-md-12 mt-2">
-                            <label>Mô tả ngắn</label>
-                            <input type="text" name="DescriptionVacation" value="" class="form-control" id="DescriptionVacation" placeholder="Mô tả ngắn" />
+                            <label>Ngày kết thúc</label>
+                            <input type="text" name="TodateVacation" value="" class="form-control" id="TodateVacation" placeholder="" />
                         </div>
                     </div>
-                    <div class="text-center mt-3">
-                        <button type="button" class="btn btn-success text-center" onclick="Submit_AddVacation()" id="btnActionVacation">
+                    <div class="mt-3">
+                        <button type="button" class="btn btn-success" onclick="Submit_savechange()" id="btnActionVacation">
                             <i class="ti ti-circle-plus"></i> Thêm mới
                         </button>
+                        <span class="loader"></span>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
+<script>
+    var isProcessing = false;
+    $(function () {
+        $("#FromdateVacation").datepicker({ dateFormat: "dd/mm/yy", minDate: 0 });
+        $("#TodateVacation").datepicker({ dateFormat: "dd/mm/yy", minDate: 1 });
+    });
+
+    function Add_vacation() {
+        $('#modaladdVacationLabel').html("Thêm lịch nghỉ");
+        $('#action').val("create");
+        $('#btnActionVacation').html("Thêm mới");
+        $('#exampleModal').modal('show');
+    }
+    function Edit_vacation(id) {
+        $('#modaladdVacationLabel').html("Chỉnh sửa lịch nghỉ");
+        $('#action').val("edit");
+        $('#btnActionVacation').html("Cập nhật");
+        $.ajax({
+            url: '@Url.Action("Loadedit_vacation", "VacationSchedules")',
+            type: "GET",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                $('#IdVacation').val(id);
+                $('#NameVacation').val(data.name);
+                $('#FromdateVacation').val(data.fromDate);
+                $('#TodateVacation').val(data.toDate);
+
+                $('#exampleModal').modal('show');
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function Submit_savechange() {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        var fromDate = $("#FromdateVacation").val().split("/").reverse().join("-");
+        var toDate = $("#TodateVacation").val().split("/").reverse().join("-");
+
+        $.ajax({
+            url: '@Url.Action("Submit_savechanges", "VacationSchedules")',
+            type: "POST",
+            data: {
+                Id: $("#IdVacation").val(),
+                action: $("#action").val(),
+                Name: $("#NameVacation").val(),
+                Fromdate: fromDate,
+                Todate: toDate
+            },
+            success: function (data) {
+                if (data.status == "ok") {
+                    $('#exampleModal').modal('hide');
+                    location.reload();
+                } else {
+                    showError(data.message, 3000);
+                }
+                isProcessing = false;
+                $(".loader").html(""); 
+            },
+            error: function (xhr, error) {
+                isProcessing = false;
+                $(".loader").html("");
+            }
+        });
+    }
+
+    function Delete_vacation(id) {
+        if (confirm('Bạn có muốn xóa khóa học của cơ sở này?')) {
+            $.ajax({
+                url: "/VacationSchedules/Delete_vacation",
+                type: "POST",
+                data: {
+                    id: id
+                }
+                , dataType: "json",
+                success: function (data) {
+                    if (data.status = "ok") {
+                        showSuccess(data.message, 3000);
+                        location.reload();
+                    }
+                    else {
+                        showError(data.status, 3000);
+                    }
+                },
+                error: function () { showError('Lỗi xóa lịch nghỉ!', 3000); }
+            });
+        }
+    }
+</script>

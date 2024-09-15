@@ -115,7 +115,20 @@ namespace SuperbrainManagement.Helpers
                     return "Không hợp lệ";
             }
         }
-
+        public string GetRoomName(int IdClass,int IdWeek)
+        {
+            var schedules = db.Schedules.FirstOrDefault(x=>x.IdClass==IdClass&&x.IdWeek==IdWeek);
+            if(schedules == null)
+            {
+                return "Không tìm thấy phòng";
+            }
+            else
+            {
+                int idroom = (int)schedules.IdRoom;
+                var room = db.Rooms.Find(idroom).Name;
+                return room;
+            }
+        }
         public double GetHourQuantity(DateTime fromDate, DateTime toDate)
         {
             TimeSpan timeQuantity = toDate - fromDate;

@@ -23,8 +23,8 @@ namespace SuperbrainManagement.Controllers
         // GET: Courses
         public ActionResult Index()
         {
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Name");
-            ViewBag.IdBranchForm = new SelectList(db.Branches, "Id", "Name");
+            ViewBag.IdBranch = new SelectList(db.Branches.Where(x=>x.Enable==true), "Id", "Name");
+            ViewBag.IdBranchForm = new SelectList(db.Branches.Where(x => x.Enable == true), "Id", "Name");
             ViewBag.IdCourse = new SelectList(db.Courses, "Id", "Name");
             return View();
         }

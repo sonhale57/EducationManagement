@@ -117,7 +117,7 @@
                     <i class="ti ti-dots-vertical"></i>
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <li><button type="button" class="confirmButton dropdown-item" onclick="getSelectedClassId(@item.Id)" data-bs-toggle="modal" data-bs-target="#scheduleModal"><i class="ti ti-calendar-event"></i> Thời khóa biểu</button></li>
+                    <li><a class="dropdown-item" href="javascript:LoadSchedulebyClass(@item.Id)"><i class="ti ti-calendar-event"></i> Thời khóa biểu</a></li>
                 </ul>
             </td>
         </tr>
@@ -130,7 +130,7 @@
     </ul>
 </nav>
 
-<div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="scheduleModalsc" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content" style="width:auto;">
             <div class="modal-header">
@@ -152,7 +152,7 @@
                                 <th class="text-center">Phòng học</th>
                             </tr>
                         </thead>
-                        <tbody id="schedulerTable">
+                        <tbody id="schedulerTables">
                             @if (ViewBag.Schedule != null)
                             {
                                 foreach (var item in ViewBag.Schedule)
@@ -195,6 +195,45 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content" style="width:auto;">
+            <div class="modal-header">
+                <h5 class="modal-fullscreen" id="exampleModalLabel">Thời khóa biểu</h5>
+                <button type="button" class="btn btn-sm" onclick="Close()" data-dismiss="modal" aria-label="Close">
+                    <i class="ti ti-x"></i>
+                </button>
+            </div>
+            <hr style="width:90%;margin:0 auto;" />
+            <div class="modal-body">
+                <form id="scheduleForm" action="/Classes/UpdateScheduleBulk" method="post">
+                    <input type="hidden" name="ClassId" value="" id="ClassId" />
+                    <table cellpadding="0" cellspacing="0" border="0" class="table" id="datatable">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Kích hoạt</th>
+                                <th class="text-center">Thứ</th>
+                                <th class="text-center">Từ giờ</th>
+                                <th class="text-center">Đến giờ</th>
+                                <th class="text-center">Giáo viên</th>
+                                <th class="text-center">Phòng học</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedulerTable">
+                        </tbody>
+                        <tr class="loader"></tr>
+                    </table>
+                    <div class="modal-footer">
+                        <span class="loader"></span>
+                        <a id="submitButton" href="javascript:updateSchedule()" class="btn btn-sm btn-success"><i class="ti ti-refresh"></i> Lưu thay đổi</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -215,6 +254,7 @@
                     <input type="text" class="form-control" id="DescriptionClass" name="DescriptionClass" value="" placeholder="Mô tả" />
                 </div>
                 <div class="modal-footer">
+                    <span class="loader"></span>
                     <a href="javascript:Submit_savechange()" class="btn btn-success" id="btnaction"> Lưu cập nhật</a>
                 </div>
             </form>
@@ -224,6 +264,11 @@
 @section Scripts
  {
     <script>
+        var isProcessing = false;
+        $(function () {
+            $("#fromHourtxt").datepicker({ dateFormat: "hh:mm tt" });
+            $("#toHourtxt").datepicker({ dateFormat: "hh:mm tt", minDate: 0 });
+        });
         function Add_class() {
             $('#exampleModalLabel').html("Thêm lớp học");
             $('#typeaction').val("create");
@@ -300,10 +345,7 @@
         }
 
         function Close() {
-            var element = document.getElementById("scheduleModal");
-            element.classList.remove("show");
-
-            window.location.reload();
+            $('#scheduleModal').modal('hide');
         }
 
         function getSelectedClassId(idInput) {
@@ -316,52 +358,94 @@
             });
         }
 
-        function saveChange() {
-            $("#datatable tbody tr").each(function () {
-                var id = $(this).find("input[name='selectedClassId']").val();
-                var idWeek = $(this).find("input[name='idWeek']").val();
-                var idClass = $(this).find("input[name='idClass']").val();
-                var active = $(this).find("input[name='myCheckbox']").is(":checked");
-                var fromHour = $(this).find("input[name='fromHourtxt']").val();
-                var toHour = $(this).find("input[name='toHourtxt']").val();
-                var employeeId = $("#employeeId" + idWeek + idClass).val();
-                var roomId = $("#roomId" + idWeek + idClass).val();
+        function updateSchedule() {
+            // Tạo mảng chứa các đối tượng schedule cần cập nhật
+            var schedules = [];
 
-                scheduleData.push({
-                    id: id,
-                    active: active,
-                    fromHour: fromHour,
-                    toHour: toHour,
-                    employeeId: employeeId,
-                    roomId: roomId,
-                    idWeek: idWeek,
-                    idClass: idClass,
-                    idUser: @ViewBag.UserId
-                });
+            // Duyệt qua các hàng trong bảng để lấy dữ liệu
+            $('#schedulerTable tr').each(function () {
+                var schedule = {
+                    ClassId: $("#ClassId").val(),
+                    ScheduleId: $(this).find('input[name="IdWeek"]').val(),
+                    IsActive: $(this).find('input[type="checkbox"]').is(':checked'),  // Lấy trạng thái kích hoạt
+                    FromHour: $(this).find('input[name="fromHourtxt"]').val(),        // Lấy giờ bắt đầu
+                    ToHour: $(this).find('input[name="toHourtxt"]').val(),            // Lấy giờ kết thúc
+                    EmployeeId: $(this).find('select[name^="employeeId"]').val(),     // Lấy id giáo viên
+                    RoomId: $(this).find('select[name^="roomId"]').val()              // Lấy id phòng học
+                };
+                schedules.push(schedule);
             });
 
-            document.getElementById("scheduleData").value = JSON.stringify(scheduleData);;
+            if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+            isProcessing = true; // Đặt cờ đang xử lý
+            $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+            // Gửi yêu cầu AJAX để cập nhật
+            $.ajax({
+                url: '/Classes/UpdateScheduleBulk',  // URL đến phương thức trong controller
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ schedules: schedules }),  // Chuyển mảng thành JSON và gửi lên server
+                success: function (response) {
+                    if (response.status === "ok") {
+                        showSuccess('Lưu thay đổi thành công!',3000);
+                        // Có thể cập nhật lại dữ liệu hoặc reload trang
+                    } else {
+                        showError('Đã có lỗi xảy ra: ' + response.message,3000);
+                    }
+                    isProcessing = false;
+                    $(".loader").html("");
+                },
+                error: function (xhr, status, error) {
+                    showError('Có lỗi khi gửi yêu cầu: ' + error, 3000);
+                    isProcessing = false;
+                    $(".loader").html("");
+                }
+            });
         }
 
-    function Delete_Classes(Id) {
-    if (confirm('Bạn có muốn xóa lớp học này?')) {
-        $.ajax({
-            url: '@Url.Action("Delete_Classes", "Classes")',
-            type: 'POST',
-            data: { id: Id },
-            success: function (data) {
-                if (data.status=="ok") {
-                    location.reload();
-                    showSuccess("Đã xóa thành công!", 3000);
-                } else {
-                    showError(data.message, 3000);
-                }
-            },
-            error: function () {
-                showError('Error deleting course', 3000);
+        function Delete_Classes(Id) {
+            if (confirm('Bạn có muốn xóa lớp học này?')) {
+                $.ajax({
+                    url: '@Url.Action("Delete_Classes", "Classes")',
+                    type: 'POST',
+                    data: { id: Id },
+                    success: function (data) {
+                        if (data.status == "ok") {
+                            location.reload();
+                            showSuccess("Đã xóa thành công!", 3000);
+                        } else {
+                            showError(data.message, 3000);
+                        }
+                    },
+                    error: function () {
+                        showError('Error deleting course', 3000);
+                    }
+                });
             }
-        });
-    }
-}
+        }
+        function LoadSchedulebyClass(Id) {
+            $(".loader").html("<td colspan=6 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
+            $.ajax({
+                url: '@Url.Action("LoadSchedulebyClass", "Classes")',
+                type: "GET",
+                data: {
+                    IdClass: Id
+                },
+                success: function (data) {
+                    if (data.status == "ok") {
+                        $('#ClassId').val(Id);
+                        $('#schedulerTable').html(data.str);
+                        $('#scheduleModal').modal('show');
+                    } else {
+                        showError(data.message, 3000);
+                    }
+                    $(".loader").html("");
+                },
+                error: function (xhr, error) {
+                    console.log(error);
+                }
+            });
+        }
     </script>
 }

@@ -22,10 +22,8 @@
                 <span id="filterEnum"></span>
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="javascript:Loadlist('1','date_desc')"><i class="ti ti-row-insert-top"></i> Phiếu thu</a></li>
-                <li><a class="dropdown-item" href="javascript:Loadlist('0','date_desc')"><i class="ti ti-row-insert-bottom"></i> Phiếu chi</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { filterEnum = 1 })"> Phiếu thu</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = 0})"> Phiếu chi</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new { filterEnum = 1 })"><i class="ti ti-row-insert-top"></i> Phiếu thu</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Index", new {filterEnum = 0})"><i class="ti ti-row-insert-bottom"></i> Phiếu chi</a></li>
             </ul>
         </div>
         <div class="me-0 btn btn-md p-0">

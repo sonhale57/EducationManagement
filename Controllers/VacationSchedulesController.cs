@@ -10,6 +10,8 @@ using PagedList.Mvc;
 using PagedList;
 using SuperbrainManagement.Models;
 using Microsoft.EntityFrameworkCore;
+using SuperbrainManagement.Helpers;
+using EntityState = System.Data.Entity.EntityState;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -84,7 +86,81 @@ namespace SuperbrainManagement.Controllers
             ViewBag.PagedListRenderOptions = pagedListRenderOptions;
             return View(pagedData);
         }
+        public ActionResult Loadedit_vacation(int id)
+        {
+            var c = db.VacationSchedules.Find(id);
+            return Json(new { id = c.Id, name = c.Description, fromDate = c.Fromdate.Value.ToString("dd/MM/yyyy"),toDate=c.Todate.Value.ToString("dd/MM/yyyy") }, JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public ActionResult Submit_savechanges(string action, int? Id, string Name, DateTime Fromdate, DateTime Todate)
+        {
+            int iduser = Convert.ToInt32(CheckUsers.iduser());
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            string status = "", message = "";
+            if (action == "create")
+            {
+                VacationSchedule vacationSchedule = new VacationSchedule()
+                {
+                    Description = Name,
+                    DateCreate = DateTime.Now,
+                    IdBranch = idbranch,
+                    IdUser = iduser,
+                    Fromdate = Fromdate,
+                    Todate = Todate
+                };
+                db.VacationSchedules.Add(vacationSchedule);
 
+                db.SaveChanges();
+                status = "ok";
+                message = "Đã thêm lịch nghỉ thành công!";
+            }
+            else
+            {
+                if (Id == null)
+                {
+                    return Json(new { status = "error", message = "Không tìm thấy lịch nghỉ." }, JsonRequestBehavior.AllowGet);
+                }
+                var vac = db.VacationSchedules.Find(Id);
+                vac.Description = Name;
+                vac.Fromdate = Fromdate;
+                vac.Todate = Todate;
+                db.Entry(vac).State = EntityState.Modified;
+                db.SaveChanges();
+                status = "ok";
+                message = "Đã cập nhật lịch nghỉ thành công!";
+
+            }
+            var studentClasses = db.StudentJoinClasses.Where(s => s.Fromdate <= Todate && s.Todate >= Fromdate).ToList();
+
+            foreach (var studentClass in studentClasses)
+            {
+                // Cộng thêm số ngày nghỉ vào lịch của học viên
+                int vacationDays = (Todate - Fromdate).Days + 1; // Số ngày nghỉ
+                studentClass.Todate = studentClass.Todate.Value.AddDays(vacationDays);
+                // Lưu thay đổi
+                db.Entry(studentClass).State = EntityState.Modified;
+            }
+            db.SaveChanges();
+            return Json(new { status, message }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Delete_vacation(int id) {
+            var vacation = db.VacationSchedules.Find(id);
+            if (vacation == null)
+            {
+                return Json(new { status = "error", message = "Không tìm thấy lịch nghỉ!" }, JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                //kiểm tra 
+                var joinClass = db.StudentJoinClasses.Where(x => x.Fromdate > vacation.Fromdate && x.Todate < vacation.Todate);
+
+                db.VacationSchedules.Remove(vacation);
+                db.SaveChanges();
+                return Json(new { status = "ok", message = "Đã xóa lịch nghỉ này." }, JsonRequestBehavior.AllowGet);
+            }    
+        }
+
+        #region loaddefault
         // GET: VacationSchedules/Details/5
         public ActionResult Details(int? id)
         {
@@ -199,5 +275,6 @@ namespace SuperbrainManagement.Controllers
             }
             base.Dispose(disposing);
         }
+        #endregion
     }
 }

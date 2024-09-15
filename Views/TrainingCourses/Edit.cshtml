@@ -1,7 +1,8 @@
 ﻿@model SuperbrainManagement.Models.TrainingCourse
 
 @{
-    ViewBag.Title = "Edit";
+    ViewBag.Controller = "Khóa đào tạo";
+    ViewBag.Title = "Chỉnh sửa";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 @using (Html.BeginForm())
@@ -51,26 +52,29 @@
             </div>
 
             <div class="col-md-4 mt-3">
-                @Html.LabelFor(model => model.Fromdate, htmlAttributes: new { @class = "control-label col-md-12" })
+                <label>Ngày bắt đầu</label>
                 <div class="col-md-12">
-                    @Html.EditorFor(model => model.Fromdate, new { htmlAttributes = new { @class = "form-control" } })
+                    <input type="text" name="ngaybatdau" value="@Model.Fromdate.Value.ToString("dd/MM/yyyy")" id="ngaybatdau" class="form-control" onchange="Updatedate()" />
+                    @Html.HiddenFor(model => model.Fromdate, new { htmlAttributes = new { @class = "form-control", @type = "date" } })
                     @Html.ValidationMessageFor(model => model.Fromdate, "", new { @class = "text-danger" })
                 </div>
             </div>
 
             <div class="col-md-4 mt-3">
-                @Html.LabelFor(model => model.Todate, htmlAttributes: new { @class = "control-label col-md-12" })
+                <label>Ngày kết thúc</label>
                 <div class="col-md-12">
-                    @Html.EditorFor(model => model.Todate, new { htmlAttributes = new { @class = "form-control" } })
+                    <input type="text" name="ngayketthuc" value="@Model.Todate.Value.ToString("dd/MM/yyyy")" id="ngayketthuc" class="form-control" onchange="Updatedate()" />
+                    @Html.HiddenFor(model => model.Todate, new { htmlAttributes = new { @class = "form-control", @type = "date" } })
                     @Html.ValidationMessageFor(model => model.Todate, "", new { @class = "text-danger" })
                 </div>
             </div>
 
 
             <div class="col-md-4 mt-3">
-                @Html.LabelFor(model => model.ResgistrationDeadline, htmlAttributes: new { @class = "control-label col-md-12" })
+                <label>Hạn đăng ký</label>
                 <div class="col-md-12">
-                    @Html.EditorFor(model => model.ResgistrationDeadline, new { htmlAttributes = new { @class = "form-control" } })
+                    <input type="text" name="handangky" value="@Model.ResgistrationDeadline.Value.ToString("dd/MM/yyyy")" id="handangky" class="form-control" onchange="Updatedate()" />
+                    @Html.HiddenFor(model => model.ResgistrationDeadline, new { htmlAttributes = new { @class = "form-control", @type = "date" } })
                     @Html.ValidationMessageFor(model => model.ResgistrationDeadline, "", new { @class = "text-danger" })
                 </div>
             </div>
@@ -113,9 +117,18 @@
     </div>
 }
 <script>
+
+    function Updatedate() {
+        var fromDate = $("#ngaybatdau").val().split("/").reverse().join("-");
+        var toDate = $("#ngayketthuc").val().split("/").reverse().join("-");
+        var deadlineDate = $("#handangky").val().split("/").reverse().join("-");
+        $("#Fromdate").val(fromDate);
+        $("#Todate").val(toDate);
+        $("#ResgistrationDeadline").val(deadlineDate);
+    }
     $(function () {
-        $("#Fromdate").datepicker({
-            dateFormat: "dd/mm/yy"
-        });
+        $("#ngaybatdau").datepicker({ dateFormat: "dd/mm/yy", minDate: 0 });
+        $("#ngayketthuc").datepicker({ dateFormat: "dd/mm/yy", minDate: 0 });
+        $("#handangky").datepicker({ dateFormat: "dd/mm/yy", minDate: 0 });
     });
 </script>

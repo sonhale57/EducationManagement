@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Data;
 using System.Data.Entity;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Web;
@@ -63,7 +64,7 @@ namespace SuperbrainManagement.Controllers
                         if (CheckUsers.CheckHQ())
                         {
                             strbtn = "<a href='/trainingcourses/edit/" + reader["Id"] + "' class='me-1'><i class='ti ti-edit text-primary'></i></a>" +
-                                    "<a href='javascript:Delete(" + reader["Id"] + ")' class='me-1'><i class='ti ti-trash text-danger'></i></a>" +
+                                    "<a href='javascript:Delete_trainning(" + reader["Id"] + ")' class='me-1'><i class='ti ti-trash text-danger'></i></a>" +
                                     "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
                                         "<i class=\"ti ti-dots-vertical\"></i>" +
                                     "</a>" +
@@ -98,7 +99,7 @@ namespace SuperbrainManagement.Controllers
                             if (CheckUsers.CheckHQ())
                             {
                                 strbtn = "<a href='/trainingcourses/edit/" + reader["Id"] + "' class='me-1'><i class='ti ti-edit text-primary'></i></a>" +
-                                        "<a href='javascript:Delete(" + reader["Id"] + ")' class='me-1'><i class='ti ti-trash text-danger'></i></a>" +
+                                        "<a href='javascript:Delete_trainning(" + reader["Id"] + ")' class='me-1'><i class='ti ti-trash text-danger'></i></a>" +
                                         "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
                                             "<i class=\"ti ti-dots-vertical\"></i>" +
                                         "</a>" +
@@ -173,23 +174,40 @@ namespace SuperbrainManagement.Controllers
             foreach(var ite in join)
             {
                 tongtien += Double.Parse(train.Price.ToString());
-                count++;    
+                count++;
+                string btn = "";
+                if (ite.StatusPayment!=true)
+                {
+                    if (CheckUsers.CheckHQ())
+                    {
+                        btn += "<a class='btn btn-sm btn-outline-success mt-1 ms-1' href='javascript:Confirm_reg("+ite.IdTraining+","+ite.IdEmployee+")'>Xác nhận</a>";
+                    }
+                    btn += "<a class='btn btn-sm btn-outline-danger mt-1 ms-1' href='javascript:Cancel_reg("+ite.IdTraining+","+ite.IdEmployee+")'>Hủy đăng ký</a>";
+                }
+                else
+                {
+                    if (CheckUsers.CheckHQ())
+                    {
+                        btn += "<a class='btn btn-sm btn-outline-danger mt-1 ms-1' href='javascript:Return_reg(" + ite.IdTraining + "," + ite.IdEmployee + ")'><i class='ti ti-arrow-back'></i></a>";
+                    }
+                }
                 str += "<tr>"
-                    +"<td class='text-center'>"+count+"</td>"
-                    +"<td class='text-left'>"+ite.Employee.Name+"</td>"
-                    +"<td class='text-center'>"+ite.Employee.Phone+"</td>"
-                    + "<td>" + ite.Employee.Email + "</td>"
-                    + "<td class='text-center'>" + ite.Employee.Branch.Name + "</td>"
-                    + "<td class='text-center'>" + (ite.StatusPayment==true?"<span class='text-success'>Đã thanh toán</span>":"Chưa thanh toán") + "</td>"
-                    + "<td class='text-center'>" + (ite.IsRegisteStay==true?"<span class='text-success'>Đăng ký</span>":"Không đăng ký") + "</td>"
-                    +"</tr>";
+                    + "<td class='text-center align-content-center'>" + count + "</td>"
+                    + "<td class='text-left align-content-center'>" + ite.Employee.Name + "</td>"
+                    + "<td class='text-center align-content-center'>" + ite.Employee.Phone + "</td>"
+                    + "<td class='align-content-center'>" + ite.Employee.Email + "</td>"
+                    + "<td class='text-center align-content-center'>" + ite.Employee.Branch.Name + "</td>"
+                    + "<td class='text-center align-content-center'>" + (ite.StatusJoin == true ? "<span class='text-success'>Đã xác nhận</span>" : (ite.StatusPayment==true?"<span class='text-success'>Đã đóng phí</span>":"Chưa xác nhận")) + "</td>"
+                    + "<td class='text-center align-content-center'>" + (ite.IsRegisteStay == true ? "<span class='text-success'>Đăng ký</span>" : "Không đăng ký") + "</td>"
+                    + "<td class='align-content-center text-center'>" + btn + "</td>"
+                    + "</tr>";
             }
             str += "<tr><td colspan=7 class='text-end'>Tổng tiền: <b>"+string.Format("{0:N0} đ",tongtien)+"</b></td></tr>";
             var item = new
             {
                 str,
                 name = train.Name,
-                price =train.Price,
+                price =string.Format("{0:N0}",train.Price),
                 description = train.Description,
                 deadline= train.ResgistrationDeadline.Value.ToString("dd/MM/yyyy"),
                 from = train.Fromdate.Value.ToString("dd/MM/yyyy"),
@@ -264,10 +282,11 @@ namespace SuperbrainManagement.Controllers
         }
         public ActionResult Load_payment(int id)
         {
-            string str = "",strName="",strStatus="";
+            string str = "",strStatus="",strDiscount="";
             int count_chuadongphi = 0;
-            double price = 0;
             int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            var branch = db.Branches.Find(idbranch);
+            int discount = branch.FreeTrainning==null?0:(int)branch.FreeTrainning;
             var tr = db.TrainingCourses.Find(id);
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
@@ -284,8 +303,6 @@ namespace SuperbrainManagement.Controllers
                 int count = 0;
                 while (reader.Read())
                 {
-                    price = Double.Parse(reader["Price"].ToString());
-                    strName = reader["NameCourse"].ToString();
                     count++;
                     str += "<tr>"
                         + "<td class='text-center'>" + count + "</td>"
@@ -302,7 +319,22 @@ namespace SuperbrainManagement.Controllers
                 }
                 reader.Close();
             }
-            double tong = price * count_chuadongphi;
+            if (branch.FreeTrainning>0)
+            {
+                if (discount >= count_chuadongphi)
+                {
+                    count_chuadongphi = 0;
+                    discount = count_chuadongphi;
+                }
+                else
+                {
+                    count_chuadongphi = count_chuadongphi - discount;
+                }
+                strDiscount = "<span class='text-muted fst-italic'>** Cơ sở đang còn ưu đãi phí đào tạo cho " + discount + " nhân sự.</span>";
+            }
+            decimal price = (decimal)tr.Price;
+            
+            decimal tong = price * count_chuadongphi;
             string strphi = string.Format("{0:N0}", price);
             string strtongtien = string.Format("{0:N0}", tong);
             if(count_chuadongphi > 0)
@@ -317,7 +349,184 @@ namespace SuperbrainManagement.Controllers
             {
                 return Json(new { status = "error", message = "Không tìm thấy khóa đào tạo này!" }, JsonRequestBehavior.AllowGet);
             }
-            return Json(new { str,strtongtien,count_chuadongphi,strphi,strName,strStatus}, JsonRequestBehavior.AllowGet);
+            return Json(new { str,strtongtien,count_chuadongphi,discount,strphi,strName=tr.Name,strStatus,strDiscount}, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Confirm_reg(int IdTrainning,int IdEmployee) { 
+            var reg = db.RegistrationTrainings.FirstOrDefault(x=>x.IdTraining == IdTrainning&&x.IdEmployee==IdEmployee);
+            if(reg== null)
+            {
+                return Json(new { status = "error", message = "Không tìm thấy nhân sự này!" },JsonRequestBehavior.AllowGet);
+            }
+            reg.StatusJoin = true;
+            db.Entry(reg).State=EntityState.Modified;
+            db.SaveChanges();
+            return Json(new { status="ok",message="Đã xác nhận cho nhân sự thành công!" },JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Return_reg(int IdTrainning, int IdEmployee)
+        {
+            var reg = db.RegistrationTrainings.FirstOrDefault(x => x.IdTraining == IdTrainning && x.IdEmployee == IdEmployee);
+            if (reg == null)
+            {
+                return Json(new { status = "error", message = "Không tìm thấy nhân sự này!" }, JsonRequestBehavior.AllowGet);
+            }
+            reg.StatusJoin = false;
+            db.Entry(reg).State = EntityState.Modified;
+            db.SaveChanges();
+            return Json(new { status = "ok", message = "Đã hủy xác nhận cho nhân sự thành công!" }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Cancel_reg(int IdTrainning, int IdEmployee)
+        {
+            var reg = db.RegistrationTrainings.FirstOrDefault(x => x.IdTraining == IdTrainning && x.IdEmployee == IdEmployee);
+            if (reg == null)
+            {
+                return Json(new { status = "error", message = "Không tìm thấy nhân sự này!" }, JsonRequestBehavior.AllowGet);
+            }
+            db.RegistrationTrainings.Remove(reg);
+            db.SaveChanges();
+            return Json(new { status = "ok", message = "Đã hủy tham gia cho nhân sự thành công!" }, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Delete_trainning(int id)
+        {
+            var tr = db.TrainingCourses.Find(id);
+            if (tr == null)
+            {
+                return Json(new { status = "error", message = "Không tìm thấy khóa đào tạo này!" }, JsonRequestBehavior.AllowGet);
+            }
+            var reg = db.RegistrationTrainings.Any(x => x.IdTraining==id);
+            if (reg == null)
+            {
+                db.TrainingCourses.Remove(tr);
+                db.SaveChanges();
+                return Json(new { status = "ok", message = "Đã xóa khóa đào tạo thành công!" }, JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                tr.Enable = false;
+                tr.Active = false;
+                db.Entry(tr).State = EntityState.Modified;
+                db.SaveChanges();
+                return Json(new { status = "ok", message = "Khóa đào tạo đã được ẩn thành công!" }, JsonRequestBehavior.AllowGet);
+            }
+        }
+        public ActionResult Submit_paymentFee(int? IdTrainingCourse, int? Number, int? Discount, decimal? Tongtien, string Description, HttpPostedFileBase file)
+        {
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            int iduser = Convert.ToInt32(CheckUsers.iduser());
+            string fileName = "";
+
+            // Kiểm tra IdTrainingCourse không null trước khi xử lý
+            if (IdTrainingCourse == null || Number == null)
+            {
+                return Json(new { status = "error", message = "Thông tin khóa đào tạo hoặc số lượng không hợp lệ!" }, JsonRequestBehavior.AllowGet);
+            }
+            var reg = db.RegistrationTrainings.Where(x => x.IdTraining == IdTrainingCourse && x.IdBranch == idbranch);
+            if (reg == null)
+            {
+                return Json(new { status = "error",message="Cơ sở đang không giáo viên tham gia!" }, JsonRequestBehavior.AllowGet);
+            }
+
+            // Khởi tạo đối tượng TraningPayment
+            var payment = new TraningPayment()
+            {
+                IdTraining = IdTrainingCourse.Value, // Sử dụng .Value vì đã kiểm tra không null
+                Amount = Number.Value,               // Sử dụng .Value cho Number
+                IdBranch = idbranch,
+                IdUser = iduser,
+                Updatetime = DateTime.Now,
+                Number = Number.Value,
+                Status = true,
+                Descript = Description
+            };
+
+            // Nếu có file tải lên
+            if (file != null && file.ContentLength > 0)
+            {
+                // Generate a unique file name
+                fileName = Path.GetFileNameWithoutExtension(file.FileName);
+                string extension = Path.GetExtension(file.FileName);
+                fileName = $"{fileName}_{DateTime.Now:yyyyMMddHHmmssfff}{extension}";
+
+                // Specify the path to save the file
+                string _path = Path.Combine(Server.MapPath("~/Uploads/Images"), fileName);
+                file.SaveAs(_path);
+
+                // Lưu đường dẫn file vào đối tượng payment
+                payment.Image = "/Uploads/Images/" + fileName;
+            }
+
+            // Thêm payment vào database
+            db.TraningPayments.Add(payment);
+
+            foreach (var item in reg)
+            {
+                item.StatusPayment = true;
+                db.Entry(item).State = EntityState.Modified;
+            }
+            db.SaveChanges();
+
+            // Cập nhật transaction
+            Update_Transaction(Tongtien, 0, IdTrainingCourse.Value, "/Uploads/Images/" + fileName);
+
+            // Nếu có Discount, cập nhật chi nhánh
+            if (Discount.HasValue && Discount.Value > 0)
+            {
+                var branch = db.Branches.Find(idbranch);
+                if (branch != null)
+                {
+                    branch.FreeTrainning = branch.FreeTrainning - Discount.Value;
+                    db.Entry(branch).State = EntityState.Modified;
+                    db.SaveChanges();
+                }
+            }
+
+            // Trả về kết quả thành công
+            return Json(new { status = "ok", message = "Đã thanh toán phí thành công!" }, JsonRequestBehavior.AllowGet);
+        }
+
+        string Getcode_transaction(bool type)
+        {
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            string loai = "";
+            int nextCode = 0;
+            if (type == false)
+            {
+                loai = "PC";
+                nextCode = db.Transactions.Where(x => x.IdBranch == idbranch && x.Type == false).Count() + 1;
+            }
+            else if (type == true)
+            {
+                loai = "PT";
+                nextCode = db.Transactions.Where(x => x.IdBranch == idbranch && x.Type == true).Count() + 1;
+            }
+            string code = nextCode.ToString().PadLeft(5, '0');
+            var cn = db.Branches.Find(idbranch);
+            string str = cn.Code + loai + DateTime.Now.Year + code;
+
+            return str;
+        }
+        public void Update_Transaction(decimal? Tongtien,decimal Discount,int IdTrain,string Image)
+        {
+            var trainingCourse = db.TrainingCourses.Find(IdTrain);
+            int IdUser = int.Parse(CheckUsers.iduser());
+            int IdBranch = int.Parse(CheckUsers.idBranch());
+            var transaction = new Transaction()
+            {
+                Code = Getcode_transaction(false),
+                Type = false,
+                IdUser = IdUser,
+                DateCreate = DateTime.Now,
+                Amount = Tongtien,
+                IdBranch = IdBranch,
+                Status = true,
+                Description = "Thanh toán phí đào tạo " +trainingCourse.Name,
+                PaymentMethod = "chuyenkhoan",
+                Name = "Head Quater",
+                Image = Image,
+                Discount = Discount,
+                TotalAmount = Tongtien
+            };
+            db.Transactions.Add(transaction);
+            db.SaveChanges();
         }
 
         [HttpPost]
@@ -376,12 +585,12 @@ namespace SuperbrainManagement.Controllers
                     + "<td class='text-center'>" + Get_resultTraninning(ite.Employee.Id, id) + "</td>";
                 if (CheckUsers.CheckHQ())
                 {
-                    str += "<td class='text-end'><a href='javascript:Rating_Employee(" + id + "," + ite.Employee.Id + ")' class='btn btn-sm btn-success me-1'><i class='ti ti-check text-white'></i> Đánh giá</a></td>";
+                    str += "<td class='text-end'><a href='javascript:loadRatingModal(" + id + "," + ite.Employee.Id + ")' class='btn btn-sm btn-outline-success me-1'> Đánh giá</a></td>";
                 }
                 str += "</tr>";
             }
             string strinfo = "<p><b>Khóa đào tạo:</b> "+train.Name+"</p>"
-                            +"<p><b>Ghi chú:</b> " + train.Description + "</p>"
+                            +"<p><b>Loại:</b> " + train.TrainingType.Name + "</p>"
                             + "<p><b>Phí đào tạo:</b> " + string.Format("{0:N0} đ",train.Price) + "</p>"
                             + "<p><b>Thời gian:</b> " + train.Fromdate.Value.ToString("dd/MM/yyyy") + " - "+train.Todate.Value.ToString("dd/MM/yyyy")+"</p>";
             var item = new
@@ -401,16 +610,52 @@ namespace SuperbrainManagement.Controllers
             };
             return Json(item,JsonRequestBehavior.AllowGet);
         }
-
         [HttpPost]
-        public ActionResult Submit_rating(int IdTrainingCourse,int IdEmployee,bool Result,int TotalScore,int NumberCertification, string SuperbrainScore,string BrandScore,string TeachScore,string SaleScore,string MindsetScore,string SorobanScore,string OnlineScore,string CompleteScore,string ParticipationScore,string DemeanorScore,string ProactiveScore, string Description)
+        public ActionResult LoadRating(int IdTrainingCourse, int IdEmployee)
+        {
+            var e = db.Employees.Find(IdEmployee) as Employee;
+            var tr = db.TrainingCourses.Find(IdTrainingCourse);
+            var result = db.TrainingResults.SingleOrDefault(x => x.IdTraining == IdTrainingCourse && x.IdEmpoyee == IdEmployee);
+
+            var data = new
+            {
+                IdTrainingCourse = IdTrainingCourse,
+                IdEmployee = IdEmployee,
+                Result = result?.Result ?? false, // Mặc định là false nếu chưa có
+                TotalScore = result?.TotalScore ?? 0, // Mặc định là 0 nếu chưa có
+                NumberCertification = result? .NumberCertification ?? 0, // Mặc định chuỗi rỗng
+                SuperbrainScore = result?.SuperbrainScore ?? "",
+                BrandScore = result?.BrandScore ?? "",
+                TeachScore = result?.TeachScore ?? "",
+                SaleScore = result?.SaleScore ?? "",
+                MindsetScore = result?.MindsetScore ?? "",
+                SorobanScore = result?.SorobanScore ?? "",
+                OnlineScore = result?.OnlineScore ?? "",
+                CompleteScore = result?.CompleteScore ?? "",
+                ParticipationScore = result?.ParticipationScore ?? "",
+                DemeanorScore = result?.DemeanorScore ?? "",
+                ProactiveScore = result?.ProactiveScore ?? "",
+                Description = result?.Description ?? ""
+            };
+
+            return Json(new { status = "ok",nameEmployee=e.Name,nameCourse=tr.Name, data }, JsonRequestBehavior.AllowGet);;
+        }
+        [HttpPost]
+        public ActionResult Submit_rating(int IdTrainingCourse, int IdEmployee, bool Result, int TotalScore, int NumberCertification,
+                                  string SuperbrainScore, string BrandScore, string TeachScore, string SaleScore,
+                                  string MindsetScore, string SorobanScore, string OnlineScore, string CompleteScore,
+                                  string ParticipationScore, string DemeanorScore, string ProactiveScore, string Description)
         {
             string status = "ok";
-            var type = db.TrainingResults.SingleOrDefault(x => x.IdTraining == IdTrainingCourse&&x.IdEmpoyee==IdEmployee);
-            var e = db.Employees.Find(IdEmployee);
-            var reg = db.RegistrationTrainings.SingleOrDefault(x=>x.IdTraining==IdTrainingCourse&& x.IdEmployee==IdEmployee);
+
+            // Tìm bản ghi đánh giá của giáo viên trong khóa đào tạo
+            var type = db.TrainingResults.SingleOrDefault(x => x.IdTraining == IdTrainingCourse && x.IdEmpoyee == IdEmployee);
+            var e = db.Employees.Find(IdEmployee);  // Tìm giáo viên
+            var reg = db.RegistrationTrainings.SingleOrDefault(x => x.IdTraining == IdTrainingCourse && x.IdEmployee == IdEmployee);  // Tìm bản ghi đăng ký khóa học
+
             if (type == null)
             {
+                // Nếu chưa có đánh giá, thêm mới
                 var rate = new TrainingResult()
                 {
                     IdTraining = IdTrainingCourse,
@@ -431,33 +676,68 @@ namespace SuperbrainManagement.Controllers
                     OnlineScore = OnlineScore,
                     Description = Description,
                     DateCreate = DateTime.Now,
-                    IdUser = Convert.ToInt32(CheckUsers.iduser())
+                    IdUser = Convert.ToInt32(CheckUsers.iduser())  // Lấy id người dùng hiện tại
                 };
-                db.TrainingResults.Add(rate);
+
+                db.TrainingResults.Add(rate);  // Thêm vào cơ sở dữ liệu
                 reg.IsPass = Result;
                 reg.Result = TotalScore;
-                db.Entry(reg);
+                db.Entry(reg).State = EntityState.Modified;
                 db.SaveChanges();
 
+                // Nếu kết quả đạt, cập nhật thông tin chính thức của giáo viên
                 if (Result == true)
                 {
                     e.IsOfficial = true;
                     e.CertificateNumber = NumberCertification;
-                    db.Entry(e);
+                    db.Entry(e).State = EntityState.Modified;
                     db.SaveChanges();
-                    Create_Account(IdEmployee);
+                    Create_Account(IdEmployee);  // Tạo tài khoản cho giáo viên
                 }
             }
             else
             {
-                status = "Giáo viên này đã được đánh giá trước đó!";
+                // Nếu đã có đánh giá, cập nhật kết quả mới
+                type.Result = Result;
+                type.TotalScore = TotalScore;
+                type.NumberCertification = NumberCertification;
+                type.SaleScore = SaleScore;
+                type.SorobanScore = SorobanScore;
+                type.SuperbrainScore = SuperbrainScore;
+                type.BrandScore = BrandScore;
+                type.TeachScore = TeachScore;
+                type.MindsetScore = MindsetScore;
+                type.CompleteScore = CompleteScore;
+                type.DemeanorScore = DemeanorScore;
+                type.ParticipationScore = ParticipationScore;
+                type.ProactiveScore = ProactiveScore;
+                type.OnlineScore = OnlineScore;
+                type.Description = Description;
+
+                db.Entry(type).State = EntityState.Modified;
+                db.SaveChanges();
+
+                reg.IsPass = Result;
+                reg.Result = TotalScore;
+                db.Entry(reg).State = EntityState.Modified;
+                db.SaveChanges();
+
+                if (Result == true && e.IsOfficial == false)
+                {
+                    e.IsOfficial = true;
+                    e.CertificateNumber = NumberCertification;
+                    db.Entry(e).State = EntityState.Modified;
+                    db.SaveChanges();
+                }
             }
+
             var item = new
             {
                 status
             };
             return Json(item, JsonRequestBehavior.AllowGet);
         }
+
         public static string GetLastName(string fullName)
         {
             if (string.IsNullOrEmpty(fullName))
@@ -530,6 +810,14 @@ namespace SuperbrainManagement.Controllers
                     }
                 }
             }
+        }
+        public ActionResult Statistics()
+        {
+            return View();
+        }
+        public  ActionResult PaymentStatistics()
+        {
+            return View();
         }
 
         #region DefaultController

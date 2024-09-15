@@ -100,12 +100,14 @@ namespace SuperbrainManagement.Models
         [StringLength(50)]
         public string ContractNumber { get; set; }
 
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime? ContractExpire { get; set; }
 
         public bool? Enable { get; set; }
 
         public bool? Active { get; set; }
 
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime? DateExpire { get; set; }
 
         public bool? StatusUsageBrand { get; set; }
@@ -124,6 +126,7 @@ namespace SuperbrainManagement.Models
 
         public bool? Unlock { get; set; }
 
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime? GrandOpeningDay { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

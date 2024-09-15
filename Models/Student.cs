@@ -41,7 +41,7 @@
         public string Code { get; set; }
 
         [Display(Name = "Sinh nhật")]
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime? DateOfBirth { get; set; }
 
         [StringLength(10)]
@@ -82,7 +82,7 @@
         public string Email { get; set; }
 
         [Display(Name = "Sinh nhật phụ huynh")]
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime? ParentDateOfBirth { get; set; }
 
         [StringLength(50)]
@@ -108,7 +108,7 @@
         [StringLength(50)]
         public string Facebook { get; set; }
 
-        [StringLength(50)]
+        [StringLength(500)]
         [Display(Name = "Mong muốn")]
         public string Hopeful { get; set; }
 

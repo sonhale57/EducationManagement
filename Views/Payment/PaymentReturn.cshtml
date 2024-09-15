@@ -1,0 +1,12 @@
+﻿@{
+    ViewBag.Title = "Kết quả giao dịch";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Kết quả giao dịch thanh toán</h2>
+
+<div class="alert @((ViewBag.Message.Contains("thành công") ? "alert-success" : "alert-danger"))">
+    <p>@ViewBag.Message</p>
+</div>
+
+<a href="@Url.Action("Index", "Home")" class="btn btn-primary">Về trang chủ</a>

@@ -1,0 +1,62 @@
+﻿@{
+    ViewBag.Title = "ShowTimeTableData";
+    int stt = 1;
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In thời khóa biểu : Phần mềm quản lý Superbrain</title>
+    <link rel="shortcut icon" type="image/png" href="~/assets/images/logos/icon web.png" />
+    <link rel="stylesheet" href="~/assets/css/styles.css" />
+    <link href="~/assets/css/select2.css" rel="stylesheet" />
+    <script src="~/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+    <script src="~/assets/js/main.js"></script>
+    @Scripts.Render("~/bundles/jquery")
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/js/jquery-confirm.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="card mt-3">
+            <div class="card-body">
+                <div class="d-sm-flex d-block align-items-center justify-content-between align-content-center mt-3 me-5">
+                </div>
+            </div>
+        </div>
+        <h3 class="text-center">THỜI KHOÁ BIỂU</h3>
+        <p>Tên học viên: @ViewBag.StudentName</p>
+        <p>Khoá học: @ViewBag.CourseName</p>
+        <p>Lớp: @ViewBag.ClassName</p>
+        <p>Ghi chú:</p>
+        <table class="table table-bordered table-striped">
+            <thead class="bg-success text-white">
+                <tr style="height:30px;">
+                    <th class="text-center">Buổi</th>
+                    <th class="text-center">Ngày</th>
+                    <th class="text-center">Thứ</th>
+                    <th class="text-center">Giờ Học</th>
+                    <th class="text-center">Phòng học</th>
+                    <th class="text-center">Giáo viên</th>
+                </tr>
+            </thead>
+            <tbody id="datarow">
+                @foreach (var item in ViewBag.timeTableData)
+                {
+                    <tr style="height:40px;">
+                        <td class="text-center align-content-center">Buổi @stt</td>
+                        <td class="text-center align-content-center">@item.Date</td>
+                        <td class="text-center align-content-center">@item.DayOfWeek</td>
+                        <td class="text-center align-content-center">@item.TimeSlot</td>
+                        <td class="text-center align-content-center">@item.RoomName</td>
+                        <td class="text-center align-content-center">@item.TeacherName</td>
+                    </tr>
+                    stt++;
+                }
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

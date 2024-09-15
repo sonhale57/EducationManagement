@@ -87,7 +87,8 @@
                                     <div class="form-group row mt-2">
                                         <label class="form-control-label ms-2">Sinh nhật</label>
                                         <div class="col-lg-12">
-                                            @Html.EditorFor(model => model.DateOfBirth, new { htmlAttributes = new { @class = "form-control", @placeholder = "MM/dd/yyyy" } })
+                                            @Html.EditorFor(model => model.DateOfBirth, new { htmlAttributes = new { @class = "form-control", @placeholder = "Ngày sinh của học viên" } })
+                                            <input type="hidden" name="Ngaysinh" id="Ngaysinh" value="" />
                                         </div>
                                     </div>
                                     <div class="form-group row mt-2">
@@ -134,7 +135,8 @@
                                     <div class="form-group row mt-2">
                                         <label class="form-control-label ms-2">Ngày sinh</label>
                                         <div class="col-lg-12">
-                                            @Html.EditorFor(model => model.ParentDateOfBirth, new { htmlAttributes = new { @class = "form-control", @placeholder = "MM/dd/yyyy" } })
+                                            @Html.EditorFor(model => model.ParentDateOfBirth, new { htmlAttributes = new { @class = "form-control", @placeholder = "Ngày sinh của phụ huynh" } })
+                                            <input type="hidden" name="Ngaysinhphuhuynh" id="Ngaysinhphuhuynh" value="" />
                                         </div>
                                     </div>
                                     <div class="form-group row mt-2">
@@ -142,7 +144,7 @@
                                         <div class="col-lg-12">
                                             @{
                                                 var relationship = new List<SelectListItem>
-                                                                                                                                                                                                            {
+                                                                                    {
                                                                 new SelectListItem { Text = "--", Value = "" },
                                                                 new SelectListItem { Text = "Cha mẹ", Value = "Cha mẹ" },
                                                                 new SelectListItem { Text = "Ông bà", Value = "Ông bà" },
@@ -179,7 +181,7 @@
                                             <label class="form-control-label ms-2">Phụ huynh biết qua</label>
                                             @{
                                                 var bietqua = new List<SelectListItem>
-                                                                                                                                                                                                            {
+                                                                                    {
                                                                 new SelectListItem { Text = "--", Value = "" },
                                                                 new SelectListItem { Text = "Bạn bè", Value = "Bạn bè" },
                                                                 new SelectListItem { Text = "Website", Value = "Website" },
@@ -201,36 +203,35 @@
                                     <div class="form-group mt-2">
                                         <label class="col-md-12" for="mongmuon">Phụ huynh mong muốn</label>
                                         <label class="radio col-md-4 mt-1">
-                                            <input value="Phát triển trí não" name="mongmuon" id="mongmuon" type="checkbox"> Phát triển trí não
+                                            <input value="Phát triển trí não" name="mongmuon" type="checkbox"> Phát triển trí não
                                         </label>
                                         <label class="radio col-md-4 mt-1">
-                                            <input value="Phát triển trí nhớ" name="mongmuon" id="mongmuon" type="checkbox"> Phát triển trí nhớ
+                                            <input value="Phát triển trí nhớ" name="mongmuon" type="checkbox"> Phát triển trí nhớ
                                         </label>
                                         <label class="radio col-md-4 mt-1">
-                                            <input value="Tăng sự tập trung" name="mongmuon" id="mongmuon" type="checkbox"> Tăng sự tập trung
+                                            <input value="Tăng sự tập trung" name="mongmuon" type="checkbox"> Tăng sự tập trung
                                         </label>
                                         <label class="radio col-md-4 mt-1">
-                                            <input value="Nâng cao kết quả học tập" name="mongmuon" id="mongmuon" type="checkbox"> Nâng cao kết quả học tập
+                                            <input value="Nâng cao kết quả học tập" name="mongmuon" type="checkbox"> Nâng cao kết quả học tập
                                         </label>
                                         <label class="radio col-md-4 mt-1">
-                                            <input value="Làm toán siêu tốc" name="mongmuon" id="mongmuon" type="checkbox"> Làm toán siêu tốc
+                                            <input value="Làm toán siêu tốc" name="mongmuon" type="checkbox"> Làm toán siêu tốc
                                         </label>
                                         <label class="radio col-md-4 mt-1">
-                                            <input value="Tăng sự tự tin" name="mongmuon" id="mongmuon" type="checkbox"> Tăng sự tự tin
+                                            <input value="Tăng sự tự tin" name="mongmuon" type="checkbox"> Tăng sự tự tin
                                         </label>
                                         <label class="radio col-md-4 mt-1">
-                                            <input value="Phát triển tư duy" name="mongmuon" id="mongmuon" type="checkbox"> Phát triển tư duy
+                                            <input value="Phát triển tư duy" name="mongmuon" type="checkbox"> Phát triển tư duy
                                         </label>
                                         <label class="radio col-md-4 mt-1">
-                                            <input value="Khác" name="mongmuon" id="mongmuon" type="checkbox"> Khác
+                                            <input value="Khác" name="mongmuon" type="checkbox"> Khác
                                         </label>
                                     </div>
-                                    <input type="hidden" name="Hopeful" id="Hopeful" value="" />
+                                    @Html.HiddenFor(model => model.Hopeful, new { htmlAttributes = new { @class = "form-control" } })
                                     <input type="hidden" name="DateCreate" id="DateCreate" value="@Model.DateCreate.ToShortDateString()" />
                                     @Html.HiddenFor(model => model.IdBranch)
                                     @Html.HiddenFor(model => model.Status)
                                     @Html.HiddenFor(model => model.Enable)
-                                    @Html.HiddenFor(model => model.IdUser)
                                 </div>
                             </div>
                             <a href="javascript:Submit_editStudent()" class="btn btn-success btn-md mt-3"><i class="ti ti-edit"></i> Chỉnh sửa thông tin</a>
@@ -260,7 +261,7 @@
                             <label class="text-success">
                                 Ngày hẹn
                             </label>
-                            <input type="date" name="Ngayhen" value="" class="form-control" id="Ngayhen" />
+                            <input type="text" name="Ngayhen" value="" class="form-control" id="Ngayhen" placeholder="Chọn lịch hẹn"/>
                         </div>
                         <div class="form-group mt-2">
                             <label class="text-success">
@@ -356,7 +357,7 @@
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Ngày bắt đầu</label>
                     <div class="col-lg-9">
-                        <input type="text" name="ngaybatdau" value="" id="ngaybatdau" class="form-control" onchange="javascript: Onchange_todate()" />
+                        <input type="text" name="ngaybatdau" value="" id="ngaybatdau" class="form-control" onchange="javascript: Loadlist_xetlop()" />
                     </div>
                 </div>
 
@@ -368,7 +369,7 @@
                 </div><br />
                 <b>Thời khóa biểu</b>
                 <div class="form-group row mt-2">
-                    <table cellpadding="0" cellspacing="0" border="0" class="table">
+                    <table cellpadding="0" cellspacing="0" border="0" class="table table-striped">
                         <thead>
                             <tr>
                                 <th class="text-center">STT</th>
@@ -384,7 +385,7 @@
                 </div>
                 <b>Lịch học</b>
                 <div class="form-group row mt-2">
-                    <table cellpadding="0" cellspacing="0" border="0" class="table">
+                    <table cellpadding="0" cellspacing="0" border="0" class="table table-striped">
                         <thead>
                             <tr>
                                 <th class="text-center">Buổi</th>
@@ -465,7 +466,7 @@
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Gia hạn</label>
                     <div class="col-lg-9">
-                        <input type="date" name="todate" value="" id="todate_giahannew" class="form-control" onchange="Check_max(this)"/>
+                        <input type="text" name="todate" value="" id="todate_giahannew" class="form-control" onchange="Check_max(this)"/>
                     </div>
                 </div>
             </div>
@@ -576,7 +577,7 @@
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Lớp học</label>
                     <div class="col-lg-9">
-                        <select id="IdClass_exchange" class="form-control" onchange="onchangeSchedule()">
+                        <select id="IdClass_exchange" class="form-control" onchange="onchangeScheduleExchange()">
                         </select>
                     </div>
                 </div>
@@ -623,7 +624,8 @@
 
 <script>
     $(document).ready(function () {
-        var hopefulValues = "@Model.Hopeful".split(', '); // Chia nhỏ các giá trị đã lưu
+        var hopeful = $("#Hopeful").val();
+        var hopefulValues = hopeful.split(', '); // Chia nhỏ các giá trị đã lưu
         // Tick các checkbox tương ứng với giá trị đã lưu
         $.each(hopefulValues, function (index, value) {
             // Sử dụng hàm trên để giải mã
@@ -702,12 +704,14 @@
         if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
         isProcessing = true; // Đặt cờ đang xử lý
         $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+
+        var Ngayhen = $("#Ngayhen").val().split("/").reverse().join("-");
          $.ajax({
              url: '@Url.Action("Submit_tuvan", "Students")',
              type: "POST",
              data: {
                  Noidung: $("#Noidung").val(),
-                 Ngayhen: $("#Ngayhen").val(),
+                 Ngayhen: Ngayhen,
                  idStudent: $("#idStudent").val()
              },
              success: function (data) {
@@ -765,6 +769,10 @@
             mongmuons.push($(this).val());
         });
         $("#Hopeful").val(mongmuons.join(', '));
+        var DateOfBirth = $("#DateOfBirth").val().split("/").reverse().join("-");
+        var ParentDateOfBirth = $("#ParentDateOfBirth").val().split("/").reverse().join("-");
+         $("#Ngaysinh").val(DateOfBirth);
+         $("#Ngaysinhphuhuynh").val(ParentDateOfBirth);
         var formData = new FormData(document.getElementById("form_editStudent"));
         $.ajax({
             url: '@Url.Action("Submit_editStudent", "Students")',
@@ -773,7 +781,7 @@
             contentType: false,  // Không đặt `contentType` khi sử dụng FormData
             processData: false,  // Không xử lý dữ liệu thành chuỗi
             success: function (data) {
-                if (data.status = "ok") {
+                if (data.status == "ok") {
                     showSuccess("Đã cập nhật thành công!", 3000);
                 } else {
                     showError(data.message, 3000);
@@ -789,20 +797,54 @@
         });
     }
 
-    function Loadlist_xetlop(idregistration, idcourse) {
+    $(function () {
+        $("#DateOfBirth").datepicker({ dateFormat: "dd/mm/yy" });
+        $("#ParentDateOfBirth").datepicker({ dateFormat: "dd/mm/yy" });
+
+        $("#Ngayhen").datepicker({ dateFormat: "dd/mm/yy", minDate: 0 });
+        if ($("#Ngayhen").val() == "") {
+            $("#Ngayhen").datepicker("setDate", new Date());
+        }
+
+        $("#todate_giahannew").datepicker({ dateFormat: "dd/mm/yy", minDate: 0 });
+        if ($("#todate_giahannew").val() == "") {
+            $("#todate_giahannew").datepicker("setDate", new Date());
+        }
+
+        $("#fromdate_exchange").datepicker({ dateFormat: "dd/mm/yy" });
+        $("#todate_exchange").datepicker({ dateFormat: "dd/mm/yy" });
+
+        $("#ngayketthuc").datepicker({ dateFormat: "dd/mm/yy" });
+        $("#ngaybatdau").datepicker({ dateFormat: "dd/mm/yy", minDate: 0 });
+        $("#ngaybatdau").attr("readonly", "readonly");
+        if ($("#ngaybatdau").val() == "") {
+            $("#ngaybatdau").datepicker("setDate", new Date());
+        }
+    });
+
+    function Xetlop_modal(idregistration, idcourse) {
+        $("#IdRegistration").val(idregistration);
+        $("#IdCourse").val(idcourse);
+        Loadlist_xetlop();
+        // Mở modal
+        $('#exampleModal').modal('show');
+    }
+    function Loadlist_xetlop() {
+        var fromDate = $("#ngaybatdau").val().split("/").reverse().join("-");
         $.ajax({
             url: '@Url.Action("Load_xetlop", "Students")',
             type: "GET",
             data: {
-                idCourse: idcourse,
-                idRegistration: idregistration,
+                idRegistration: $("#IdRegistration").val(),
+                idCourse: $("#IdCourse").val(),
                 idStudent: $("#idStudent").val(),
-                fromdate: $("ngaybatdau").val()
+                fromdate: fromDate
             },
             success: function (data) {
-                $('#IdRegistration').val(idregistration);
+                $('#IdRegistration').val($("#IdRegistration").val());
                 $('#RegistrationCode').val(data.registrionCode);
                 $('#IdCourse').html(data.str);
+                $('#ngayketthuc').val(data.todate);
                 if (data.statusStudent == false) {
                     $("#btnSubmitXetlop").addClass("hideof");
                     showError("Không thể xét lớp cho học viên này!", 5000);
@@ -816,20 +858,12 @@
         });
     }
 
-    $(function () {
-        //$("#ngaybatdau").datepicker({ dateFormat: "dd/mm/yy" });
-        $("#ngayketthuc").datepicker({ dateFormat: "dd/mm/yy" });
-        $("#ngaybatdau").datepicker({ dateFormat: "dd/mm/yy", minDate: 0 });
-        $("#ngaybatdau").attr("readonly", "readonly");
-        if ($("#ngaybatdau").val() == "") {
-            $("#ngaybatdau").datepicker("setDate", new Date());
-        }
-    });
-
     function Submit_xetlop() {
         if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
         isProcessing = true; // Đặt cờ đang xử lý
         $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        var fromDate = $("#ngaybatdau").val().split("/").reverse().join("-");
+        var toDate = $("#ngayketthuc").val().split("/").reverse().join("-");
         $.ajax({
             url: '@Url.Action("Submit_xetlop", "Students")',
             type: "POST",
@@ -837,8 +871,8 @@
                 idCourse: $("#IdCourse").val(),
                 idRegistration: $("#IdRegistration").val(),
                 idClass: $("#IdClass").val(),
-                fromdate: $("#ngaybatdau").val(),
-                todate: $("#ngayketthuc").val(),
+                fromdate: fromDate,
+                todate: toDate,
                 idStudent: $("#idStudent").val()
             },
             success: function (data) {
@@ -859,17 +893,11 @@
         });
     }
 
-    function Xetlop_modal(idregistration, idcourse) {
-        Loadlist_xetlop(idregistration, idcourse);
-        // Mở modal
-        $('#exampleModal').modal('show');
-    }
-    //loadSchedule();
     function loadSchedule() {
         const idClass = $("#IdClass").val();
-        const fromDate = $("#fromdate").val();
-        const toDate = $("#todate").val();
         const idCourse = $("#IdCourse").val();
+        var fromDate = $("#ngaybatdau").val().split("/").reverse().join("-");
+        var toDate = $("#ngayketthuc").val().split("/").reverse().join("-");
 
         $("#idClassShowTimeTbl").val(parseInt(idClass));
         $("#idCourseShowTimeTbl").val(parseInt(idCourse));
@@ -893,12 +921,12 @@
                     let index = 1;
                     let stt = 1;
                     $.each(data.schedulesbyClass, function (key, value) {
-                        $('#datarow').append('<tr><td class="text-center">' + index++ + '</td><td class="text-center">' + value.DayOfWeek + '</td><td>' + value.TimeSlot + '</td><td class="text-center">' + value.HourQuantity + '</td><td>' + value.TeacherName + '</td></tr>');
+                        $('#datarow').append('<tr style="height:35px;"><td class="text-center align-content-center">' + index++ + '</td><td class="text-center align-content-center">' + value.DayOfWeek + '</td><td class="align-content-center">' + value.TimeSlot + '</td><td class="text-center align-content-center">' + value.HourQuantity + '</td><td class="align-content-center">' + value.TeacherName + '</td></tr>');
                     });
 
                     $.each(data.timeTableData, function (index, value) {
                         $('#timetable_datarow')
-                            .append('<tr style="height:30px;"><td>Buổi ' + stt++ + '</td><td>' + value.Date + '</td><td>' + value.DayOfWeek + '</td><td>' + value.TimeSlot + '</td><td>' + value.HourQuantity + '</td></tr>');
+                            .append('<tr style="height:35px;"><td class="align-content-center">Buổi ' + stt++ + '</td><td class="align-content-center">' + value.Date + '</td><td class="align-content-center">' + value.DayOfWeek + '</td><td class="align-content-center">' + value.TimeSlot + '</td><td class="align-content-center">' + value.HourQuantity + '</td></tr>');
                     });
                 }
             },
@@ -966,8 +994,8 @@
         var todate_giahannew = input.value;
 
         // Chuyển đổi chuỗi ngày thành đối tượng Date
-        var dateGiaHan = new Date(todate_giahan);
-        var dateGiaHanNew = new Date(todate_giahannew);
+        var dateGiaHan = parseDate(todate_giahan);
+        var dateGiaHanNew = parseDate(todate_giahannew);
 
         // Tính toán sự chênh lệch ngày
         var differenceInTime = dateGiaHanNew.getTime() - dateGiaHan.getTime();
@@ -975,10 +1003,29 @@
 
         // Kiểm tra nếu chênh lệch vượt quá 14 ngày
         if (differenceInDays > 14) {
-            showError("Ngày gia hạn mới không được vượt quá 14 ngày so với ngày kết thúc.",3000);
-            // Đặt lại giá trị ngày về rỗng
-            input.value = "";
+            // Cộng thêm 14 ngày cho ngày hiện tại
+            var newDate = new Date(dateGiaHan);
+            newDate.setDate(newDate.getDate() + 14);
+
+            // Chuyển đổi ngày mới sang định dạng dd/MM/yyyy
+            var formattedDate = formatDate(newDate);
+
+            showError("Ngày gia hạn mới không được vượt quá 14 ngày so với ngày kết thúc.", 3000);
+            // Đặt giá trị input thành ngày mới
+            input.value = formattedDate;
         }
+    }
+    // Hàm định dạng ngày theo kiểu dd/MM/yyyy
+    function formatDate(date) {
+        var day = String(date.getDate()).padStart(2, '0');
+        var month = String(date.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0 nên cần +1
+        var year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+    // Hàm chuyển đổi từ chuỗi dd/MM/yyyy sang đối tượng Date
+    function parseDate(dateStr) {
+        var parts = dateStr.split("/");
+        return new Date(parts[2], parts[1] - 1, parts[0]);  // Chú ý tháng bắt đầu từ 0 trong đối tượng Date
     }
     function Submit_giahan() {
         // Kiểm tra nếu người dùng chưa chọn ngày mới để gia hạn
@@ -989,13 +1036,14 @@
         if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
         isProcessing = true; // Đặt cờ đang xử lý
         $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        var toDate = $("#todate_giahannew").val().split("/").reverse().join("-");
         $.ajax({
             url: '@Url.Action("Submit_giahan", "Students")',
             type: 'POST',
             data: {
                 IdRegistration: $("#IdRegistration_giahan").val(),
                 IdCourse: $("#IdCourse_giahan").val(),
-                Todate: $("#todate_giahannew").val()
+                Todate: toDate
             },
             success: function (data) {
                 if (data.status == "ok") {
@@ -1049,6 +1097,7 @@
         if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
         isProcessing = true; // Đặt cờ đang xử lý
         $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        var toDate = $("#todate_deactive").val().split("/").reverse().join("-");
         $.ajax({
             url: '@Url.Action("Submit_deactive", "Students")',
             type: 'POST',
@@ -1056,7 +1105,7 @@
                 IdRegistration: $("#IdRegistration_deactive").val(),
                 IdCourse: $("#IdCourse_deactive").val(),
                 IdClass: $("#IdClass_deactive").val(),
-                Todate: $("#todate_deactive").val()
+                Todate: toDate
             },
             success: function (data) {
                 if (data.status == "ok") {
@@ -1071,7 +1120,7 @@
                 $(".loader").html("");
             },
             error: function () {
-                showError('Error extend student', 3000);
+                showError('Lỗi khi kích hoạt lại khóa học.', 3000);
                 isProcessing = false;
                 $(".loader").html("");
             }
@@ -1099,6 +1148,27 @@
             }
         });
     }
+    function onchangeScheduleExchange() {
+        $("#datarow_exchange").html("");
+        $.ajax({
+            url: '@Url.Action("Onchange_schedule", "Students")',
+            type: "GET",
+            data: {
+                idClass: $("#IdClass_exchange").val()
+            },
+            success: function (data) {
+                if (data.status = "ok") {
+                    let index = 1;
+                    $.each(data.schedulesbyClass, function (key, value) {
+                        $('#datarow_exchange').append('<tr><td class="text-center">' + index++ + '</td><td class="text-center">' + value.DayOfWeek + '</td><td>' + value.TimeSlot + '</td><td class="text-center">' + value.HourQuantity + '</td><td>' + value.TeacherName + '</td></tr>');
+                    });
+                }
+            },
+            error: function (xhr, error) {
+                console.log("error: " + error);
+            }
+        });
+    }
     function Capnhat_modal(idregistration, idcourse) {
         $.ajax({
             url: '@Url.Action("Load_exchange", "Students")',
@@ -1115,6 +1185,7 @@
                 $('#fromdate_exchange').val(data.fromdate);
                 $('#todate_exchange').val(data.todate);
                 $('#exchangeCourseModal').modal('show');
+                onchangeScheduleExchange();
             },
             error: function (xhr, error) {
                 console.log("lỗi" + error);
@@ -1125,6 +1196,8 @@
         if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
         isProcessing = true; // Đặt cờ đang xử lý
         $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        var fromDate = $("#fromdate_exchange").val().split("/").reverse().join("-");
+        var toDate = $("#todate_exchange").val().split("/").reverse().join("-");
         $.ajax({
             url: '@Url.Action("Submit_exchange", "Students")',
             type: 'POST',
@@ -1132,8 +1205,8 @@
                 IdRegistration: $("#IdRegistration_exchange").val(),
                 IdCourse: $("#IdCourse_exchange").val(),
                 IdClass: $("#IdClass_exchange").val(),
-                Todate: $("#todate_exchange").val(),
-                Fromdate: $("#fromdate_exchange").val()
+                Todate: toDate,
+                Fromdate: fromDate
             },
             success: function (data) {
                 if (data.status == "ok") {

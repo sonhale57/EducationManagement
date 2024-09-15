@@ -27,8 +27,7 @@
                 <li><a class="dropdown-item" href="javascript:Loadlist('date_desc')"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
             </ul>
         </div>
-        <a href="/branches/create" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
-        <a href="/branchgroups" class="btn btn-md btn-primary ms-0"><i class="ti ti-layers-subtract"></i> Cụm cơ sở</a>
+        <a href="/branches/create" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>
     </div>
 </div>
 <table class="table fs-3">
@@ -37,18 +36,20 @@
             <th class="text-center">STT</th>
             <th class="text-center">Mã</th>
             <th>Tên cơ sở</th>
-            <th class="text-center">Ngày hết hạn hợp đồng</th>
-            <th class="text-center">Phí tài khoản Online</th>
-            <th class="text-center">Phí sử dụng thương hiệu</th>
+            <th class="text-center">Số điện thoại</th>
+            <th class="text-center">Địa chỉ Email</th>
+            <th class="text-center">Hạn hợp đồng</th>
             <th class="text-center">Tình trạng</th>
             <th class="text-end">Thao tác</th>
         </tr>
     </thead>
     <tbody id="showlist"></tbody>
+    <tr class="loader"></tr>
 </table>
 <script>
     Loadlist();
     function Loadlist(sort) {
+        $(".loader").html("<td colspan=8 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
         $.ajax({
             url: '@Url.Action("Loadlist", "Branches")',
             type: "GET",
@@ -59,6 +60,7 @@
             success: function (data) {
                 console.log(data);
                 $('#showlist').html(data.str);
+                $(".loader").html("");
             },
             error: function (xhr, error) {
                 console.log(error);

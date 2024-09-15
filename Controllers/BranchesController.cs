@@ -46,9 +46,11 @@ namespace SuperbrainManagement.Controllers
                         "<td class='text-center align-content-center'>"+count+"</td>" +
                         "<td class='text-center align-content-center'>" + cn2.Code+"</td>" +
                         "<td class='text-left align-content-center'>" + cn2.Name+"</td>" +
+                        "<td class='text-center align-content-center'>" + (cn2.Phone != null ? cn2.Phone : "-") +"</td>" +
+                        "<td class='text-center align-content-center'>" + (cn2.Email != null ? cn2.Email : "-") +"</td>" +
+                        //"<td class='text-center align-content-center'>" + (cn2.DateExpire != null ? cn2.DateExpire.Value.ToString("dd/MM/yyyy") : "-") +"</td>" +
+                        //"<td class='text-center align-content-center'>" + (cn2.DateExpireOnline != null ? cn2.DateExpireOnline.Value.ToString("dd/MM/yyyy") : "-") +"</td>" +
                         "<td class='text-center align-content-center'>" + (cn2.ContractExpire != null ? cn2.ContractExpire.Value.ToString("dd/MM/yyyy") : "-") +"</td>" +
-                        "<td class='text-center align-content-center'>" + (cn2.DateExpire != null ? cn2.DateExpire.Value.ToString("dd/MM/yyyy") : "-") +"</td>" +
-                        "<td class='text-center align-content-center'>" + (cn2.DateExpireOnline != null ? cn2.DateExpireOnline.Value.ToString("dd/MM/yyyy") : "-") +"</td>" +
                         "<td class='text-center align-content-center'>" + (cn2.StatusActiveOnline==true?"<span class='text-success'>Đã thanh toán</span>":"<span class='text-danger'>Chưa thanh toán</span>") + "</td>" +
                         "<td class='text-end align-content-center'>" +
                         "<a href='/branches/edit/"+cn2.Id+"'><i class='ti ti-edit text-primary'></i></a>" +
@@ -122,6 +124,17 @@ namespace SuperbrainManagement.Controllers
             return View(pagedData);
         }
 
+        public ActionResult PaymentList()
+        {
+            var config = db.Configurations.OrderByDescending(x=>x.Id).ToList();
+            if (config == null)
+            {
+                ViewBag.Month = new SelectList(config, "Không tìm thấy dữ liệu");
+            }
+            ViewBag.Month = new SelectList(config, "TimePayment","TimePayment" );
+            ViewBag.IdBranch = new SelectList(db.Branches.Where(x=>x.Enable==true), "Id","Name" );
+            return View();
+        } 
         // GET: Branches/Details/5
         public ActionResult Details(int? id)
         {

@@ -1,4 +1,4 @@
-namespace SuperbrainManagement.Models
+﻿namespace SuperbrainManagement.Models
 {
     using System;
     using System.Collections.Generic;
@@ -37,5 +37,15 @@ namespace SuperbrainManagement.Models
         public virtual Room Room { get; set; }
 
         public virtual User User { get; set; }
+    }
+    public class ScheduleUpdateModel
+    {
+        public int ScheduleId { get; set; } // Id của schedule
+        public int EmployeeId { get; set; } // Id giáo viên được chọn
+        public int RoomId { get; set; } // Id phòng học được chọn
+        public bool IsActive { get; set; } // Trạng thái checkbox
+        public int ClassId { get; set; }
+        public DateTime FromHour { get; set; }
+        public DateTime ToHour { get; set; }
     }
 }

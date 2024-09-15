@@ -19,7 +19,7 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
         // GET: MarketingCampaigns
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, string idBranch)
         {
-            var branches = db.Branches.ToList();
+            var branches = db.Branches.Where(x=>x.Enable==true).ToList();
             int idbranch = int.Parse(CheckUsers.idBranch());
             if (!CheckUsers.CheckHQ())
             {

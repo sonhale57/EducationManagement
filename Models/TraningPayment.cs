@@ -9,7 +9,7 @@ namespace SuperbrainManagement.Models
     [Table("TraningPayment")]
     public partial class TraningPayment
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         public int? IdBranch { get; set; }
