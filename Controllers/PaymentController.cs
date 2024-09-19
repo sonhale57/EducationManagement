@@ -28,6 +28,7 @@ namespace SuperbrainManagement.Controllers
             string vnp_ReturnUrl = ConfigurationManager.AppSettings["VNPAY_ReturnUrl"];
 
             VnPayLibrary vnpay = new VnPayLibrary();
+
             vnpay.AddRequestData("vnp_Version", "2.1.0");
             vnpay.AddRequestData("vnp_Command", "pay");
             vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
@@ -39,7 +40,7 @@ namespace SuperbrainManagement.Controllers
             vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán đơn hàng #" + orderId);
             vnpay.AddRequestData("vnp_OrderType", "other");
             vnpay.AddRequestData("vnp_ReturnUrl", vnp_ReturnUrl);
-            vnpay.AddRequestData("vnp_TxnRef", orderId.ToString()); // Mã giao dịch duy nhất
+            vnpay.AddRequestData("vnp_TxnRef", orderId.ToString());
 
             // Tạo URL yêu cầu thanh toán và chuyển hướng
             string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
@@ -47,17 +48,6 @@ namespace SuperbrainManagement.Controllers
             return Redirect(paymentUrl);
         }
 
-        private string ComputeHash(string secretKey, string inputData)
-        {
-            byte[] keyByte = Encoding.UTF8.GetBytes(secretKey);
-            byte[] inputByte = Encoding.UTF8.GetBytes(inputData);
-
-            using (var hmac = new HMACSHA512(keyByte))
-            {
-                byte[] hashByte = hmac.ComputeHash(inputByte);
-                return BitConverter.ToString(hashByte).Replace("-", "").ToLower();
-            }
-        }
         public ActionResult PaymentReturn()
         {
             // Lấy dữ liệu từ query string của VNPAY trả về
@@ -72,8 +62,6 @@ namespace SuperbrainManagement.Controllers
                 }
             }
 
-            System.Diagnostics.Debug.WriteLine("Query String: " + Request.QueryString.ToString());
-            System.Diagnostics.Debug.WriteLine("VNP Secure Hash: " + vnp_SecureHash);
             string vnp_HashSecret = ConfigurationManager.AppSettings["VNPAY_HashSecret"];
             bool checkSignature = vnpay.ValidateSignature(vnp_SecureHash, vnp_HashSecret);
 

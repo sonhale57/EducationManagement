@@ -205,7 +205,83 @@ namespace SuperbrainManagement.Controllers
 
             return Json(new { success = true });
         }
+        public ActionResult Loadlist_Statistics(int? IdBranch, string month)
+        {
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            if (IdBranch == null)
+            {
+                IdBranch = idbranch;
+            }
+            // Tách tháng và năm từ chuỗi tháng
+            var monthYear = month.Split('/');
+            int monthValue = int.Parse(monthYear[0]);
+            int yearValue = int.Parse(monthYear[1]);
 
+            string str = "";
+            var query = from c in db.Courses
+                        join cb in db.CourseBranches on c.Id equals cb.IdCourse
+                        join rec in db.RegistrationCourses on c.Id equals rec.IdCourse
+                        join re in db.Registrations on rec.IdRegistration equals re.Id
+                        join joinclass in db.StudentJoinClasses on re.Id equals joinclass.IdRegistration
+                        join s in db.Students on re.IdStudent equals s.Id
+                        where cb.IdBranch==IdBranch
+                        let countOnClass = db.StudentJoinClasses
+                     .Count(x => x.IdCourse == c.Id
+                                 && x.Registration.IdBranch == IdBranch
+                                 && x.Todate.HasValue
+                                 && x.Fromdate.HasValue
+                                 // Ngày bắt đầu trước hoặc trong tháng được chọn
+                                 && x.Fromdate.Value.Month <= monthValue
+                                 && x.Fromdate.Value.Year <= yearValue
+                                 // Ngày kết thúc sau hoặc trong tháng được chọn
+                                 && x.Todate.Value.Month >= monthValue
+                                 && x.Todate.Value.Year >= yearValue)
+                        let countEnd = db.StudentJoinClasses.Count(x=>x.IdCourse==c.Id && x.Todate.Value.Month<monthValue && x.Todate.Value.Year == yearValue)
+                        let countRegistration = db.RegistrationCourses.Count(x=>x.IdCourse==c.Id && x.Registration.IdBranch == IdBranch && x.Registration.DateCreate.Value.Month==monthValue&&x.Registration.DateCreate.Value.Year==yearValue)
+                        select new{
+                            NameProgram = c.Program.Name,
+                            NameCourse = c.Name,
+                            CountRegistration = countRegistration,
+                            CountOnClass = countOnClass,
+                            CountEndClass = countEnd
+                        };
+
+            // Tạo một đối tượng để trả về kết quả
+            if(query == null)
+            {
+                str = "<tr><td colspan=6>Không tìm thấy dữ liệu</td></tr>";
+            }
+            int stt = 0;
+            foreach(var s in query)
+            {
+                stt++;
+                str += "<tr>"
+                    +"<td class='text-center'>"+stt + "</td>"
+                    +"<td class='text-center'>"+s.NameCourse + "</td>"
+                    +"<td class='text-center'>"+s.CountRegistration + "</td>"
+                    +"<td class='text-center'>"+s.CountOnClass + "</td>"
+                    +"<td class='text-center'>"+s.CountEndClass + "</td>"
+                    +"<td class='text-center'>"+(s.CountRegistration - s.CountOnClass - s.CountEndClass) + "</td>"
+                    + "</tr>";
+            }
+            return Json(new {str}, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Statistics()
+        {
+            var config = db.Configurations;
+            var list = new List<string>();
+            if(config != null)
+            {
+                foreach(var c in config)
+                {
+                    list.Add(c.TimePayment.Value.ToString("MM/yyyy"));
+                }    
+            }
+            ViewBag.Month = new SelectList(list);
+            ViewBag.IdBranch = new SelectList(db.Branches.Where(x=>x.Enable==true), "Id", "Name");
+            return View();
+        }
         // GET: Courses/Create
         public ActionResult Create()
         {

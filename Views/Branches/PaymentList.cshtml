@@ -5,7 +5,7 @@
 }
 
 <div class="row">
-    <div class="col col-md-3 col-sm-12">
+    <div class="col col-md-5 col-sm-12">
         <div class="input-group">
             @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
             {
@@ -14,7 +14,7 @@
             @Html.DropDownList("Month", null, htmlAttributes: new { @class = "form-control ms-1 rounded-1",@onchange="Loadlist()" })
         </div>
     </div>
-    <div class="col col-md-9 col-sm-12 text-right" style="text-align:right;">
+    <div class="col col-md-7 col-sm-12 text-right" style="text-align:right;">
         <a href="javascript:TableToPrint()" class="btn btn-md btn-outline-dark ms-0"><i class="ti ti-download"></i> Download</a>
     </div>
 </div>

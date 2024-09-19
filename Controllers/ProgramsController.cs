@@ -19,7 +19,7 @@ namespace SuperbrainManagement.Controllers
         public ActionResult Index()
         {
             ViewBag.IdProduct = new SelectList(db.Products.Where(x=>x.Enable==true && x.Active==true), "Id", "Name");
-            var programs = db.Programs.Include(p => p.User).OrderBy(x=>x.DisplayOrder);
+            var programs = db.Programs.Where(x=>x.Enable==true).Include(p => p.User).OrderBy(x=>x.DisplayOrder);
             return View(programs.ToList());
         }
         [HttpPost]
@@ -157,6 +157,37 @@ namespace SuperbrainManagement.Controllers
             return View(program);
         }
 
+        public ActionResult Submit_delete(int id)
+        {
+            var program = db.Programs.Find(id);
+            if(program == null)
+            {
+                return Json(new {status="error",message="Không tìm thấy chương trình cần xóa"},JsonRequestBehavior.AllowGet);
+            }
+            var course = db.Courses.Where(x=>x.IdProgram == id);
+            if (course.Any())
+            {
+                var sJoinClass= db.RegistrationCourses.Any(x=>x.Course.IdProgram==id);
+                if (sJoinClass)
+                {
+                    return Json(new { status = "error", message = "Chương trình không thể xóa, đang có khóa học của chương trình này được đăng ký!" }, JsonRequestBehavior.AllowGet);
+
+                }
+                else
+                {
+                    program.Enable = false;
+                    db.Entry(program).State = EntityState.Modified;
+                    db.SaveChanges();
+                    return Json(new { status = "ok", message = "Đã ngừng kích hoạt chương trình này!" }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                db.Programs.Remove(program);
+                db.SaveChanges();
+                return Json(new {status="ok",message="Đã xóa chương trình thành công!"},JsonRequestBehavior.AllowGet);
+            }
+        }
         [HttpPost]
         public async Task<ActionResult> Delete(int id)
         {

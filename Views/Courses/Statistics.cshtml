@@ -1,0 +1,57 @@
+﻿
+@{
+    ViewBag.Controller = "Khóa học";
+    ViewBag.Title = "Thống kê khóa học";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col col-md-5 col-sm-12">
+        <div class="input-group">
+            @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
+            {
+                @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", @onchange = "Loadlist()" })
+            }
+            @Html.DropDownList("Month", null, htmlAttributes: new { @class = "form-control ms-1 rounded-1", @onchange = "Loadlist()" })
+        </div>
+    </div>
+    <div class="col col-md-7 col-sm-12 text-end">
+        <a href="javascript:download()" class="btn btn-md btn-outline-dark ms-0"><i class="ti ti-download"></i> Download</a>
+    </div>
+</div>
+<table class="table fs-3 mt-2">
+    <thead class="bg-success text-white rounded-1">
+        <tr>
+            <th class="text-center">Tên chương trình</th>
+            <th class="text-center">Tên khóa học</th>
+            <th class="text-center">SL Đăng ký</th>
+            <th class="text-center">SL Đang học</th>
+            <th class="text-center">SL Đã học</th>
+            <th class="text-center">SL Hủy khóa</th>
+        </tr>
+    </thead>
+    <tbody id="showlist"></tbody>
+    <tr class="loader"></tr>
+</table>
+<script>
+    Loadlist();
+    function Loadlist() {
+        $(".loader").html("<td colspan=6 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='35' alt='loading...'></td>");
+        $.ajax({
+            url: '@Url.Action("Loadlist_Statistics", "Courses")',
+            type: "GET",
+            data: {
+                IdBranch: $("#IdBranch").val(),
+                month: $("#Month").val()
+            },
+            success: function (data) {
+                $(".loader").html("");
+                $('#showlist').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+                $(".loader").html("");
+            }
+        });
+    }
+</script>

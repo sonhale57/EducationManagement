@@ -10,12 +10,10 @@
 }
 <div class="row">
     <div class="col col-md-3 col-sm-12">
-        <form action="/trainingcourses" method="get" id="formload">
-            <div class="input-group mb-3">
-                <input type="text" class="form-control ms-1 rounded-1" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
-                <button class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
-            </div>
-        </form>
+        @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
+        {
+            @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", @onchange = "Loadlist()" })
+        }
     </div>
     <div class="col col-md-9 col-sm-12 text-end">
         <div class="me-0 btn btn-md p-0">
