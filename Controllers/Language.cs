@@ -41,7 +41,20 @@ namespace SuperbrainManagement.Controllers
                 return "Vừa xong";
             return string.Empty;
         }
-
+        public string Week_viet(int i)
+        {
+            switch (i)
+            {
+                case 0: return "Chủ nhật";
+                case 1: return "Thứ Hai";
+                case 2: return "Thứ Ba";
+                case 3: return "Thứ Tư";
+                case 4: return "Thứ Năm";
+                case 5: return "Thứ Sáu";
+                case 6: return "Thứ Bảy";
+                default: return "";
+            }
+        }
         public static string TimeCount(DateTime dt)
         {
             TimeSpan span = dt - DateTime.Now;

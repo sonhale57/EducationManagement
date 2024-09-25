@@ -1,7 +1,8 @@
 ﻿@model SuperbrainManagement.Models.Promotion
 
 @{
-    ViewBag.Title = "Edit";
+    ViewBag.Controller = "Cài đặt";
+    ViewBag.Title = "Chỉnh sửa Ưu đãi";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 @using (Html.BeginForm())
@@ -24,16 +25,32 @@
                 </div>
             </div>
 
-            <div class="form-group pt-0">
-                @Html.LabelFor(model => model.Type, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="form-group mt-0">
+                <label>Loại ưu đãi</label>
                 <div class="col-md-12">
-                    @Html.EditorFor(model => model.Type, new { htmlAttributes = new { @class = "form-control" } })
+
+                    @{
+                        var gratuateOptions = new List<SelectListItem>
+                                        {
+                            new SelectListItem { Text = "Ưu đãi khóa học", Value = "1" },
+                            new SelectListItem { Text = "Ưu đãi đơn hàng", Value = "2" },
+                            new SelectListItem { Text = "Ưu đãi phí thương hiệu", Value = "3" }
+                        };
+                        if (!SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
+                        {
+                            gratuateOptions = new List<SelectListItem>
+                                            {
+                            new SelectListItem { Text = "Ưu đãi khóa học", Value = "1" }
+                            };
+                        }
+                    }
+                    @Html.DropDownListFor(model => model.Type, gratuateOptions, new { @class = "form-control", id = "Type" })
                     @Html.ValidationMessageFor(model => model.Type, "", new { @class = "text-danger" })
                 </div>
             </div>
 
             <div class="form-group pt-0">
-                @Html.LabelFor(model => model.Value, htmlAttributes: new { @class = "control-label col-md-2" })
+                <label>Giá trị</label>
                 <div class="col-md-12">
                     @Html.EditorFor(model => model.Value, new { htmlAttributes = new { @class = "form-control" } })
                     @Html.ValidationMessageFor(model => model.Value, "", new { @class = "text-danger" })
@@ -42,12 +59,14 @@
             <div class="form-group row pe-0 pt-0">
                 <div class="col-md-6 pt-0 pe-0">
                     <label class="form-control-label">Ngày bắt đầu</label>
-                    @Html.EditorFor(model => model.Fromdate, new { htmlAttributes = new { @class = "form-control" } })
+                    <input type="text" name="ngaybatdau" value="@Model.Fromdate.Value.ToString("dd/MM/yyyy")" id="ngaybatdau" class="form-control" onchange="Updatedate()" required />
+                    @Html.HiddenFor(model => model.Fromdate, new { htmlAttributes = new { @class = "form-control" } })
                     @Html.ValidationMessageFor(model => model.Fromdate, "", new { @class = "text-danger" })
                 </div>
                 <div class="col-md-6 pt-0 pe-0">
                     <label class="form-control-label">Ngày kết thúc</label>
-                    @Html.EditorFor(model => model.Todate, new { htmlAttributes = new { @class = "form-control" } })
+                    <input type="text" name="ngayketthuc" value="@Model.Todate.Value.ToString("dd/MM/yyyy")" id="ngayketthuc" class="form-control" onchange="Updatedate()" required />
+                    @Html.HiddenFor(model => model.Todate, new { htmlAttributes = new { @class = "form-control" } })
                     @Html.ValidationMessageFor(model => model.Todate, "", new { @class = "text-danger" })
                 </div>
             </div>
@@ -95,3 +114,15 @@
 
     </div>
 }
+<script>
+    function Updatedate() {
+        var fromDate = $("#ngaybatdau").val().split("/").reverse().join("-");
+        var toDate = $("#ngayketthuc").val().split("/").reverse().join("-");
+        $("#Fromdate").val(fromDate);
+        $("#Todate").val(toDate);
+    }
+    $(function () {
+        $("#ngaybatdau").datepicker({ dateFormat: "dd/mm/yy" });
+        $("#ngayketthuc").datepicker({ dateFormat: "dd/mm/yy" });
+    });
+</script>

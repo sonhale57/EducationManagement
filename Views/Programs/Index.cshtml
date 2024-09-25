@@ -6,13 +6,34 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     int stt = 1;
 }
+<style>
+    hr.horizontal.dark {
+        background-image: linear-gradient(90deg, transparent, rgba(0, 0, 0, .4), transparent);
+    }
 
+    hr.horizontal {
+        background-color: transparent;
+    }
+
+    hr {
+        border-top: none;
+        height: 1px;
+    }
+
+    hr {
+        margin: 1rem 0;
+        color: inherit;
+        border: 0;
+        border-top: 1px solid;
+        opacity: .25;
+    }
+</style>
 <div class="row mb-3">
     <div class="col col-md-4 col-sm-12">
     </div>
     <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
-        <a href="javascript:Add_Program()" class="btn btn-md btn-success ms-0"><i class="ti ti-coffee"></i> Thêm mới chương trình</a>
-        <a href="/courses/create" class="btn btn-md btn-primary ms-0"><i class="ti ti-certificate-2"></i> Thêm mới khóa học</a>
+        <a href="javascript:Add_Program()" class="btn btn-md btn-outline-success"><i class="ti ti-coffee"></i> Thêm chương trình</a>
+        <a href="/courses/create" class="btn btn-md btn-success ms-1"><i class="ti ti-certificate-2"></i> Thêm khóa học</a>
     </div>
 </div>
 <table class="table fs-3">
@@ -35,6 +56,7 @@
                 @Html.DisplayFor(modelItem => item.Name)
                 <a href="javascript:Edit_Program(@item.Id)" class="ms-2"><i class="ti ti-edit text-primary fw-bolder"></i></a>
                 <a href="javascript:Delete_Program(@item.Id)" class="me-1"><i class="ti ti-trash text-danger"></i></a>
+                <span id="loader-@item.Id"></span>
             </td>
         </tr>
         foreach (var c in item.Courses.OrderBy(x=>x.DisplayOrder))
@@ -60,6 +82,7 @@
                     @Html.DisplayFor(modelItem => c.Hours)
                 </td>
                 <td class="text-end">
+                    <span id="loader+@c.Id"></span>
                     <a href="/courses/edit/@c.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
                     <a href="javascript:Delete_Course(@c.Id)" class="me-1"><i class="ti ti-trash text-danger"></i></a>
                     <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
@@ -82,7 +105,7 @@
         <div class="modal-content" style="width:800px;">
             <form action="/" method="post" id="form_nhap">
                 <div class="modal-header">
-                    <h5 class="modal-title text-success" id="modaladdProgramLabel">Thêm chương trình</h5>
+                    <h6 class="modal-title text-success" id="modaladdProgramLabel">Thêm chương trình</h6>
                 </div>
                 <hr style="width:90%;margin:0 auto;"/>
                 <div class="modal-body">
@@ -109,22 +132,26 @@
                             <input type="text" name="DescriptionProgram" value="" class="form-control" id="DescriptionProgram" placeholder="Mô tả ngắn" />
                         </div>
                     </div>
-                    <div class="text-center mt-3">
-                        <button type="button" class="btn btn-success text-center" onclick="Submit_AddProgram()" id="btnActionProgram">
-                            <i class="ti ti-circle-plus"></i> Thêm mới
-                        </button>
-                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
+                        <i class="ti ti-door-exit"></i> Hủy
+                    </button>
+                    <button type="button" class="btn btn-sm btn-success text-center" onclick="Submit_AddProgram()" id="btnActionProgram">
+                        <i class="ti ti-plus"></i> Thêm mới
+                    </button>
+                    <span class="loader"></span>
                 </div>
             </form>
         </div>
     </div>
 </div>
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-dialog-scrollable" role="document">
         <div class="modal-content" style="width:800px;">
             <form action="/" method="post" id="form_nhap">
                 <div class="modal-header">
-                    <h5 class="modal-title text-success" id="exampleModalLabel">Cài đặt vật tư khóa học</h5>
+                    <h6 class="modal-title text-success" id="exampleModalLabel">Cài đặt vật tư khóa học</h6>
                 </div>
                 <hr style="width:90%;margin:0 auto;" />
                 <div class="modal-body">
@@ -141,31 +168,36 @@
                     </div>
                     <hr />
                     <table class="table mt-3">
-                        <thead class="bg-info">
+                        <thead class="bg-success">
                             <tr class="text-white">
                                 <td class="text-center">STT</td>
                                 <td>Vật tư</td>
-                                <td>Số lượng</td>
+                                <td class="text-center">Số lượng</td>
                                 <td class="text-end">Thao tác</td>
                             </tr>
                         </thead>
                         <tbody id="showlist_product"></tbody>
                     </table>
-                    <div class="text-center mt-3">
-                        <button type="button" class="btn btn-success" onclick="Submit_ProductCourse()">
-                            <i class="ti ti-circle-plus"></i> Cập nhật
-                        </button>
-                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
+                        <i class="ti ti-door-exit"></i> Hủy
+                    </button>
+                    <button type="button" class="btn btn-sm btn-success" onclick="Submit_ProductCourse()">
+                        <i class="ti ti-plus"></i> Cập nhật
+                    </button>
+                    <span class="loader"></span>
                 </div>
             </form>
         </div>
     </div>
 </div>
 <script>
+    var isProcessing = false;
     function Add_Program() {
         $('#modaladdProgramLabel').html("Thêm chương trình học");
         $('#action').val("create");
-        $('#btnActionProgram').html("Thêm mới");
+        $('#btnActionProgram').html("+ Thêm mới");
         $('#modaladdProgram').modal('show');
     }
     function Edit_Program(id) {
@@ -192,6 +224,9 @@
         });
     }
     function Submit_AddProgram() {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
         $.ajax({
             url: '@Url.Action("Submit_addProgram", "Programs")',
             type: "POST",
@@ -210,9 +245,13 @@
                 } else {
                     showError(data.message,3000);
                 }
+                isProcessing = false; // Hoàn thành xử lý
+                $(".loader").html("");
             },
             error: function (xhr, error) {
                 console.log(error);
+                isProcessing = false; // Hoàn thành xử lý
+                $(".loader").html("");
             }
         });
     }
@@ -255,13 +294,20 @@
                 } else {
                     showError(data.status,3000);
                 }
+                isProcessing = false; // Hoàn thành xử lý
+                $(".loader").html("");
             },
             error: function (xhr, error) {
                 console.log(error);
+                isProcessing = false; // Hoàn thành xử lý
+                $(".loader").html("");
             }
         });
     }
-    function Delete_ProductCourse(Id,IdCourse) {
+    function Delete_ProductCourse(Id, IdCourse) {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
         if (confirm('Are you sure you want to delete this product?')) {
             $.ajax({
                 url: '@Url.Action("Delete_ProductCourse", "Courses")',
@@ -274,34 +320,48 @@
                     } else {
                         showError('Error deleting product',3000);
                     }
+                    isProcessing = false; // Hoàn thành xử lý
+                    $(".loader").html("");
                 },
                 error: function () {
-                    showError('Error deleting product',3000);
+                    showError('Error deleting product', 3000);
+                    isProcessing = false; // Hoàn thành xử lý
+                    $(".loader").html("");
                 }
             });
         }
     }
     function Delete_Course(Id) {
-        if (confirm('Are you sure you want to delete this course?')) {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $("#loader+" + Id).html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        if (confirm('Bạn có muốn xóa khóa học này?')) {
             $.ajax({
                 url: '@Url.Action("Delete_Course", "Courses")',
                 type: 'POST',
                 data: { id: Id },
                 success: function (response) {
-                    if (response.success) {
-                        location.reload();
+                    if (response.status=="ok") {
                         showSuccess("Đã xóa thành công!", 3000);
+                        location.reload();
                     } else {
-                        showError('Error deleting course', 3000);
+                        showError(response.message, 3000);
                     }
+                    isProcessing = false; // Hoàn thành xử lý
+                    $("#loader+" + Id).html("");
                 },
                 error: function () {
-                    showError('Error deleting course', 3000);
+                    showError('Lỗi xóa khóa học', 3000);
+                    isProcessing = false; // Hoàn thành xử lý
+                    $("#loader+" + Id).html("");
                 }
             });
         }
     }
     function Delete_Program(Id) {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $("#loader-" + Id).html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
         if (confirm('Bạn có muốn chương trình này?')) {
             $.ajax({
                 url: '@Url.Action("Submit_delete", "Programs")',
@@ -315,9 +375,13 @@
                     } else {
                         showError(response.message, 3000);
                     }
+                    isProcessing = false; // Hoàn thành xử lý
+                    $("#loader-" + Id).html("");
                 },
                 error: function () {
                     showError('Error deleting program', 3000);
+                    isProcessing = false; // Hoàn thành xử lý
+                    $("#loader-" + Id).html("");
                 }
             });
         }

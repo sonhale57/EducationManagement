@@ -12,8 +12,8 @@
             {
                 @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", @onchange = "Loadlist()" })
             }
-            <input type="date" class="form-control ms-1 rounded-1" name="fromdate" id="fromdate" placeholder="Tìm kiếm" value="" onchange="return Loadlist()">
-            <input type="date" class="form-control ms-1 rounded-1" name="todate" id="todate" placeholder="Tìm kiếm" value="" onchange="return Loadlist()">
+            <input type="text" class="form-control ms-1 rounded-1" name="fromdate" id="fromdate" placeholder="Tìm kiếm" value="" onchange="return Loadlist()">
+            <input type="text" class="form-control ms-1 rounded-1" name="todate" id="todate" placeholder="Tìm kiếm" value="" onchange="return Loadlist()">
         </div>
     </div>
     <div class="col col-md-6 col-sm-12 text-right" style="text-align:right;">
@@ -38,38 +38,37 @@
     </tr>
 </table>
 <script>
-    $(document).ready(function () {
-        var currentDate = new Date();
-        var currentDay = currentDate.getDate()+1;
-        var currentMonth = currentDate.getMonth() + 1;
-        var currentYear = currentDate.getFullYear();
-        var formattedToday = currentYear + '-' + ('0' + currentMonth).slice(-2) + '-' + ('0' + currentDay).slice(-2);
-        $("#todate").val(formattedToday);
-        var lastMonthDate = new Date(currentDate.getFullYear(), currentMonth - 2, currentDay);
-        var lastMonth = lastMonthDate.getMonth() + 1;
-        var lastMonthYear = lastMonthDate.getFullYear();
-        var formattedLastMonth = lastMonthYear + '-' + ('0' + lastMonth).slice(-2) + '-' + ('0' + currentDay).slice(-2);
-        $("#fromdate").val(formattedLastMonth);
+    $(function () {
+        $("#fromdate").datepicker({ dateFormat: "dd/mm/yy" });
+        $("#todate").datepicker({ dateFormat: "dd/mm/yy", maxDate: 1 });
+        if ($("#fromdate").val() == "") {
+            $("#fromdate").datepicker("setDate", -30);
+        }
+        if ($("#todate").val() == "") {
+            $("#todate").datepicker("setDate", 1);
+        }
         Loadlist();
     });
-     function Loadlist() {
-     $("#loading").html("<td colspan=6 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
-      $.ajax({
-          url: '@Url.Action("Load_Statistics", "Orders")',
-          type: "GET",
-          data: {
-              IdBranch: $("#IdBranch").val(),
-              Fromdate: $("#fromdate").val(),
-              Todate: $("#todate").val()
-          },
-          success: function (data) {
-             $("#loading").html("");
-              $('#showlist').html(data.str);
-          },
-          error: function (xhr, error) {
-              console.log(error);
-          }
-      });
+    function Loadlist() {
+        $("#loading").html("<td colspan=6 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
+        var fromDate = $("#fromdate").val().split("/").reverse().join("-");
+        var toDate = $("#todate").val().split("/").reverse().join("-");
+        $.ajax({
+            url: '@Url.Action("Load_Statistics", "Orders")',
+            type: "GET",
+            data: {
+                IdBranch: $("#IdBranch").val(),
+                Fromdate: fromDate,
+                Todate: toDate
+            },
+            success: function (data) {
+                $("#loading").html("");
+                $('#showlist').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
     }
     document.getElementById('exportButton').addEventListener('click', function () {
         var wb = XLSX.utils.table_to_book(document.getElementById('tableToPrint'), { sheet: "Sheet1" });

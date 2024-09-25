@@ -27,7 +27,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.min.css">
     <script src="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/js/jquery-confirm.min.js"></script>
 
-
     <style>
         .custom-scrollbar {
             width: 300px;
@@ -93,19 +92,31 @@
             overflow-y: auto;
         }
 
-            .modal-dialog-scrollable .modal-body::-webkit-scrollbar {
-                height: 5px;
-                width: 5px;
-            }
+        .overflow-y-scroll::-webkit-scrollbar {
+            height: 2px;
+            width: 5px;
+        }
+        .overflow-y-scroll::-webkit-scrollbar-track {
+            background-color: #fafafa;
+        }
+        .overflow-y-scroll::-webkit-scrollbar-thumb {
+            background-image: linear-gradient(-45deg, #cbcbcb, #7b7b7b);
+            border-radius: 50px;
+        }
 
-            .modal-dialog-scrollable .modal-body::-webkit-scrollbar-track {
-                background-color: #fafafa;
-            }
+        .modal-dialog-scrollable .modal-body::-webkit-scrollbar {
+            height: 5px;
+            width: 5px;
+        }
 
-            .modal-dialog-scrollable .modal-body::-webkit-scrollbar-thumb {
-                background-image: linear-gradient(-45deg, #189599, #00411a);
-                border-radius: 50px;
-            }
+        .modal-dialog-scrollable .modal-body::-webkit-scrollbar-track {
+            background-color: #fafafa;
+        }
+
+        .modal-dialog-scrollable .modal-body::-webkit-scrollbar-thumb {
+            background-image: linear-gradient(-45deg, #189599, #00411a);
+            border-radius: 50px;
+        }
     </style>
 </head>
 <body>
@@ -202,7 +213,7 @@
                                         <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Lịch học</span>
                                     </a>
                                 </li>
-                                <li class="sidebar-item">
+                                <li class="sidebar-item hideof">
                                     <a href="javascript:void(0)" class="sidebar-link">
                                         <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Thống kê lớp học</span>
                                     </a>
@@ -222,7 +233,7 @@
                                         <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Danh sách học viên</span>
                                     </a>
                                 </li>
-                                <li class="sidebar-item">
+                                <li class="sidebar-item hideof">
                                     <a href="javascript:void(0)" class="sidebar-link">
                                         <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Danh sách vắng</span>
                                     </a>
@@ -237,12 +248,12 @@
                                         <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Sinh nhật</span>
                                     </a>
                                 </li>
-                                <li class="sidebar-item">
+                                <li class="sidebar-item hideof">
                                     <a href="javascript:void(0)" class="sidebar-link">
                                         <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Giấy chứng nhận</span>
                                     </a>
                                 </li>
-                                <li class="sidebar-item">
+                                <li class="sidebar-item hideof">
                                     <a href="javascript:void(0)" class="sidebar-link">
                                         <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Thống kê học viên</span>
                                     </a>
@@ -394,7 +405,7 @@
                                         <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Lịch sử thao tác</span>
                                     </a>
                                 </li>
-                                <li class="sidebar-item">
+                                <li class="sidebar-item hideof">
                                     <a href="javascript:void(0)" class="sidebar-link">
                                         <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Thống kê nhân sự</span>
                                     </a>
@@ -513,7 +524,7 @@
                                             <p class="mb-0 fs-3">Đổi mật khẩu</p>
                                         </a>
                                         <hr />
-                                        <a href="/Authentication/Logout" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
+                                        <a href="/Authentication/Logout" class="btn btn-sm btn-outline-dark mx-3 mt-2 d-block">Đăng xuất</a>
                                     </div>
                                 </div>
                             </li>
@@ -533,81 +544,29 @@
                 }
                 @{
                     Html.RenderPartial("~/Views/Settings/Datasuggest.cshtml");
+                    Html.RenderPartial("~/Views/Settings/_ChangePassword.cshtml");
                 }
-            </div>
-        </div>
-    </div>
-    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content" style="width:800px;">
-                <div class="modal-header">
-                    <h5 class="modal-fullscreen" id="changePasswordModalLabel">Đổi mật khẩu</h5>
-                </div>
-                <hr style="width:90%;margin:0 auto;" />
-                <form action="/" method="post" id="form_nhap">
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col col-md-12 mt-3">
-                                <label>Mật khẩu mới</label>
-                                <input type="hidden" id="IdUser" value="" class="form-control" />
-                                <input type="password" id="EditPassword" value="" class="form-control" onkeyup="check()" required />
-                            </div>
-                            <div class="col col-md-12 mt-3">
-                                <label>Nhập lại mật khẩu</label>
-                                <input type="password" id="ConfirmPassword" value="" class="form-control" onkeyup="check()" required />
-                                <small class="fst-italic" id="message"></small>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-success mt-3" onclick="Submit_changepassword()" id="btnAction">
-                            <i class="ti ti-refresh"></i> Lưu thay đổi
-                        </button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
     <script src="~/assets/js/jquery.signalR-2.4.3.min.js"></script>
     <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
     <script>
-        CKEDITOR.replace('editor1');
-        function ChangePassword() {
-            $('#changePasswordModal').modal('show');
-        }
-        function Submit_changepassword() {
-            if ($("#EditPassword").val() != $("#ConfirmPassword").val()) {
-                showError("Mật khẩu không trùng khớp!");
-            }
-            $.ajax({
-                url: '@Url.Action("Submit_ChangePassword", "Users")',
-                type: "POST",
-                data: {
-                    Password: $("#EditPassword").val()
+        // Khởi tạo CKEditor
+        CKEDITOR.replace('editor1', {
+            on: {
+                instanceReady: function () {
+                    this.showNotification = function () { };  // Ghi đè để tắt tất cả thông báo
                 }
-                , dataType: "json",
-                success: function (data) {
-                    if (data.status == "ok") {
-                        $('#changePasswordModal').modal('hide');
-                        showSuccess(data.message, 3000);
-                    }
-                    else {
-                        showError(data.message, 3000);
-                    }
-                },
-                error: function () { showError('Lỗi!', 3000); }
-            });
-        }
-        var check = function () {
-            if (document.getElementById('EditPassword').value ==
-                document.getElementById('ConfirmPassword').value) {
-                document.getElementById('message').style.color = 'green';
-                document.getElementById('message').innerHTML = '<i class="ti ti-check text-success"></i> Matching';
-            } else {
-                document.getElementById('message').style.color = 'red';
-                document.getElementById('message').innerHTML = 'Mật khẩu không trùng khớp!';
             }
-        }
-    </script>
+        });
 
+        // Tắt kiểm tra phiên bản và các thông báo khác
+        CKEDITOR.editorConfig = function (config) {
+            config.versionCheck = false;  // Tắt kiểm tra phiên bản
+            config.removePlugins = 'notification';  // Tắt plugin notification
+        };
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
     <script src="~/assets/js/select2.min.js"></script>
     <script src="~/assets/js/choices.min.js"></script>

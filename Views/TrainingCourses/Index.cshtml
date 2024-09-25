@@ -10,10 +10,6 @@
 }
 <div class="row">
     <div class="col col-md-3 col-sm-12">
-        @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
-        {
-            @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", @onchange = "Loadlist()" })
-        }
     </div>
     <div class="col col-md-9 col-sm-12 text-end">
         <div class="me-0 btn btn-md p-0">
@@ -27,10 +23,10 @@
                 <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
             </ul>
         </div>
-        <a href="/trainingcourses/create" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
+        <a href="/trainingcourses/create" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>
     </div>
 </div>
-<table class="table fs-3">
+<table class="table fs-3 mt-2">
     <thead class="bg-success text-white rounded-1">
         <tr>
             <th class="text-center">STT</th>
@@ -158,11 +154,14 @@
                         </tr>
                         <tbody id="showlist_dangky"></tbody>
                     </table>
-                    <div class="text-center">
-                        <a href="javascript:Load_paymentFee()" class="btn btn-success">
-                            <i class="ti ti-credit-card"></i> Thanh toán phí tham gia
-                        </a>
-                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="close_modal()">
+                        <i class="ti ti-door-exit"></i> Hủy
+                    </button>
+                    <a href="javascript:Load_paymentFee()" class="btn btn-sm btn-success">
+                        <i class="ti ti-credit-card"></i> Thanh toán phí tham gia
+                    </a>
                 </div>
             </form>
         </div>
@@ -398,15 +397,15 @@
                             <textarea type="text" name="rateDescription" id="rateDescription" value="" class="form-control"></textarea>
                         </div>
                     </div>
-                    <div class="text-center mt-3">
-                        <span class="loader"></span>
-                        <button type="button" class="btn btn-success" onclick="Submit_rating()">
-                            <i class="ti ti-rating-12-plus"></i> Cập nhật đánh giá
-                        </button>
-                        <button type="button" class="btn btn-outline-dark" onclick="close_modal()">
-                            <i class="ti ti-door-exit"></i> Thoát
-                        </button>
-                    </div>
+                </div>
+                <div class="modal-footer">
+                    <span class="loader"></span>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="close_modal()">
+                        <i class="ti ti-door-exit"></i> Hủy
+                    </button>
+                    <button type="button" class="btn btn-sm btn-success" onclick="Submit_rating()">
+                        <i class="ti ti-rating-12-plus"></i> Cập nhật đánh giá
+                    </button>
                 </div>
             </form>
         </div>
@@ -657,24 +656,24 @@
     }
     Load_infoByEmployee();
     function Load_infoByTrainingCourse(id) {
-    $.ajax({
-        url: '@Url.Action("Load_infoByTrainingCourse", "TrainingCourses")',
-        type: "GET",
-        data: {
-            id: id
-        },
-        success: function (data) {
-            console.log(data);
-            $('#Name').val(data.name);
-            $('#Price').val(data.price);
-            $('#Statusdeadline').html (data.deadline);
-        },
-        error: function (xhr, error) {
-            console.log(error);
-        }
-    });
-    return false;
-}
+        $.ajax({
+            url: '@Url.Action("Load_infoByTrainingCourse", "TrainingCourses")',
+            type: "GET",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                console.log(data);
+                $('#Name').val(data.name);
+                $('#Price').val(data.price);
+                $('#Statusdeadline').html(data.deadline);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+        return false;
+    }
     function Load_infoByEmployee() {
         $.ajax({
             url: '@Url.Action("Load_infoByEmployee", "TrainingCourses")',

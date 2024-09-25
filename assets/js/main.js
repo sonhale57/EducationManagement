@@ -30,3 +30,6 @@ function showError(content, time) {
         toast.hide();
     }, time);
 }
+function closeModal() {
+    $(".modal").modal('hide');
+}

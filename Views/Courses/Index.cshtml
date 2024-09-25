@@ -18,7 +18,7 @@
         </form>
     </div>
     <div class="col-md-9 text-end">
-        <a href="javascript:Add_CourseBranch()" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
+        <a href="javascript:Add_CourseBranch()" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>
     </div>
 </div>
 
@@ -38,39 +38,42 @@
     <tbody id="showlist"></tbody>
 </table>
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
         <div class="modal-content" >
             <div class="modal-header">
-                <h5 class="modal-fullscreen" id="exampleModalLabel">Thêm khóa học</h5>
+                <h6 class="text-success modal-title" id="exampleModalLabel">Thêm khóa học</h6>
             </div>
             <hr style="width:90%;margin:0 auto;" />
             <form action="/" method="post">
                 @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <input type="hidden" name="typeaction" value="" id="typeaction" />
-                    <label class="text-success">Cơ sở</label>
+                    <label class="text-muted">Cơ sở</label>
                     @Html.DropDownList("IdBranchForm", null, htmlAttributes: new { @class = "form-control" })
 
-                    <label class="text-success mt-3">Khóa học</label>
+                    <label class="text-muted mt-3">Khóa học</label>
                     @Html.DropDownList("IdCourse", null, htmlAttributes: new { @class = "form-control" })
 
-                    <label class="text-success mt-3">Học phí</label>
+                    <label class="text-muted mt-3">Học phí</label>
                     <input type="text" class="form-control" id="PriceCourse" name="PriceCourse" value="0" placeholder="Học phí khóa học" />
 
-                    <label class="text-success mt-3">Phí tài khoản Online</label>
+                    <label class="text-muted mt-3">Phí tài khoản Online</label>
                     <input type="text" class="form-control" id="PriceOnline" name="PriceOnline" value="0" placeholder="Phí tài khoản" />
 
-                    <label class="text-success mt-3">Phí test đầu vào</label>
+                    <label class="text-muted mt-3">Phí test đầu vào</label>
                     <input type="text" class="form-control" id="PriceTest" name="PriceTest" value="0" placeholder="Phí test đầu vào" />
 
-                    <label class="text-success mt-3">Số buổi</label>
+                    <label class="text-muted mt-3">Số buổi</label>
                     <input type="text" class="form-control" id="SessonCourse" name="SessonCourse" value="12" placeholder="Số buổi" />
 
-                    <label class="text-success mt-3">Số giờ</label>
+                    <label class="text-muted mt-3">Số giờ</label>
                     <input type="text" class="form-control" id="HourCourse" name="HourCourse" value="24" placeholder="Số giờ" />
                 </div>
                 <div class="modal-footer">
-                    <a href="javascript:Submit_CourseBranch()" class="btn btn-success"> Lưu cập nhật</a>
+                    <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
+                        <i class="ti ti-door-exit"></i> Hủy
+                    </button>
+                    <a href="javascript:Submit_CourseBranch()" class="btn btn-sm btn-success"><i class="ti ti-refresh"></i> Lưu cập nhật</a>
                 </div>
             </form>
         </div>

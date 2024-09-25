@@ -1,202 +1,227 @@
 ﻿@{
-    ViewBag.Title = "Trang chủ";
-    ViewBag.Title = "Trang chủ";
+    ViewBag.Controller = "Dashboard";
+    ViewBag.Title = "Tổng quan";
+
+
 }
 <div class="row">
-    <div class="col-md-3 stretch-card grid-margin">
-        <div class="card bg-light-gray card-img-holder shadow">
-            <div class="card-body p-2 ps-3 pt-3">
-                <h6 class="font-weight-normal mb-3">
-                    Weekly Sales <i class="ti ti-chart-line"></i>
-                </h6>
-                <h3>$ 15,0000</h3>
-                <div class="d-flex align-items-center pb-1">
-                    <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
-                        <i class="ti ti-arrow-down-right text-danger"></i>
-                    </span>
-                    <p class="text-dark me-1 fs-3 mb-0">+9%</p>
-                    <p class="text-muted fs-3 mb-0">last year</p>
+    <div class="col-md-8">
+        <div class="row">
+            <div class="col-lg-4 mb-2">
+                <div class="card border-start border-4 border-primary">
+                    <div class="card-body">
+                        <div class="overline text-muted mb-1">Học viên</div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class=" me-3"><i class="ti ti-users"></i> <span id="sohocvien" class="fw-bold"></span></div>
+                            <div class="d-flex align-items-center text-success">
+                                <i class="ti ti-trending-up icon-sm me-2"></i>
+                                <div class=" text-success fw-normal"><span id="sohocvienper"></span> %</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-2">
+                <div class="card border-start border-4 border-secondary">
+                    <div class="card-body">
+                        <div class="overline text-muted mb-1">Học viên đang học</div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="me-3"><i class="ti ti-users"></i> <span id="danghoc" class="fw-bold"></span></div>
+                            <div class="d-flex align-items-center text-muted">
+                                <i class="ti ti-trending-up me-2"></i>
+                                <div class=" text-muted fw-normal"><span id="danghocper"></span> %</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-2">
+                <div class="card border-start border-4 border-secondary">
+                    <div class="card-body">
+                        <div class="overline text-muted mb-1">Đang chờ xét lớp</div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="me-3"><i class="ti ti-users"></i> <span id="dangchoxetlop" class="fw-bold"></span></div>
+                            <div class="d-flex align-items-center text-muted">
+                                <i class="ti ti-trending-up me-2"></i>
+                                <div class=" text-muted fw-normal"><span id="dangchoxetlopper"></span> %</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-3 stretch-card grid-margin">
-        <div class="card bg-gradient-success card-img-holder shadow">
-            <div class="card-body p-2 ps-3 pt-3">
-                <h6 class="font-weight-normal mb-3">
-                    Weekly Orders <i class="ti ti-bookmark"></i>
-                </h6>
-                <h3>45,6334</h3>
-                <div class="d-flex align-items-center pb-1">
-                    <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
-                        <i class="ti ti-arrow-down-right text-danger"></i>
-                    </span>
-                    <p class="text-dark me-1 fs-3 mb-0">+9%</p>
-                    <p class="text-muted fs-3 mb-0">last year</p>
+        <div class="card">
+            <div class="card-header rounded-2">
+                <div class="card-actions float-end">
+                    <div class="dropdown position-relative">
+                        <a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+                            <i class="ti ti-dots"> </i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
+                            {
+                                <a class="dropdown-item" href="javascript:add_thongbao()"><i class="ti ti-plus"></i> Thêm mới</a>
+                            }
+                            <a class="dropdown-item" href="/feeds"><i class="ti ti-list"></i> Xem tất cả</a>
+                        </div>
+                    </div>
                 </div>
+                <h6 class="mb-0 fw-bolder"><i class="ti ti-bell-ringing"></i> Thông báo</h6>
+            </div>
+            <div class="card-body p-3 overflow-y-scroll" style="max-height:365px;">
+                <span id="loader_thongbao"></span>
+                <ul class="list-group" id="showlist_thongbao">
+                </ul>
             </div>
         </div>
     </div>
-    <div class="col-md-3 stretch-card grid-margin">
-        <div class="card bg-gradient-success card-img-holder shadow">
-            <div class="card-body p-2 ps-3 pt-3">
-                <h6 class="font-weight-normal mb-3">
-                    Visitors Online <i class="ti ti-diamond"></i>
-                </h6>
-                <h3>95,5741</h3>
-                <div class="d-flex align-items-center pb-1">
-                    <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
-                        <i class="ti ti-arrow-down-right text-danger"></i>
-                    </span>
-                    <p class="text-dark me-1 fs-3 mb-0">+9%</p>
-                    <p class="text-muted fs-3 mb-0">last year</p>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-light">
+                <div class="card-actions float-end">
+                    <div class="dropdown position-relative">
+                        <a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+                            <i class="ti ti-dots"> </i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item" href="#">Action</a>
+                            <a class="dropdown-item" href="#">Another action</a>
+                            <a class="dropdown-item" href="#">Something else here</a>
+                        </div>
+                    </div>
                 </div>
+                <h6 class="fw-bolder mb-0"><i class="ti ti-coffee"></i> Thông tin cơ sở</h6>
+            </div>
+            <div class="card-body p-3">
+                <span id="loader_info"></span>
+                <ul class="list-group" id="showlist_info"></ul>
             </div>
         </div>
-    </div>
-    <div class="col-md-3 stretch-card grid-margin">
-        <div class="card bg-gradient-success card-img-holder shadow">
-            <div class="card-body p-2 ps-3 pt-3">
-                <h6 class="font-weight-normal mb-3">
-                    Visitors Online <i class="ti ti-diamond"></i>
-                </h6>
-                <h3>95,5741</h3>
-                <div class="d-flex align-items-center pb-1">
-                    <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
-                        <i class="ti ti-arrow-down-right text-danger"></i>
-                    </span>
-                    <p class="text-dark me-1 fs-3 mb-0">+9%</p>
-                    <p class="text-muted fs-3 mb-0">last year</p>
+        <div class="card flex-fill">
+            <div class="card-header bg-light">
+                <div class="card-actions float-end">
+                    <div class="dropdown position-relative">
+                        <a href="javascript:void(0)" data-bs-toggle="dropdown" data-bs-display="static">
+                            <i class="ti ti-dots"> </i>
+                        </a>
+                    </div>
                 </div>
+                <h6 class="mb-0 fw-bolder"><i class="ti ti-bell"></i> Thông báo vật tư</h6>
+            </div>
+            <div class="card-body p-3 overflow-y-scroll" style="max-height:205px;">
+                <span id="loader_vattu"></span>
+                <ul class="list-group" id="showlist_vattu">
+                </ul>
             </div>
         </div>
     </div>
 </div>
-<div class="row">
-    <div class="col-lg-8 stretch-card grid-margin  d-flex align-items-strech">
-        <div class="card">
-            <div class="card-header p-2 ps-3 pt-3 bg-success">
-                <div class="d-sm-flex d-block align-items-center justify-content-between align-content-center">
-                    <h5 class="text-white fw-bolder"><i class="ti ti-bell-ringing"></i> Thông báo</h5>
-                    <div class="align-content-center pb-2 pe-3">
-                        <a href="/feeds" class="text-white"><i class="ti ti-eye"></i> Xem tất cả</a>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <div id="loading"></div>
-                <div class="row" id="showlist_thongbao">
-                </div>
-            </div>
 
-        </div>
-    </div>
-    <div class="col-lg-4  stretch-card grid-margin">
-        <div class="card">
-            <div class="card-header p-2 ps-3 pt-3 bg-success">
-                <div class="d-sm-flex d-block align-items-center justify-content-between align-content-center">
-                    <h5 class="text-white fw-bolder"><i class="ti ti-bell-ringing"></i> Thông báo vật tư</h5>
+<div class="modal fade" id="addFeedModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content h-75">
+            <form action="/" method="post" id="form_nhap">
+                <div class="modal-header">
+                    <h6 class="modal-title"><i class="ti ti-bell"></i> Cập nhật thông báo</h6>
                 </div>
-            </div>
-            <div class="card-body simplebar-scrollbar">
-                <div id="loading"></div>
-                <div class="d-block" id="showlist_vattu">
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-8">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title d-flex align-items-center gap-2 mb-4">
-                    Traffic Overview
-                    <span>
-                        <iconify-icon icon="solar:question-circle-bold" class="fs-7 d-flex text-muted" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" data-bs-title="Traffic Overview"></iconify-icon>
-                    </span>
-                </h5>
-                <div id="traffic-overview" style="min-height: 335px;">
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title d-flex align-items-center gap-2 mb-5 pb-3">
-                    Sessions by
-                    device<span><iconify-icon icon="solar:question-circle-bold" class="fs-7 d-flex text-muted" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" data-bs-title="Locations"></iconify-icon></span>
-                </h5>
-                <div class="row">
-                    <div class="col-4">
-                        <span class="fs-11 mt-2 d-block text-nowrap">Computers</span>
-                        <h4 class="mb-0 mt-1">87%</h4>
-                    </div>
-                    <div class="col-4">
-                        <span class="fs-11 mt-2 d-block text-nowrap">Smartphone</span>
-                        <h4 class="mb-0 mt-1">9.2%</h4>
-                    </div>
-                    <div class="col-4">
-                        <span class="fs-11 mt-2 d-block text-nowrap">Tablets</span>
-                        <h4 class="mb-0 mt-1">3.1%</h4>
-                    </div>
-                </div>
-
-                <div class="vstack gap-4 mt-7 pt-2">
-                    <div>
-                        <div class="hstack justify-content-between">
-                            <span class="fs-3 fw-medium">Computers</span>
-                            <h6 class="fs-3 fw-medium text-dark lh-base mb-0">87%</h6>
+                <hr style="width:90%;margin:0 auto;" />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <input type="hidden" name="action" value="" id="action" />
+                            <input type="hidden" name="Id" value="" id="Id" />
+                            <input type="text" name="tieude" value="" id="tieude" class="form-control" placeholder="Tiêu đề thông báo" />
                         </div>
-                        <div class="progress mt-6" role="progressbar" aria-label="Warning example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                            <div class="progress-bar bg-primary" style="width: 100%"></div>
+                        <div class="col-md-12 mt-1">
+                            <textarea id="editor1"></textarea>
+                        </div>
+                        <div class="col-md-12 mt-1">
+                            <input type="text" name="ngayhethan" value="" id="ngayhethan" class="form-control" placeholder="Ngày hết hạn" />
                         </div>
                     </div>
-
-                    <div>
-                        <div class="hstack justify-content-between">
-                            <span class="fs-3 fw-medium">Smartphones</span>
-                            <h6 class="fs-3 fw-medium text-dark lh-base mb-0">9.2%</h6>
-                        </div>
-                        <div class="progress mt-6" role="progressbar" aria-label="Warning example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                            <div class="progress-bar bg-secondary" style="width: 50%"></div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="hstack justify-content-between">
-                            <span class="fs-3 fw-medium">Tablets</span>
-                            <h6 class="fs-3 fw-medium text-dark lh-base mb-0">3.1%</h6>
-                        </div>
-                        <div class="progress mt-6" role="progressbar" aria-label="Warning example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                            <div class="progress-bar bg-success" style="width: 35%"></div>
-                        </div>
-                    </div>
-
                 </div>
-            </div>
+                <div class="modal-footer">
+                    <span class="loader"></span>
+                    <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
+                        <i class="ti ti-door-exit"></i> Đóng
+                    </button>
+                    <a class="btn btn-sm btn-success text-center" href="javascript:Submit_savechange()">
+                        <i class="ti ti-plus"></i> Cập nhật
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content rounded-0 h-75">
-            <form action="/" method="post" id="form_nhap">
-                <div class="modal-header bg-primary">
-                    <h5 class="modal-title text-white" id="exampleModalLabel"></h5>
-                    <span class="fst-italic text-white" id="ngay"></span>
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content h-75">
+            <form action="/" method="post">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalLabel"></h6>
+                    <span class="fst-italic"><i class="ti ti-clock"></i> <small id="ngay"></small></span>
                 </div>
+                <hr style="width:90%;margin:0 auto;" />
                 <div class="modal-body">
-                    <div class="container border-info border-1" style="border: 1px solid; border-radius: 5px; padding: 10px; text-align: justify;">
+                    <div class="container border-light border-1" style="border: 1px solid; border-radius: 5px; padding: 10px; text-align: justify;">
                         <span id="noidung"></span>
                     </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
+                        <i class="ti ti-door-exit"></i> Đóng
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 <script>
+    $(function () {
+        $("#ngayhethan").datepicker({ dateFormat: "dd/mm/yy", minDate: 0 });
+        Loadlist_numberStatistic();
+        Loadlist();
+        Loadlist_vattu();
+        Loadlist_Info();
+    });
+    isProcessing = false;
+    function Submit_savechange() {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        var toDate = $("#ngayhethan").val().split("/").reverse().join("-");
+        var editorText = CKEDITOR.instances.editor1.getData();
+        $.ajax({
+            url: '@Url.Action("Submit_savechange", "Feeds")',
+            type: "POST",
+            data: {
+                action: $("#action").val(),
+                Id: $("#Id").val(),
+                Name: $("#tieude").val(),
+                Description: editorText,
+                Todate: toDate
+            },
+            success: function (data) {
+                if (data.status == "ok") {
+                    $('#modaladdProgram').modal('hide');
+                    location.reload();
+                } else {
+                    showError(data.message, 3000);
+                }
+                isProcessing = false; // Hoàn thành xử lý
+                $(".loader").html("");
+            },
+            error: function (xhr, error) {
+                console.log(error);
+                isProcessing = false; // Hoàn thành xử lý
+                $(".loader").html("");
+            }
+        });
+    }
+    function add_thongbao() {
+        $("#action").val("create");
+        $('#addFeedModal').modal('show');
+    }
     function View_thongbao(id) {
         $.ajax({
             url: '@Url.Action("Load_thongbao", "Home")',
@@ -208,7 +233,7 @@
                 console.log(data);
                 $("#exampleModalLabel").html(data.tieude);
                 $('#noidung').html(data.str);
-                $('#ngay').html("đăng ngày: "+data.ngay);
+                $('#ngay').html(""+data.ngay);
                 $('#exampleModal').modal('show');
             },
             error: function (xhr, error) {
@@ -216,28 +241,46 @@
             }
         });
     }
-    Loadlist();
-    function Loadlist() {
-            $("#loading").html("Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
-             $.ajax({
-                 url: '@Url.Action("Loadlist_thongbao", "Home")',
-                 type: "GET",
-                 data: {
-                 },
-                 success: function (data) {
-                     console.log(data);
-                    $("#loading").html("");
-                     $('#showlist_thongbao').html(data.str);
-                 },
-                 error: function (xhr, error) {
-                     console.log(error);
-                 }
-             });
+    function Loadlist_numberStatistic() {
+        $.ajax({
+            url: '@Url.Action("LoadNumber_statistics", "Home")',
+            type: "GET",
+            data: {
+            },
+            success: function (data) {
+                console.log(data);
+                $("#loader_thongbao").html("");
+                $('#sohocvien').html(data.NumberStudent);
+                $('#sohocvienper').html(data.percentChangeStudent);
+                $('#danghoc').html(data.NumberOnClass);
+                $('#danghocper').html(data.percentChangeOnClass);
+                $('#dangchoxetlop').html(data.NumberWaiting);
+                $('#dangchoxetlopper').html(data.percentChangeWaiting);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
     }
-
-    Loadlist_vattu();
+    function Loadlist() {
+        $("#loader_thongbao").html("Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        $.ajax({
+            url: '@Url.Action("Loadlist_thongbao", "Home")',
+            type: "GET",
+            data: {
+            },
+            success: function (data) {
+                console.log(data);
+                $("#loader_thongbao").html("");
+                $('#showlist_thongbao').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
     function Loadlist_vattu() {
-        $("#loading").html("Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        $("#loader_vattu").html("Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
          $.ajax({
              url: '@Url.Action("Loadlist_vattu", "Home")',
              type: "GET",
@@ -245,8 +288,24 @@
              },
              success: function (data) {
                  console.log(data);
-                $("#loading").html("");
+                $("#loader_vattu").html("");
                  $('#showlist_vattu').html(data.str);
+             },
+             error: function (xhr, error) {
+                 console.log(error);
+             }
+         });
+    }
+    function Loadlist_Info() {
+        $("#loader_info").html("Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+         $.ajax({
+             url: '@Url.Action("GetInfoBranch", "Home")',
+             type: "GET",
+             data: {
+             },
+             success: function (data) {
+                 $("#loader_info").html("");
+                 $('#showlist_info').html(data.str);
              },
              error: function (xhr, error) {
                  console.log(error);

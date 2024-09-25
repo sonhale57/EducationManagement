@@ -164,7 +164,7 @@ namespace SuperbrainManagement.Controllers
                     str += "<tr>"
                             + "<td class='text-center '>" + count + "</td>"
                             + "<td class='' >" + readerCat["Name"].ToString() + "</td>"
-                            + "<td class='' >" + readerCat["Amount"].ToString() + "</td>"
+                            + "<td class='text-center' >" + readerCat["Amount"].ToString() + "</td>"
                             + "<td class='text-end'><a href=\"javascript:Delete_ProductCourse(" + readerCat["Id"] +","+IdCourse+")\" class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a></td>"
                             + "</tr>";
                     
@@ -192,18 +192,20 @@ namespace SuperbrainManagement.Controllers
             return Json(new { success = true });
         }
         [HttpPost]
-        public async Task<ActionResult> Delete_Course(int id)
+        public ActionResult Delete_Course(int id)
         {
-            var c = await db.Courses.FindAsync(id);
+            var c =  db.Courses.Find(id);
             if (c == null)
             {
-                return HttpNotFound();
+                return Json(new {status="error",message="Không tìm thấy khóa học!"},JsonRequestBehavior.AllowGet);
             }
-
+            if (db.RegistrationCourses.Any(x => x.IdCourse == id))
+            {
+                return Json(new { status = "error", message = "Không thể xóa học viên, Đã có học viên đăng kí khóa học này!" }, JsonRequestBehavior.AllowGet);
+            }
             db.Courses.Remove(c);
-            await db.SaveChangesAsync();
-
-            return Json(new { success = true });
+            db.SaveChanges();
+            return Json(new { status="ok",message = "Đã xóa khóa học thành công!" },JsonRequestBehavior.AllowGet);
         }
         public ActionResult Loadlist_Statistics(int? IdBranch, string month)
         {

@@ -8,95 +8,201 @@
 }
 <div class="row">
     <div class="col col-md-4 col-sm-12">
-        <form action="/marketingcampaigns" method="get" id="formload">
+        <form action="/" method="get" id="formload">
             <div class="input-group mb-3">
                 @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
                 {
-                    @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2" })
+                    @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2",@onchange="Loadlist()" })
                 }
-                <input type="text" class="form-control ms-1 rounded-1" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
-                <button class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
             </div>
         </form>
     </div>
     <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
-        <div class="me-0 btn btn-md p-0">
-            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="ti ti-arrows-sort"></i> Sắp xếp theo
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-ascending"></i> Cũ nhất</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
-            </ul>
-        </div>
-        <a href="/marketingcampaigns/create" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
+        <a href="javascript:Add_MKT()" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>
     </div>
 </div>
 
-<table class="table fs-3">
+<table class="table fs-3 mt-2">
     <thead class="bg-success text-white rounded-1">
         <tr>
             <th class="text-center">STT</th>
             <th>Mã</th>
-            <th>Mô tả ngắn</th>
-            <th>Người tạo</th>
-            <th>Ngày tạo</th>
+            <th>Tên</th>
+            <th class="text-center">Số lượng đăng ký</th>
             <th class="text-center">Trạng thái</th>
             <th class="text-end">Thao tác</th>
         </tr>
     </thead>
-
-    @foreach (var item in Model)
-    {
-        <tr>
-            <td class="text-center">
-                @stt
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Code)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.User.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DateCreate)
-            </td>
-            <td class="text-center">
-                @if (item.Enable != null && item.Enable == true)
-                {
-                    <label class="custom-control ios-switch">
-                        <input type="checkbox" class="ios-switch-control-input" onchange="javascript: ChangeStatus(this)" data-id="@item.Id" value="0" checked>
-                        <span class="ios-switch-control-indicator"></span>
-                    </label>
-                }
-                else
-                {
-                    <label class="custom-control ios-switch">
-                        <input type="checkbox" class="ios-switch-control-input" onchange="javascript: ChangeStatus(this)" data-id="@item.Id" value="1">
-                        <span class="ios-switch-control-indicator"></span>
-                    </label>
-                }
-            </td>
-            <td class="text-end">
-                <a href="/marketingcampaigns/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
-                <a href="/marketingcampaigns/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
-                <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="ti ti-dots-vertical"></i>
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                </ul>
-            </td>
-        </tr>
-        stt += 1;
-    }
+    <tbody id="showlist"></tbody>
+    <tr class="loader"></tr>
 </table>
-<nav aria-label="Page navigation">
-    <ul class="pagination justify-content-center">
-        @Html.PagedListPager(Model, page => Url.Action("Index", new { page }), new PagedListRenderOptions { LiElementClasses = new string[] { "page-item" } })
-    </ul>
-</nav>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-fullscreen" id="exampleModalLabel">Thêm lớp học </h5>
+            </div>
+            <hr style="width:90%;margin:0 auto;" />
+            <form action="/" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label class="">Mã chương trình</label>
+                            <input type="text" class="form-control" id="Code" name="Code" value="" placeholder="Mã chương trình" />
+                        </div>
+                        <div class="col-md-12">
+                            <label class=" mt-3">Tên chương trình</label>
+                            <input type="text" class="form-control" id="Name" name="Name" value="" placeholder="Tên chương trình" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="mt-3">Trạng thái</label>
+                            <select class="form-control" id="Status">
+                                <option value="true">Hoạt động</option>
+                                <option value="false">Ngừng hoạt động</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="mt-3">Chế độ</label>
+                            <select class="form-control" id="IsPublic">
+                                <option value="true">Công khai</option>
+                                <option value="false">Riêng tư</option>
+                            </select>
+                        </div>
+                    </div>
+                    <input type="hidden" name="action" value="" id="action" />
+                    <input type="hidden" name="Id" value="" id="Id" />
+                </div>
+                <div class="modal-footer">
+                    <span class="loader"></span>
+                    <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
+                        <i class="ti ti-door-exit"></i> Hủy
+                    </button>
+                    <a href="javascript:Submit_savechange()" class="btn btn-sm btn-success" id="btnaction"><i class="ti ti-refresh"></i> Lưu cập nhật</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    Loadlist();
+    var isProcessing = false;
+    function Loadlist() {
+        $(".loader").html("<td colspan=6 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
+        $.ajax({
+            url: '@Url.Action("Loadlist", "MarketingCampaigns")',
+            type: "GET",
+            data: {
+                IdBranch: $("#IdBranch").val()
+            },
+            success: function (data) {
+                $('#showlist').html(data.str);
+                $(".loader").html("");
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+    function Add_MKT() {
+        $('#exampleModalLabel').html("Thêm chương trình MKT");
+        $('#action').val("create");
+        $('#btnaction').html("+ Thêm mới");
+        $('#exampleModal').modal('show');
+    }
+    function Edit(id) {
+        $('#exampleModalLabel').html("Cập nhật chương trình MKT");
+        $.ajax({
+            url: '@Url.Action("LoadInfoMKT", "MarketingCampaigns")',
+            type: "GET",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                $('#Id').val(id);
+                $('#Code').val(data.Code);
+                $('#Name').val(data.Name);
+                $('#Status').val(data.Status);
+                $('#IsPublic').val(data.IsPublic);
+                $('#action').val("edit");
+                $('#exampleModal').modal('show');
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function Submit_savechange() {
+        $.ajax({
+            url: '@Url.Action("Submit_savechange", "MarketingCampaigns")',
+            type: "POST",
+            data: {
+                action: $("#action").val(),
+                Id: $("#Id").val(),
+                Code: $("#Code").val(),
+                Name: $("#Name").val(),
+                Status: $("#Status").val(),
+                IsPublic: $("#IsPublic").val()
+            },
+            success: function (data) {
+                if (data.status == "ok") {
+                    Loadlist();
+                    $('#exampleModal').modal('hide');
+                    showSuccess(data.message, 3000);
+                } else {
+                    showError(data.message, 3000);
+                }
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+
+
+    function Delete(id) {
+        if (confirm('Bạn có muốn xóa chương trình MKT của cơ sở này?')) {
+            $.ajax({
+                url: "/MarketingCampaigns/Submit_delete",
+                type: "POST",
+                data: {
+                    id: id
+                }
+                , dataType: "json",
+                success: function (data) {
+                    if (data.status = "ok") {
+                        Loadlist();
+                        showSuccess(data.message, 3000);
+                    }
+                    else {
+                        showError(data.status, 3000);
+                    }
+                },
+                error: function () { showError('Lỗi xóa lịch nghỉ!', 3000); }
+            });
+        }
+    }
+    function ChangeStatus(button) {
+        var id = parseInt(button.getAttribute("data-id")); // Chuyển đổi id thành một số nguyên
+        var status = button.value; // Sử dụng button.value thay vì lấy từ tất cả các button
+        $.ajax({
+            type: "POST",
+            url: '/MarketingCampaigns/updateStatus',
+            data: JSON.stringify({ id: id, status: status }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                if (response.status == "ok") {
+                    showSuccess(response.message, 3000);
+                } else {
+                    showError(response.message, 3000);
+                }
+            },
+            error: function (xhr, status, error) {
+                showError("Lỗi cập nhật!", 3000);
+            }
+        });
+    }
+</script>

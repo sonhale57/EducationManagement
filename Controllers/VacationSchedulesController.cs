@@ -12,6 +12,8 @@ using SuperbrainManagement.Models;
 using Microsoft.EntityFrameworkCore;
 using SuperbrainManagement.Helpers;
 using EntityState = System.Data.Entity.EntityState;
+using System.Data.SqlClient;
+using Microsoft.Ajax.Utilities;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -19,72 +21,39 @@ namespace SuperbrainManagement.Controllers
     {
         private ModelDbContext db = new ModelDbContext();
 
-        // GET: VacationSchedules
-        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page,string idBranch)
+        public ActionResult Index()
         {
-            var branches = db.Branches.ToList();
-            int idbranch = int.Parse(CheckUsers.idBranch());
-            if (!CheckUsers.CheckHQ())
+            ViewBag.IdBranch = new SelectList(db.Branches.Where(x => x.Enable == true), "Id", "Name");
+            return View();
+        }
+        public ActionResult Loadlist(int? IdBranch)
+        {
+            string str = "";
+            int stt = 0;
+            if (IdBranch == null)
             {
-                branches = db.Branches.Where(x => x.Id == idbranch && x.Enable == true).ToList();
+                IdBranch = Convert.ToInt32(CheckUsers.idBranch());
             }
-            if (string.IsNullOrEmpty(idBranch))
+            var vacation = db.VacationSchedules.Where(x=>x.IdBranch == IdBranch).OrderByDescending(x=>x.Id);
+            if (vacation.Count() == 0)
             {
-                idBranch = branches.First().Id.ToString();
+                str = "<tr><td colspan=5>Không có dữ liệu lịch nghỉ</td></tr>";
             }
-            ViewBag.IdBranch = new SelectList(branches, "Id", "Name", idBranch);
-
-            if (searchString != null)
+            foreach (var v in vacation)
             {
-                page = 1;
+                stt++;
+                str += "<tr>"
+                    +"<td class='text-center'>"+stt+"</td>"
+                    +"<td>"+v.Description+"</td>"
+                    +"<td class='text-center'>"+v.Fromdate.Value.ToString("dd/MM/yyyy")+"</td>"
+                    +"<td class='text-center'>" +v.Todate.Value.ToString("dd/MM/yyyy") +"</td>"
+                    +"<td class='text-end'>" +
+                    "<a href='javascript:Edit_vacation(" + v.Id+")' class='text-primary'><i class='ti ti-edit'></i> </a>" +
+                    "<a href='javascript:Delete_vacation(" + v.Id+ ")' class='text-danger'><i class='ti ti-trash'></i> </a>" +
+                    "</td>"
+                    + "</tr>";
             }
-            else
-            {
-                searchString = currentFilter;
-            }
-            ViewBag.CurrentFilter = searchString;
-            
-            var vacation = db.VacationSchedules.ToList();
-
-            if (!string.IsNullOrEmpty(idBranch))
-            {
-                vacation = vacation.Where(x => x.IdBranch==int.Parse(idBranch)).ToList();
-            }
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                vacation = vacation.Where(x => x.Description.ToLower().Contains(searchString.ToLower())).ToList();
-            }
-            switch (sortOrder)
-            {
-                case "name_desc":
-                    vacation = vacation.OrderByDescending(s => s.Description).ToList();
-                    break;
-                case "date":
-                    vacation = vacation.OrderBy(s => s.Id).ToList();
-                    break;
-                case "name":
-                    vacation = vacation.OrderBy(s => s.Description).ToList();
-                    break;
-                default:
-                    vacation = vacation.OrderByDescending(s => s.Id).ToList();
-                    break;
-            }
-            int pageSize = 20;
-            int pageNumber = (page ?? 1);
-
-
-            var pagedData = vacation.ToPagedList(pageNumber, pageSize);
-
-            var pagedListRenderOptions = new PagedListRenderOptions();
-            pagedListRenderOptions.FunctionToTransformEachPageLink = (liTag, aTag) =>
-            {
-                liTag.AddCssClass("page-item");
-                aTag.AddCssClass("page-link");
-                return liTag;
-            };
-            
-            ViewBag.PagedListRenderOptions = pagedListRenderOptions;
-            return View(pagedData);
+            return Json(new {str},JsonRequestBehavior.AllowGet);
         }
         public ActionResult Loadedit_vacation(int id)
         {
@@ -159,122 +128,6 @@ namespace SuperbrainManagement.Controllers
                 return Json(new { status = "ok", message = "Đã xóa lịch nghỉ này." }, JsonRequestBehavior.AllowGet);
             }    
         }
-
-        #region loaddefault
-        // GET: VacationSchedules/Details/5
-        public ActionResult Details(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            VacationSchedule vacationSchedule = db.VacationSchedules.Find(id);
-            if (vacationSchedule == null)
-            {
-                return HttpNotFound();
-            }
-            return View(vacationSchedule);
-        }
-
-        // GET: VacationSchedules/Create
-        public ActionResult Create()
-        {
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Name");
-            ViewBag.IdUser = new SelectList(db.Users, "Id", "Name");
-            return View();
-        }
-
-        // POST: VacationSchedules/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,DateCreate,IdUser,IdBranch,Fromdate,Todate,Description")] VacationSchedule vacationSchedule)
-        {
-            if (ModelState.IsValid)
-            {
-                vacationSchedule.IdBranch = int.Parse(CheckUsers.idBranch());
-                vacationSchedule.IdUser =int.Parse(CheckUsers.iduser());
-                vacationSchedule.DateCreate = DateTime.Now;
-                db.VacationSchedules.Add(vacationSchedule);
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
-
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Name", vacationSchedule.IdBranch);
-            ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", vacationSchedule.IdUser);
-            return View(vacationSchedule);
-        }
-
-        // GET: VacationSchedules/Edit/5
-        public ActionResult Edit(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            VacationSchedule vacationSchedule = db.VacationSchedules.Find(id);
-            if (vacationSchedule == null)
-            {
-                return HttpNotFound();
-            }
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo", vacationSchedule.IdBranch);
-            ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", vacationSchedule.IdUser);
-            return View(vacationSchedule);
-        }
-
-        // POST: VacationSchedules/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,DateCreate,IdUser,IdBranch,Fromdate,Todate,Description")] VacationSchedule vacationSchedule)
-        {
-            if (ModelState.IsValid)
-            {
-                db.Entry(vacationSchedule).State = System.Data.Entity.EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo", vacationSchedule.IdBranch);
-            ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", vacationSchedule.IdUser);
-            return View(vacationSchedule);
-        }
-
-        // GET: VacationSchedules/Delete/5
-        public ActionResult Delete(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            VacationSchedule vacationSchedule = db.VacationSchedules.Find(id);
-            if (vacationSchedule == null)
-            {
-                return HttpNotFound();
-            }
-            return View(vacationSchedule);
-        }
-
-        // POST: VacationSchedules/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
-        {
-            VacationSchedule vacationSchedule = db.VacationSchedules.Find(id);
-            db.VacationSchedules.Remove(vacationSchedule);
-            db.SaveChanges();
-            return RedirectToAction("Index");
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-        #endregion
+        
     }
 }

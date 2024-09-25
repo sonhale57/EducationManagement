@@ -53,9 +53,10 @@
             </div>
 
             <div class="col-md-6 mt-3">
-                <label>Sinh nhật <a href="#" title="Format là MM/dd/yyyy"><i class="ti ti-help"></i></a></label>
+                <label>Ngày sinh</label>
                 <div class="col-md-12">
-                    @Html.EditorFor(model => model.DateOfBirth, new { htmlAttributes = new { @class = "form-control" } })
+                    <input type="text" name="sinhnhat" value="@Model.DateOfBirth.Value.ToString("dd/MM/yyyy")" id="sinhnhat" class="form-control" onchange="Updatedate()" required/>
+                    @Html.HiddenFor(model => model.DateOfBirth, new { htmlAttributes = new { @class = "form-control" } })
                     @Html.ValidationMessageFor(model => model.DateOfBirth, "", new { @class = "text-danger" })
                 </div>
             </div>
@@ -188,12 +189,17 @@
                                         </div>
                                     </div>
                                 }
+                                else
+                                {
+                                    @Html.HiddenFor(model => model.IdBranch)
+                                }
+
                                 @Html.EditorFor(model => model.Enable, new { htmlAttributes = new { @class = "form-control hideof", @type = "hidden" } })
                                 @Html.EditorFor(model => model.IsOfficial, new { htmlAttributes = new { @class = "form-control hideof", @type = "hidden" } })
                                 @Html.EditorFor(model => model.DateCreate, new { htmlAttributes = new { @class = "form-control", @type = "hidden" } })
                                 <div class="col-md-12 mt-3">
                                     <div class="col-md-offset-2 col-md-12">
-                                        <input type="submit" value="Cập nhật" class="btn btn-success" />
+                                        <button type="submit" class="btn btn-success"><i class="ti ti-refresh"></i> Cập nhật</button>
                                     </div>
                                 </div>
                             </div>
@@ -239,6 +245,14 @@
 </div>
 
 <script>
+
+    function Updatedate() {
+        var dateofbirth = $("#sinhnhat").val().split("/").reverse().join("-");
+        $("#DateOfBirth").val(dateofbirth);
+    }
+    $(function () {
+        $("#sinhnhat").datepicker({ dateFormat: "dd/mm/yy" });
+    });
     function Add_Position() {
         $('#action').val("create");
         $('#modaladdProgram').modal('show');

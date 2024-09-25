@@ -52,7 +52,7 @@
         public DateTime? DateCertificate { get; set; }
 
         [Display(Name = "Thời gian bắt đầu công tác")]
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime? StartWork { get; set; }
 
         [Display(Name = "Cơ sở")]
@@ -64,7 +64,7 @@
         public bool? Enable { get; set; }
 
         [Display(Name = "Sinh nhật")]
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime? DateOfBirth { get; set; }
 
         [StringLength(50)]

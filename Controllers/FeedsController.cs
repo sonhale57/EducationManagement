@@ -23,26 +23,24 @@ namespace SuperbrainManagement.Controllers
         public ActionResult Loadlist_thongbao()
         {
             string str = "";
-            var list = db.Feeds.ToList();
+            var list = db.Feeds.Where(x=>x.Enable==true).OrderByDescending(x=>x.Id).ToList();
             foreach (var item in list)
             {
-                str += "<div class=\"col-md-12\">"
-                    + "<div class=\"p-1 border-1\">"
-                    + "<div class=\"row align-items-center\">"
-                    + "<div class=\"col-auto text-end\">"
-                    + "<img src=\"" + (item.User.Employee.Image == null ? "/Assets/images/profile/user-1.jpg" : item.User.Employee.Image) + "\" alt=\"\" width=\"35\" height=\"35\" class=\"rounded-circle\">"
-                    + "</div>"
-                    + "<div class=\"col-10\">"
-                    + "<div class=\"overflow-hidden flex-nowrap\">"
-                    + "<h6 class=\"mb-1\">"
-                    + "<a href=\"javascript:View_thongbao(" + item.Id + ")\" class=\"fw-bolder\">" + item.Name + "</a>"
-                    + "</h6>"
-                    + "<i class=\"text-muted d-block mb-2 small\">đăng bởi <span class='fw-bolder'>" + item.User.Name + "</span> - vào lúc: " + item.DateCreate + "</i>"
-                    + "</div>"
-                    + "</div>"
-                    + "</div>"
-                    + "</div>"
-                    + "</div> <hr class='bg-light'/>";
+                str += "<li class=\"list-group-item border-0 d-flex justify-content-between mb-3 border-radius-lg\">" +
+                            "<div class=\"d-flex align-items-center\">" +
+                                "<div class=\"me-3 text-center\">" +
+                                    "<img src=\"" + (item.User.Employee.Image == null ? "/Assets/images/profile/user-1.jpg" : item.User.Employee.Image) + "\" alt=\"\" width=\"35\" height=\"35\" class=\"rounded-circle\">" +
+                                "</div>" +
+                                "<div class=\"d-flex flex-column\">" +
+                                    "<h6 class='mb-0 pb-0'><a href=\"javascript:View_thongbao(" + item.Id + ")\" class='text-muted fw-bolder'>" + item.Name + "</a></h6>" +
+                                    "<small class=\"fst-italic\"><i class=\"ti ti-user-circle\" aria-hidden=\"true\"></i> " + item.User.Name + " , <i class=\"ti ti-clock\" aria-hidden=\"true\"></i> " + item.DateCreate.Value.ToString("dd/MM/yyyy") + "</small>" +
+                                "</div>" +
+                            "</div>" +
+                            "<div class=\"d-flex\">" +
+                                "<a href=\"javascript:Edit(" + item.Id + ")\" class=\"text-primary\"><i class=\"ti ti-edit\" aria-hidden=\"true\"></i></a>" +
+                                "<a href=\"javascript:Delete(" + item.Id + ")\" class=\"text-danger ms-1\"><i class=\"ti ti-trash\" aria-hidden=\"true\"></i></a>" +
+                            "</div>" +
+                        "</li>";
             }
             var json = new
             {
@@ -50,120 +48,64 @@ namespace SuperbrainManagement.Controllers
             };
             return Json(json, JsonRequestBehavior.AllowGet);
         }
-        // GET: Feeds/Details/5
-        public ActionResult Details(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Feed feed = db.Feeds.Find(id);
-            if (feed == null)
-            {
-                return HttpNotFound();
-            }
-            return View(feed);
-        }
-
-
-        // GET: Feeds/Create
-        public ActionResult Create()
-        {
-            ViewBag.IdUser = new SelectList(db.Users, "Id", "Name");
-            return View();
-        }
-
-        // POST: Feeds/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateInput(false)]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Name,Description,DateCreate,IdUser,Enable,Active,Todate,IsPublic,Type")] Feed feed,string editor1)
-        {
-            if (ModelState.IsValid)
+        [ValidateInput(false)]  // Tắt xác thực đầu vào cho hành động này
+        public ActionResult Submit_savechange(int? Id,string action,string Name,string Description,DateTime Todate) {
+            int iduser = Convert.ToInt32(CheckUsers.iduser());
+            if (action == "create")
             {
-                feed.Description = editor1;
-                feed.DateCreate = DateTime.Now;
-                feed.IdUser = Convert.ToInt32(CheckUsers.iduser());
-                feed.Enable= true;
-                feed.Active = true;
-                feed.IsPublic = true;
-                db.Feeds.Add(feed);
+                var f = new Feed()
+                {
+                    Name = Name,
+                    Description = Description,
+                    Todate = Todate,
+                    DateCreate = DateTime.Now,
+                    IdUser = iduser,
+                    Active = true,
+                    Enable = true,
+                    IsPublic = true
+                };
+                db.Feeds.Add(f);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return Json(new {status="ok",message="Đã thêm thông báo thành công!"},JsonRequestBehavior.AllowGet);
             }
-
-            ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", feed.IdUser);
-            return View(feed);
+            else
+            {
+                if (Id == null)
+                {
+                    return Json(new { status = "error", message = "Không tìm thấy thông báo cần cập nhật!" }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    var f = db.Feeds.Find(Id);
+                    f.Name = Name;
+                    f.Description = Description;
+                    f.Todate = Todate;
+                    db.Entry(f).State = EntityState.Modified;
+                    db.SaveChanges();
+                    return Json(new { status = "ok", message = "Đã cập nhật thông báo thành công!" }, JsonRequestBehavior.AllowGet);
+                }
+            }
         }
-
-        // GET: Feeds/Edit/5
-        public ActionResult Edit(int? id)
-        {
-            if (id == null)
+        public ActionResult GetFeed(int id) { 
+            var f = db.Feeds.Find(id);
+            if(f== null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return Json(new { status = "error", message = "Không tìm thấy thông báo cần cập nhật!" }, JsonRequestBehavior.AllowGet);
             }
-            Feed feed = db.Feeds.Find(id);
-            if (feed == null)
-            {
-                return HttpNotFound();
-            }
-            ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", feed.IdUser);
-            return View(feed);
+            return Json(new {Id= f.Id, Name =f.Name, Description = f.Description,Todate = f.Todate.Value.ToString("dd/MM/yyyy") }, JsonRequestBehavior.AllowGet);
         }
-
-        // POST: Feeds/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,Name,Description,DateCreate,IdUser,Enable,Active,Todate,IsPublic,Type")] Feed feed)
+        public ActionResult Submit_delete(int id)
         {
-            if (ModelState.IsValid)
+            var f = db.Feeds.Find(id);
+            if (f == null)
             {
-                db.Entry(feed).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                return Json(new { status = "error", message = "Không tìm thấy thông báo cần cập nhật!" }, JsonRequestBehavior.AllowGet);
             }
-            ViewBag.IdUser = new SelectList(db.Users, "Id", "Name", feed.IdUser);
-            return View(feed);
-        }
-
-        // GET: Feeds/Delete/5
-        public ActionResult Delete(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Feed feed = db.Feeds.Find(id);
-            if (feed == null)
-            {
-                return HttpNotFound();
-            }
-            return View(feed);
-        }
-
-        // POST: Feeds/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
-        {
-            Feed feed = db.Feeds.Find(id);
-            db.Feeds.Remove(feed);
+            f.Enable = false;
+            db.Entry(f).State= EntityState.Modified;
             db.SaveChanges();
-            return RedirectToAction("Index");
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
+            return Json(new { status="ok",message="Đã xóa thông báo thành công!" }, JsonRequestBehavior.AllowGet);
         }
     }
 }

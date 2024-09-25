@@ -11,6 +11,8 @@ using PagedList;
 using SuperbrainManagement.Models;
 using System.Threading.Tasks;
 using SuperbrainManagement.Helpers;
+using static Org.BouncyCastle.Math.EC.ECCurve;
+using System.Xml.Linq;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -313,12 +315,33 @@ namespace SuperbrainManagement.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "Id,Name,IdPosition,Description,Image,Phone,Email,CertificateNumber,DateCertificate,StartWork,IdBranch,IsOfficial,Enable,DateOfBirth,Address,Gratuate,Sex,DateCreate,DateStart,BasicSalary,BankName,BankAccountName,BankNumber,BankBranch")] Employee employee)
         {
+            ConvertText convi = new ConvertText();
+            int IdBranch = Convert.ToInt32(CheckUsers.idBranch());
             if (ModelState.IsValid)
             {
+                string Username = "GV_" + convi.fixtex(GetLastName(employee.Name)) + GetLastThreeDigits(employee.Phone);
+                if (employee.IdBranch == null)
+                {
+                    employee.IdBranch = IdBranch;
+                }
                 employee.Enable = true;
                 employee.IsOfficial = false;
                 employee.DateCreate = DateTime.Now;
                 db.Employees.Add(employee);
+                if (db.Users.Any(x => x.Username == Username)) {
+                    TempData["error"] = "<span class='alert alert-danger'>Đã tồn tại username của nhân sự này, vui lòng kiểm tra lại!</span>";
+                }
+                else
+                {
+                    var us = new User() {
+                        Username = Username,
+                        Password = "taptrung",
+                        Expire = DateTime.Now.AddMonths(3),
+                        DateCreate = DateTime.Now,
+                        Active = true
+                    };
+                    db.Users.Add(us);
+                }
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }

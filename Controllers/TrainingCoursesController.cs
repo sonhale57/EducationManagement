@@ -25,6 +25,7 @@ namespace SuperbrainManagement.Controllers
         {
             int IdBranch = Convert.ToInt32(CheckUsers.idBranch());
             ViewBag.IdEmployee = new SelectList(db.Employees.Where(x=>x.IdBranch==IdBranch), "Id", "Name");
+            ViewBag.IdBranch = new SelectList(db.Branches.Where(x=>x.Enable==true), "Id", "Name",IdBranch);
             var trainingCourses = db.TrainingCourses.Include(t => t.TrainingType).Include(t => t.User);
             return View(trainingCourses.ToList());
         }

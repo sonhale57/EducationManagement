@@ -5,13 +5,11 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div>
-    <table class="table table-bordered table table-striped">
-        <thead class="" style="height:50px;">
+<div class="">
+    <table class="table table-bordered table-responsive">
+        <thead class="bg-light" style="height:50px;">
             <tr>
-                <th></th>
                 <th class="text-center">Thứ 2</th>
-                <th class="text-center">Thứ 3</th>
                 <th class="text-center">Thứ 3</th>
                 <th class="text-center">Thứ 4</th>
                 <th class="text-center">Thứ 5</th>
@@ -21,5 +19,25 @@
             </tr>
         </thead>
         <tbody id="showlist"></tbody>
+        <tr class="loader"></tr>
     </table>
 </div>
+<script>
+    Loadlist();
+    function Loadlist() {
+        $(".loader").html("Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+         $.ajax({
+             url: '@Url.Action("ShowWeeklySchedule", "Classes")',
+             type: "GET",
+             data: {
+             },
+             success: function (data) {
+                 $(".loader").html("");
+                 $('#showlist').html(data.str);
+             },
+             error: function (xhr, error) {
+                 console.log(error);
+             }
+         });
+    }
+</script>

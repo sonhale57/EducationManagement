@@ -1,7 +1,8 @@
 ﻿@model SuperbrainManagement.Models.Course
 
 @{
-    ViewBag.Title = "Edit";
+    ViewBag.Controller = "Khóa học";
+    ViewBag.Title = "Chỉnh sửa";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -143,7 +144,9 @@
 
                                 <div class="form-group mt-3">
                                     <div class="col-md-offset-2 col-md-12">
-                                        <input type="submit" value="Cập nhật" class="btn btn-success" />
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="ti ti-refresh"></i> Cập nhật
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -189,8 +192,11 @@
                         </div>
                     </div>
                     <div class="text-center mt-3">
-                        <button type="button" class="btn btn-success text-center" onclick="Submit_AddProgram()" id="btnActionProgram">
-                            <i class="ti ti-circle-plus"></i> Thêm mới
+                        <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
+                            <i class="ti ti-door-exit"></i> Hủy
+                        </button>
+                        <button type="button" class="btn btn-sm btn-success text-center" onclick="Submit_AddProgram()" id="btnActionProgram">
+                            <i class="ti ti-plus"></i> Thêm mới
                         </button>
                     </div>
                 </div>

@@ -308,7 +308,7 @@
             });
     });
 
-    function ChangeStatus(button) {
+        function ChangeStatus(button) {
             var id = parseInt(button.getAttribute("data-id")); // Chuyển đổi id thành một số nguyên
             var status = button.value; // Sử dụng button.value thay vì lấy từ tất cả các button
             $.ajax({
@@ -324,51 +324,51 @@
                     showError("Lỗi cập nhật!", 3000);
                 }
             });
-    }
-        function Delete_Account(Id) {
-        if (confirm('Bạn có muốn xóa tài khoản này?')) {
-            $.ajax({
-                url: '@Url.Action("Delete_Account", "Users")',
-                type: 'POST',
-                data: {
-                    id: Id
-                },
-                success: function (data) {
-                    if (data.status=="ok") {
-                        showSuccess(data.message, 3000);
-                        location.reload();
-                    } else {
-                        showError(data.message,3000);
-                    }
-                },
-                error: function () {
-                    showError('Error deleting user',3000);
-                }
-            });
         }
+        function Delete_Account(Id) {
+            if (confirm('Bạn có muốn xóa tài khoản này?')) {
+                $.ajax({
+                    url: '@Url.Action("Delete_Account", "Users")',
+                    type: 'POST',
+                    data: {
+                        id: Id
+                    },
+                    success: function (data) {
+                        if (data.status == "ok") {
+                            showSuccess(data.message, 3000);
+                            location.reload();
+                        } else {
+                            showError(data.message, 3000);
+                        }
+                    },
+                    error: function () {
+                        showError('Error deleting user', 3000);
+                    }
+                });
+            }
         }
         function Extend_Account(Id) {
-    if (confirm('Bạn có muốn gia hạn tài khoản này?')) {
-        $.ajax({
-            url: '@Url.Action("Extend_Account", "Users")',
-            type: 'POST',
-            data: {
-                id: Id
-            },
-            success: function (data) {
-                if (data.status=="ok") {
-                    showSuccess(data.message, 3000);
-                    location.reload();
-                } else {
-                    showError(data.message,3000);
-                }
-            },
-            error: function () {
-                showError('Error deleting user',3000);
+            if (confirm('Bạn có muốn gia hạn tài khoản này?')) {
+                $.ajax({
+                    url: '@Url.Action("Extend_Account", "Users")',
+                    type: 'POST',
+                    data: {
+                        id: Id
+                    },
+                    success: function (data) {
+                        if (data.status == "ok") {
+                            showSuccess(data.message, 3000);
+                            location.reload();
+                        } else {
+                            showError(data.message, 3000);
+                        }
+                    },
+                    error: function () {
+                        showError('Error deleting user', 3000);
+                    }
+                });
             }
-        });
-    }
-}
+        }
     </script>
 }
 

@@ -109,11 +109,165 @@ namespace SuperbrainManagement.Controllers
 
             return View(pagedData);
         }
+        public ActionResult Loadlist()
+        {
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            string str = "";
+            int stt = 0;
+            var classes = db.Classes.Where(x => x.Enable == true &&x.IdBranch==idbranch);
+            foreach ( var c in classes)
+            {
+                stt++;
+                str += "<tr>"
+                    +"<td class='text-center'>"+stt+"</td>"
+                    +"<td>"+c.Name+"</td>"
+                    +"<td>"+c.Description+ "</td>"
+                    +"<td class='text-center'>"+TKB(c.Id) +"</td>"
+                    +"<td class='text-center'>"+GetTeacher(c.Id)+"</td>"
+                    +"<td class='text-center'>"+Getsiso(c.Id)+ "</td>"
+                    + "<td class='text-end'>"
+                    + "<a href=\"javascript:Edit_class("+c.Id+")\" class=\"me-1\"><i class=\"ti ti-edit text-primary\"></i></a>" +
+                    "<a href=\"javascript:Delete_Classes("+c.Id+")\" class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a>" +
+                    "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
+                    "<i class=\"ti ti-dots-vertical\"></i>" +
+                    "</a>" +
+                    "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">" +
+                    "<li><a class=\"dropdown-item\" href=\"javascript:LoadSchedulebyClass("+c.Id+")\"><i class=\"ti ti-calendar-event\"></i> Thời khóa biểu</a></li>" +
+                    "</ul>"
+                    + "</td>"
+                    + "</tr>";
+            }
+
+            return Json(new {str}, JsonRequestBehavior.AllowGet);
+        }
+        public string Getsiso(int id)
+        {
+            var count = db.StudentJoinClasses.Where(x=>x.IdClass==id&&x.Todate>DateTime.Now).Count();
+            return count.ToString();
+        }
+        public string TKB(int classId)
+        {
+            Language lg = new Language();
+            // Giả định có danh sách lịch học với thông tin các buổi trong tuần và giờ học tương ứng
+            var schedules = db.Schedules.Where(s => s.IdClass == classId && s.Active==true).ToList();
+            if (schedules.Count() == 0)
+            {
+                return "<span class='fst-italic text-danger'> Chưa cài TKB </span>";
+            }
+            // Dictionary để nhóm các giờ giống nhau
+            Dictionary<string, List<string>> groupedSchedule = new Dictionary<string, List<string>>();
+
+            foreach (var schedule in schedules)
+            {
+                // Đổi tên ngày từ dạng dài sang dạng ngắn
+                string shortDay = lg.Week_viet(schedule.IdWeek);
+
+                // Ghép thời gian học lại (ví dụ: "08:00 - 09:00")
+                string time = schedule.FromHour.Value.ToString("HH:mm") + " - " + schedule.ToHour.Value.ToString("HH:mm");
+
+                // Kiểm tra nếu thời gian này đã tồn tại trong dictionary
+                if (!groupedSchedule.ContainsKey(time))
+                {
+                    groupedSchedule[time] = new List<string>();
+                }
+
+                // Thêm ngày đã chuyển đổi vào nhóm tương ứng với thời gian đó
+                groupedSchedule[time].Add(shortDay);
+            }
+
+            // Tạo chuỗi kết quả cuối cùng
+            List<string> result = new List<string>();
+            foreach (var group in groupedSchedule)
+            {
+                // Gộp các ngày vào chuỗi và ghép với thời gian tương ứng
+                string days = string.Join(" và ", group.Value);
+                result.Add($"{days}, lúc {group.Key}");
+            }
+
+            // Trả về kết quả đã ghép lại
+            return string.Join(", ", result);
+        }
+        public string GetTeacher(int IdClass) 
+        {
+            var s = db.Schedules.Where(x => x.IdClass == IdClass && x.Active == true);
+            if(s == null)
+            {
+                return "-";
+            }
+            string str = "";
+            foreach (var e in s)
+            {
+                str += "<a href='javascript:void(0);' class='avatar avatar-lg avatar-xs rounded-circle me-1' data-toggle='tooltip' data-placement='bottom' data-original-title='" + e.Employee.Name + "' title='" + e.Employee.Name + "'>"
+                    + "<img height='25' width='25' class='rounded-circle' alt=\"Image placeholder\" src=\"" + (e.Employee.Image == null ? "/assets/images/profile/user-1.jpg" : e.Employee.Image) + "\">"
+                    + "</a>";
+            }
+            string strs = "<div class=\"avatar-group ms-auto\">"
+                + str
+                + "</div>";
+            return strs;
+        }
         public ActionResult Schedules()
         {
             ViewBag.IdBranch = new SelectList(db.Branches.Where(x => x.Enable == true), "Name", "Id");
             return View();
         }
+        public ActionResult ShowWeeklySchedule()
+        {
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            // Giả sử tuần bắt đầu từ thứ 2 và kết thúc vào Chủ nhật
+            DateTime today = DateTime.Today;
+            int deltaToMonday = DayOfWeek.Monday - today.DayOfWeek;
+            DateTime monday = today.AddDays(deltaToMonday);
+            DateTime sunday = monday.AddDays(6);
+
+            // Truy vấn dữ liệu thời khóa biểu trong khoảng thời gian từ thứ 2 đến Chủ nhật
+            var scheduleData = (from s in db.Schedules
+                                join c in db.Classes on s.IdClass equals c.Id
+                                where s.Active == true && c.IdBranch == idbranch
+                                select new
+                                {
+                                    s.IdWeek,
+                                    s.IdClass,
+                                    c.Name,
+                                    s.FromHour,
+                                    s.ToHour
+                                }).ToList();
+
+            // Tạo chuỗi HTML cho bảng 7 cột (từ thứ 2 đến Chủ nhật)
+            string str = "<tr>";
+
+            // Biến lưu dữ liệu theo từng cột (ngày trong tuần)
+            for (int i = 0; i < 7; i++)
+            {
+                // Kiểm tra IdWeek tương ứng từ Chủ Nhật (0) đến Thứ 7 (6)
+                var dayData = scheduleData.Where(s => (s.IdWeek == (i == 6 ? 0 : i + 1))).ToList(); // Chủ Nhật là 0, Thứ 2 là 1, Thứ 3 là 2, ...
+
+                string cellContent = "";
+
+                foreach (var schedule in dayData)
+                {
+                    cellContent += "<div class=\"card border-start border-4 border-danger mb-3 pt-0 pb-0\">" +
+                                        "<div class=\"card-body\">" +
+                                           "<p class=\"mb-0 fs-2 fw-semibold text-muted\"><i class='ti ti-clock'></i> " + schedule.FromHour.Value.ToString("hh:mm tt") + " - " + schedule.ToHour.Value.ToString("hh:mm tt") + "</span></p>" +
+                                           "<p class=\"text-success fw-bolder fs-4 mb-0\"><i class=\"ti ti-calendar\"></i> " + schedule.Name + "</p>" +
+                                           "<p class=\"fw-bold mb-0\"><i class=\"ti ti-user\"></i>Sỉ số: " + Getsiso(schedule.IdClass) + "</p>" +
+                                        "</div>" +
+                                    "</div>";
+                }
+
+                if (string.IsNullOrEmpty(cellContent))
+                {
+                    cellContent = "<div>Không có lớp</div>"; // Trường hợp không có lớp
+                }
+
+                str += $"<td style='min-width:300px;'>{cellContent}</td>";
+            }
+            str += "</tr>";
+
+            // Trả về chuỗi HTML
+            return Json(new { str }, JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult ResultCourse()
         {
             int idbranch = Convert.ToInt32(CheckUsers.idBranch());
@@ -614,6 +768,27 @@ namespace SuperbrainManagement.Controllers
                 // Duyệt qua danh sách các schedule và cập nhật từng mục
                 foreach (var schedule in schedules)
                 {
+                    var duration = schedule.ToHour - schedule.FromHour;
+
+                    // Kiểm tra nếu thời gian không hợp lệ (dưới 1 tiếng hoặc hơn 4 tiếng)
+                    if ( duration.TotalHours < 1 || duration.TotalHours > 4)
+                    {
+                        return Json(new { status = "error", message = $"Khoảng thời gian xét thời khóa biểu không hợp lệ. Thời gian hiện tại: {duration.TotalHours} giờ." });
+                    }
+                    // Kiểm tra xem có lịch trùng không (trùng IdRoom, IdWeek và khoảng giờ)
+                    var isConflict = db.Schedules.Any(s => s.IdRoom == schedule.RoomId
+                                                           && s.IdWeek == schedule.ScheduleId
+                                                           && s.IdClass != schedule.ClassId // Bỏ qua chính nó
+                                                           && ((s.FromHour >= schedule.FromHour && s.FromHour < schedule.ToHour)  // Thời gian bắt đầu nằm trong khoảng
+                                                                || (s.ToHour > schedule.FromHour && s.ToHour <= schedule.ToHour)   // Thời gian kết thúc nằm trong khoảng
+                                                                || (s.FromHour <= schedule.FromHour && s.ToHour >= schedule.ToHour))); // Thời gian của lịch nằm bao trùm
+
+                    if (isConflict)
+                    {
+                        // Nếu có xung đột lịch, trả về lỗi
+                        return Json(new { status = "error", message = $"Lịch cho phòng {schedule.RoomId} vào khoảng thời gian {schedule.FromHour} - {schedule.ToHour} đã tồn tại." });
+                    }
+
                     var dbSchedule = db.Schedules.FirstOrDefault(s => s.IdWeek == schedule.ScheduleId && s.IdClass==schedule.ClassId);  // Tìm schedule trong DB
                     if (dbSchedule != null)
                     {

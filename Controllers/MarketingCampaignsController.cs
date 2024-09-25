@@ -19,182 +19,118 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
         // GET: MarketingCampaigns
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, string idBranch)
         {
-            var branches = db.Branches.Where(x=>x.Enable==true).ToList();
-            int idbranch = int.Parse(CheckUsers.idBranch());
-            if (!CheckUsers.CheckHQ())
+            ViewBag.IdBranch = new SelectList(db.Branches.Where(x=>x.Enable==true), "Id", "Name", idBranch);
+            return View();
+        }
+        public ActionResult Loadlist(int? IdBranch)
+        {
+            int idbranchHQ = db.Branches.FirstOrDefault(x => x.Code.ToLower() == "hq").Id;
+            var mkt = db.MKTCampaigns.Where(x=>x.Enable==true);
+            if (IdBranch == null)
             {
-                branches = db.Branches.Where(x => x.Id == idbranch).ToList();
+                IdBranch = Convert.ToInt32(CheckUsers.idBranch());
             }
-            if (string.IsNullOrEmpty(idBranch))
+            mkt = mkt.Where(x => x.IdBranch == IdBranch || (x.IdBranch==idbranchHQ && x.IsPublic==true)); 
+            string str = "";int stt = 0;
+            foreach (var item in mkt)
             {
-                idBranch = branches.First().Id.ToString();
+                stt = stt + 1;
+                str += "<tr>"
+                    +"<td class='text-center align-content-center'>"+stt+"</td>"
+                    + "<td class='text-start align-content-center'>" + item.Code+"</td>"
+                    + "<td class='text-start align-content-center'>" + item.Name+"</td>"
+                    + "<td class='text-center align-content-center'><span class='btn btn-sm btn-outline-success m-1'>" + db.Students.Count(x=>x.IdMKT==item.Id && x.IdBranch==IdBranch) + "</span></td>"
+                    + "<td class='text-center align-content-center'>" + (item.Status==true ? "<label class=\"custom-control ios-switch\"><input type=\"checkbox\" class=\"ios-switch-control-input\" onchange=\"javascript: ChangeStatus(this)\" data-id=\"" + item.Id + "\" value=\"false\" checked><span class=\"ios-switch-control-indicator\"></span></label>" : "<label class=\"custom-control ios-switch\"><input type=\"checkbox\" class=\"ios-switch-control-input\" onchange=\"javascript: ChangeStatus(this)\" data-id=\"" + item.Id + "\" value=\"true\"><span class=\"ios-switch-control-indicator\"></span></label>") + "</td>"
+                    + "<td class='text-end align-content-center'>"
+                    + "<a href='javascript:Edit(" + item.Id+")' class='text-primary'><i class='ti ti-edit'></i> </a>" 
+                    +"<a href='javascript:Delete(" + item.Id+ ")' class='text-danger'><i class='ti ti-trash'></i> </a>" 
+                    +"</td>"
+                    +"</tr>";
             }
-            ViewBag.IdBranch = new SelectList(branches, "Id", "Name", idBranch);
-
-            if (searchString != null)
+            return Json(new {str}, JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult LoadInfoMKT(int id) {
+            var mkt = db.MKTCampaigns.Find(id);
+            if (mkt == null)
             {
-                page = 1;
+                return Json(new { status = "error", message = "Không tìm thấy chương trình MKT" },JsonRequestBehavior.AllowGet);
+            }
+            return Json(new {Code=mkt.Code,Name = mkt.Name,Status=mkt.Status, IsPublic = mkt.IsPublic},JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult Submit_savechange(int? Id,string action,string Code,string Name,bool? IsPublic,bool? Status) {
+            int IdBranch = Convert.ToInt32(CheckUsers.idBranch());
+            int IdUser = Convert.ToInt32(CheckUsers.iduser());
+            if (action == "create")
+            {
+                var mkt = new MKTCampaign() {
+                    IdBranch = IdBranch,
+                    Name = Name,
+                    Code = Code,
+                    DateCreate = DateTime.Now,
+                    Status = Status,
+                    Enable = true,
+                    Fee=0,
+                    IsPublic = IsPublic,
+                    IdUser = IdUser
+                };
+                db.MKTCampaigns.Add(mkt);
+                db.SaveChanges();
+                return Json(new { status = "ok", message = "Đã thêm mới chương trình MKT!" },JsonRequestBehavior.AllowGet);
             }
             else
             {
-                searchString = currentFilter;
+                var m = db.MKTCampaigns.Find(Id);
+                if (m == null)
+                    return Json(new { status = "error", message = "Không tìm thấy chương trình MKT!" }, JsonRequestBehavior.AllowGet);
+                else
+                {
+                    m.Status = Status;
+                    m.Code = Code;
+                    m.Name = Name;
+                    m.IsPublic = IsPublic;
+                    db.Entry(m).State = EntityState.Modified;
+                    db.SaveChanges();
+                    return Json(new { status = "ok", message = "Đã thêm mới chương trình MKT!" }, JsonRequestBehavior.AllowGet);
+                }
             }
-            ViewBag.CurrentFilter = searchString;
-
-            var mKTCampaigns = db.MKTCampaigns.ToList();
-
-            if (!string.IsNullOrEmpty(idBranch))
-            {
-                mKTCampaigns = mKTCampaigns.Where(x => x.IdBranch == int.Parse(idBranch)).ToList();
-            }
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                mKTCampaigns = mKTCampaigns.Where(x => x.Name.ToLower().Contains(searchString.ToLower())).ToList();
-            }
-            switch (sortOrder)
-            {
-                case "name_desc":
-                    mKTCampaigns = mKTCampaigns.OrderByDescending(s => s.Name).ToList();
-                    break;
-                case "date":
-                    mKTCampaigns = mKTCampaigns.OrderBy(s => s.Id).ToList();
-                    break;
-                case "name":
-                    mKTCampaigns = mKTCampaigns.OrderBy(s => s.Name).ToList();
-                    break;
-                default:
-                    mKTCampaigns = mKTCampaigns.OrderByDescending(s => s.Id).ToList();
-                    break;
-            }
-            int pageSize = 20;
-            int pageNumber = (page ?? 1);
-
-
-            var pagedData = mKTCampaigns.ToPagedList(pageNumber, pageSize);
-
-            var pagedListRenderOptions = new PagedListRenderOptions();
-            pagedListRenderOptions.FunctionToTransformEachPageLink = (liTag, aTag) =>
-            {
-                liTag.AddCssClass("page-item");
-                aTag.AddCssClass("page-link");
-                return liTag;
-            };
-
-            ViewBag.PagedListRenderOptions = pagedListRenderOptions;
-            return View(pagedData);
         }
 
-
-        // GET: MarketingCampaigns/Details/5
-        public ActionResult Details(int? id)
+        public ActionResult Submit_delete(int id)
         {
-            if (id == null)
+            var mkt = db.MKTCampaigns.Find(id);
+            if (mkt == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return Json(new { status = "error", message = "Không tìm thấy chương trình MKT!" }, JsonRequestBehavior.AllowGet);
             }
-            MKTCampaign mKTCampaign = db.MKTCampaigns.Find(id);
-            if (mKTCampaign == null)
+            else
             {
-                return HttpNotFound();
-            }
-            return View(mKTCampaign);
-        }
-
-        // GET: MarketingCampaigns/Create
-        public ActionResult Create()
-        {
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo");
-            ViewBag.IdBranch = new SelectList(db.Users, "Id", "Name");
-            return View();
-        }
-
-        // POST: MarketingCampaigns/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Code,Name,DateCreate,IdUser,IdBranch,Enable,Status,IsPublic,Fee")] MKTCampaign mKTCampaign)
-        {
-            if (ModelState.IsValid)
-            {
-                db.MKTCampaigns.Add(mKTCampaign);
+                //kiểm tra 
+                if (db.Students.Any(x => x.IdMKT == id))
+                {
+                    mkt.Enable = false;
+                    db.Entry(mkt).State = EntityState.Modified;
+                    db.SaveChanges();
+                    return Json(new { status = "ok", message = "Đã cập nhật chương trình MKT!" }, JsonRequestBehavior.AllowGet);
+                }
+                db.MKTCampaigns.Remove(mkt);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return Json(new { status = "ok", message = "Đã xóa chương trình này." }, JsonRequestBehavior.AllowGet);
             }
-
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo", mKTCampaign.IdBranch);
-            ViewBag.IdBranch = new SelectList(db.Users, "Id", "Name", mKTCampaign.IdBranch);
-            return View(mKTCampaign);
         }
-
-        // GET: MarketingCampaigns/Edit/5
-        public ActionResult Edit(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            MKTCampaign mKTCampaign = db.MKTCampaigns.Find(id);
-            if (mKTCampaign == null)
-            {
-                return HttpNotFound();
-            }
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo", mKTCampaign.IdBranch);
-            ViewBag.IdBranch = new SelectList(db.Users, "Id", "Name", mKTCampaign.IdBranch);
-            return View(mKTCampaign);
-        }
-
-        // POST: MarketingCampaigns/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,Code,Name,DateCreate,IdUser,IdBranch,Enable,Status,IsPublic,Fee")] MKTCampaign mKTCampaign)
+        public ActionResult updateStatus(int id, bool status)
         {
-            if (ModelState.IsValid)
+            MKTCampaign mkt = db.MKTCampaigns.Find(id);
+            if (mkt != null)
             {
-                db.Entry(mKTCampaign).State = EntityState.Modified;
+                mkt.Status = status;
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return Json(new {status="ok",message="Đã cập nhật thành công"},JsonRequestBehavior.AllowGet);
             }
-            ViewBag.IdBranch = new SelectList(db.Branches, "Id", "Logo", mKTCampaign.IdBranch);
-            ViewBag.IdBranch = new SelectList(db.Users, "Id", "Name", mKTCampaign.IdBranch);
-            return View(mKTCampaign);
-        }
-
-        // GET: MarketingCampaigns/Delete/5
-        public ActionResult Delete(int? id)
-        {
-            if (id == null)
+            else
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return Json(new {status="error",message="Lỗi cập nhật!"},JsonRequestBehavior.AllowGet);
             }
-            MKTCampaign mKTCampaign = db.MKTCampaigns.Find(id);
-            if (mKTCampaign == null)
-            {
-                return HttpNotFound();
-            }
-            return View(mKTCampaign);
-        }
-
-        // POST: MarketingCampaigns/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
-        {
-            MKTCampaign mKTCampaign = db.MKTCampaigns.Find(id);
-            db.MKTCampaigns.Remove(mKTCampaign);
-            db.SaveChanges();
-            return RedirectToAction("Index");
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
         }
     }
 }

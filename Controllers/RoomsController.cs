@@ -54,18 +54,18 @@ namespace SuperbrainManagement.Controllers
             }
             if (!string.IsNullOrEmpty(searchString))
             {
-                room = room.Where(x => x.Description.ToLower().Contains(searchString.ToLower())).ToList();
+                room = room.Where(x => x.Name.ToLower().Contains(searchString.ToLower())).ToList();
             }
             switch (sortOrder)
             {
                 case "name_desc":
-                    room = room.OrderByDescending(s => s.Description).ToList();
+                    room = room.OrderByDescending(s => s.Name).ToList();
                     break;
                 case "date":
                     room = room.OrderBy(s => s.Id).ToList();
                     break;
                 case "name":
-                    room = room.OrderBy(s => s.Description).ToList();
+                    room = room.OrderBy(s => s.Name).ToList();
                     break;
                 default:
                     room = room.OrderByDescending(s => s.Id).ToList();

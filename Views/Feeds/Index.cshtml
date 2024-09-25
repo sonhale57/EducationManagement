@@ -7,52 +7,149 @@
 }
 <div class="row">
     <div class="col col-md-3 col-sm-12">
-        <div class="input-group mb-3">
-            <input type="text" class="form-control rounded-1" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
-            <a class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" href="javascript:Loadlist()"><i class="ti ti-search text-white"></i></a>
-        </div>
     </div>
     <div class="col col-md-9 col-sm-12 text-right" style="text-align:right;">
-        <div class="me-0 btn btn-md p-0">
-            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="ti ti-arrows-sort"></i> Sắp xếp theo
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="javascript:Loadlist('name')"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
-                <li><a class="dropdown-item" href="javascript:Loadlist('name_desc')"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
-                <li><a class="dropdown-item" href="javascript:Loadlist('date')"><i class="ti ti-sort-ascending"></i> Cũ nhất</a></li>
-                <li><a class="dropdown-item" href="javascript:Loadlist('date_desc')"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
-            </ul>
-        </div>
-        <a href="/feeds/create" class="btn btn-success">
-            <i class="ti ti-certificate"></i> Thêm mới
+        <a href="javascript:add_feed()" class="btn btn-success">
+            <i class="ti ti-plus"></i> Thêm mới
         </a>
     </div>
 </div>
-<div class="row card">
+<div class="card mt-2">
     <div id="loading"></div>
-    <div class="row card-body p-1 ps-4 pe-3 pt-3" id="showlist_thongbao">
+    <div class="card-body">
+        <ul class="list-group" id="showlist_thongbao">
+        </ul>
+    </div>
+</div>
+
+<div class="modal fade" id="addFeedModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content h-75">
+            <form action="/" method="post" id="form_nhap">
+                <div class="modal-header">
+                    <h6 class="modal-title"><i class="ti ti-bell"></i> Cập nhật thông báo</h6>
+                </div>
+                <hr style="width:90%;margin:0 auto;" />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <input type="hidden" name="action" value="" id="action" />
+                            <input type="hidden" name="Id" value="" id="Id" />
+                            <input type="text" name="tieude" value="" id="tieude" class="form-control" placeholder="Tiêu đề thông báo" />
+                        </div>
+                        <div class="col-md-12 mt-1">
+                            <textarea id="editor1"></textarea>
+                        </div>
+                        <div class="col-md-12 mt-1">
+                            <input type="text" name="ngayhethan" value="" id="ngayhethan" class="form-control" placeholder="Ngày hết hạn" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <span class="loader"></span>
+                    <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
+                        <i class="ti ti-door-exit"></i> Đóng
+                    </button>
+                    <a class="btn btn-sm btn-success text-center" href="javascript:Submit_savechange()">
+                        <i class="ti ti-plus"></i> Cập nhật
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content rounded-0 h-75">
-            <form action="/" method="post" id="form_nhap">
-                <div class="modal-header bg-primary">
-                    <h5 class="modal-title text-white" id="exampleModalLabel"></h5>
-                    <span class="fst-italic text-white" id="ngay"></span>
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <form action="/" method="post">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalLabel"></h6>
+                    <span class="fst-italic"><i class="ti ti-clock"></i> <small id="ngay"></small></span>
                 </div>
+                <hr style="width:90%;margin:0 auto;" />
                 <div class="modal-body">
-                    <div class="container border-info border-1" style="border:1px solid;border-radius:5px; padding:10px;">
-                        <span id="noidung" class="justify-content-center" style="text-align:justify-all;"></span>
+                    <div class="container border-light border-1" style="border: 1px solid; border-radius: 5px; padding: 10px; text-align: justify;">
+                        <span id="noidung"></span>
                     </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
+                        <i class="ti ti-door-exit"></i> Đóng
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 <script>
-        function View_thongbao(id) {
+    $(function () {
+        $("#ngayhethan").datepicker({ dateFormat: "dd/mm/yy", minDate: 0 });
+        Loadlist();
+    });
+    function Edit(id) {
+        $.ajax({
+            url: '@Url.Action("GetFeed", "Feeds")',
+            type: "GET",
+            data: {
+                id: id,
+            },
+            success: function (data) {
+                $('#Id').val(data.Id);
+                $('#action').val("edit");
+                $('#tieude').val(data.Name);
+                $('#ngayhethan').val(data.Todate);
+                $('#addFeedModal').modal('show');
+                // Kiểm tra CKEditor instance trước khi setData
+                if (CKEDITOR.instances['editor1']) {
+                    CKEDITOR.instances['editor1'].setData(data.Description);
+                } else {
+                    console.error('CKEditor instance not found');
+                }
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+    function add_feed() {
+        $("#action").val("create");
+        $('#addFeedModal').modal('show');
+    }
+    isProcessing = false;
+    function Submit_savechange() {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        $(".loader").html("Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
+        var toDate = $("#ngayhethan").val().split("/").reverse().join("-");
+        var editorText = CKEDITOR.instances.editor1.getData();
+        $.ajax({
+            url: '@Url.Action("Submit_savechange", "Feeds")',
+            type: "POST",
+            data: {
+                action: $("#action").val(),
+                Id: $("#Id").val(),
+                Name: $("#tieude").val(),
+                Description: editorText,
+                Todate: toDate
+            },
+            success: function (data) {
+                if (data.status == "ok") {
+                    $('#addFeedModal').modal('hide');
+                    Loadlist();
+                } else {
+                    showError(data.message,3000);
+                }
+                isProcessing = false; // Hoàn thành xử lý
+                $(".loader").html("");
+            },
+            error: function (xhr, error) {
+                console.log(error);
+                isProcessing = false; // Hoàn thành xử lý
+                $(".loader").html("");
+            }
+        });
+    }
+    function View_thongbao(id) {
         $.ajax({
             url: '@Url.Action("Load_thongbao", "Home")',
             type: "GET",
@@ -63,7 +160,7 @@
                 console.log(data);
                 $("#exampleModalLabel").html(data.tieude);
                 $('#noidung').html(data.str);
-                $('#ngay').html("đăng ngày: "+data.ngay);
+                $('#ngay').html("" + data.ngay);
                 $('#exampleModal').modal('show');
             },
             error: function (xhr, error) {
@@ -71,41 +168,44 @@
             }
         });
     }
-    Loadlist();
     function Loadlist() {
         $("#loading").html("Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
-         $.ajax({
-             url: '@Url.Action("Loadlist_thongbao", "Feeds")',
-             type: "GET",
-             data: {
-             },
-             success: function (data) {
-                 console.log(data);
+        $.ajax({
+            url: '@Url.Action("Loadlist_thongbao", "Feeds")',
+            type: "GET",
+            data: {
+            },
+            success: function (data) {
+                console.log(data);
                 $("#loading").html("");
-                 $('#showlist_thongbao').html(data.str);
-             },
-             error: function (xhr, error) {
-                 console.log(error);
-             }
-         });
+                $('#showlist_thongbao').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
     }
-
-    Loadlist_vattu();
-    function Loadlist_vattu() {
-        $("#loading").html("Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'>");
-         $.ajax({
-             url: '@Url.Action("Loadlist_vattu", "Home")',
-             type: "GET",
-             data: {
-             },
-             success: function (data) {
-                 console.log(data);
-                $("#loading").html("");
-                 $('#showlist_vattu').html(data.str);
-             },
-             error: function (xhr, error) {
-                 console.log(error);
-             }
-         });
+    function Delete(Id) {
+        if (isProcessing) return; // Nếu đang xử lý, không cho phép gửi yêu cầu mới
+        isProcessing = true; // Đặt cờ đang xử lý
+        if (confirm('Bạn có muốn xóa thông báo này?')) {
+            $.ajax({
+                url: '@Url.Action("Submit_delete", "Feeds")',
+                type: 'POST',
+                data: { id: Id },
+                success: function (data) {
+                    if (data.status == "ok") {
+                        Loadlist();
+                        showSuccess(data.message, 3000);
+                    } else {
+                        showError(data.message, 3000);
+                    }
+                    isProcessing = false; // Hoàn thành xử lý
+                },
+                error: function () {
+                    showError('Error deleting course', 3000);
+                }
+            });
+        }
     }
 </script>
