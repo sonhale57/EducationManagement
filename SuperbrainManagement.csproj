@@ -993,6 +993,7 @@
     <Content Include="Views\Payment\TestPage.cshtml" />
     <Content Include="Views\Courses\Statistics.cshtml" />
     <Content Include="Views\Settings\_ChangePassword.cshtml" />
+    <Content Include="Views\Transactions\Statistics.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Authentication\Index.cshtml" />

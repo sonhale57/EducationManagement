@@ -30,7 +30,6 @@ namespace SuperbrainManagement.Controllers
         // GET: Classes
         public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, string idBranch)
         {
-
             if (CheckUsers.iduser() == "")
             {
                 return Redirect("/authentication");
@@ -189,21 +188,25 @@ namespace SuperbrainManagement.Controllers
         }
         public string GetTeacher(int IdClass) 
         {
-            var s = db.Schedules.Where(x => x.IdClass == IdClass && x.Active == true);
-            if(s == null)
+            var s = db.Schedules
+                     .Where(x => x.IdClass == IdClass && x.Active == true)
+                     .GroupBy(x => x.Employee.Id) // Nhóm theo IdEmployee để loại bỏ trùng lặp
+                     .Select(g => g.FirstOrDefault().Employee) // Chỉ lấy một giáo viên mỗi nhóm
+                     .ToList();
+            if (s.Count() == 0)
             {
                 return "-";
             }
             string str = "";
-            foreach (var e in s)
+            foreach (var teacher in s)
             {
-                str += "<a href='javascript:void(0);' class='avatar avatar-lg avatar-xs rounded-circle me-1' data-toggle='tooltip' data-placement='bottom' data-original-title='" + e.Employee.Name + "' title='" + e.Employee.Name + "'>"
-                    + "<img height='25' width='25' class='rounded-circle' alt=\"Image placeholder\" src=\"" + (e.Employee.Image == null ? "/assets/images/profile/user-1.jpg" : e.Employee.Image) + "\">"
-                    + "</a>";
+                str += "<a href='javascript:void(0);' class='avatar avatar-lg avatar-xs rounded-circle me-1' "
+                       + "data-toggle='tooltip' data-placement='bottom' data-original-title='" + teacher.Name + "' title='" + teacher.Name + "'>"
+                       + "<img height='25' width='25' class='rounded-circle' alt='Image placeholder' src='"
+                       + (teacher.Image == null ? "/assets/images/profile/user-1.jpg" : teacher.Image) + "'>"
+                       + "</a>";
             }
-            string strs = "<div class=\"avatar-group ms-auto\">"
-                + str
-                + "</div>";
+            string strs = "<div class=\"avatar-group ms-auto\">"+ str+ "</div>";
             return strs;
         }
         public ActionResult Schedules()
@@ -1161,28 +1164,34 @@ namespace SuperbrainManagement.Controllers
         {
             int iduser= Convert.ToInt32(CheckUsers.iduser());
             int idbranch = Convert.ToInt32(CheckUsers.idBranch());
-            string status = "",message="";
             if (action == "create")
             {
-                Class cla = new Class()
+                if(!db.Employees.Any(x=>x.Enable==true && x.IsOfficial == true && x.IdBranch == idbranch))
                 {
-                    Name = Name,
-                    Description = Description,
-                    DateCreate =DateTime.Now,
-                    IdBranch = idbranch,
-                    IdUser = iduser,
-                    Enable = true,
-                    Active = true
-                };
-                db.Classes.Add(cla);
-
-                var scheduleDefault = scheduleHelper.GetScheduleDefault(cla.Id);
-
-                db.Schedules.AddRange(scheduleDefault);
-
-                db.SaveChanges();
-                status = "ok";
-                message = "Đã thêm thành công!";
+                    return Json(new { status = "error", message = "Lỗi cập nhật, Không tìm thấy nhân sự!" }, JsonRequestBehavior.AllowGet);
+                }
+                if (!db.Rooms.Any(x => x.IdBranch == idbranch))
+                {
+                    return Json(new { status = "error", message = "Lỗi cập nhật, Không tìm thấy phòng học!" }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    Class cla = new Class()
+                    {
+                        Name = Name,
+                        Description = Description,
+                        DateCreate = DateTime.Now,
+                        IdBranch = idbranch,
+                        IdUser = iduser,
+                        Enable = true,
+                        Active = true
+                    };
+                    db.Classes.Add(cla);
+                    var scheduleDefault = scheduleHelper.GetScheduleDefault(cla.Id);
+                    db.Schedules.AddRange(scheduleDefault);
+                    db.SaveChanges();
+                    return Json(new { status = "ok", message = "Đã thêm thành công!" }, JsonRequestBehavior.AllowGet);
+                }
             }
             else
             {
@@ -1191,11 +1200,8 @@ namespace SuperbrainManagement.Controllers
                 c.Description = Description;
                 db.Entry(c).State=EntityState.Modified;
                 db.SaveChanges();
-                status = "ok";
-                message = "Đã cập nhật thành công!";
-
+                return Json(new { status="ok", message = "Đã cập nhật thành công!"}, JsonRequestBehavior.AllowGet);
             }
-            return Json(new {status,message},JsonRequestBehavior.AllowGet);
         }
 
         public async Task<ActionResult> Delete_Classes(int id)

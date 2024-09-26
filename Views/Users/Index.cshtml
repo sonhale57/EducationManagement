@@ -2,12 +2,12 @@
 @using PagedList.Mvc;
 @{
     ViewBag.Controller = "Nhân sự";
-    ViewBag.Title = "Quản trị User";
+    ViewBag.Title = "Quản lý tài khoản";
     Layout = "~/Views/Shared/_Layout.cshtml";
     int stt = 1;
 }
 <div class="row">
-    <div class="col col-md-4 col-sm-12">
+    <div class="col col-md-5 col-sm-12">
         <form action="/users" method="get" id="formload">
             <div class="input-group mb-3">
                 @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
@@ -19,18 +19,7 @@
             </div>
         </form>
     </div>
-    <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
-        <div class="me-0 btn btn-md p-0">
-            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="ti ti-arrows-sort"></i> Sắp xếp theo
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-ascending"></i> Cũ nhất</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
-            </ul>
-        </div>
+    <div class="col col-md-7 col-sm-12 text-end">
     </div>
 </div>
 
@@ -151,8 +140,8 @@
     </div>
 </div>
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content" >
+    <div class="modal-dialog modal-lg modal-dialog-scrollable h-75" role="document">
+        <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-fullscreen" id="exampleModalLabel">Phân quyền tài khoản</h5>
             </div>
@@ -163,22 +152,21 @@
                         <thead class="bg-success text-white">
                             <tr>
                                 <th class="head0">CHỨC NĂNG</th>
-                                <th class="head0" style="text-align:left"><i>Xem</i></th>
-                                <th class="head0" style="text-align:left"><i>Thêm</i></th>
-                                <th class="head0" style="text-align:left"><i>Sửa</i></th>
-                                <th class="head0" style="text-align:left"><i>Xóa</i></th>
+                                <th class="head0 text-center"><i>Xem</i></th>
+                                <th class="head0 text-center"><i>Thêm</i></th>
+                                <th class="head0 text-center"><i>Sửa</i></th>
+                                <th class="head0 text-center"><i>Xóa</i></th>
                             </tr>
                         </thead>
                         <tbody>
                         </tbody>
                     </table>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal"><i class="ti ti-x"></i> Close</button>
-                        <button type="submit" id="submitButton" value="Submit" onclick="saveChange()" class="btn btn-sm btn-primary" data-dismiss="modal">Lưu thay đổi</button>
-                    </div>
                 </form>
             </div>
-
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-outline-danger" data-dismiss="modal" onclick="closeModal()"><i class="ti ti-door-exit"></i> hủy</button>
+                <button type="submit" id="submitButton" value="Submit" onclick="saveChange()" class="btn btn-sm btn-success" data-dismiss="modal"><i class="ti ti-refresh"></i> Lưu thay đổi</button>
+            </div>
         </div>
     </div>
 </div>

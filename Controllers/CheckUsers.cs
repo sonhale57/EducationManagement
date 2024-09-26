@@ -52,7 +52,6 @@ namespace SuperbrainManagement.Controllers
             try
             {
                 MD5Hash md5 = new MD5Hash();
-               
                 string idlogin = "";
                 if (System.Web.HttpContext.Current.Request.Cookies["check"] != null && System.Web.HttpContext.Current.Request.Cookies["check"]["iduser"] != null)
                 {
@@ -205,5 +204,60 @@ namespace SuperbrainManagement.Controllers
 
             return "";
         }
+
+        public static string CheckPermission(string code, int role)
+        {
+            using (ModelDbContext db = new ModelDbContext())
+            {
+                try
+                {
+                    MD5Hash md5 = new MD5Hash();
+                    string encryptedUserId = "";
+
+                    // Kiểm tra cookie để lấy ID người dùng đã mã hóa
+                    var userCookie = System.Web.HttpContext.Current.Request.Cookies["check"];
+                    if (userCookie != null && userCookie["iduser"] != null)
+                    {
+                        encryptedUserId = md5.Decrypt(userCookie["iduser"].ToString());
+                    }
+
+                    if (string.IsNullOrEmpty(encryptedUserId)) { return "hideof"; }
+
+                    int userId = Convert.ToInt32(encryptedUserId);
+                    var permission = db.Permissions.FirstOrDefault(x => x.Code.ToLower() == code.ToLower());
+                    if (permission == null) { return "hideof"; }
+
+                    var userPermission = db.UserPermissions.FirstOrDefault(x => x.IdUser == userId && x.IdPermission == permission.Id);
+                    if (userPermission == null) { return "hideof"; }
+
+                    // Kiểm tra quyền theo vai trò
+                    switch (role)
+                    {
+                        case 1:
+                            if (!(bool)userPermission.IsRead) { return "hideof"; }
+                            break;
+                        case 2:
+                            if (!(bool)userPermission.IsCreate) { return "hideof"; }
+                            break;
+                        case 3:
+                            if (!(bool)userPermission.IsEdit) { return "hideof"; }
+                            break;
+                        case 4:
+                            if (!(bool)userPermission.IsDelete) { return "hideof"; }
+                            break;
+                        default:
+                            return "hideof";
+                    }
+                    return "";
+                }
+                catch (Exception ex)
+                {
+                    // Log exception nếu cần thiết
+                    return "";
+                }
+            }
+        }
+
+
     }
 }

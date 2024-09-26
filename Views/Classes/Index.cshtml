@@ -4,7 +4,6 @@
     ViewBag.Controller = "Lớp học";
     ViewBag.Title = "Danh sách lớp học";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    int stt = 1;
     var employees = ViewBag.EmployeeDDData as List<SelectListItem>;
     var rooms = ViewBag.RoomDDData as List<SelectListItem>;
 }
@@ -37,7 +36,7 @@
 <div class="row">
     <div class="col col-md-4 col-sm-12">
         <form action="/classes" method="get" id="formload">
-            <div class="input-group mb-3">
+            <div class="input-group">
                 @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
                 {
                     @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2" })
@@ -59,11 +58,11 @@
                 <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
             </ul>
         </div>
-        <a href="javascript:Add_class()" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
+        <a href="javascript:Add_class()" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>
     </div>
 </div>
 
-<table class="table fs-3">
+<table class="table fs-3 mt-2">
     <thead class="bg-success text-white rounded-1">
         <tr>
             <th class="text-center">STT</th>
@@ -79,7 +78,7 @@
 </table>
 
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
         <div class="modal-content" style="width:auto;">
             <div class="modal-header">
                 <h5 class="modal-fullscreen" id="exampleModalLabel">Thời khóa biểu</h5>
@@ -106,14 +105,14 @@
                         </tbody>
                         <tr class="loader"></tr>
                     </table>
-                    <div class="modal-footer">
-                        <span class="loader"></span>
-                        <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
-                            <i class="ti ti-door-exit"></i> Hủy
-                        </button>
-                        <a id="submitButton" href="javascript:updateSchedule()" class="btn btn-sm btn-success"><i class="ti ti-refresh"></i> Lưu thay đổi</a>
-                    </div>
                 </form>
+            </div>
+            <div class="modal-footer">
+                <span class="loader"></span>
+                <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
+                    <i class="ti ti-door-exit"></i> Hủy
+                </button>
+                <a id="submitButton" href="javascript:updateSchedule()" class="btn btn-sm btn-success"><i class="ti ti-refresh"></i> Lưu thay đổi</a>
             </div>
         </div>
     </div>

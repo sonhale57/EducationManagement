@@ -37,7 +37,10 @@ namespace SuperbrainManagement.Controllers
                 return View();
             }
         }
-
+        public ActionResult Statistics()
+        {
+            return View();
+        }
         public ActionResult Loadlist(string idBranch, string sort, string type, string searchString, DateTime fromdate, DateTime todate)
         {
             string str = "";
