@@ -1,36 +1,24 @@
 ﻿@model PagedList.IPagedList<SuperbrainManagement.Models.Branch>
 @using PagedList.Mvc;
 @{
-    ViewBag.Controller = "Cơ sở";
-    ViewBag.Title = "Hệ thống cơ sở";
+    ViewBag.Controller = "Hệ thống Cơ sở";
+    ViewBag.Title = "Danh sách cơ sở";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    int stt = 1;
 }
 <div class="row">
     <div class="col col-md-3 col-sm-12">
         <form action="/Branches" method="get">
-            <div class="input-group mb-3">
+            <div class="input-group">
                 <input type="text" class="form-control rounded-1" id="searchString" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter ">
                 <button class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
             </div>
         </form>
     </div>
-    <div class="col col-md-9 col-sm-12 text-right" style="text-align:right;">
-        <div class="me-0 btn btn-md p-0">
-            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="ti ti-arrows-sort"></i> Sắp xếp theo
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="javascript:Loadlist('name')"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
-                <li><a class="dropdown-item" href="javascript:Loadlist('name_desc')"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
-                <li><a class="dropdown-item" href="javascript:Loadlist('date')"><i class="ti ti-sort-ascending"></i> Cũ nhất</a></li>
-                <li><a class="dropdown-item" href="javascript:Loadlist('date_desc')"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
-            </ul>
-        </div>
+    <div class="col col-md-9 col-sm-12 text-end">
         <a href="/branches/create" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>
     </div>
 </div>
-<table class="table fs-3">
+<table class="table fs-3 mt-2">
     <thead class="bg-success text-white rounded-1">
         <tr>
             <th class="text-center">STT</th>
@@ -48,14 +36,13 @@
 </table>
 <script>
     Loadlist();
-    function Loadlist(sort) {
+    function Loadlist() {
         $(".loader").html("<td colspan=8 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
         $.ajax({
             url: '@Url.Action("Loadlist", "Branches")',
             type: "GET",
             data: {
-                searchString: $("#searchString").val(),
-                sort :sort
+                searchString: $("#searchString").val()
             },
             success: function (data) {
                 console.log(data);

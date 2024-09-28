@@ -982,7 +982,7 @@
     <Content Include="Views\DataSuggests\Details.cshtml" />
     <Content Include="Views\DataSuggests\Edit.cshtml" />
     <Content Include="Views\DataSuggests\Index.cshtml" />
-    <Content Include="Views\Settings\Datasuggest.cshtml" />
+    <Content Include="Views\Settings\_Datasuggest.cshtml" />
     <Content Include="Views\Classes\Schedules.cshtml" />
     <Content Include="Views\Students\PrintSchedule.cshtml" />
     <Content Include="Views\Error\E404.cshtml" />
@@ -994,6 +994,8 @@
     <Content Include="Views\Courses\Statistics.cshtml" />
     <Content Include="Views\Settings\_ChangePassword.cshtml" />
     <Content Include="Views\Transactions\Statistics.cshtml" />
+    <Content Include="Views\Settings\_Header.cshtml" />
+    <Content Include="Views\Settings\_Sidebar.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Authentication\Index.cshtml" />

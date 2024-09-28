@@ -6,7 +6,7 @@
 }
 <div class="row">
     <div class="col col-md-6 col-sm-12">
-        <div class="input-group mb-3">
+        <div class="input-group">
             @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
             {
                 @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", @onchange = "Loadlist()" })
@@ -21,7 +21,7 @@
         </button>
     </div>
 </div>
-<table class="table fs-3 table-bordered" id="tableToPrint">
+<table class="table fs-3 table-bordered mt-2" id="tableToPrint">
     <thead class="bg-success text-white">
         <tr>
             <th class="text-center align-content-center" rowspan="2">STT</th>

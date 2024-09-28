@@ -35,29 +35,16 @@
 
 <div class="row">
     <div class="col col-md-4 col-sm-12">
-        <form action="/classes" method="get" id="formload">
-            <div class="input-group">
-                @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
-                {
-                    @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2" })
-                }
-                <input type="text" class="form-control ms-1 rounded-1" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
-                <button class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
-            </div>
-        </form>
+        <div class="input-group">
+            @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
+            {
+                @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2",@onchange="Loadlist()" })
+            }
+            <input type="text" class="form-control ms-1 rounded-1" name="searchString" id="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
+            <button class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" type="button" onclick="Loadlist()"><i class="ti ti-search text-white"></i></button>
+        </div>
     </div>
     <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
-        <div class="me-0 btn btn-md p-0">
-            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="ti ti-arrows-sort"></i> Sắp xếp theo
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-ascending"></i> Cũ nhất</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
-            </ul>
-        </div>
         <a href="javascript:Add_class()" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>
     </div>
 </div>
@@ -75,6 +62,7 @@
         </tr>
     </thead>
     <tbody id="showlist"></tbody>
+    <tr class="loader"></tr>
 </table>
 
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -153,16 +141,23 @@
     <script>
         Loadlist();
         function Loadlist() {
+            $(".loader").html("<td colspan=6>Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
+            $('#showlist').html("");
             $.ajax({
                 url: '@Url.Action("Loadlist", "Classes")',
                 type: "GET",
-                data: {},
+                data: {
+                    IdBranch: $("#IdBranch").val(),
+                    searchString: $("#searchString").val()
+                },
                 success: function (data) {
                     console.log(data);
                     $('#showlist').html(data.str);
+                    $(".loader").html("");
                 },
                 error: function (xhr, error) {
                     console.log(error);
+                    $(".loader").html("");
                 }
             });
         }

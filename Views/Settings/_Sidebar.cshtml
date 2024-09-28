@@ -1,0 +1,349 @@
+﻿<aside class="left-sidebar">
+    <div>
+        <div class="brand-logo d-flex align-items-center justify-content-between">
+            <a href="javascript:void(0)" class="text-nowrap logo-img">
+                <img src="~/assets/images/logos/logo.png" width="180" alt="" />
+            </a>
+            <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer mt-3 " id="sidebarCollapse">
+                <i class="ti ti-circle-caret-left fs-5 text-success"></i>
+            </div>
+        </div>
+        <nav class="sidebar-nav scroll-sidebar mt-2" data-simplebar="">
+            <ul id="sidebarnav">
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="/" aria-expanded="false">
+                        <span>
+                            <i class="ti ti-layout-dashboard"></i>
+                        </span>
+                        <span class="hide-menu"> Tổng quan</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="/programs" aria-expanded="false">
+                        <span>
+                            <i class="ti ti-award fs-6"></i>
+                        </span>
+                        <span class="hide-menu"> Chương trình</span>
+                    </a>
+                    <ul aria-expanded="false" class="collapse first-level base-level-line">
+                        <li class="sidebar-item @SuperbrainManagement.Controllers.CheckUsers.CheckPermission("02PQ",1)">
+                            <a href="/programs" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Khóa học</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item @SuperbrainManagement.Controllers.CheckUsers.CheckPermission("02PQ",1)">
+                            <a href="/courses" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Khóa học cơ sở</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="/classes" aria-expanded="false">
+                        <span>
+                            <i class="ti ti-abacus"></i>
+                        </span>
+                        <span class="hide-menu"> Lớp học</span>
+                    </a>
+                    <ul aria-expanded="false" class="collapse first-level base-level-line">
+                        <li class="sidebar-item @SuperbrainManagement.Controllers.CheckUsers.CheckPermission("03PH",1)">
+                            <a href="/rooms" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Phòng học</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item @SuperbrainManagement.Controllers.CheckUsers.CheckPermission("03LH",1)">
+                            <a href="/classes" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Lớp học</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item @SuperbrainManagement.Controllers.CheckUsers.CheckPermission("03KQN",1)">
+                            <a href="/classes/checkinstudent" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Điểm danh</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item @SuperbrainManagement.Controllers.CheckUsers.CheckPermission("03CKGK",1)">
+                            <a href="/classes/resultcourse" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Nhập điểm</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item @SuperbrainManagement.Controllers.CheckUsers.CheckPermission("03TKB",1)">
+                            <a href="/classes/schedules" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Lịch học</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item @SuperbrainManagement.Controllers.CheckUsers.CheckPermission("03TK",1)">
+                            <a href="javascript:void(0)" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Thống kê lớp học</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="/students" aria-expanded="false">
+                        <span>
+                            <i class="ti ti-user fs-6"></i>
+                        </span>
+                        <span class="hide-menu"> Học viên</span>
+                    </a>
+                    <ul aria-expanded="false" class="collapse first-level base-level-line">
+                        <li class="sidebar-item @SuperbrainManagement.Controllers.CheckUsers.CheckPermission("01HV",1)">
+                            <a href="/students" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Danh sách học viên</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item hideof">
+                            <a href="javascript:void(0)" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Danh sách vắng</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item @SuperbrainManagement.Controllers.CheckUsers.CheckPermission("0114N",1)">
+                            <a href="/students/endingsoon" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Gần kết khóa</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/students/birthdaylist" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Sinh nhật</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item hideof">
+                            <a href="javascript:void(0)" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Giấy chứng nhận</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item hideof">
+                            <a href="javascript:void(0)" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Thống kê học viên</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/students/deletedlist" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Danh sách đã xóa</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="sidebar-item ">
+                    <a class="sidebar-link" href="/orders" aria-expanded="false">
+                        <span>
+                            <i class="ti ti-shopping-cart"></i>
+                        </span>
+                        <span class="hide-menu"> Đơn hàng</span>
+                    </a>
+                    <ul aria-expanded="false" class="collapse first-level base-level-line">
+                        <li class="sidebar-item">
+                            <a href="/orders?openModal=true" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Đặt hàng</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/orders" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Quản lý Đơn hàng</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/orders/statistics" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Thống kê đơn hàng</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/orders/detailstatistics" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Thống kê chi tiết</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="javascript:void(0)" aria-expanded="false">
+                        <span>
+                            <i class="ti ti-building-warehouse fs-6"></i>
+                        </span>
+                        <span class="hide-menu"> Quản lý Kho</span>
+                    </a>
+                    <ul aria-expanded="false" class="collapse first-level base-level-line">
+                        <li class="sidebar-item @SuperbrainManagement.Controllers.CheckUsers.checkRole(3)">
+                            <a href="/products" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Danh mục vật tư</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/warehouses" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Quản lý kho</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/warehouses/receiptions" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Chi tiết thẻ kho</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/warehouses/statistics" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Thống kê</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="/transactions" aria-expanded="false">
+                        <span>
+                            <i class="ti ti-report-money fs-6"></i>
+                        </span>
+                        <span class="hide-menu"> Kế toán</span>
+                    </a>
+                    <ul aria-expanded="false" class="collapse first-level base-level-line">
+                        <li class="sidebar-item">
+                            <a href="/transactions?openModal=true" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Tạo phiếu</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/transactions" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Nhật ký Thu Chi</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="javascript:void(0)" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Báo cáo tháng</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="javascript:void(0)" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Báo cáo năm</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="/trainingcourses" aria-expanded="false">
+                        <span>
+                            <i class="ti ti-certificate"></i>
+                        </span>
+                        <span class="hide-menu"> Khóa đào tạo</span>
+                    </a>
+                    <ul aria-expanded="false" class="collapse first-level base-level-line">
+                        <li class="sidebar-item">
+                            <a href="/trainingcourses" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Danh sách</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/trainingcourses/paymentstatistics" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Thống kê đóng phí</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/trainingcourses/statistics" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Thống kê kết quả</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="/employees" aria-expanded="false">
+                        <span>
+                            <i class="ti ti-users fs-6"></i>
+                        </span>
+                        <span class="hide-menu"> Nhân sự</span>
+                    </a>
+                    <ul aria-expanded="false" class="collapse first-level base-level-line">
+                        <li class="sidebar-item">
+                            <a href="/employees" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Danh sách nhân sự</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/users" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Quản trị Users</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="javascript:void(0)" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Lịch sử thao tác</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item hideof">
+                            <a href="javascript:void(0)" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Thống kê nhân sự</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="/feeds" aria-expanded="false">
+                        <span>
+                            <i class="ti ti-alarm"></i>
+                        </span>
+                        <span class="hide-menu"> Thông báo</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="javascript:void(0)" aria-expanded="false">
+                        <span>
+                            <i class="ti ti-file-check"></i>
+                        </span>
+                        <span class="hide-menu"> Tài liệu</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="javascript:void(0)" aria-expanded="false">
+                        <span>
+                            <i class="ti ti-settings-2 fs-6"></i>
+                        </span>
+                        <span class="hide-menu"> Cài đặt</span>
+                    </a>
+                    <ul aria-expanded="false" class="collapse first-level base-level-line">
+                        <li class="sidebar-item">
+                            <a href="javascript:void(0)" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Cấu hình hệ thống</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/vacationschedules" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Lịch nghỉ</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/marketingcampaigns" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Chương trình Marketing</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/promotions" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-31"></i> Chương trình ưu đãi</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="/branches" aria-expanded="false">
+                        <span>
+                            <i class="ti ti-building-store"></i>
+                        </span>
+                        <span class="hide-menu"> Hệ thống cơ sở</span>
+                    </a>
+                    <ul aria-expanded="false" class="collapse first-level base-level-line">
+                        <li class="sidebar-item">
+                            <a href="/branchgroups" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Cụm cơ sở</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/branches" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Danh sách cơ sở</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/branches/paymentlist" class="sidebar-link">
+                                <span class="hide-menu"><i class="ti ti-corner-down-right mt-1 me-1 ms-3 fs-3"></i> Danh sách tính phí</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</aside>

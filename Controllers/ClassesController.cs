@@ -28,7 +28,7 @@ namespace SuperbrainManagement.Controllers
         private ScheduleHelper scheduleHelper = new ScheduleHelper();
 
         // GET: Classes
-        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, string idBranch)
+        public ActionResult Index(string idBranch)
         {
             if (CheckUsers.iduser() == "")
             {
@@ -40,91 +40,36 @@ namespace SuperbrainManagement.Controllers
             {
                 branches = db.Branches.Where(x => x.Id == idbranch).ToList();
             }
-            if (string.IsNullOrEmpty(idBranch))
-            {
-                idBranch = branches.First().Id.ToString();
-            }
             ViewBag.IdBranch = new SelectList(branches, "Id", "Name", idBranch);
 
-            if (searchString != null)
-            {
-                page = 1;
-            }
-            else
-            {
-                searchString = currentFilter;
-            }
-
-            ViewBag.CurrentFilter = searchString;
-
-            ViewBag.Schedule = db.Schedules.Include(x => x.Employee).Include(x => x.Class).Include(x => x.User).ToList();
-
-            ViewBag.EmployeeDDData = db.Employees.Where(x => x.IdBranch == idbranch).Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name }).ToList();
-
-            ViewBag.RoomDDData = db.Rooms.Where(x => x.IdBranch == idbranch).Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name }).ToList();
-
-            ViewBag.UserId = int.Parse(CheckUsers.iduser());
-
-            var classes = db.Classes.ToList();
-
-            if (!string.IsNullOrEmpty(idBranch))
-            {
-                classes = classes.Where(x => x.IdBranch == int.Parse(idBranch)).ToList();
-            }
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                classes = classes.Where(x => x.Name.ToLower().Contains(searchString.ToLower())).ToList();
-            }
-            switch (sortOrder)
-            {
-                case "name_desc":
-                    classes = classes.OrderByDescending(s => s.Name).ToList();
-                    break;
-                case "date":
-                    classes = classes.OrderBy(s => s.Id).ToList();
-                    break;
-                case "name":
-                    classes = classes.OrderBy(s => s.Name).ToList();
-                    break;
-                default:
-                    classes = classes.OrderByDescending(s => s.Id).ToList();
-                    break;
-            }
-            int pageSize = 20;
-            int pageNumber = (page ?? 1);
-
-
-            var pagedData = classes.ToPagedList(pageNumber, pageSize);
-
-            var pagedListRenderOptions = new PagedListRenderOptions();
-            pagedListRenderOptions.FunctionToTransformEachPageLink = (liTag, aTag) =>
-            {
-                liTag.AddCssClass("page-item");
-                aTag.AddCssClass("page-link");
-                return liTag;
-            };
-
-            ViewBag.PagedListRenderOptions = pagedListRenderOptions;
-
-            return View(pagedData);
+            return View();
         }
-        public ActionResult Loadlist()
+        public ActionResult Loadlist(int? IdBranch,string searchString)
         {
             int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            if (IdBranch == null)
+            {
+                IdBranch = idbranch;
+            }
+            
             string str = "";
             int stt = 0;
-            var classes = db.Classes.Where(x => x.Enable == true &&x.IdBranch==idbranch);
+            var classes = db.Classes.Where(x => x.Enable == true && x.IdBranch==IdBranch);
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                classes = classes.Where(x=>x.Name.Contains(searchString));
+            }
             foreach ( var c in classes)
             {
                 stt++;
                 str += "<tr>"
-                    +"<td class='text-center'>"+stt+"</td>"
-                    +"<td>"+c.Name+"</td>"
-                    +"<td>"+c.Description+ "</td>"
-                    +"<td class='text-center'>"+TKB(c.Id) +"</td>"
-                    +"<td class='text-center'>"+GetTeacher(c.Id)+"</td>"
-                    +"<td class='text-center'>"+Getsiso(c.Id)+ "</td>"
-                    + "<td class='text-end'>"
+                    +"<td class='text-center align-content-center'>"+stt+"</td>"
+                    + "<td class=' align-content-center'>" + c.Name+"</td>"
+                    + "<td class=' align-content-center'>" + c.Description+ "</td>"
+                    + "<td class='text-center align-content-center'>" + TKB(c.Id) +"</td>"
+                    + "<td class='text-center align-content-center'>" + GetTeacher(c.Id)+"</td>"
+                    + "<td class='text-center align-content-center'><span class='btn btn-sm btn-outline-success'>" + db.StudentJoinClasses.Count(x=>x.IdClass==c.Id && x.Todate>DateTime.Now)+ "</td>"
+                    + "<td class='text-end align-content-center'>"
                     + "<a href=\"javascript:Edit_class("+c.Id+")\" class=\"me-1\"><i class=\"ti ti-edit text-primary\"></i></a>" +
                     "<a href=\"javascript:Delete_Classes("+c.Id+")\" class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a>" +
                     "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
@@ -1168,11 +1113,11 @@ namespace SuperbrainManagement.Controllers
             {
                 if(!db.Employees.Any(x=>x.Enable==true && x.IsOfficial == true && x.IdBranch == idbranch))
                 {
-                    return Json(new { status = "error", message = "Lỗi cập nhật, Không tìm thấy nhân sự!" }, JsonRequestBehavior.AllowGet);
+                    return Json(new { status = "error", message = "Lỗi cập nhật: Cơ sở chưa có nhân sự!" }, JsonRequestBehavior.AllowGet);
                 }
                 if (!db.Rooms.Any(x => x.IdBranch == idbranch))
                 {
-                    return Json(new { status = "error", message = "Lỗi cập nhật, Không tìm thấy phòng học!" }, JsonRequestBehavior.AllowGet);
+                    return Json(new { status = "error", message = "Lỗi cập nhật: Cơ sở chưa có phòng học!" }, JsonRequestBehavior.AllowGet);
                 }
                 else
                 {
@@ -1190,7 +1135,7 @@ namespace SuperbrainManagement.Controllers
                     var scheduleDefault = scheduleHelper.GetScheduleDefault(cla.Id);
                     db.Schedules.AddRange(scheduleDefault);
                     db.SaveChanges();
-                    return Json(new { status = "ok", message = "Đã thêm thành công!" }, JsonRequestBehavior.AllowGet);
+                    return Json(new { status = "ok", message = "Thành công: Đã thêm mới lớp học!" }, JsonRequestBehavior.AllowGet);
                 }
             }
             else
@@ -1200,35 +1145,35 @@ namespace SuperbrainManagement.Controllers
                 c.Description = Description;
                 db.Entry(c).State=EntityState.Modified;
                 db.SaveChanges();
-                return Json(new { status="ok", message = "Đã cập nhật thành công!"}, JsonRequestBehavior.AllowGet);
+                return Json(new { status="ok", message = "Thành công: Đã cập nhật lớp học!"}, JsonRequestBehavior.AllowGet);
             }
         }
 
         public async Task<ActionResult> Delete_Classes(int id)
         {
-            var status = "ok";
-            var message = "Phòng đã được xóa thành công.";
-
-            var room = await db.Classes.FindAsync(id);
-            if (room == null)
+            var classes = await db.Classes.FindAsync(id);
+            if (classes == null)
             {
                 return HttpNotFound();
             }
 
             // Kiểm tra khóa ngoại
-            var hasJoinClass = db.StudentJoinClasses.Any(s => s.IdClass == id);
-
-            if (hasJoinClass)
+            if (db.StudentJoinClasses.Any(s => s.IdClass == id))
             {
-                status = "error";
-                message = "Không thể xóa lớp này vì đang có học viên tham gia lớp học này.";
-                return Json(new { status = status, message = message }, JsonRequestBehavior.AllowGet);
+                if (db.StudentJoinClasses.Any(x => x.IdClass == id && x.Todate > DateTime.Now))
+                {
+                    return Json(new { status = "error", message = "Lỗi cập nhật: Đang có học viên đang học lớp này!" }, JsonRequestBehavior.AllowGet);
+                }
+                classes.Enable = false;
+                db.Entry(classes).State = EntityState.Modified;
+                db.SaveChanges();
+                return Json(new { status = "ok", message = "Thành công: Lớp học đã được cập nhật!" }, JsonRequestBehavior.AllowGet);
             }
 
-            db.Classes.Remove(room);
+            db.Classes.Remove(classes);
             await db.SaveChangesAsync();
 
-            return Json(new { status = status, message = message }, JsonRequestBehavior.AllowGet);
+            return Json(new { status = "ok", message = "Thành công: Lớp học đã được xóa!" }, JsonRequestBehavior.AllowGet);
         }
 
         // GET: Classes/Delete/5

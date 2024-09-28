@@ -7,9 +7,9 @@
     int stt = 1;
 }
 <div class="row">
-    <div class="col col-md-4 col-sm-12">
+    <div class="col col-md-3 col-sm-12">
         <form action="/" method="get" id="formload">
-            <div class="input-group mb-3">
+            <div class="input-group">
                 @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
                 {
                     @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2",@onchange="Loadlist()" })
@@ -17,7 +17,7 @@
             </div>
         </form>
     </div>
-    <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
+    <div class="col col-md-9 col-sm-12 text-right" style="text-align:right;">
         <a href="javascript:Add_MKT()" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>
     </div>
 </div>

@@ -4,39 +4,25 @@
     ViewBag.Controller = "Phòng học";
     ViewBag.Title = "Danh sách phòng học";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    int stt = 1;
 }
 
 <div class="row">
     <div class="col col-md-4 col-sm-12">
-        <form action="/rooms" method="get" id="formload">
-            <div class="input-group mb-3">
-                @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
-                {
-                    @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2" })
-                }
-                <input type="text" class="form-control ms-1 rounded-1" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
-                <button class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
-            </div>
-        </form>
-    </div>
-    <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
-        <div class="me-0 btn btn-md p-0">
-            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="ti ti-arrows-sort"></i> Sắp xếp theo
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-ascending"></i> Cũ nhất</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
-            </ul>
+        <div class="input-group">
+            @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
+            {
+                @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2",@onchange="Loadlist()" })
+            }
+            <input type="text" class="form-control ms-1 rounded-1" name="searchString" id="searchString" placeholder="Tìm kiếm" value="">
+            <button class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" type="button" onclick="Loadlist()"><i class="ti ti-search text-white"></i></button>
         </div>
+    </div>
+    <div class="col col-md-8 col-sm-12 text-end">
         <a href="javascript:Add_room()" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>
     </div>
 </div>
 
-<table class="table fs-3">
+<table class="table fs-3 mt-2">
     <thead class="bg-success text-white rounded-1">
         <tr>
             <th class="text-center">STT</th>
@@ -47,38 +33,9 @@
             <th class="text-end">Thao tác</th>
         </tr>
     </thead>
-
-    @foreach (var item in Model)
-    {
-        <tr>
-            <td class="text-center">
-                @stt
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td class="text-center"> 
-                @Html.DisplayFor(modelItem => item.DateCreate)
-            </td>
-            <td class="text-center">
-                @Html.DisplayFor(modelItem => item.User.Name)
-            </td>
-            <td class="text-end">
-                <a href="javascript:Edit_room(@item.Id)" class="me-1"><i class="ti ti-edit text-primary"></i></a>
-                <a href="javascript:Delete_room(@item.Id)" class="me-1"><i class="ti ti-trash text-danger"></i></a>
-            </td>
-        </tr>
-        stt += 1;
-    }
+    <tbody id="showlist"></tbody>
+    <tr class="loader"></tr>
 </table>
-<nav aria-label="Page navigation">
-    <ul class="pagination justify-content-center">
-        @Html.PagedListPager(Model, page => Url.Action("Index", new { page }), new PagedListRenderOptions { LiElementClasses = new string[] { "page-item" } })
-    </ul>
-</nav>
 
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
@@ -107,6 +64,29 @@
     </div>
 </div>
 <script>
+
+        Loadlist();
+        function Loadlist() {
+            $(".loader").html("<td colspan=6>Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
+            $('#showlist').html("");
+            $.ajax({
+                url: '@Url.Action("Loadlist", "Rooms")',
+                type: "GET",
+                data: {
+                    IdBranch: $("#IdBranch").val(),
+                    searchString: $("#searchString").val()
+                },
+                success: function (data) {
+                    console.log(data);
+                    $('#showlist').html(data.str);
+                    $(".loader").html("");
+                },
+                error: function (xhr, error) {
+                    console.log(error);
+                    $(".loader").html("");
+                }
+            });
+        }
     function Add_room() {
     $('#exampleModalLabel').html("Thêm phòng học");
     $('#typeaction').val("create");

@@ -10,6 +10,7 @@ using PagedList.Mvc;
 using PagedList;
 using SuperbrainManagement.Models;
 using System.Threading.Tasks;
+using Microsoft.Ajax.Utilities;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -18,75 +19,53 @@ namespace SuperbrainManagement.Controllers
         private ModelDbContext db = new ModelDbContext();
 
         // GET: Rooms
-        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, string idBranch)
+        public ActionResult Index(string idBranch)
         {
             if (CheckUsers.iduser() == "")
             {
                 return Redirect("/authentication");
             }
-            var branches = db.Branches.ToList();
+            var branches = db.Branches.Where(x => x.Enable == true).ToList();
             int idbranch = int.Parse(CheckUsers.idBranch());
             if (!CheckUsers.CheckHQ())
             {
                 branches = db.Branches.Where(x => x.Id == idbranch).ToList();
             }
-            if (string.IsNullOrEmpty(idBranch))
-            {
-                idBranch = branches.First().Id.ToString();
-            }
             ViewBag.IdBranch = new SelectList(branches, "Id", "Name", idBranch);
 
-            if (searchString != null)
+            return View();
+        }
+        public ActionResult Loadlist(int? IdBranch,string searchString) {
+            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+            if (IdBranch == null)
             {
-                page = 1;
+                IdBranch = idbranch;
             }
-            else
-            {
-                searchString = currentFilter;
-            }
-            ViewBag.CurrentFilter = searchString;
 
-            var room = db.Rooms.ToList();
-
-            if (!string.IsNullOrEmpty(idBranch))
-            {
-                room = room.Where(x => x.IdBranch == int.Parse(idBranch)).ToList();
-            }
+            string str = "";
+            int stt = 0;
+            var rooms = db.Rooms.Where(x => x.IdBranch == IdBranch);
             if (!string.IsNullOrEmpty(searchString))
             {
-                room = room.Where(x => x.Name.ToLower().Contains(searchString.ToLower())).ToList();
+                rooms = rooms.Where(x => x.Name.Contains(searchString));
             }
-            switch (sortOrder)
+            foreach (var c in rooms)
             {
-                case "name_desc":
-                    room = room.OrderByDescending(s => s.Name).ToList();
-                    break;
-                case "date":
-                    room = room.OrderBy(s => s.Id).ToList();
-                    break;
-                case "name":
-                    room = room.OrderBy(s => s.Name).ToList();
-                    break;
-                default:
-                    room = room.OrderByDescending(s => s.Id).ToList();
-                    break;
+                stt++;
+                str += "<tr>"
+                    + "<td class='text-center align-content-center'>" + stt + "</td>"
+                    + "<td class='align-content-center'>" + c.Name + "</td>"
+                    + "<td class='align-content-center'>" + c.Description + "</td>"
+                    + "<td class='align-content-center text-center'><span class='btn btn-sm btn-outline-success'>" + db.Schedules.Where(x=>x.IdRoom==c.Id && x.Active==true).DistinctBy(x=>x.IdClass).Count() + "</span></td>"
+                    + "<td class='align-content-center text-center'>" + c.User.Name + "</td>"
+                    + "<td class='text-end align-content-center'>"
+                    + "<a href=\"javascript:Edit_room(" + c.Id + ")\" class=\"me-1\"><i class=\"ti ti-edit text-primary\"></i></a>"
+                    +"<a href=\"javascript:Delete_room(" + c.Id + ")\" class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a>" 
+                    + "</td>"
+                    + "</tr>";
             }
-            int pageSize = 20;
-            int pageNumber = (page ?? 1);
 
-
-            var pagedData = room.ToPagedList(pageNumber, pageSize);
-
-            var pagedListRenderOptions = new PagedListRenderOptions();
-            pagedListRenderOptions.FunctionToTransformEachPageLink = (liTag, aTag) =>
-            {
-                liTag.AddCssClass("page-item");
-                aTag.AddCssClass("page-link");
-                return liTag;
-            };
-
-            ViewBag.PagedListRenderOptions = pagedListRenderOptions;
-            return View(pagedData);
+            return Json(new { str }, JsonRequestBehavior.AllowGet);
         }
         public ActionResult Loadedit_room(int id)
         {
