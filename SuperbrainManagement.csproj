@@ -996,6 +996,7 @@
     <Content Include="Views\Transactions\Statistics.cshtml" />
     <Content Include="Views\Settings\_Header.cshtml" />
     <Content Include="Views\Settings\_Sidebar.cshtml" />
+    <Content Include="Views\Settings\_Config.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Authentication\Index.cshtml" />

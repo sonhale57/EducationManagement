@@ -5,7 +5,7 @@
     ViewBag.Title = "Thêm nhân sự";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-@using (Html.BeginForm("Create", "Employees", FormMethod.Post, new { enctype = "multipart/form-data" }))
+@using (Html.BeginForm("Create", "Employees", FormMethod.Post, new { enctype = "multipart/form-data", id = "createEmployeeForm" }))
 {
     @Html.AntiForgeryToken()
     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
@@ -40,7 +40,14 @@
             <div class="col-md-6 mt-3">
                 @Html.LabelFor(model => model.Sex, htmlAttributes: new { @class = "control-label col-md-12" })
                 <div class="col-md-12">
-                    @Html.EditorFor(model => model.Sex, new { htmlAttributes = new { @class = "form-control" } })
+                    @{
+                        var sex = new List<SelectListItem>
+                                        {
+                            new SelectListItem { Text = "Nam", Value = "Nam" },
+                            new SelectListItem { Text = "Nữ", Value = "Nữ" }
+                        };
+                    }
+                    @Html.DropDownListFor(model => model.Sex, sex, new { @class = "form-control", id = "Sex" })
                     @Html.ValidationMessageFor(model => model.Sex, "", new { @class = "text-danger" })
                 </div>
             </div>
@@ -94,7 +101,8 @@
             <div class="col-md-6 mt-3">
                 @Html.LabelFor(model => model.StartWork, htmlAttributes: new { @class = "control-label col-md-12" })
                 <div class="col-md-12">
-                    @Html.EditorFor(model => model.StartWork, new { htmlAttributes = new { @class = "form-control" } })
+                    <input type="text" name="ngaylamviec" value="" id="ngaylamviec" class="form-control" onchange="Updatedate()" required />
+                    @Html.HiddenFor(model => model.StartWork, new { htmlAttributes = new { @class = "form-control" } })
                     @Html.ValidationMessageFor(model => model.StartWork, "", new { @class = "text-danger" })
                 </div>
             </div>
@@ -137,9 +145,6 @@
                     @Html.ValidationMessageFor(model => model.BankBranch, "", new { @class = "text-danger" })
                 </div>
             </div>
-
-
-
         </div>
         <div class="col-12 col-xl-4">
             <div class="row g-2">
@@ -186,7 +191,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 }
 
@@ -224,12 +228,39 @@
 <script>
 
     function Updatedate() {
+        var startwork = $("#ngaylamviec").val().split("/").reverse().join("-");
         var dateofbirth = $("#sinhnhat").val().split("/").reverse().join("-");
         $("#DateOfBirth").val(dateofbirth);
+        $("#StartWork").val(startwork);
     }
     $(function () {
         $("#sinhnhat").datepicker({ dateFormat: "dd/mm/yy" });
+        $("#ngaylamviec").datepicker({ dateFormat: "dd/mm/yy" });
     });
+
+    function submit_create() {
+        var formData = new FormData($("#createEmployeeForm")[0]);
+
+        $.ajax({
+            url: '/Employees/Create',  // Đường dẫn đến action Create trong controller
+            type: 'POST',
+            data: formData,
+            contentType: false,  // Không cần thiết lập Content-Type vì chúng ta đang gửi file
+            processData: false,  // Không xử lý data dạng string
+            success: function (response) {
+                if (response.status=="ok") {
+                    showSuccess(response.message, 3000);
+                    // Có thể làm mới lại trang hoặc load lại danh sách nhân viên
+                    window.location.href = '/employees';  // Chuyển hướng sau khi thêm mới thành công
+                } else {
+                    showError(response.message, 3000);
+                }
+            },
+            error: function (xhr, status, error) {
+                showError(error, 3000);
+            }
+        });
+    }
     function Add_Position() {
         $('#action').val("create");
         $('#modaladdProgram').modal('show');
