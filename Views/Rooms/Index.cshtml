@@ -26,9 +26,9 @@
     <thead class="bg-success text-white rounded-1">
         <tr>
             <th class="text-center">STT</th>
-            <th>Tên lớp</th>
+            <th>Tên phòng</th>
             <th>Mô tả</th>
-            <th class="text-center">Ngày tạo</th>
+            <th class="text-center">Số lớp</th>
             <th class="text-center">Người tạo</th>
             <th class="text-end">Thao tác</th>
         </tr>
@@ -41,7 +41,10 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-fullscreen" id="exampleModalLabel">Thêm lớp học </h5>
+                <h5 class="modal-fullscreen" id="exampleModalLabel">Thêm phòng học </h5>
+                <button type="button" class="btn btn-sm" onclick="closeModal()" data-dismiss="modal" aria-label="Close">
+                    <i class="ti ti-x"></i>
+                </button>
             </div>
             <hr style="width:90%;margin:0 auto;" />
             <form action="/" method="post">
@@ -50,6 +53,9 @@
                     <input type="hidden" name="typeaction" value="" id="typeaction" />
                     <input type="hidden" name="IdRoomedit" value="" id="IdRoomedit" />
 
+                    <label class="text-success mt-3">Mã phòng học</label>
+                    <input type="text" class="form-control" id="CodeRoom" name="CodeRoom" value="" placeholder="Mã phòng học" />
+
                     <label class="text-success mt-3">Tên phòng học</label>
                     <input type="text" class="form-control" id="NameRoom" name="NameRoom" value="" placeholder="Tên phòng" />
 
@@ -57,7 +63,10 @@
                     <input type="text" class="form-control" id="DescriptionRoom" name="DescriptionRoom" value="" placeholder="Mô tả" />
                 </div>
                 <div class="modal-footer">
-                    <a href="javascript:Submit_savechange()" class="btn btn-success" id="btnaction"> Lưu cập nhật</a>
+                    <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
+                        <i class="ti ti-door-exit"></i> Hủy
+                    </button>
+                    <a href="javascript:Submit_savechange()" class="btn btn-sm btn-success" id="btnaction"> Lưu cập nhật</a>
                 </div>
             </form>
         </div>
@@ -90,13 +99,13 @@
     function Add_room() {
     $('#exampleModalLabel').html("Thêm phòng học");
     $('#typeaction').val("create");
-    $('#btnaction').html("Thêm mới");
+    $('#btnaction').html("+ Thêm mới");
     $('#exampleModal').modal('show');
 }
 function Edit_room(id) {
     $('#exampleModalLabel').html("Chỉnh sửa phòng học");
     $('#typeaction').val("edit");
-    $('#btnaction').html("Cập nhật");
+    $('#btnaction').html("<i class='ti ti-device-floppy'></i> Cập nhật");
     $.ajax({
         url: '@Url.Action("Loadedit_room", "Rooms")',
         type: "GET",
@@ -105,6 +114,7 @@ function Edit_room(id) {
         },
         success: function (data) {
             $('#IdRoomedit').val(id);
+            $('#CodeRoom').val(data.code);
             $('#NameRoom').val(data.name);
             $('#DescriptionRoom').val(data.description);
 
@@ -124,6 +134,7 @@ function Submit_savechange() {
             Id: $("#IdRoomedit").val(),
             action: $("#typeaction").val(),
             Name: $("#NameRoom").val(),
+            Code: $("#CodeRoom").val(),
             Description: $("#DescriptionRoom").val()
         },
         success: function (data) {

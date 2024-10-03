@@ -67,7 +67,7 @@
 
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
-        <div class="modal-content" style="width:auto;">
+        <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-fullscreen" id="exampleModalLabel">Thời khóa biểu</h5>
                 <button type="button" class="btn btn-sm" onclick="closeModal()" data-dismiss="modal" aria-label="Close">
@@ -100,7 +100,7 @@
                 <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
                     <i class="ti ti-door-exit"></i> Hủy
                 </button>
-                <a id="submitButton" href="javascript:updateSchedule()" class="btn btn-sm btn-success"><i class="ti ti-refresh"></i> Lưu thay đổi</a>
+                <a id="submitButton" href="javascript:updateSchedule()" class="btn btn-sm btn-success"><i class="ti ti-refresh"></i> Cập nhật</a>
             </div>
         </div>
     </div>
@@ -111,6 +111,9 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-fullscreen" id="exampleModalLabels">Thêm lớp học </h5>
+                <button type="button" class="btn btn-sm" onclick="closeModal()" data-dismiss="modal" aria-label="Close">
+                    <i class="ti ti-x"></i>
+                </button>
             </div>
             <hr style="width:90%;margin:0 auto;" />
             <form action="/" method="post">
@@ -130,7 +133,7 @@
                     <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
                         <i class="ti ti-door-exit"></i> Hủy
                     </button>
-                    <a href="javascript:Submit_savechange()" class="btn btn-sm btn-success" id="btnaction"> Lưu cập nhật</a>
+                    <a href="javascript:Submit_savechange()" class="btn btn-sm btn-success" id="btnaction"> Cập nhật</a>
                 </div>
             </form>
         </div>
@@ -141,7 +144,7 @@
     <script>
         Loadlist();
         function Loadlist() {
-            $(".loader").html("<td colspan=6>Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
+            $(".loader").html("<td colspan=7>Đang xử lý, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
             $('#showlist').html("");
             $.ajax({
                 url: '@Url.Action("Loadlist", "Classes")',
@@ -175,7 +178,7 @@
         function Edit_class(id) {
             $('#exampleModalLabels').html("Chỉnh sửa lớp học");
             $('#typeaction').val("edit");
-            $('#btnaction').html("Cập nhật");
+            $('#btnaction').html("<i class='ti ti-device-floppy'></i> Cập nhật");
             $.ajax({
                 url: '@Url.Action("Loadedit_class", "Classes")',
                 type: "GET",

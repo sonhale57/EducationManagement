@@ -41,7 +41,10 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-fullscreen" id="exampleModalLabel">Thêm lớp học </h5>
+                <h5 class="modal-fullscreen" id="exampleModalLabel">Thêm chương trình MKT </h5>
+                <button type="button" class="btn btn-sm" onclick="closeModal()" data-dismiss="modal" aria-label="Close">
+                    <i class="ti ti-x"></i>
+                </button>
             </div>
             <hr style="width:90%;margin:0 auto;" />
             <form action="/" method="post">
@@ -76,10 +79,10 @@
                 </div>
                 <div class="modal-footer">
                     <span class="loader"></span>
-                    <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="closeModal()">
                         <i class="ti ti-door-exit"></i> Hủy
                     </button>
-                    <a href="javascript:Submit_savechange()" class="btn btn-sm btn-success" id="btnaction"><i class="ti ti-refresh"></i> Lưu cập nhật</a>
+                    <a href="javascript:Submit_savechange()" class="btn btn-sm btn-success" id="btnaction"><i class="ti ti-device-floppy"></i> Cập nhật</a>
                 </div>
             </form>
         </div>
@@ -113,6 +116,7 @@
     }
     function Edit(id) {
         $('#exampleModalLabel').html("Cập nhật chương trình MKT");
+        $('#btnaction').html("<i class='ti ti-device-floppy'></i> Cập nhật");
         $.ajax({
             url: '@Url.Action("LoadInfoMKT", "MarketingCampaigns")',
             type: "GET",

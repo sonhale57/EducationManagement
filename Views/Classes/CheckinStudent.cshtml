@@ -29,6 +29,9 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">Kết quả học tập ngày</h5>
+                    <button type="button" class="btn btn-sm" onclick="closeModal()" data-dismiss="modal" aria-label="Close">
+                        <i class="ti ti-x"></i>
+                    </button>
                 </div>
                 <hr style="width:90%;margin:0 auto;" />
                 <div class="modal-body">
@@ -166,7 +169,7 @@
                         <div class="form-group row mb-2">
                             <label class="col-lg-3 col-form-label form-control-label">Power</label>
                             <div class="col-lg-9">
-                                <input type="number" class="form-control" name="power" id="power" />
+                                <input type="number" class="form-control" name="power" id="power" value="0" required/>
                             </div>
                         </div>
                         <div class="form-group row mb-2">
@@ -188,7 +191,10 @@
                 </div>
                 <div class="modal-footer text-start">
                     <span class="loader"></span>
-                    <a href="javascript:Submit_checkinStudent()" class="btn btn-success">
+                    <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
+                        <i class="ti ti-door-exit"></i> Hủy
+                    </button>
+                    <a href="javascript:Submit_checkinStudent()" class="btn btn-sm btn-success">
                         <i class="ti ti-calendar"></i> Nhập kết quả
                     </a>
                 </div>
@@ -305,7 +311,7 @@
         document.getElementById("row").value = "";
         document.getElementById("second").value = "";
         document.getElementById("other").value = "";
-        document.getElementById("power").value = "";
+        document.getElementById("power").value = 0;
         document.getElementById("description").value = "";
 
         // Gửi yêu cầu đến server để lấy thông tin check-in trước đó
@@ -325,7 +331,7 @@
                     document.getElementById("row").value = data.OnClassRow || "";
                     document.getElementById("second").value = data.OnClassPaper || "";
                     document.getElementById("other").value = data.Other || "";
-                    document.getElementById("power").value = data.Power || "";
+                    document.getElementById("power").value = data.Power || 0;
                     document.getElementById("description").value = data.Description || "";
 
                     // Cập nhật trạng thái check-in

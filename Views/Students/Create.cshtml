@@ -37,7 +37,7 @@
                     </div>
                     <div class="col-lg-6 pe-0">
                         <label class="form-control-label">Sinh nhật</label>
-                        <input class="form-control" type="text" name="Ngaysinh" id="Ngaysinh" value="" placeholder="Sinh nhật">
+                        <input class="form-control" type="text" name="Ngaysinh" id="Ngaysinh" value="" placeholder="Sinh nhật" required>
                         <input class="form-control" type="hidden" name="DateOfBirth" id="DateOfBirth" value="" placeholder="Sinh nhật">
                     </div>
                 </div>
@@ -88,7 +88,7 @@
                 <div class="form-group mt-2">
                     @Html.LabelFor(model => model.ParentDateOfBirth, htmlAttributes: new { @class = "control-label col-md-12" })
                     <div class="col-md-12">
-                        <input type="text" name="Ngaysinhphuhuynh" id="Ngaysinhphuhuynh" class="form-control" value="" placeholder="Ngáy sinh của phụ huynh" />
+                        <input type="text" name="Ngaysinhphuhuynh" id="Ngaysinhphuhuynh" class="form-control" value="" placeholder="Ngáy sinh của phụ huynh"  required/>
                         <input type="hidden" name="ParentDateOfBirth" id="ParentDateOfBirth" class="form-control" value=""/>
                     </div>
                 </div>

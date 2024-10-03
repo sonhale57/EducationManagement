@@ -23,10 +23,8 @@ namespace SuperbrainManagement.Controllers
             return View(programs.ToList());
         }
         [HttpPost]
-        public ActionResult Submit_addProgram(string action,int? Id,string Code,string Name,int DisplayOrder,string Description)
+        public ActionResult Submit_addProgram(string action,int? Id,string Code,string Name,int? DisplayOrder,string Description)
         {
-            string status = "ok";
-            string message = "";
             if(action == "create")
             {
                 var program = db.Programs.SingleOrDefault(x => x.Code == Code);
@@ -45,13 +43,11 @@ namespace SuperbrainManagement.Controllers
                     };
                     db.Programs.Add(p);
                     db.SaveChanges();
-                    status = "ok";
-                    message = "Đã thêm thành công!";
+                        return Json(new {status = "ok", message = "Thành công: Đã thêm mới thành công!"}, JsonRequestBehavior.AllowGet);
                 }
                 else
                 {
-                    status = "error";
-                    message = "Đã tồn tại mã chương trình này!";
+                    return Json(new {status = "error", message = "Lỗi cập nhật: Đã tồn tại mã chương trình này!" }, JsonRequestBehavior.AllowGet);
                 }
             }
             else if(action == "edit")
@@ -63,14 +59,8 @@ namespace SuperbrainManagement.Controllers
                 p.DisplayOrder = DisplayOrder;
                 db.Entry(p);
                 db.SaveChanges();
-                status = "ok";
-                message = "Đã cập nhật thành công!";
             }
-            var item = new {
-                message,
-                status
-            };
-            return Json(item, JsonRequestBehavior.AllowGet);
+            return Json(new {status = "ok", message = "Thành công: Đã cập nhật thành công!"}, JsonRequestBehavior.AllowGet);
         }
         public ActionResult Loadedit_Program(int id) {
             var p = db.Programs.Find(id);

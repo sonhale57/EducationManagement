@@ -1,7 +1,8 @@
 ﻿@model SuperbrainManagement.Models.Employee
 
 @{
-    ViewBag.Title = "Edit";
+    ViewBag.Controller = "Nhân sự";
+    ViewBag.Title = "Chỉnh sửa nhân sự";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -199,7 +200,7 @@
                                 @Html.EditorFor(model => model.DateCreate, new { htmlAttributes = new { @class = "form-control", @type = "hidden" } })
                                 <div class="col-md-12 mt-3">
                                     <div class="col-md-offset-2 col-md-12">
-                                        <button type="submit" class="btn btn-success"><i class="ti ti-refresh"></i> Cập nhật</button>
+                                        <button type="submit" class="btn btn-success"><i class="ti ti-device-floppy"></i> Cập nhật</button>
                                     </div>
                                 </div>
                             </div>

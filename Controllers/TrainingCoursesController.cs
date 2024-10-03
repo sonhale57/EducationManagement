@@ -689,11 +689,26 @@ namespace SuperbrainManagement.Controllers
                 // Nếu kết quả đạt, cập nhật thông tin chính thức của giáo viên
                 if (Result == true)
                 {
-                    e.IsOfficial = true;
-                    e.CertificateNumber = NumberCertification;
-                    db.Entry(e).State = EntityState.Modified;
-                    db.SaveChanges();
-                    Create_Account(IdEmployee);  // Tạo tài khoản cho giáo viên
+                    var user = db.Users.FirstOrDefault(x => x.IdEmployee == e.Id);
+                    // Kiểm tra xem user có tồn tại không
+                    if (user != null && e != null)
+                    {
+                        // Cập nhật thông tin nhân sự và người dùng
+                        e.IsOfficial = true;
+                        e.CertificateNumber = NumberCertification;
+                        user.Expire = DateTime.Now.AddMonths(6);
+
+                        // Đánh dấu rằng thông tin của user và nhân sự đã bị thay đổi
+                        db.Entry(user).State = EntityState.Modified;
+                        db.Entry(e).State = EntityState.Modified;
+
+                        // Lưu thay đổi vào cơ sở dữ liệu
+                        db.SaveChanges();
+                    }
+                    else
+                    {
+                        Create_Account(IdEmployee);  // Tạo tài khoản cho giáo viên
+                    }
                 }
             }
             else

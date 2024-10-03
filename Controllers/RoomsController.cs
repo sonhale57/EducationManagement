@@ -70,19 +70,19 @@ namespace SuperbrainManagement.Controllers
         public ActionResult Loadedit_room(int id)
         {
             var c = db.Rooms.Find(id);
-            return Json(new { id = c.Id, name = c.Name, description = c.Description }, JsonRequestBehavior.AllowGet);
+            return Json(new { id = c.Id,code=c.Code, name = c.Name, description = c.Description }, JsonRequestBehavior.AllowGet);
         }
         [HttpPost]
-        public ActionResult Submit_savechanges(string action, int? Id, string Name, string Description)
+        public ActionResult Submit_savechanges(string action, int? Id,string Code, string Name, string Description)
         {
             int iduser = Convert.ToInt32(CheckUsers.iduser());
             int idbranch = Convert.ToInt32(CheckUsers.idBranch());
-            string status = "", message = "";
             if (action == "create")
             {
                 Room cla = new Room()
                 {
                     Name = Name,
+                    Code = Code,
                     Description = Description,
                     DateCreate = DateTime.Now,
                     IdBranch = idbranch,
@@ -90,21 +90,22 @@ namespace SuperbrainManagement.Controllers
                 };
                 db.Rooms.Add(cla);
                 db.SaveChanges();
-                status = "ok";
-                message = "Đã thêm thành công!";
+                return Json(new { status="ok", message="Thành công: Đã thêm phòng học thành công!" }, JsonRequestBehavior.AllowGet);
             }
             else
             {
                 var c = db.Rooms.Find(Id);
+                if(c == null)
+                {
+                    return Json(new { status = "error", message = "Lỗi cập nhật: Không tìm thấy phòng học!" }, JsonRequestBehavior.AllowGet);
+                }
                 c.Name = Name;
+                c.Code = Code;
                 c.Description = Description;
                 db.Entry(c).State = EntityState.Modified;
                 db.SaveChanges();
-                status = "ok";
-                message = "Đã cập nhật thành công!";
-
+                return Json(new { status = "ok", message = "Thành công: Đã cập nhật phòng học thành công!" }, JsonRequestBehavior.AllowGet);
             }
-            return Json(new { status, message }, JsonRequestBehavior.AllowGet);
         }
 
         // GET: Rooms/Details/5
@@ -210,9 +211,6 @@ namespace SuperbrainManagement.Controllers
         [HttpPost]
         public async Task<ActionResult> Delete_Room(int id)
         {
-            var status = "ok";
-            var message = "Phòng đã được xóa thành công.";
-
             var room = await db.Rooms.FindAsync(id);
             if (room == null)
             {
@@ -224,15 +222,13 @@ namespace SuperbrainManagement.Controllers
 
             if (hasSchedules)
             {
-                status = "error";
-                message = "Không thể xóa phòng này vì đang có lớp đang xét vào phòng này.";
-                return Json(new { status = status, message = message }, JsonRequestBehavior.AllowGet);
+                return Json(new { status = "error", message = "Không thể xóa phòng này vì đang có lớp đang xét vào phòng này." }, JsonRequestBehavior.AllowGet);
             }
 
             db.Rooms.Remove(room);
             await db.SaveChangesAsync();
 
-            return Json(new { status = status, message = message }, JsonRequestBehavior.AllowGet);
+            return Json(new { status = "ok", message = "Thành công: Đã xóa phòng học thành công!" }, JsonRequestBehavior.AllowGet);
         }
         protected override void Dispose(bool disposing)
         {

@@ -12,17 +12,6 @@
     <div class="col col-md-3 col-sm-12">
     </div>
     <div class="col col-md-9 col-sm-12 text-end">
-        <div class="me-0 btn btn-md p-0">
-            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="ti ti-arrows-sort"></i> Sắp xếp theo
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "name_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-ascending"></i> Cũ nhất</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter, searchString = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Mới nhất</a></li>
-            </ul>
-        </div>
         <a href="/trainingcourses/create" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>
     </div>
 </div>
@@ -47,6 +36,9 @@
             <form action="/" method="post" id="form_xuat">
                 <div class="modal-header">
                     <h5 class="modal-title text-success" id="exampleModalLabel2">Đăng ký giáo viên tham gia đào tạo</h5>
+                    <button type="button" class="btn btn-sm" onclick="closeModal()" data-dismiss="modal" aria-label="Close">
+                        <i class="ti ti-x"></i>
+                    </button>
                 </div>
                 <hr style="width:90%;margin:0 auto;" />
                 <div class="modal-body">
@@ -90,11 +82,12 @@
                         </div>
                     </div>
                     <div class="text-center mt-4">
-                        <button type="button" class="btn btn-success" onclick="Submit_registration()">
-                            <i class="ti ti-registered"></i> Đăng ký tham gia
-                        </button>
-                        <button type="button" class="btn btn-outline-dark" onclick="close_modal()">
+                        <span class="loader"></span>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="closeModal()">
                             <i class="ti ti-door-exit"></i> Thoát
+                        </button>
+                        <button type="button" class="btn btn-sm btn-success" onclick="Submit_registration()">
+                            <i class="ti ti-registered"></i> Đăng ký tham gia
                         </button>
                     </div>
                 </div>
@@ -107,9 +100,10 @@
         <div class="modal-content" style="">
             <form action="/" method="post" id="form_xuat">
                 <div class="modal-header">
-                    <h5 class="modal-title text-success" id="exampleModalLabel2">
-                        Danh sách đăng ký tham gia đào tạo
-                    </h5>
+                    <h5 class="modal-title text-success" id="exampleModalLabel2">Danh sách đăng ký tham gia đào tạo</h5>
+                    <button type="button" class="btn btn-sm" onclick="closeModal()" data-dismiss="modal" aria-label="Close">
+                        <i class="ti ti-x"></i>
+                    </button>
                 </div>
                 <hr style="width:90%;margin:0 auto;" />
                 <div class="modal-body">
@@ -156,7 +150,7 @@
                     </table>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="close_modal()">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="closeModal()">
                         <i class="ti ti-door-exit"></i> Hủy
                     </button>
                     <a href="javascript:Load_paymentFee()" class="btn btn-sm btn-success">
@@ -173,9 +167,10 @@
         <div class="modal-content" style="">
             <form action="/" method="post" id="form_payment" enctype="multipart/form-data">
                 <div class="modal-header">
-                    <h5 class="modal-title text-success" id="modalPaymentLabel">
-                        Thanh toán phí đào tạo
-                    </h5>
+                    <h5 class="modal-title text-success" id="modalPaymentLabel">Thanh toán phí đào tạo</h5>
+                    <button type="button" class="btn btn-sm" onclick="closeModal()" data-dismiss="modal" aria-label="Close">
+                        <i class="ti ti-x"></i>
+                    </button>
                 </div>
                 <hr style="width:90%;margin:0 auto;" />
                 <div class="modal-body">
@@ -241,7 +236,7 @@
                                 </tr>
                                 <tr>
                                     <th style="width:150px;text-align:left">Nội dung:</th>
-                                    <td><i>[Tên cơ sở] thanh toan DH [mã đơn hàng 1, mã đơn hàng 2,…]</i></td>
+                                    <td><i>[Tên cơ sở] thanh toán phí đào tạo[Tên khóa đào tạo]</i></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -272,9 +267,10 @@
         <div class="modal-content" style="">
             <form action="/" method="post" id="form_xuat">
                 <div class="modal-header">
-                    <h5 class="modal-title text-success" id="modalRatingLabel2">
-                        Kết quả giáo viên tham gia đào tạo
-                    </h5>
+                    <h5 class="modal-title text-success" id="modalRatingLabel2">Kết quả giáo viên tham gia đào tạo</h5>
+                    <button type="button" class="btn btn-sm" onclick="closeModal()" data-dismiss="modal" aria-label="Close">
+                        <i class="ti ti-x"></i>
+                    </button>
                 </div>
                 <hr style="width:90%;margin:0 auto;" />
                 <div class="modal-body">
@@ -309,9 +305,10 @@
         <div class="modal-content" style="">
             <form action="/" method="post" id="form-danhgia">
                 <div class="modal-header">
-                    <h5 class="modal-title text-success" id="modalRatingEmployeesLabel2">
-                        Đánh giá giáo viên tham gia đào tạo
-                    </h5>
+                    <h5 class="modal-title text-success" id="modalRatingEmployeesLabel2">Đánh giá giáo viên tham gia đào tạo </h5>
+                    <button type="button" class="btn btn-sm" onclick="closeModal()" data-dismiss="modal" aria-label="Close">
+                        <i class="ti ti-x"></i>
+                    </button>
                 </div>
                 <hr style="width:90%;margin:0 auto;" />
                 <div class="modal-body">
@@ -400,11 +397,11 @@
                 </div>
                 <div class="modal-footer">
                     <span class="loader"></span>
-                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="close_modal()">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="closeModal()">
                         <i class="ti ti-door-exit"></i> Hủy
                     </button>
                     <button type="button" class="btn btn-sm btn-success" onclick="Submit_rating()">
-                        <i class="ti ti-rating-12-plus"></i> Cập nhật đánh giá
+                        <i class="ti ti-device-floppy"></i> Cập nhật đánh giá
                     </button>
                 </div>
             </form>

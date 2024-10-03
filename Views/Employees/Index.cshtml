@@ -50,7 +50,10 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content" style="width:800px;">
             <div class="modal-header">
-                <h5 class="modal-fullscreen" id="exampleModalLabel">Tạo tài khoản</h5>
+                <h5 class="text-success" id="exampleModalLabel">Tạo tài khoản</h5>
+                <button type="button" class="btn btn-sm" onclick="closeModal()" data-dismiss="modal" aria-label="Close">
+                    <i class="ti ti-x"></i>
+                </button>
             </div>
             <hr style="width:90%;margin:0 auto;" />
             <form action="/" method="post" id="form_nhap">
@@ -70,8 +73,14 @@
                             <input type="password" id="Password" value="" class="form-control" required />
                         </div>
                     </div>
-                    <button type="button" class="btn btn-success mt-3" onclick="Submit_adduser()" id="btnAction">
-                        <i class="ti ti-circle-plus"></i> Tạo tài khoản
+                </div>
+                <div class="modal-footer">
+                    <span class="loader"></span>
+                    <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
+                        <i class="ti ti-door-exit"></i> Hủy
+                    </button>
+                    <button type="button" class="btn btn-sm btn-success" onclick="Submit_adduser()" id="btnAction">
+                        <i class="ti ti-device-floppy"></i> Cập nhật
                     </button>
                 </div>
             </form>
@@ -79,7 +88,6 @@
     </div>
 </div>
 <script>
-
     Loadlist(true);
     function Loadlist(isOfficial) {
         // Lấy giá trị của chi nhánh và từ khóa tìm kiếm từ giao diện người dùng
@@ -110,14 +118,6 @@
                 }
             });
         }
-    $(document).ready(function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('filterEnum') === 'False') {
-            $('#filterEnum').html("Thử việc");
-        } else {
-            $('#filterEnum').html("Chính thức");
-        }
-    });
 
     function UserbyId(id) {
         $('#Username').val("");
@@ -133,10 +133,10 @@
                 $('#NameEmployee').val(data.name);
                 if (data.action == "create") {
                     $('#exampleModalLabel').html("Tạo tài khoản");
-                    $('#btnAction').html("Tạo tài khoản");
+                    $('#btnAction').html("+ Tạo tài khoản");
                 } else {
                     $('#exampleModalLabel').html("Chỉnh sửa tài khoản");
-                    $('#btnAction').html("Chỉnh sửa tài khoản");
+                    $('#btnAction').html("<i class='ti ti-device-floppy'></i> Cập nhật");
                     $('#Username').val(data.username);
                 }
                 $('#exampleModal').modal('show');
@@ -153,15 +153,14 @@
             type: "POST",
             data: {
                 IdEmployee: $("#IdEmployee").val(),
-                Name: $("#NameEmployee").val(),
                 Username: $("#Username").val(),
                 Password: $("#Password").val()
             }
             , dataType: "json",
             success: function (data) {
-                if (data.message == "ok") {
+                if (data.status == "ok") {
                     $('#exampleModal').modal('hide');
-                    showSuccess(data.status, 3000);
+                    showSuccess(data.message, 3000);
                 }
                 else {
                     showError(data.message, 3000);
@@ -170,7 +169,7 @@
             error: function () { showError('Lỗi!', 3000); }
         });
     }
-    function Delete_Employee(Id) {
+    function Delete(Id) {
         if (confirm('Bạn có muốn xóa nhân sự này?')) {
             $.ajax({
                 url: '@Url.Action("Delete_Employee", "Employees")',

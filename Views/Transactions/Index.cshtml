@@ -7,7 +7,7 @@
 }
 <div class="row">
     <div class="col col-md-6 col-sm-12">
-        <div class="input-group mb-3">
+        <div class="input-group">
             @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
             {
                 @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", @onchange = "Loadlist()" })
@@ -43,7 +43,7 @@
         </a>
     </div>
 </div>
-<table class="table fs-3">
+<table class="table fs-3 mt-2">
     <thead class="bg-success text-white rounded-1">
         <tr>
             <th class="text-center">STT</th>
@@ -58,15 +58,19 @@
             <th class="text-end">Thao tác</th>
         </tr>
     </thead>
-    <tr id="loading"></tr>
     <tbody id="showlist"></tbody>
+    <tr id="loading"></tr>
 </table>
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Tạo phiếu</h5>
+                <button type="button" class="btn btn-sm" onclick="closeModal()" data-dismiss="modal" aria-label="Close">
+                    <i class="ti ti-x"></i>
+                </button>
             </div>
+            <hr style="width:90%;margin:0 auto;" /> 
             <form action="/" method="post" enctype="multipart/form-data" id="form_transaction">
                 <div class="modal-body row">
                     <div class="col-md-6 mt-3">
@@ -134,8 +138,12 @@
                     </div>
                 </div>
                 <div class="modal-footer text-left">
-                    <button type="button" class="btn btn-success text-start" onclick="Submit_transaction()">
-                        <i class="ti ti-circle-plus"></i> Thêm phiếu
+                    <span class="loader"></span>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="closeModal()">
+                        <i class="ti ti-door-exit"></i> Hủy
+                    </button>
+                    <button type="button" class="btn btn-sm btn-success" onclick="Submit_transaction()">
+                        <i class="ti ti-plus"></i> Thêm phiếu
                     </button>
                 </div>
             </form>

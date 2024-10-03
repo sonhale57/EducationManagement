@@ -54,6 +54,9 @@
             <form action="/" method="post" id="form_nhap">
                 <div class="modal-header">
                     <h5 class="modal-title text-success" id="modaladdProgramLabel">Thêm danh mục</h5>
+                    <button type="button" class="btn btn-sm" onclick="closeModal()" data-dismiss="modal" aria-label="Close">
+                        <i class="ti ti-x"></i>
+                    </button>
                 </div>
                 <hr style="width:90%;margin:0 auto;" />
                 <div class="modal-body">
@@ -80,11 +83,14 @@
                             <input type="text" name="DescriptionCategory" value="" class="form-control" id="DescriptionCategory" placeholder="Mô tả ngắn" />
                         </div>
                     </div>
-                    <div class="text-center mt-3">
-                        <button type="button" class="btn btn-success text-center" onclick="Submit_AddCategory()" id="btnAction">
-                            <i class="ti ti-circle-plus"></i> Lưu thay đổi
-                        </button>
-                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
+                        <i class="ti ti-door-exit"></i> Hủy
+                    </button>
+                    <button type="button" class="btn btn-success btn-sm" onclick="Submit_AddCategory()" id="btnAction">
+                        <i class="ti ti-device-floppy"></i> Cập nhật
+                    </button>
                 </div>
             </form>
         </div>
@@ -112,12 +118,14 @@
          });
     }
      function Add_Category() {
+         $("#btnAction").html("+ Thêm mới");
          $('#action').val("create");
          $("#modaladdProgramLabel").html("Thêm danh mục");
          $('#modaladdProgram').modal('show');
     }
      function Edit_Category(IdCategory) {
          $("#modaladdProgramLabel").html("Chỉnh sửa danh mục");
+         $("#btnAction").html("<i class='ti ti-device-floppy'></i> Cập nhật");
          $('#action').val("edit");
          $("#IdCategory").val(IdCategory);
          $("#CodeCategory").addClass("disabled");

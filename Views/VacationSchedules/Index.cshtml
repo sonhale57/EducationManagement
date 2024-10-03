@@ -9,7 +9,7 @@
 <div class="row">
     <div class="col col-md-4 col-sm-12">
         <form action="/vacationschedules" method="get" id="formload">
-            <div class="input-group mb-3">
+            <div class="input-group">
                 @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
                 {
                     @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2",@onchange="Loadlist()" })
@@ -21,7 +21,6 @@
         <a href="javascript:Add_vacation()" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>
     </div>
 </div>
-
 <table class="table fs-3 mt-2">
     <thead class="bg-success text-white rounded-1">
         <tr>
@@ -42,6 +41,9 @@
             <form action="/" method="post" id="form_nhap">
                 <div class="modal-header">
                     <h5 class="modal-title text-success" id="modaladdVacationLabel">Thêm lịch nghỉ</h5>
+                    <button type="button" class="btn btn-sm" onclick="closeModal()" data-dismiss="modal" aria-label="Close">
+                        <i class="ti ti-x"></i>
+                    </button>
                 </div>
                 <hr style="width:90%;margin:0 auto;" />
                 <div class="modal-body">
@@ -63,12 +65,15 @@
                             <input type="text" name="TodateVacation" value="" class="form-control" id="TodateVacation" placeholder="" />
                         </div>
                     </div>
-                    <div class="mt-3">
-                        <button type="button" class="btn btn-success" onclick="Submit_savechange()" id="btnActionVacation">
-                            <i class="ti ti-circle-plus"></i> Thêm mới
-                        </button>
-                        <span class="loader"></span>
-                    </div>
+                </div>
+                <div class="modal-footer">
+                    <span class="loader"></span>
+                    <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
+                        <i class="ti ti-door-exit"></i> Hủy
+                    </button>
+                    <button type="button" class="btn btn-sm btn-success" onclick="Submit_savechange()" id="btnActionVacation">
+                        <i class="ti ti-circle-plus"></i> Thêm mới
+                    </button>
                 </div>
             </form>
         </div>
@@ -102,13 +107,13 @@
     function Add_vacation() {
         $('#modaladdVacationLabel').html("Thêm lịch nghỉ");
         $('#action').val("create");
-        $('#btnActionVacation').html("Thêm mới");
+        $('#btnActionVacation').html("+ Thêm mới");
         $('#exampleModal').modal('show');
     }
     function Edit_vacation(id) {
         $('#modaladdVacationLabel').html("Chỉnh sửa lịch nghỉ");
         $('#action').val("edit");
-        $('#btnActionVacation').html("Cập nhật");
+        $('#btnActionVacation').html("<i class='ti ti-device-floppy'></i> Cập nhật");
         $.ajax({
             url: '@Url.Action("Loadedit_vacation", "VacationSchedules")',
             type: "GET",

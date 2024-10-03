@@ -42,6 +42,9 @@
         <div class="modal-content" >
             <div class="modal-header">
                 <h6 class="text-success modal-title" id="exampleModalLabel">Thêm khóa học</h6>
+                <button type="button" class="btn btn-sm" onclick="closeModal()" data-dismiss="modal" aria-label="Close">
+                    <i class="ti ti-x"></i>
+                </button>
             </div>
             <hr style="width:90%;margin:0 auto;" />
             <form action="/" method="post">
@@ -73,7 +76,8 @@
                     <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
                         <i class="ti ti-door-exit"></i> Hủy
                     </button>
-                    <a href="javascript:Submit_CourseBranch()" class="btn btn-sm btn-success"><i class="ti ti-refresh"></i> Lưu cập nhật</a>
+
+                    <a href="javascript:Submit_CourseBranch()" class="btn btn-sm btn-success"><i class="ti ti-device-floppy"></i> Cập nhật</a>
                 </div>
             </form>
         </div>

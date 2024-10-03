@@ -67,7 +67,6 @@
                         <i class="ti ti-dots-vertical"></i>
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <!-- Thêm các mục dropdown nếu cần -->
                         <li>
                             <a href="javascript:Load_ProductCourse(@c.Id)" class="me-1  dropdown-item"><i class="ti ti-trash text-danger"></i> Cài đặt vật tư</a>
                         </li>
@@ -84,6 +83,9 @@
             <form action="/" method="post" id="form_nhap">
                 <div class="modal-header">
                     <h6 class="modal-title text-success" id="modaladdProgramLabel">Thêm chương trình</h6>
+                    <button type="button" class="btn btn-sm" onclick="closeModal()" data-dismiss="modal" aria-label="Close">
+                        <i class="ti ti-x"></i>
+                    </button>
                 </div>
                 <hr style="width:90%;margin:0 auto;"/>
                 <div class="modal-body">
@@ -112,13 +114,13 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
+                    <span class="loader"></span>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="closeModal()">
                         <i class="ti ti-door-exit"></i> Hủy
                     </button>
-                    <button type="button" class="btn btn-sm btn-success text-center" onclick="Submit_AddProgram()" id="btnActionProgram">
-                        <i class="ti ti-plus"></i> Thêm mới
+                    <button type="button" class="btn btn-sm btn-success" onclick="Submit_AddProgram()" id="btnActionProgram">
+                        <i class="ti ti-refresh"></i> Cập nhật
                     </button>
-                    <span class="loader"></span>
                 </div>
             </form>
         </div>
@@ -130,6 +132,9 @@
             <form action="/" method="post" id="form_nhap">
                 <div class="modal-header">
                     <h6 class="modal-title text-success" id="exampleModalLabel">Cài đặt vật tư khóa học</h6>
+                    <button type="button" class="btn btn-sm" onclick="closeModal()" data-dismiss="modal" aria-label="Close">
+                        <i class="ti ti-x"></i>
+                    </button>
                 </div>
                 <hr style="width:90%;margin:0 auto;" />
                 <div class="modal-body">
@@ -144,7 +149,6 @@
                             <input type="text" name="Phone" id="Phone" placeholder="Số lượng" value="1" class="form-control" />
                         </div>
                     </div>
-                    <hr />
                     <table class="table mt-3">
                         <thead class="bg-success">
                             <tr class="text-white">
@@ -158,11 +162,11 @@
                     </table>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-sm btn-outline-danger text-center" onclick="closeModal()">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="closeModal()">
                         <i class="ti ti-door-exit"></i> Hủy
                     </button>
                     <button type="button" class="btn btn-sm btn-success" onclick="Submit_ProductCourse()">
-                        <i class="ti ti-plus"></i> Cập nhật
+                        <i class="ti ti-device-floppy"></i> Cập nhật
                     </button>
                     <span class="loader"></span>
                 </div>
@@ -180,7 +184,7 @@
     }
     function Edit_Program(id) {
         $('#modaladdProgramLabel').html("Chỉnh sửa chương trình học");
-        $('#btnActionProgram').html("Cập nhật");
+        $('#btnActionProgram').html("<i class='ti ti-device-floppy'></i> Cập nhật");
         $.ajax({
             url: '@Url.Action("Loadedit_Program", "Programs")',
             type: "GET",

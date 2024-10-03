@@ -12,7 +12,7 @@
     <h5 class="text-success">Thêm nhân sự mới</h5>
     <div class="row">
         <div class="col-12 col-xl-8 row">
-
+            @Html.Raw(TempData["error"])
             <div class="col-md-12 mt-3">
                 @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-12" })
                 <div class="col-md-12">
