@@ -655,6 +655,7 @@ namespace SuperbrainManagement.Controllers
                                 if (studentJoinClass.Todate >= DateTime.Now)
                                 {
                                     strStatusJoinClass = "<span class='badge bg-success rounded-3'>Đang học</span>";
+                                    btn += "<li><a class=\"dropdown-item\" href='/students/printschedule?IdRegistration=" + reader["IdRegistration"] + "&IdCourse=" + reader["IdCourse"] + "'><i class=\"ti ti-printer\"></i> In thời khóa biểu</a></li>";
                                     if (!statusReserve && todateJoinClass.Value.AddDays(30) > DateTime.Now)
                                     {
                                         btn += "<li><a class=\"dropdown-item\" href='javascript:Baoluu_modal(" + reader["IdRegistration"] + "," + reader["IdCourse"] + ")'><i class=\"ti ti-album-off\"></i> Bảo lưu khóa học</a></li>";
@@ -1392,7 +1393,7 @@ namespace SuperbrainManagement.Controllers
                     }
                     int IdProduct = Convert.ToInt32(readerkho["Id"].ToString());  
                     strtable += "<tr class='"+css+"'>"
-                        + "<td class='text-center'><input class='form-control disabled' type='checkbox' id='IdProduct_" + readerkho["Id"] +"' "+check+"/></td>"
+                        + "<td class='text-center'><input class='form-check-input' type='checkbox' id='IdProduct_" + readerkho["Id"] +"' "+check+ " disabled/></td>"
                         + "<td>" + readerkho["Name"] + "</td>"
                         + "<td class='text-center'>" + readerkho["Unit"].ToString() + "</td>"
                         + "<td class='text-end'>" + string.Format("{0:N0}", dongia) + "</td>"
@@ -2466,7 +2467,7 @@ namespace SuperbrainManagement.Controllers
                         + "<td class='text-center'>" + s.Sex + "</td>"
                         + "<td>" + s.CourseName + "</td>"
                         + "<td class='text-center'>" + s.Todate + "</td>"
-                        + "<td>" + statusStudent + "</td>"
+                        + "<td class='text-center'>" + statusStudent + "</td>"
                         + "</tr>";
                 }
             }
