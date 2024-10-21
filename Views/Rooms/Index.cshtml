@@ -21,27 +21,29 @@
         <a href="javascript:Add_room()" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>
     </div>
 </div>
-
-<table class="table fs-3 mt-2">
-    <thead class="bg-success text-white rounded-1">
-        <tr>
-            <th class="text-center">STT</th>
-            <th>Tên phòng</th>
-            <th>Mô tả</th>
-            <th class="text-center">Số lớp</th>
-            <th class="text-center">Người tạo</th>
-            <th class="text-end">Thao tác</th>
-        </tr>
-    </thead>
-    <tbody id="showlist"></tbody>
-    <tr class="loader"></tr>
-</table>
+<div class="table-responsive mx-n1 px-1">
+    <table class="table table-bordered fs-3 mt-2">
+        <thead>
+            <tr>
+                <th class="text-center">STT</th>
+                <th class="text-center">Mã phòng</th>
+                <th class="text-center">Tên phòng</th>
+                <th class="text-center">Mô tả</th>
+                <th class="text-center">Số lớp</th>
+                <th class="text-center">Người tạo</th>
+                <th class="text-center">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody id="showlist"></tbody>
+        <tr class="loader"></tr>
+    </table>
+</div>
 
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-fullscreen" id="exampleModalLabel">Thêm phòng học </h5>
+                <h5 class="modal-fullscreen" id="exampleModalLabel">Thêm phòng học</h5>
                 <button type="button" class="btn btn-sm" onclick="closeModal()" data-dismiss="modal" aria-label="Close">
                     <i class="ti ti-x"></i>
                 </button>
@@ -53,13 +55,13 @@
                     <input type="hidden" name="typeaction" value="" id="typeaction" />
                     <input type="hidden" name="IdRoomedit" value="" id="IdRoomedit" />
 
-                    <label class="text-success mt-3">Mã phòng học</label>
+                    <label class="text-success">Mã phòng học</label>
                     <input type="text" class="form-control" id="CodeRoom" name="CodeRoom" value="" placeholder="Mã phòng học" />
 
-                    <label class="text-success mt-3">Tên phòng học</label>
+                    <label class="text-success mt-2">Tên phòng học</label>
                     <input type="text" class="form-control" id="NameRoom" name="NameRoom" value="" placeholder="Tên phòng" />
 
-                    <label class="text-success mt-3">Mô tả</label>
+                    <label class="text-success mt-2">Mô tả</label>
                     <input type="text" class="form-control" id="DescriptionRoom" name="DescriptionRoom" value="" placeholder="Mô tả" />
                 </div>
                 <div class="modal-footer">

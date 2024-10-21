@@ -338,7 +338,7 @@ namespace SuperbrainManagement.Controllers
         }
 
         [HttpPost]
-        public ActionResult SaveRegistration(int? IdRegistration, int type, int? IdObject, decimal? price, decimal? totalamount, int? amount, string Description, int? Discount)
+        public ActionResult SaveRegistration(int? IdRegistration, int type, int? IdObject, decimal? price, decimal? totalamount, int? amount, string Description, int? Discount,int? promotionId, int? promotionProductId)
         {
             using (var scope = new TransactionScope())
             {
@@ -389,7 +389,8 @@ namespace SuperbrainManagement.Controllers
                                     Price = price,
                                     Amount = amount,
                                     TotalAmount = totalamount,
-                                    Discount = Discount
+                                    Discount = Discount,
+                                    IdPromotion = promotionProductId
                                 };
                                 db.RegistrationProducts.Add(NewregistrationProduct);
                                 db.SaveChanges();
@@ -415,8 +416,9 @@ namespace SuperbrainManagement.Controllers
                                     Discount = Discount,
                                     StatusExchangeCourse = false,
                                     StatusExtend = false,
-                                    StatusJoinClass = false,
-                                    StatusReserve = false
+                                    StatusJoinClass = false,    
+                                    StatusReserve = false,
+                                    IdPromotion = promotionId
                                 };
                                 db.RegistrationCourses.Add(NewregistrationCourse);
                                 db.SaveChanges();
@@ -428,19 +430,22 @@ namespace SuperbrainManagement.Controllers
                                     {
                                         int IdProduct = Convert.ToInt32(p.IdProduct);
                                         // Check if tonkho is greater than 0 before creating RegistrationProduct
-                                        if (Check_tonkho( IdProduct)) // Ensure to pass IdBranch parameter if needed in Check_tonkho
+                                        if (Check_tonkho(IdProduct)) // Ensure to pass IdBranch parameter if needed in Check_tonkho
                                         {
-                                            RegistrationProduct NewregistrationProduct = new RegistrationProduct
+                                            if (!db.RegistrationProducts.Any(x => x.IdProduct == IdProduct && x.IdRegistration==registration.Id))
                                             {
-                                                IdRegistration = registration.Id,
-                                                IdProduct = IdProduct,
-                                                Status = false,
-                                                Price = p.Product.Price,
-                                                Amount = p.Amount,
-                                                TotalAmount = p.Product.Price * p.Amount, // Assuming TotalAmount should be price multiplied by amount
-                                                Discount = 0,
-                                            };
-                                            db.RegistrationProducts.Add(NewregistrationProduct);
+                                                RegistrationProduct NewregistrationProduct = new RegistrationProduct
+                                                {
+                                                    IdRegistration = registration.Id,
+                                                    IdProduct = IdProduct,
+                                                    Status = false,
+                                                    Price = p.Product.Price,
+                                                    Amount = p.Amount,
+                                                    TotalAmount = p.Product.Price * p.Amount, // Assuming TotalAmount should be price multiplied by amount
+                                                    Discount = 0,
+                                                };
+                                                db.RegistrationProducts.Add(NewregistrationProduct);
+                                            }
                                         }
                                     }
                                     // Save all changes in one go to improve performance
@@ -654,7 +659,7 @@ namespace SuperbrainManagement.Controllers
                             {
                                 if (studentJoinClass.Todate >= DateTime.Now)
                                 {
-                                    strStatusJoinClass = "<span class='badge bg-success rounded-3'>Đang học</span>";
+                                    strStatusJoinClass = "<span class='badge bg-success'>Đang học</span>";
                                     btn += "<li><a class=\"dropdown-item\" href='/students/printschedule?IdRegistration=" + reader["IdRegistration"] + "&IdCourse=" + reader["IdCourse"] + "'><i class=\"ti ti-printer\"></i> In thời khóa biểu</a></li>";
                                     if (!statusReserve && todateJoinClass.Value.AddDays(30) > DateTime.Now)
                                     {
@@ -679,7 +684,7 @@ namespace SuperbrainManagement.Controllers
                                         //isLessThanThreeMonths = true;
                                         if (statusReserve)
                                         {
-                                            strStatusJoinClass = "<span class='badge bg-info rounded-3'>Đang bảo lưu</span>";
+                                            strStatusJoinClass = "<span class='badge bg-info'>Đang bảo lưu</span>";
                                             btn += "<li><a class=\"dropdown-item\" href='javascript:Deactive_modal(" + reader["IdRegistration"] + "," + reader["IdCourse"] + ")'><i class=\"ti ti-album\"></i> Kích hoạt lại</a></li>";
                                         }
                                     }
@@ -687,12 +692,12 @@ namespace SuperbrainManagement.Controllers
                                     {
                                         if (!statusExtend && todateJoinClass.Value.AddDays(14) > DateTime.Now)
                                         {
-                                            strStatusJoinClass = "<span class='badge bg-danger rounded-3'>Đã kết thúc</span>";
+                                            strStatusJoinClass = "<span class='badge bg-danger'>Đã kết thúc</span>";
                                             btn += "<li><a class=\"dropdown-item\" href='javascript:Giahan_modal(" + reader["IdRegistration"] + "," + reader["IdCourse"] + ")'><i class=\"ti ti-plus\"></i> Gia hạn khóa học</a></li>";
                                         }
                                         else
                                         {
-                                            strStatusJoinClass = "<span class='badge bg-danger rounded-3'>Đã kết thúc</span>";
+                                            strStatusJoinClass = "<span class='badge bg-danger'>Đã kết thúc</span>";
                                             btn += "<li><a class=\"dropdown-item\" href='javascript:void(0)'><i class=\"ti ti-cancel\"></i> Khóa học kết thúc</a></li>";
                                         }
                                     }
@@ -701,13 +706,13 @@ namespace SuperbrainManagement.Controllers
                             }
                             else
                             {
-                                strStatusJoinClass = "<span class='badge bg-secondary rounded-3'>Chờ xét lớp</span>";
+                                strStatusJoinClass = "<span class='badge bg-secondary'>Chờ xét lớp</span>";
                                 btn += "<li><a class=\"dropdown-item\" href='javascript:Xetlop_modal(" + reader["IdRegistration"] + "," + reader["IdCourse"] + ")'><i class=\"ti ti-eye-check\"></i> Xét vào lớp</a></li>";
                             }
                         }
                         else
                         {
-                            strStatusJoinClass = "<span class='badge bg-secondary rounded-3'>Chờ xét lớp</span>";
+                            strStatusJoinClass = "<span class='badge bg-secondary'>Chờ xét lớp</span>";
                             btn += "<li><a class=\"dropdown-item\" href='/students/AddCourseProgramOfStudents?IdStudent=" + idStudent + "&IdRegistration=" + reader["IdRegistration"] + "&modalPayment=True' target='_blank'><i class=\"ti ti-credit-card\"></i> Thu tiền</a></li>";
                         }
                         count++;
@@ -1264,15 +1269,25 @@ namespace SuperbrainManagement.Controllers
                 {
                      int tonkho = Convert.ToInt32(reader["tonkho"]);
                      double dongia = Convert.ToDouble(reader["Price"]);
-                    str += "<option value='" + reader["Id"] + "' data-name='" + reader["Name"] + "' data-tonkho='"+tonkho+"' data-dongia='"+string.Format("{0:N0}",dongia)+"' data-isfixed=' "+ reader["IsFixed"] +" '>" + reader["Name"] + "</option>";
+                    str += "<option value='" + reader["Id"] + "' data-name='" + reader["Name"] + "' data-tonkho='"+tonkho+"' data-dongia='"+string.Format("{0:N0}",dongia)+"' data-isfixed='"+ reader["IsFixed"] +"'>" + reader["Name"] + "</option>";
                 }
                 reader.Close();
             }
-            var item = new
+            string strpromotion = "";
+            List<Promotion> promotions = Connect.Select<Promotion>("Select * from Promotion where idBranch='" + idBranch + "' and type='2' and todate>getdate() and active='1'");
+            if (promotions.Count > 0)
             {
-                str
-            };
-            return Json(item, JsonRequestBehavior.AllowGet);
+                foreach (var promotion in promotions)
+                {
+                    strpromotion += "<option value='" + promotion.Id + "' data-value='" + string.Format("{0:N0}", promotion.Value) + "' data-name='" + promotion.Name + "'>" + promotion.Name + "</option>";
+
+                }
+            }
+            else
+            {
+                strpromotion += "<option value='0' data-name='--'>--</option>";
+            }
+            return Json(new {str,strpromotion}, JsonRequestBehavior.AllowGet);
         }
         public ActionResult GetDataCombobox(int? IdProgram)
         {
@@ -1295,13 +1310,13 @@ namespace SuperbrainManagement.Controllers
                 }
                 strpro += "<option value='" + pro.Id + "' data-name='" + pro.Name + "'"+seleted+">" + pro.Name + "</option>";
             }
-            List<Promotion> promotions = Connect.Select<Promotion>("Select * from Promotion where idBranch='"+idBranch+"' and todate>getdate() and active='1'");
+            List<Promotion> promotions = Connect.Select<Promotion>("Select * from Promotion where idBranch='"+idBranch+"' and type='1' and todate>getdate() and active='1'");
             if (promotions.Count > 0)
             {
                 foreach (var promotion in promotions)
                 {
                     
-                    strpromotion += "<option value='" + string.Format("{0:N0}", promotion.Value) + "' data-name='" + promotion.Name + "'>" + promotion.Name + "</option>";
+                    strpromotion += "<option value='" +promotion.Id  + "' data-value='"+string.Format("{0:N0}", promotion.Value)+"' data-name='" + promotion.Name + "'>" + promotion.Name + "</option>";
                 }
             }
             else
@@ -2338,7 +2353,7 @@ namespace SuperbrainManagement.Controllers
                     +"<td class='text-center'>" +s.Sex+"</td>"
                     +"<td>"+s.User.Name+"</td>"
                     +"<td class='text-end'>" +
-                    "<a href='javascript:restore_Student("+s.Id+")' class='btn btn-sm btn-danger'><i class='ti ti-refresh text-white'></i> Khôi phục</a>" +
+                    "<a href='javascript:restore_Student("+s.Id+")' class='text-primary'><i class='ti ti-refresh'></i></a>" +
                     "</td>"
                     + "</tr>";
             }

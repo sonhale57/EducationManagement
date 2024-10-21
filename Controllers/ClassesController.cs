@@ -64,8 +64,9 @@ namespace SuperbrainManagement.Controllers
                 stt++;
                 str += "<tr>"
                     +"<td class='text-center align-content-center'>"+stt+"</td>"
-                    + "<td class=' align-content-center'>" + c.Name+"</td>"
-                    + "<td class=' align-content-center'>" + c.Description+ "</td>"
+                    + "<td class='align-content-center text-center'>" + c.Code+"</td>"
+                    + "<td class='align-content-center'>" + c.Name+ "</td>"
+                    + "<td class='align-content-center'>" + c.Description+ "</td>"
                     + "<td class='text-center align-content-center'>" + TKB(c.Id) +"</td>"
                     + "<td class='text-center align-content-center'>" + GetTeacher(c.Id)+"</td>"
                     + "<td class='text-center align-content-center'><span class='btn btn-sm btn-outline-success'>" + db.StudentJoinClasses.Count(x=>x.IdClass==c.Id && x.Todate>DateTime.Now)+ "</td>"
@@ -552,7 +553,7 @@ namespace SuperbrainManagement.Controllers
                                       .Where(vs => vs.IdBranch == idBranch)
                                       .ToList();
 
-            str += "<thead class='bg-success text-white'><tr>"
+            str += "<thead><tr>"
                 + "<th class='text-center'>STT</th>"
                 + "<th style='min-width:200px;'>TÊN</th>"
                 + "<th style='min-width:200px;'>KHÓA HỌC</th>"
@@ -1102,10 +1103,10 @@ namespace SuperbrainManagement.Controllers
 
         public ActionResult Loadedit_class(int id) { 
             var c = db.Classes.Find(id);
-            return Json(new {id=c.Id,name=c.Name,description=c.Description},JsonRequestBehavior.AllowGet);
+            return Json(new {id=c.Id,code=c.Code,name=c.Name,description=c.Description},JsonRequestBehavior.AllowGet);
         }
         [HttpPost]
-        public ActionResult Submit_savechanges(string action, int? Id, string Name, string Description)
+        public ActionResult Submit_savechanges(string action, int? Id, string Code,string Name, string Description)
         {
             int iduser= Convert.ToInt32(CheckUsers.iduser());
             int idbranch = Convert.ToInt32(CheckUsers.idBranch());
@@ -1129,7 +1130,8 @@ namespace SuperbrainManagement.Controllers
                         IdBranch = idbranch,
                         IdUser = iduser,
                         Enable = true,
-                        Active = true
+                        Active = true,
+                        Code = Code
                     };
                     db.Classes.Add(cla);
                     var scheduleDefault = scheduleHelper.GetScheduleDefault(cla.Id);
@@ -1142,6 +1144,7 @@ namespace SuperbrainManagement.Controllers
             {
                 var c = db.Classes.Find(Id);
                 c.Name = Name;
+                c.Code = Code;
                 c.Description = Description;
                 db.Entry(c).State=EntityState.Modified;
                 db.SaveChanges();

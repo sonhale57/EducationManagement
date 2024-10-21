@@ -9,9 +9,9 @@
         <div class="input-group">
             @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
             {
-                @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2",@onchange="Loadlist()" })
+                @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2 rounded-1", @onchange = "Loadlist()" })
             }
-            @Html.DropDownList("Month", null, htmlAttributes: new { @class = "form-control ms-1 rounded-1",@onchange="Loadlist()" })
+            @Html.DropDownList("Month", (SelectList)ViewBag.Month, new { @class = "form-control ms-1 rounded-1", @onchange = "Loadlist()",id = "monthSelect" })
         </div>
     </div>
     <div class="col col-md-7 col-sm-12 text-right" style="text-align:right;">
@@ -19,17 +19,16 @@
     </div>
 </div>
 
-<table class="table fs-3 mt-3">
+<table class="table fs-3 mt-2">
     <thead class="bg-success text-white rounded-1">
         <tr>
             <th class="text-center">STT</th>
-            <th class="text-center">Tên học viên</th>
-            <th class="text-center">Ngày sinh</th>
-            <th class="text-center">Số điện thoại</th>
-            <th class="text-center">Địa chỉ Email</th>
+            <th class="text-center">Mã học viên</th>
+            <th class="text-start">Tên học viên</th>
+            <th class="text-center">Khóa học</th>
             <th class="text-center">Ngày bắt đầu</th>
             <th class="text-center">Ngày kết thúc</th>
-            <th class="text-center">Tình trạng</th>
+            <th class="text-center">Ngày thao tác</th>
         </tr>
     </thead>
     <tbody id="showlist"></tbody>
@@ -37,7 +36,30 @@
 </table>
 <script>
     Loadlist();
-    function Loadlist() {
-        $(".loader").html("<td colspan=8 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
-    }
+function Loadlist() {
+    $(".loader").html("<td colspan=8 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
+    $('#showlist').html("");
+    var toDate = $("#monthSelect").val().split("/").reverse().join("-");
+    $.ajax({
+        url: '@Url.Action("Loadlist_paymentList", "Branches")',
+        type: "GET",
+        data: {
+            IdBranch: $("#IdBranch").val(),
+            toDate: toDate
+        },
+        success: function (data) {
+            if (data.status === "ok") {
+                $('#showlist').html(data.str);
+            } else {
+                showError(data.message, 3000); // Hiển thị lỗi với thời gian 3 giây
+                $('#showlist').html("");
+            }
+            $(".loader").html(""); // Xóa loader sau khi hoàn thành
+        },
+        error: function (xhr, error) {
+            console.error(error); // Log lỗi ra console
+            $(".loader").html("");
+        }
+    });
+}
 </script>
