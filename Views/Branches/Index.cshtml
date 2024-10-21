@@ -7,12 +7,10 @@
 }
 <div class="row">
     <div class="col col-md-3 col-sm-12">
-        <form action="/Branches" method="get">
-            <div class="input-group">
-                <input type="text" class="form-control rounded-1" id="searchString" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter ">
-                <button class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
-            </div>
-        </form>
+        <div class="input-group">
+            <input type="text" class="form-control rounded-1" id="searchString" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter ">
+            <button class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" type="button" onclick="Loadlist()"><i class="ti ti-search text-white"></i></button>
+        </div>
     </div>
     <div class="col col-md-9 col-sm-12 text-end">
         <a href="/branches/create" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>

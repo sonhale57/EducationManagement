@@ -34,7 +34,23 @@ namespace SuperbrainManagement.Controllers
         public ActionResult Loadlist_thongbao()
         {
             string str = "";
-            var list = db.Feeds.Where(x => x.Todate > DateTime.Now && x.Active == true && x.Enable==true).OrderByDescending(x => x.Id).Take(7).ToList(); 
+            var list = db.Feeds.Where(x => x.Todate > DateTime.Now && x.Active == true && x.Enable==true).OrderByDescending(x => x.Id).Take(7).ToList();
+            if (list.Count == 0)
+            {
+                str = "<li class=\"list-group-item border-0 d-flex justify-content-between ps-0 mb-3 border-radius-lg\">" +
+                            "<div class=\"d-flex align-items-center\">" +
+                                "<div class=\"me-3 text-center\">" +
+                                    "<img src=\"/Assets/images/profile/user-1.jpg\" alt=\"\" width=\"35\" height=\"35\" class=\"rounded-circle\">" +
+                                "</div>" +
+                                "<div class=\"d-flex flex-column\">" +
+                                    "<h6 class='mb-0 pb-0'><a href=\"javascript:void(0)\" class='text-muted fw-bolder'>Không có thông báo mới!</a></h6>" +
+                                "</div>" +
+                            "</div>" +
+                            "<div class=\"d-flex\">" +
+                                "<a href=\"javascript:void(0)\" class=\"btn btn-sm text-dark icon-move-right my-auto\"><i class=\"ti ti-chevron-right\" aria-hidden=\"true\"></i></a>" +
+                            "</div>" +
+                        "</li>";
+            }
             foreach(var item in list)
             {
                 str += "<li class=\"list-group-item border-0 d-flex justify-content-between ps-0 mb-3 border-radius-lg\">" +

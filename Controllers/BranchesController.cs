@@ -21,7 +21,7 @@ namespace SuperbrainManagement.Controllers
         {
             return View();
         }
-        public ActionResult Loadlist()
+        public ActionResult Loadlist(string searchString)
         {
             var configTimePayment = db.Configurations.OrderByDescending(x => x.Id).FirstOrDefault().TimePayment;
             string str = "";
@@ -39,6 +39,10 @@ namespace SuperbrainManagement.Controllers
                     +"</td>" 
                     +"</tr>";
                 var cn = db.Branches.Where(x => x.IdGroup == c.Id);
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    cn = cn.Where(x => x.Name.Contains(searchString) || x.Code.Contains(searchString));
+                }
                 foreach(var cn2 in cn)
                 {
                     count++;
@@ -48,8 +52,6 @@ namespace SuperbrainManagement.Controllers
                         "<td class='text-left align-content-center'>" + cn2.Name+"</td>" +
                         "<td class='text-center align-content-center'>" + (cn2.Phone != null ? cn2.Phone : "-") +"</td>" +
                         "<td class='text-center align-content-center'>" + (cn2.Email != null ? cn2.Email : "-") +"</td>" +
-                        //"<td class='text-center align-content-center'>" + (cn2.DateExpire != null ? cn2.DateExpire.Value.ToString("dd/MM/yyyy") : "-") +"</td>" +
-                        //"<td class='text-center align-content-center'>" + (cn2.DateExpireOnline != null ? cn2.DateExpireOnline.Value.ToString("dd/MM/yyyy") : "-") +"</td>" +
                         "<td class='text-center align-content-center'>" + (cn2.ContractExpire != null ? cn2.ContractExpire.Value.ToString("dd/MM/yyyy") : "-") +"</td>" +
                         "<td class='text-center align-content-center'>" + (cn2.StatusActiveOnline==true?"<span class='text-success'>Đã thanh toán</span>":"<span class='text-danger'>Chưa thanh toán</span>") + "</td>" +
                         "<td class='text-end align-content-center'>" +
@@ -75,91 +77,112 @@ namespace SuperbrainManagement.Controllers
             var join = db.StudentJoinClasses.Where(x=>x.Student.Branch.Id == idBranch && x.Todate>=DateTime.Now).ToList();
             return join.Count;
         }
-        public ActionResult List(string sortOrder, string currentFilter, string searchString, int? page)
+        public ActionResult List()
         {
-            if (searchString != null)
+            return View();
+        }
+        public ActionResult PaymentList()
+        {
+            // Lấy danh sách cấu hình và chuẩn hóa dữ liệu
+            var config = db.Configurations
+                           .OrderByDescending(x => x.Id).ToList();
+            var list = new List<SelectListItem>();
+            foreach(var item in config)
             {
-                page = 1;
+                list.Add(new SelectListItem()
+                {
+                    Value = item.TimePayment.Value.ToString("dd/MM/yyyy"),
+                    Text = item.TimePayment.Value.AddMonths(1).ToString("MM/yyyy")
+                });
+            }
+            // Gán ViewBag.Month với dữ liệu hoặc thông báo lỗi
+            if (!config.Any())
+            {
+                ViewBag.Month = new SelectList(new List<SelectListItem>
+                {
+                    new SelectListItem { Text = "Không tìm thấy dữ liệu", Value = "" }
+                });
             }
             else
             {
-                searchString = currentFilter;
+                ViewBag.Month = new SelectList(list, "Value", "Text");
             }
-            ViewBag.CurrentFilter = searchString;
 
-            var branches = db.Branches.Include(b => b.BranchGroup);
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                branches = branches.Where(x => x.Name.ToLower().Contains(searchString.ToLower()) || x.Code.ToLower().Contains(searchString.ToLower()) || x.BranchGroup.Name.ToLower().Contains(searchString.ToLower()));
-            }
-            switch (sortOrder)
-            {
-                case "name_desc":
-                    branches = branches.OrderByDescending(s => s.Name);
-                    break;
-                case "date":
-                    branches = branches.OrderBy(s => s.Id);
-                    break;
-                case "date_desc":
-                    branches = branches.OrderByDescending(s => s.Id);
-                    break;
-                case "group":
-                    branches = branches.OrderBy(s => s.BranchGroup.Name);
-                    break;
-                default:
-                    branches = branches.OrderBy(s => s.Name);
-                    break;
-            }
-            int pageSize = 20; 
-            int pageNumber = (page ?? 1); 
-            var pagedData = branches.ToPagedList(pageNumber, pageSize);
-            var pagedListRenderOptions = new PagedListRenderOptions();
-            pagedListRenderOptions.FunctionToTransformEachPageLink = (liTag, aTag) =>
-            {
-                liTag.AddCssClass("page-item");
-                aTag.AddCssClass("page-link");
-                return liTag;
-            };
-            ViewBag.PagedListRenderOptions = pagedListRenderOptions;
-            return View(pagedData);
-        }
-
-        public ActionResult PaymentList()
-        {
-            var config = db.Configurations.OrderByDescending(x=>x.Id).ToList();
-            if (config == null)
-            {
-                ViewBag.Month = new SelectList(config, "Không tìm thấy dữ liệu");
-            }
-            ViewBag.Month = new SelectList(config, "TimePayment","TimePayment" );
-            ViewBag.IdBranch = new SelectList(db.Branches.Where(x=>x.Enable==true), "Id","Name" );
+            // Gán ViewBag.IdBranch với các chi nhánh đang hoạt động
+            ViewBag.IdBranch = new SelectList(db.Branches.Where(x => x.Enable == true), "Id", "Name");
             return View();
-        } 
-        // GET: Branches/Details/5
-        public ActionResult Details(int? id)
+        }
+        public ActionResult Loadlist_paymentList(int? IdBranch, DateTime? toDate)
         {
-            if (id == null)
+            // Khởi tạo chuỗi HTML
+            string str = "";
+            int stt = 0;
+
+            // Gán mặc định IdBranch nếu không có giá trị
+            if (IdBranch == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                IdBranch = Convert.ToInt32(CheckUsers.idBranch());
             }
-            Branch branch = db.Branches.Find(id);
-            if (branch == null)
+
+            // Trả về lỗi nếu không có toDate
+            if (toDate == null)
             {
-                return HttpNotFound();
+                return Json(new { status = "error", message = "Lỗi cập nhật: Không tìm thấy thông tin kỳ phí!", str }, JsonRequestBehavior.AllowGet);
             }
-            return View(branch);
+
+            // Tính kỳ phí và khoảng thời gian lọc
+            string kiphi = toDate.Value.AddMonths(1).ToString("MM/yyyy");
+            DateTime fromDate = toDate.Value.AddMonths(-1);
+
+            // Truy vấn danh sách học viên theo điều kiện
+            var list = from hs in db.Students
+                       join joinclass in db.StudentJoinClasses on hs.Id equals joinclass.IdStudent
+                       join course in db.Courses on joinclass.IdCourse equals course.Id
+                       where joinclass.Fromdate >= fromDate
+                             && joinclass.Fromdate < toDate
+                             && hs.IdBranch == IdBranch
+                       select new
+                       {
+                           Name = hs.Name,
+                           Code = hs.Code,
+                           NameCourse = course.Name,
+                           Fromdate = joinclass.Fromdate,
+                           Todate = joinclass.Todate,
+                           Updatetime = joinclass.DateCreate
+                       };
+
+            // Kiểm tra nếu không có dữ liệu
+            if (!list.Any())
+            {
+                str = $"<tr><td colspan='8' class='text-center'>Không có dữ liệu tính phí của kỳ phí {kiphi}</td></tr>";
+            }
+            else
+            {
+                // Tạo chuỗi HTML từ dữ liệu
+                foreach (var item in list)
+                {
+                    stt++;
+                    str += "<tr>"
+                         + $"<td class='text-center'>{stt}</td>"
+                         + $"<td class='text-center'>{item.Code}</td>"
+                         + $"<td class='text-start'>{item.Name}</td>"
+                         + $"<td class='text-center'>{item.NameCourse}</td>"
+                         + $"<td class='text-center'>{item.Fromdate:dd/MM/yyyy}</td>"
+                         + $"<td class='text-center'>{item.Todate:dd/MM/yyyy}</td>"
+                         + $"<td class='text-center'>{item.Updatetime:dd/MM/yyyy}</td>"
+                         + "</tr>";
+                }
+            }
+            str += $"<tr><td colspan=7>Tổng cộng: {stt} tài khoản.</td></tr>";
+            // Trả về JSON chứa chuỗi HTML và kỳ phí
+            return Json(new { status = "ok", str, kiphi }, JsonRequestBehavior.AllowGet);
         }
 
-        // GET: Branches/Create
         public ActionResult Create()
         {
             ViewBag.IdGroup = new SelectList(db.BranchGroups, "Id", "Name");
             return View();
         }
-
-        // POST: Branches/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "Id,Logo,Code,Name,CompanyName,Address,City,District,Ward,Map,Phone,Email,OtherEmail,TaxCode,Description,License,DisplayOrder,ContractNumber,ContractExpire,Enable,Active,DateExpire,StatusUsageBrand,DateExpireOnline,StatusActiveOnline,IdGroup,NumberInGroup,FreeTrainning,DateCreate,Unlock,GrandOpeningDay")] Branch branch)
@@ -175,7 +198,6 @@ namespace SuperbrainManagement.Controllers
             return View(branch);
         }
 
-        // GET: Branches/Edit/5
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -191,9 +213,6 @@ namespace SuperbrainManagement.Controllers
             return View(branch);
         }
 
-        // POST: Branches/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "Id,Logo,Code,Name,CompanyName,Address,City,District,Ward,Map,Phone,Email,OtherEmail,TaxCode,Description,License,DisplayOrder,ContractNumber,ContractExpire,Enable,Active,DateExpire,StatusUsageBrand,DateExpireOnline,StatusActiveOnline,IdGroup,NumberInGroup,FreeTrainning,DateCreate,Unlock,GrandOpeningDay")] Branch branch)
@@ -208,39 +227,5 @@ namespace SuperbrainManagement.Controllers
             return View(branch);
         }
 
-        // GET: Branches/Delete/5
-        public ActionResult Delete(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Branch branch = db.Branches.Find(id);
-            if (branch == null)
-            {
-                return HttpNotFound();
-            }
-            return View(branch);
-        }
-
-        // POST: Branches/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
-        {
-            Branch branch = db.Branches.Find(id);
-            db.Branches.Remove(branch);
-            db.SaveChanges();
-            return RedirectToAction("Index");
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
     }
 }

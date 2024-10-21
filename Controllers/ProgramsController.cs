@@ -16,11 +16,54 @@ namespace SuperbrainManagement.Controllers
         private ModelDbContext db = new ModelDbContext();
 
         // GET: Programs
-        public ActionResult Index()
+        public ActionResult Index(string searchString)
         {
             ViewBag.IdProduct = new SelectList(db.Products.Where(x=>x.Enable==true && x.Active==true), "Id", "Name");
-            var programs = db.Programs.Where(x=>x.Enable==true).Include(p => p.User).OrderBy(x=>x.DisplayOrder);
-            return View(programs.ToList());
+            return View();
+        }
+        public ActionResult Loadlist(string searchString)
+        {
+            string str = "";
+            var programs = db.Programs.Where(x => x.Enable == true);
+            if (programs == null)
+            {
+                str = "<tr colspan=7 class='text-center'>Không có dữ liệu khóa học</tr>";
+            }
+            foreach(var item in programs.OrderBy(x => x.DisplayOrder))
+            {
+                str += "<tr>" 
+                    + "<td class='text-success text-center fw-bolder'>"+item.Code+"</td>"
+                    + "<td class='text-success fw-bolder' colspan=5>"+item.Name 
+                    +"<a href=\"javascript:Edit_Program("+item.Id+")\" class=\"ms-2\"><i class=\"ti ti-edit text-primary fw-bolder\"></i></a>" 
+                    +"<a href=\"javascript:Delete_Program("+item.Id+")\" class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a></td>"
+                    + "</tr>";
+                var courses = db.Courses.Where(x=>x.IdProgram==item.Id);
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    courses = courses.Where(x=>x.Name.Contains(searchString));
+                }
+                foreach(var course in courses.OrderBy(x=>x.DisplayOrder))
+                {
+                    str += "<tr>"
+                        +"<td class='text-center'>"+course.Code+"</td>"
+                        +"<td class='text-left'>"+course.Name+"</td>"
+                        +"<td class='text-center'>"+course.Price+"</td>"
+                        +"<td class='text-center'>"+course.Sessions+"</td>"
+                        +"<td class='text-center'>"+course.Hours+"</td>"
+                        + "<td class='text-end'>"
+                            + "<a href=\"/courses/edit/" + course.Id + "\" class=\"me-1\"><i class=\"ti ti-edit text-primary\"></i></a>"
+                            + "<a href=\"/javascript:Delete_Course(" + course.Id + ")\" class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a>"
+                            + "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">"
+                            + "<i class=\"ti ti-dots-vertical\"></i>"
+                            + "</a>"
+                            + "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">"
+                            + "<li><a class=\"dropdown-item\" href=\"javascript:Load_ProductCourse(" + item.Id + ")\"><i class=\"ti ti-lock\"></i> Cài đặt vật tư</a></li>"
+                            + "</ul>"
+                        + "</td>"
+                        + "</tr>";
+                }
+            }
+            return Json(new { str },JsonRequestBehavior.AllowGet);
         }
         [HttpPost]
         public ActionResult Submit_addProgram(string action,int? Id,string Code,string Name,int? DisplayOrder,string Description)

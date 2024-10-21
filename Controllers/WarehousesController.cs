@@ -65,7 +65,7 @@ namespace SuperbrainManagement.Controllers
             string querysearch = "";
             if (!string.IsNullOrEmpty(searchString))
             {
-                querysearch = " and vt.Name like N'" + searchString + "' or vt.Code like N'" + searchString + "'";
+                querysearch = " and (vt.Name like N'" + searchString + "' or vt.Code like N'" + searchString + "')";
             }
             if(Type == null)
             {
@@ -138,7 +138,7 @@ namespace SuperbrainManagement.Controllers
             string querysearch = "";
             if (!string.IsNullOrEmpty(searchString))
             {
-                querysearch = " and (p.Name like N'" + searchString + "' or p.Code like N'" + searchString + "')";
+                querysearch = " and (p.Name like N'%" + searchString + "%' or p.Code like N'%" + searchString + "%')";
             }
             if (!string.IsNullOrEmpty(sort))
             {

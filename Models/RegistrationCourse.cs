@@ -50,6 +50,7 @@ namespace SuperbrainManagement.Models
         public string Description { get; set; }
 
         public bool? StatusJoinClass { get; set; }
+        public int? IdPromotion { get; set; }
 
         public DateTime? DateJoinClass { get; set; }
 

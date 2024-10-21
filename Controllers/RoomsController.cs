@@ -54,6 +54,7 @@ namespace SuperbrainManagement.Controllers
                 stt++;
                 str += "<tr>"
                     + "<td class='text-center align-content-center'>" + stt + "</td>"
+                    + "<td class='align-content-center text-center'>" + c.Code + "</td>"
                     + "<td class='align-content-center'>" + c.Name + "</td>"
                     + "<td class='align-content-center'>" + c.Description + "</td>"
                     + "<td class='align-content-center text-center'><span class='btn btn-sm btn-outline-success'>" + db.Schedules.Where(x=>x.IdRoom==c.Id && x.Active==true).DistinctBy(x=>x.IdClass).Count() + "</span></td>"

@@ -48,22 +48,24 @@
         <a href="javascript:Add_class()" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>
     </div>
 </div>
-
-<table class="table fs-3 mt-2">
-    <thead class="bg-success text-white rounded-1">
-        <tr>
-            <th class="text-center">STT</th>
-            <th>Tên lớp</th>
-            <th>Mô tả ngắn</th>
-            <th class="text-center">Thời khóa biểu</th>
-            <th class="text-center">Giáo viên</th>
-            <th class="text-center">Sỉ số</th>
-            <th class="text-end">Thao tác</th>
-        </tr>
-    </thead>
-    <tbody id="showlist"></tbody>
-    <tr class="loader"></tr>
-</table>
+<div class="table-responsive mx-n1 px-1">
+    <table class="table table-bordered fs-3 mt-2">
+        <thead>
+            <tr>
+                <th class="text-center">STT</th>
+                <th class="text-center">Mã lớp</th>
+                <th class="text-center">Tên lớp</th>
+                <th class="text-center">Mô tả ngắn</th>
+                <th class="text-center">Thời khóa biểu</th>
+                <th class="text-center">Giáo viên</th>
+                <th class="text-center">Sỉ số</th>
+                <th class="text-center">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody id="showlist"></tbody>
+        <tr class="loader"></tr>
+    </table>
+</div>
 
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
@@ -122,10 +124,13 @@
                     <input type="hidden" name="typeaction" value="" id="typeaction" />
                     <input type="hidden" name="IdClassedit" value="" id="IdClassedit" />
 
-                    <label class="text-success">Tên lớp</label>
+                    <label class="text-success">Mã lớp học</label>
+                    <input type="text" class="form-control" id="CodeClass" name="CodeClass" value="" placeholder="Mã lớp học" />
+
+                    <label class="text-success mt-2">Tên lớp</label>
                     <input type="text" class="form-control" id="NameClass" name="NameClass" value="" placeholder="Tên lớp" />
 
-                    <label class="text-success mt-3">Mô tả</label>
+                    <label class="text-success mt-2">Mô tả</label>
                     <input type="text" class="form-control" id="DescriptionClass" name="DescriptionClass" value="" placeholder="Mô tả" />
                 </div>
                 <div class="modal-footer">
@@ -188,6 +193,7 @@
                 success: function (data) {
                     $('#IdClassedit').val(id);
                     $('#NameClass').val(data.name);
+                    $('#CodeClass').val(data.code);
                     $('#DescriptionClass').val(data.description);
                     $('#exampleModal').modal('show');
                 },
@@ -205,6 +211,7 @@
                     Id: $("#IdClassedit").val(),
                     action: $("#typeaction").val(),
                     Name: $("#NameClass").val(),
+                    Code: $("#CodeClass").val(),
                     Description: $("#DescriptionClass").val()
                 },
                 success: function (data) {

@@ -18,21 +18,26 @@
     <div class="col col-md-7 col-sm-12 text-end">
         <a href="javascript:download()" class="btn btn-md btn-outline-dark ms-0"><i class="ti ti-download"></i> Download</a>
     </div>
+    <div class="col-md-6">
+        <div class="table-responsive mx-n1 px-1">
+            <table class="table table-bordered fs-3 mt-2">
+                <thead>
+                    <tr>
+                        <th class="text-center">STT</th>
+                        <th class="text-center">Tên khóa học</th>
+                        <th class="text-center">SL Đăng ký</th>
+                        <th class="text-center">SL Đang học</th>
+                    </tr>
+                </thead>
+                <tbody id="showlist"></tbody>
+                <tr class="loader"></tr>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div id="doughnut-chart" style="min-height:320px" class="echart-doughnut-rounded-chart-example mt-5"></div>
+    </div>
 </div>
-<table class="table fs-3 mt-2">
-    <thead class="bg-success text-white rounded-1">
-        <tr>
-            <th class="text-center">Tên chương trình</th>
-            <th class="text-center">Tên khóa học</th>
-            <th class="text-center">SL Đăng ký</th>
-            <th class="text-center">SL Đang học</th>
-            <th class="text-center">SL Đã học</th>
-            <th class="text-center">SL Hủy khóa</th>
-        </tr>
-    </thead>
-    <tbody id="showlist"></tbody>
-    <tr class="loader"></tr>
-</table>
 <script>
     Loadlist();
     function Loadlist() {
@@ -47,11 +52,88 @@
             success: function (data) {
                 $(".loader").html("");
                 $('#showlist').html(data.str);
+                // Cập nhật dữ liệu biểu đồ
+                const chartData = data.data.map(item => ({
+                    name: item.NameCourse,
+                    value: item.CountRegistration,
+                    itemStyle: { color: getRandomColor() } // Màu ngẫu nhiên cho mỗi khóa học
+                }));
+                updateChart(chartData);
             },
             error: function (xhr, error) {
                 console.log(error);
                 $(".loader").html("");
             }
         });
+    }
+    // Hàm sinh màu ngẫu nhiên
+    function getRandomColor() {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+    // Hàm cập nhật biểu đồ ECharts
+    function updateChart(chartData) {
+        var doughnutChart = echarts.init(document.getElementById('doughnut-chart'));
+        var doughnutOption = {
+            title: {
+                text: 'Thống kê khóa học đăng ký',
+                left: 'center',
+                textStyle: {
+                    fontFamily: 'Libre Franklin',
+                    fontSize: 20
+                }
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: '{b}: {c} ({d}%)',
+                backgroundColor: 'rgba(239, 242, 246, 0.9)',  // Tooltip background color
+                borderColor: '#cbd0dd',
+                borderWidth: 1,
+                borderRadius: 4,
+                padding: [7, 10],
+                textStyle: {
+                    color: '#141824',  // Tooltip text color
+                    fontFamily: 'Libre Franklin',
+                    fontSize: 14
+                }
+            },
+            legend: {
+                orient: 'vertical',
+                right: '0',
+                data: chartData.map(item => item.name)
+            },
+            series: [
+                {
+                    name: 'Khóa học',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    data: chartData,
+                    label: {
+                        show: false,
+                        position: 'center'
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            fontSize: '18',
+                            fontWeight: 'bold'
+                        }
+                    },
+                    labelLine: {
+                        show: false
+                    },
+                    itemStyle: {
+                        borderRadius: 10,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }
+                }
+            ]
+        };
+        doughnutChart.setOption(doughnutOption);
     }
 </script>

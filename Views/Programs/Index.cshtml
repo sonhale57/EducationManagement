@@ -1,82 +1,36 @@
-﻿@model IEnumerable<SuperbrainManagement.Models.Program>
-
-@{
+﻿@{
     ViewBag.Controller = "Khóa học";
     ViewBag.Title = "Chương trình khóa học";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    int stt = 1;
 }
 <div class="row">
     <div class="col col-md-4 col-sm-12">
+        <div class="input-group">
+            <input type="text" class="form-control ms-1 rounded-1" id="searchString" name="searchString" placeholder="Tìm kiếm khóa học">
+            <button class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" type="button" onclick="Loadlist()"><i class="ti ti-search text-white"></i></button>
+        </div>
     </div>
     <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
         <a href="javascript:Add_Program()" class="btn btn-md btn-outline-success"><i class="ti ti-coffee"></i> Thêm chương trình</a>
         <a href="/courses/create" class="btn btn-md btn-success ms-1"><i class="ti ti-certificate-2"></i> Thêm khóa học</a>
     </div>
 </div>
-<table class="table fs-3 mt-2">
-    <thead class="bg-success text-white rounded-1">
-        <tr>
-            <th class="text-center">STT</th>
-            <th>Mã</th>
-            <th>Tên</th>
-            <th class="text-center">Học phí</th>
-            <th class="text-center">Số buổi</th>
-            <th class="text-center">Số giờ</th>
-            <th class="text-end">Thao tác</th>
-        </tr>
-    </thead>
-    @foreach (var item in Model.OrderBy(x=>x.DisplayOrder))
-    {
-        <tr>
-            <td class="text-success text-center fw-bolder">@Html.DisplayFor(modelItem => item.Code)</td>
-            <td colspan="6" class="text-success fw-bolder">
-                @Html.DisplayFor(modelItem => item.Name)
-                <a href="javascript:Edit_Program(@item.Id)" class="ms-2"><i class="ti ti-edit text-primary fw-bolder"></i></a>
-                <a href="javascript:Delete_Program(@item.Id)" class="me-1"><i class="ti ti-trash text-danger"></i></a>
-                <span id="loader-@item.Id"></span>
-            </td>
-        </tr>
-        foreach (var c in item.Courses.OrderBy(x=>x.DisplayOrder))
-        {
+<div class="table-responsive mx-n1 px-1">
+    <table class="table table-bordered fs-9 border-translucent mt-2">
+        <thead>
             <tr>
-                <td class="text-center">
-                    @stt
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => c.Code)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => c.Name)
-                </td>
-                <td class="text-center">
-                    @Html.DisplayFor(modelItem => c.Price)
-                </td>
-                <td class="text-center">
-                    @Html.DisplayFor(modelItem => c.Sessions)
-                </td>
-
-                <td class="text-center">
-                    @Html.DisplayFor(modelItem => c.Hours)
-                </td>
-                <td class="text-end">
-                    <span id="loader+@c.Id"></span>
-                    <a href="/courses/edit/@c.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
-                    <a href="javascript:Delete_Course(@c.Id)" class="me-1"><i class="ti ti-trash text-danger"></i></a>
-                    <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="ti ti-dots-vertical"></i>
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <li>
-                            <a href="javascript:Load_ProductCourse(@c.Id)" class="me-1  dropdown-item"><i class="ti ti-trash text-danger"></i> Cài đặt vật tư</a>
-                        </li>
-                    </ul>
-                </td>
+                <th class="text-center">Mã</th>
+                <th class="text-center">Tên</th>
+                <th class="text-center">Học phí</th>
+                <th class="text-center">Số buổi</th>
+                <th class="text-center">Số giờ</th>
+                <th class="text-center">Thao tác</th>
             </tr>
-            stt += 1;
-        }
-    }
-</table>
+        </thead>
+        <tbody id="showlist"></tbody>
+        <tr class="loader"></tr>
+    </table>
+</div>
 <div class="modal fade" id="modaladdProgram" tabindex="-1" aria-labelledby="modaladdProgramLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content" style="width:800px;">
@@ -175,6 +129,26 @@
     </div>
 </div>
 <script>
+    Loadlist();
+    function Loadlist(sort) {
+        $(".loader").html("<td colspan=8 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
+        $('#showlist').html("");
+        $.ajax({
+            url: '@Url.Action("Loadlist", "Programs")',
+            type: "GET",
+            data: {
+                searchString: $("#searchString").val()
+            },
+            success: function (data) {
+                console.log(data);
+                $(".loader").html("");
+                $('#showlist').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
     var isProcessing = false;
     function Add_Program() {
         $('#modaladdProgramLabel').html("Thêm chương trình học");
@@ -259,7 +233,7 @@
             }
         });
     }
-    
+
 
     function Submit_ProductCourse() {
         $.ajax({

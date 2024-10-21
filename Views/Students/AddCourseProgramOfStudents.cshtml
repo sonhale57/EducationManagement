@@ -124,14 +124,14 @@
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Chương trình</label>
                     <div class="col-lg-9">
-                        <select class="form-control IdEmployee" name="phonghoc0" id="programSelect" onchange="getDataCombobox(this.value,1)">
+                        <select class="form-control IdEmployee" name="programs" id="programSelect" onchange="getDataCombobox(this.value,1)">
                         </select>
                     </div>
                 </div>
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Khóa học</label>
                     <div class="col-lg-9">
-                        <select class="form-control IdEmployee" name="phonghoc1" id="courseSelect" onchange="GetInfoCourse()">
+                        <select class="form-control IdEmployee" name="courses" id="courseSelect" onchange="GetInfoCourse()">
                         </select>
                     </div>
                 </div>
@@ -145,7 +145,7 @@
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Chương trình KM</label>
                     <div class="col-lg-9">
-                        <select class="form-control IdEmployee" name="phonghoc0" id="promotionSelect" onchange="Getvalue_discount()">
+                        <select class="form-control IdEmployee" name="promotion" id="promotionSelect" onchange="Getvalue_discount()">
                         </select>
                     </div>
                 </div>
@@ -162,7 +162,7 @@
                     </div>
                 </div>
                 <div class="mt-3">
-                    <h6 class="text-success"><i class="ti ti-ruler-measure"></i> Vật tư kèm theo khóa học</h6>
+                    <h6 class="text-success"><i class="ti ti-shopping-cart"></i> Vật tư kèm theo khóa học</h6>
                     <table class="table table-bordered rounded">
                         <tr class="bg-success text-center text-white">
                             <th>Chọn</th>
@@ -178,15 +178,15 @@
             <div class="modal-footer text-start">
                 <span class="loader"></span>
                 <button type="button" class="btn btn-success" onclick="SaveRegistration(2)">
-                    <i class="ti ti-circle-plus"></i> Thêm vào phiếu
+                    <i class="ti ti-plus"></i> Thêm vào phiếu
                 </button>
             </div>
         </div>
     </div>
 </div>
 <div class="modal fade" id="exampleModalProduct" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" style="padding-right: -100px;margin-right: 110px;height: 100%;">
-        <div class="modal-content h-75" style="width: 600px;">
+    <div class="modal-dialog modal-dialog-scrollable" style="padding-right: -100px;margin-right: 110px;">
+        <div class="modal-content" style="width: 600px;">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Đăng ký vật tư</h5>
             </div>
@@ -212,9 +212,16 @@
                     </div>
                 </div>
                 <div class="form-group row mt-2">
+                    <label class="col-lg-3 col-form-label form-control-label">Chương trình KM</label>
+                    <div class="col-lg-9">
+                        <select class="form-control" name="promotionProduct" id="promotionProductSelect" onchange="Getvalue_discountProduct()">
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Chiết khấu</label>
                     <div class="col-lg-9">
-                        <input class="form-control" type="text" value="0" id="discountProduct" onchange="Getvalue_product()">
+                        <input class="form-control" type="text" value="0" id="discountProduct" readonly>
                     </div>
                 </div>
                 <div class="form-group row mt-2">
@@ -227,15 +234,15 @@
             <div class="modal-footer">
                 <span class="loader"></span>
                 <button type="button" class="btn btn-success" onclick="SaveRegistration(1)">
-                    <i class="ti ti-circle-plus"></i> Thêm vào phiếu
+                    <i class="ti ti-plus"></i> Thêm vào phiếu
                 </button>
             </div>
         </div>
     </div>
 </div>
 <div class="modal fade" id="exampleModalRevenueReferences" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" style="padding-right: -100px;margin-right: 110px;height: 100%;">
-        <div class="modal-content  h-75" style="width: 600px;">
+    <div class="modal-dialog modal-dialog-scrollable" style="padding-right: -100px;margin-right: 110px;">
+        <div class="modal-content" style="width: 600px;">
             <div class="modal-header ">
                 <h5 class="modal-title" id="exampleModalLabel">Đăng ký thu khác</h5>
             </div>
@@ -252,7 +259,7 @@
                 <div class="form-group row mt-2">
                     <label class="col-lg-3 col-form-label form-control-label">Đơn giá</label>
                     <div class="col-lg-9">
-                        <input class="form-control" type="text" value="0" id="priceOther">
+                        <input class="form-control" type="text" value="0" id="priceOther" readonly>
                     </div>
                 </div>
                 <div class="form-group row mt-2">
@@ -277,15 +284,15 @@
             <div class="modal-footer">
                 <span class="loader"></span>
                 <button type="button" class="btn btn-success" onclick="SaveRegistration(3)">
-                    <i class="ti ti-circle-plus"></i> Thêm vào phiếu
+                    <i class="ti ti-plus"></i> Thêm vào phiếu
                 </button>
             </div>
         </div>
     </div>
 </div>
 <div class="modal fade" id="exampleModalAddReferences" tabindex="-1" aria-labelledby="exampleModalAddReferencesLabel" aria-hidden="true">
-    <div class="modal-dialog" style="padding-right: -100px;margin-right: 110px;height: 100%;">
-        <div class="modal-content  h-75" style="width: 600px;">
+    <div class="modal-dialog modal-dialog-scrollable" style="padding-right: -100px;margin-right: 110px;">
+        <div class="modal-content" style="width: 600px;">
             <div class="modal-header ">
                 <h5 class="modal-title" id="exampleModalAddReferencesLabel">Tạo thêm khoản thu khác</h5>
             </div>
@@ -563,6 +570,7 @@
             }
         }
         function AddReferences() {
+            $(".modal").modal('hide');
             $("#exampleModalAddReferences").modal('show');
         }
         function Submit_addRef() {
@@ -597,6 +605,7 @@
                 }
             });
         }
+
         function Getvalue_other() {
             let dongia = parseFloat($("#priceOther").val().replace(/,/g, '')); // Remove all commas
             let giam = parseFloat($("#discountOther").val().replace(/,/g, '')); // Remove all commas
@@ -628,6 +637,7 @@
             // Cập nhật giá trị vào input totalamountProduct
             document.getElementById("totalamountOther").value = formattedTotalAmount;
         }
+
         function getDataComboboxOther() {
             $.ajax({
                 url: '@Url.Action("getDataComboxOther", "Students")',
@@ -648,11 +658,26 @@
                 data: {},
                 success: function (data) {
                     $('#productSelect').html(data.str);
+                    $('#promotionProductSelect').html(data.strpromotion);
                     GetInfoProduct();
                 },
                 error: function (xhr, error) {
                 }
             });
+        }
+        function Getvalue_discountProduct() {
+            let selectedPromotionOption = $("#promotionProductSelect option:selected");
+            let giam = selectedPromotionOption.attr("data-value");
+            var dongia = $("#priceProduct").val();
+            var numberProductElement = document.getElementById("numberProduct");
+            // Tính tổng tiền (thành tiền) và định dạng lại giá trị
+            var totalAmount = (parseFloat(dongia.replace(/,/g, '')) * parseInt(numberProductElement.value)) - parseFloat(giam.replace(/,/g, ''));
+            if (totalAmount < 0) {
+                totalAmount = 0;
+            }
+            var formattedTotalAmount = totalAmount.toLocaleString('en-US', { minimumFractionDigits: 0 });
+            $('#discountProduct').val(giam);
+            document.getElementById("totalamountProduct").value = formattedTotalAmount;
         }
         function Getvalue_product() {
             let dongia = parseFloat($("#priceProduct").val().replace(/,/g, '')); // Remove all commas
@@ -694,13 +719,22 @@
                 numberProductElement.value = 0;
             }
 
+            let selectedPromotionOption = $("#promotionProductSelect option:selected");
+            let giam = selectedPromotionOption.attr("data-value");
+            $('#discountProduct').val(giam);
+
+
             // Tính tổng tiền (thành tiền) và định dạng lại giá trị
-            var totalAmount = parseFloat(dongia.replace(/,/g, '')) * parseInt(numberProductElement.value);
+            var totalAmount = (parseFloat(dongia.replace(/,/g, '')) * parseInt(numberProductElement.value)) - parseFloat(giam.replace(/,/g, ''));
+            if (totalAmount < 0) {
+                totalAmount = 0;
+            }
             var formattedTotalAmount = totalAmount.toLocaleString('en-US', { minimumFractionDigits: 0 });
 
             // Cập nhật giá trị vào input totalamountProduct
             document.getElementById("totalamountProduct").value = formattedTotalAmount;
         }
+
         function getDataCombobox(IdProgram) {
           $.ajax({
               url: '@Url.Action("GetDataCombobox", "Students")',
@@ -719,7 +753,6 @@
               }
           });
         }
-        GetInfoCourse();
         function GetInfoCourse() {
           $.ajax({
               url: '@Url.Action("GetInfoCourse", "Students")',
@@ -736,8 +769,10 @@
           });
         }
         function Getvalue_discount() {
-            let value = $("#promotionSelect").val();
-            $('#discountCourse').val(value); Update_totalAmount();
+            let selectedOption = $("#promotionSelect option:selected");
+            let Value = selectedOption.attr("data-value");
+            $('#discountCourse').val(Value);
+            Update_totalAmount();
         }
         function Update_totalAmount() {
             let dongia = parseFloat($("#priceCourse").val().replace(/,/g, '')); // Remove all commas
@@ -759,9 +794,6 @@
                     randomParam: randomParam
                 },
                 success: function (data) {
-                    console.log(data);
-                    var i = 0, total = 0;
-                    console.log(data)
                     $('#dataBody').empty();
                     // Tạo một hàng mới cho bảng
 
@@ -806,6 +838,7 @@
             var discount = 0;
             var isChecked = [];
             var promotionId = $('#promotionSelect').val();
+            var promotionProductId = $('#promotionProductSelect').val();
             var IdRegistration = document.getElementById("IdRegistration").value;
             var description = $('#description').val();
             $(".listproduct").each(function () {
@@ -854,6 +887,8 @@
                     amount: amount,
                     Description: description,
                     Discount: discount,
+                    promotionId: promotionId,
+                    promotionProductId: promotionProductId,
                     listProduct: isChecked // Moved listProduct inside data object
                 }),
                 contentType: "application/json; charset=utf-8",

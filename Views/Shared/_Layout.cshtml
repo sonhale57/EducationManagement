@@ -26,10 +26,7 @@
     <!-- jQuery Confirm -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.min.css">
     <script src="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/js/jquery-confirm.min.js"></script>
-
-    <style>
-        
-    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
 </head>
 <body>
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
@@ -86,8 +83,6 @@
                 }
             }
         });
-
-        // Tắt kiểm tra phiên bản và các thông báo khác
         CKEDITOR.editorConfig = function (config) {
             config.versionCheck = false;  // Tắt kiểm tra phiên bản
             config.removePlugins = 'notification';  // Tắt plugin notification

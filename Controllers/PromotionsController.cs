@@ -17,73 +17,51 @@ namespace SuperbrainManagement.Controllers
         private ModelDbContext db = new ModelDbContext();
 
         // GET: Promotions
-        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page, string idBranch)
+        public ActionResult Index()
         {
-            var branches = db.Branches.ToList();
-            int idbranch = int.Parse(CheckUsers.idBranch());
-            if (!CheckUsers.CheckHQ())
-            {
-                branches = db.Branches.Where(x => x.Id == idbranch).ToList();
-            }
-            if (string.IsNullOrEmpty(idBranch))
-            {
-                idBranch = branches.First().Id.ToString();
-            }
-            ViewBag.IdBranch = new SelectList(branches, "Id", "Name", idBranch);
+            ViewBag.IdBranch = new SelectList(db.Branches.Where(x=>x.Enable==true), "Id", "Name");
+            return View();
+        }
 
-            if (searchString != null)
+        public ActionResult Loadlist(int? IdBranch,string searchString) 
+        { 
+            if(IdBranch == null)
             {
-                page = 1;
+                IdBranch = Convert.ToInt32(CheckUsers.idBranch());
+            }
+            var promo = db.Promotions.Where(x=>x.IdBranch == IdBranch);
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                promo = promo.Where(x=>x.Name.Contains(searchString)|| x.Code.Contains(searchString));
+            }
+            string str = "";int stt = 0;
+            if (promo == null)
+            {
+                str = "<tr><td colspan=7 class='text-center'>Không có dữ liệu ưu đãi</td></tr>";
             }
             else
             {
-                searchString = currentFilter;
+                foreach(var item in promo)
+                {
+                    stt++;
+                    str += "<tr>"
+                        +"<td class='text-center'>"+stt+"</td>"
+                        +"<td class='text-start'>"+item.Code+"</td>"
+                        +"<td class='text-start'>"+item.Name+"</td>"
+                        +"<td class='text-center'>"+string.Format("{0:N0}",item.Value)+"</td>"
+                        +"<td class='text-center'>"+(item.Type==1?"<span class='badge bg-light text-success'>Khóa học</span>":"<span class='badge bg-light text-primary'>Vật tư</span>")+ "</td>"
+                        +"<td class='text-center'>"+(db.RegistrationCourses.Count(x=>x.IdPromotion==item.Id)+ db.RegistrationProducts.Count(x=>x.IdPromotion==item.Id)) +"</td>"
+                        + "<td class='text-center'>"+(item.Active==true?(item.Todate>DateTime.Now?"<span class='badge bg-success'>Đang diễn ra</span>":"<span class='badge bg-danger'>Đã kết thúc</span>"):"<span class='badge bg-danger'>Không kích hoạt</span>")+"</td>"
+                        +"<td class='text-center'>"+item.Todate.Value.ToString("dd/MM/yyyy")+"</td>"
+                        +"<td class='text-end'>"
+                            +"<a href=\"/promotions/edit/" + item.Id + "\" class=\"me-1\"><i class=\"ti ti-edit text-primary\"></i></a>"
+                            + "<a href=\"/javascript:Delete(" + item.Id  + ")\" class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a>"
+                        + "</td>"
+                        +"</tr>";
+                }
             }
-            ViewBag.CurrentFilter = searchString;
-
-            var promotions = db.Promotions.ToList();
-
-            if (!string.IsNullOrEmpty(idBranch))
-            {
-                promotions = promotions.Where(x => x.IdBranch == int.Parse(idBranch)).ToList();
-            }
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                promotions = promotions.Where(x => x.Name.ToLower().Contains(searchString.ToLower())).ToList();
-            }
-            switch (sortOrder)
-            {
-                case "name_desc":
-                    promotions = promotions.OrderByDescending(s => s.Name).ToList();
-                    break;
-                case "date":
-                    promotions = promotions.OrderBy(s => s.Id).ToList();
-                    break;
-                case "name":
-                    promotions = promotions.OrderBy(s => s.Name).ToList();
-                    break;
-                default:
-                    promotions = promotions.OrderByDescending(s => s.Id).ToList();
-                    break;
-            }
-            int pageSize = 20;
-            int pageNumber = (page ?? 1);
-
-
-            var pagedData = promotions.ToPagedList(pageNumber, pageSize);
-
-            var pagedListRenderOptions = new PagedListRenderOptions();
-            pagedListRenderOptions.FunctionToTransformEachPageLink = (liTag, aTag) =>
-            {
-                liTag.AddCssClass("page-item");
-                aTag.AddCssClass("page-link");
-                return liTag;
-            };
-
-            ViewBag.PagedListRenderOptions = pagedListRenderOptions;
-            return View(pagedData);
+            return Json(new { str }, JsonRequestBehavior.AllowGet);
         }
-
         // GET: Promotions/Details/5
         public ActionResult Details(int? id)
         {

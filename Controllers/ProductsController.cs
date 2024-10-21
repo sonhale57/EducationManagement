@@ -37,7 +37,7 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                querysearch = " and (p.Name like N'" + searchString + "' or p.Code like N'" + searchString + "')";
+                querysearch = " and (p.Name like N'%" + searchString + "%' or p.Code like N'%" + searchString + "%')";
             }
             if (!string.IsNullOrEmpty(sort))
             {

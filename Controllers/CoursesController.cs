@@ -28,12 +28,16 @@ namespace SuperbrainManagement.Controllers
             ViewBag.IdCourse = new SelectList(db.Courses, "Id", "Name");
             return View();
         }
-        public ActionResult Loadlist(string IdBranch)
+        public ActionResult Loadlist(int? IdBranch,string searchString)
         {
-            string str = "";
-            if (string.IsNullOrEmpty(IdBranch))
+            string str = "",strquery="";
+            if (IdBranch==null)
             {
-                IdBranch = CheckUsers.idBranch();
+                IdBranch = Convert.ToInt32(CheckUsers.idBranch());
+            }
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                strquery = " and (c.Name like N'%"+searchString+"%' or c.Code like N'%"+searchString+"%')";
             }
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
@@ -51,7 +55,7 @@ namespace SuperbrainManagement.Controllers
                             + "</tr>";
                     string query = "select c.Id,c.Code,c.Name,cb.Hour,cb.Sessons,cb.PriceCourse,cb.PriceTest,cb.PriceAccount,DiscountPrice,cb.StatusDiscount"
                                         + " from Course c inner join CourseBranch cb on c.Id = cb.IdCourse" 
-                                        +" where c.IdProgram=" + readerCat["Id"] +" and cb.IdBranch="+IdBranch + " order by c.DisplayOrder";
+                                        +" where c.IdProgram=" + readerCat["Id"] +" and cb.IdBranch="+IdBranch +strquery+ " order by c.DisplayOrder";
                     SqlCommand command = new SqlCommand(query, connection);
                     SqlDataReader reader = command.ExecuteReader();
                     while (reader.Read())
@@ -61,11 +65,10 @@ namespace SuperbrainManagement.Controllers
                         double amountAccount = Double.Parse(reader["PriceAccount"].ToString(),0);
                         count++;
                         str += "<tr>"
-                            + "<td class='text-center'>" +count+ "</td>"
-                            + "<td class=''>" + reader["Code"].ToString() + "</td>"
+                            + "<td class='text-center'>" + reader["Code"].ToString() + "</td>"
                             + "<td class=''>" + reader["Name"].ToString() + "</td>"
-                            + "<td class='text-center'>" + string.Format("{0:N0} đ", amount) + "</td>"
-                            + "<td class='text-center'>" + string.Format("{0:N0} đ", amountAccount) + "</td>"
+                            + "<td class='text-end'>" + string.Format("{0:N0} đ", amount) + "</td>"
+                            + "<td class='text-end'>" + string.Format("{0:N0} đ", amountAccount) + "</td>"
                             + "<td class='text-center'>" + reader["Sessons"].ToString() + "</td>"
                             + "<td class='text-center'>" + reader["Hour"].ToString() + "</td>"
                             + "<td class='text-end'>" 
@@ -222,30 +225,18 @@ namespace SuperbrainManagement.Controllers
             string str = "";
             var query = from c in db.Courses
                         join cb in db.CourseBranches on c.Id equals cb.IdCourse
-                        join rec in db.RegistrationCourses on c.Id equals rec.IdCourse
-                        join re in db.Registrations on rec.IdRegistration equals re.Id
-                        join joinclass in db.StudentJoinClasses on re.Id equals joinclass.IdRegistration
-                        join s in db.Students on re.IdStudent equals s.Id
                         where cb.IdBranch==IdBranch
-                        let countOnClass = db.StudentJoinClasses
-                     .Count(x => x.IdCourse == c.Id
+                        let countOnClass = db.StudentJoinClasses.Count(x => x.IdCourse == c.Id
                                  && x.Registration.IdBranch == IdBranch
-                                 && x.Todate.HasValue
-                                 && x.Fromdate.HasValue
-                                 // Ngày bắt đầu trước hoặc trong tháng được chọn
-                                 && x.Fromdate.Value.Month <= monthValue
-                                 && x.Fromdate.Value.Year <= yearValue
-                                 // Ngày kết thúc sau hoặc trong tháng được chọn
                                  && x.Todate.Value.Month >= monthValue
                                  && x.Todate.Value.Year >= yearValue)
-                        let countEnd = db.StudentJoinClasses.Count(x=>x.IdCourse==c.Id && x.Todate.Value.Month<monthValue && x.Todate.Value.Year == yearValue)
                         let countRegistration = db.RegistrationCourses.Count(x=>x.IdCourse==c.Id && x.Registration.IdBranch == IdBranch && x.Registration.DateCreate.Value.Month==monthValue&&x.Registration.DateCreate.Value.Year==yearValue)
+                        orderby c.Program.DisplayOrder,c.DisplayOrder
                         select new{
                             NameProgram = c.Program.Name,
                             NameCourse = c.Name,
                             CountRegistration = countRegistration,
-                            CountOnClass = countOnClass,
-                            CountEndClass = countEnd
+                            CountOnClass = countOnClass
                         };
 
             // Tạo một đối tượng để trả về kết quả
@@ -262,11 +253,9 @@ namespace SuperbrainManagement.Controllers
                     +"<td class='text-center'>"+s.NameCourse + "</td>"
                     +"<td class='text-center'>"+s.CountRegistration + "</td>"
                     +"<td class='text-center'>"+s.CountOnClass + "</td>"
-                    +"<td class='text-center'>"+s.CountEndClass + "</td>"
-                    +"<td class='text-center'>"+(s.CountRegistration - s.CountOnClass - s.CountEndClass) + "</td>"
                     + "</tr>";
             }
-            return Json(new {str}, JsonRequestBehavior.AllowGet);
+            return Json(new {str, data = query.ToList() }, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult Statistics()
