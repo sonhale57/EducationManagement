@@ -16,11 +16,13 @@
         </div>
     </div>
     <div class="col col-md-7 col-sm-12 text-end">
-        <a href="javascript:download()" class="btn btn-md btn-outline-dark ms-0"><i class="ti ti-download"></i> Download</a>
+        <button id="exportButton" class="btn btn-success">
+            <i class="ti ti-file-download"></i> Download
+        </button>
     </div>
     <div class="col-md-6">
         <div class="table-responsive mx-n1 px-1">
-            <table class="table table-bordered fs-3 mt-2">
+            <table class="table table-bordered fs-3 mt-2" id="tableToPrint">
                 <thead>
                     <tr>
                         <th class="text-center">STT</th>
@@ -136,4 +138,15 @@
         };
         doughnutChart.setOption(doughnutOption);
     }
+
+    document.getElementById('exportButton').addEventListener('click', function () {
+        var wb = XLSX.utils.table_to_book(document.getElementById('tableToPrint'), { sheet: "Sheet1" });
+        var wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+
+        var blob = new Blob([wbout], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        var link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "ThongKeKhoaHoc.xlsx";
+        link.click();
+    });
 </script>
