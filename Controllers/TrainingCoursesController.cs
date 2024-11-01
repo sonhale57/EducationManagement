@@ -65,38 +65,31 @@ namespace SuperbrainManagement.Controllers
                         if (CheckUsers.CheckHQ())
                         {
                             strbtn = "<a href='/trainingcourses/edit/" + reader["Id"] + "' class='me-1'><i class='ti ti-edit text-primary'></i></a>" +
-                                    "<a href='javascript:Delete_trainning(" + reader["Id"] + ")' class='me-1'><i class='ti ti-trash text-danger'></i></a>" +
-                                    "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
-                                        "<i class=\"ti ti-dots-vertical\"></i>" +
-                                    "</a>" +
-                                    "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">" +
-                                        "<li>"+
-                                        "<a href=\"javascript:Load_dangky(" + reader["Id"] + ")\" class=\"dropdown-item\">" +
-                                            "<i class=\"ti ti-receipt\"></i> Đăng ký tham gia" +
-                                        "</a>" +
-                                        "</li>" +
-                                    "</ul>";
+                                    "<a href='javascript:Delete_trainning(" + reader["Id"] + ")' class='me-1'><i class='ti ti-trash text-danger'></i></a>";
                         }
-                        else
-                        {
-                            strbtn ="<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
-                                        "<i class=\"ti ti-dots-vertical\"></i>" +
+                        strbtn = "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
+                                    "<i class=\"ti ti-dots-vertical\"></i>" +
+                                "</a>" +
+                                "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">" +
+                                    "<li>" +
+                                    "<a href=\"javascript:Load_dangky(" + reader["Id"] + ")\" class=\"dropdown-item\">" +
+                                        "<i class=\"ti ti-receipt\"></i> Đăng ký tham gia" +
                                     "</a>" +
-                                    "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">" +
-                                        "<li>"+
-                                        "<a href=\"javascript:Load_dangky(" + reader["Id"] + ")\" class=\"dropdown-item\">" +
-                                            "<i class=\"ti ti-receipt\"></i> Đăng ký tham gia" +
-                                        "</a>" +
-                                        "</li>" +
-                                    "</ul>";
-                        }
+                                    "</li>" +
+                                        "<li><a href=\"javascript:View_registration(" + reader["Id"] + ")\" class=\"dropdown-item\">" +
+                                            "<i class=\"ti ti-list\"></i> Xem danh sách đăng ký" +
+                                        "</a></li>" +
+                                    "</li>" +
+                                        "<li><a href=\"javascript:View_registration(" + reader["Id"] + ")\" class=\"dropdown-item\">" +
+                                            "<i class=\"ti ti-credit-card\"></i> Thanh toán khóa đào tạo" +
+                                        "</a></li>" +
+                                "</ul>";
                     }
                     else
                     {
                         if (DateTime.Parse(reader["Todate"].ToString()) < DateTime.Now)
                         {
                             strStatus = "<span class='text-danger'>Đã kết thúc</span>";
-                            // Kiểm tra HQ
                             if (CheckUsers.CheckHQ())
                             {
                                 strbtn = "<a href='/trainingcourses/edit/" + reader["Id"] + "' class='me-1'><i class='ti ti-edit text-primary'></i></a>" +
@@ -105,11 +98,12 @@ namespace SuperbrainManagement.Controllers
                                             "<i class=\"ti ti-dots-vertical\"></i>" +
                                         "</a>" +
                                         "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">" +
-                                            "<li>" +
-                                            "<a href=\"javascript:Rating_registration(" + reader["Id"] + ")\" class=\"dropdown-item\">" +
+                                            "<li><a href=\"javascript:View_registration(" + reader["Id"] + ")\" class=\"dropdown-item\">" +
+                                                "<i class=\"ti ti-list\"></i> Xem danh sách đăng ký" +
+                                            "</a></li>" +
+                                            "<li><a href=\"javascript:Rating_registration(" + reader["Id"] + ")\" class=\"dropdown-item\">" +
                                                 "<i class=\"ti ti-receipt\"></i> Đánh giá khóa đào tạo" +
-                                            "</a>" +
-                                            "</li>" +
+                                            "</a></li>" +
                                         "</ul>";
                             }
                             else
@@ -118,25 +112,18 @@ namespace SuperbrainManagement.Controllers
                                             "<i class=\"ti ti-dots-vertical\"></i>" +
                                         "</a>" +
                                         "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">" +
-                                            "<li>" +
-                                            "<a href=\"javascript:Rating_registration(" + reader["Id"] + ")\" class=\"dropdown-item\">" +
+                                            "<li><a href=\"javascript:View_registration(" + reader["Id"] + ")\" class=\"dropdown-item\">" +
+                                                "<i class=\"ti ti-list\"></i> Xem danh sách đăng ký" +
+                                            "</a></li>" +
+                                            "<li><a href=\"javascript:Rating_registration(" + reader["Id"] + ")\" class=\"dropdown-item\">" +
                                                 "<i class=\"ti ti-receipt\"></i> Xem kết quả khóa đào tạo" +
-                                            "</a>" +
-                                            "</li>" +
+                                            "</a></li>" +
                                         "</ul>";
                             }
                         }
                         else
                         {
                             strStatus = "<span class='text-success'>Đang diễn ra</span>";
-                            // Kiểm tra HQ
-                            if (CheckUsers.CheckHQ())
-                            {
-                                strbtn = "<a href='/trainingcourses/edit/" + reader["Id"] + "' class='me-1'><i class='ti ti-edit text-primary'></i></a>" +
-                                        "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">" +
-                                            "<i class=\"ti ti-dots-vertical\"></i>" +
-                                        "</a>" ;
-                            }
                         }
                     }
 
@@ -310,7 +297,7 @@ namespace SuperbrainManagement.Controllers
                         + "<td>" + reader["NameEmployee"] + "</td>"
                         + "<td class='text-center'> " + reader["Phone"] + "</td>"
                         + "<td class='text-center'> " + reader["Email"] + "</td>"
-                        + "<td>" + reader["NameBranch"] + "</td>"
+                        + "<td class='text-center'>" + reader["NameBranch"] + "</td>"
                         + "<td class='text-center'>" + (reader["StatusPayment"].ToString() == "False" ? "<span class='text-danger'>Chưa đóng phí</span>" : "<span class='text-success'>Đã đóng phí</span>") + "</td>"
                         + "</tr>";
                     if (reader["StatusPayment"].ToString() == "False")

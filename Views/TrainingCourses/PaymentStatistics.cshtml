@@ -3,15 +3,9 @@
     ViewBag.Title = "Thống kê đóng phí";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
-
 <div class="row">
     <div class="col col-md-6 col-sm-12">
         <div class="input-group">
-            @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
-            {
-                //@Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", @onchange = "Loadlist()" })
-            }
             <input type="text" class="form-control ms-1 rounded-1" name="fromdate" id="fromdate" value="" onchange="Loadlist()">
             <input type="text" class="form-control ms-1 rounded-1" name="todate" id="todate" value="" onchange="Loadlist()">
         </div>
@@ -22,23 +16,21 @@
         </a>
     </div>
 </div>
-<table class="table fs-3 mt-2">
-    <thead class="bg-success text-white rounded-1">
+<table class="table table-bordered fs-3 mt-2">
+    <thead>
         <tr>
             <th class="text-center">STT</th>
-            <th class="text-center">Mã phiếu</th>
-            <th class="text-center">Người (nhận,nộp)</th>
-            <th class="text-left">Lý do</th>
-            <th class="text-end">Số tiền</th>
-            <th class="text-center">Hình thức</th>
-            <th class="text-center">Loại</th>
-            <th class="text-center">Ngày</th>
-            <th class="text-center">Người thao tác</th>
-            <th class="text-end">Thao tác</th>
+            <th class="text-center">Khóa đào tạo</th>
+            <th class="text-center">Cơ sở</th>
+            <th class="text-center">Số lượng đăng ký</th>
+            <th class="text-center">Số lượng hỗ trợ</th>
+            <th class="text-center">Tổng tiền</th>
+            <th class="text-center">Trạng thái</th>
+            <th class="text-center">Kế toán xác nhận</th>
         </tr>
     </thead>
     <tbody id="showlist"></tbody>
-    <tr id="loading"></tr>
+    <tr class="loader"></tr>
 </table>
 <script>
     $(function () {
@@ -52,4 +44,7 @@
         }
         Loadlist();
     });
+    function Loadlist() {
+
+    }
 </script>
