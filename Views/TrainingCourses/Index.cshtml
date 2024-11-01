@@ -4,8 +4,6 @@
     ViewBag.Controller = "Khóa đào tạo";
     ViewBag.Title = "Danh sách";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    int stt = 1;
-
     int idbranch = Convert.ToInt32(SuperbrainManagement.Controllers.CheckUsers.idBranch());
 }
 <div class="row">
@@ -15,8 +13,8 @@
         <a href="/trainingcourses/create" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>
     </div>
 </div>
-<table class="table fs-3 mt-2">
-    <thead class="bg-success text-white rounded-1">
+<table class="table table-bordered fs-3 mt-2">
+    <thead>
         <tr>
             <th class="text-center">STT</th>
             <th>Khóa đào tạo</th>

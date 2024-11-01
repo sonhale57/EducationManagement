@@ -1285,7 +1285,7 @@ namespace SuperbrainManagement.Controllers
             }
             else
             {
-                strpromotion += "<option value='0' data-name='--'>--</option>";
+                strpromotion += "<option value='0' data-name='--' data-value='0'>--</option>";
             }
             return Json(new {str,strpromotion}, JsonRequestBehavior.AllowGet);
         }
@@ -1321,7 +1321,7 @@ namespace SuperbrainManagement.Controllers
             }
             else
             {
-                strpromotion += "<option value='0' data-name='--'>--</option>";
+                strpromotion += "<option value='0' data-name='--' data-value='0'>--</option>";
             }
             if (IdProgram == 0)
             {
