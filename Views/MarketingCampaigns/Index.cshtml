@@ -26,11 +26,12 @@
     <thead>
         <tr>
             <th class="text-center">STT</th>
-            <th class="text-center">Mã</th>
-            <th class="text-center">Tên</th>
+            <th class="text-start">Mã</th>
+            <th class="text-start">Tên</th>
             <th class="text-center">Số lượng đăng ký</th>
+            <th class="text-center">Chế độ</th>
             <th class="text-center">Trạng thái</th>
-            <th class="text-center">Thao tác</th>
+            <th class="text-end">Thao tác</th>
         </tr>
     </thead>
     <tbody id="showlist"></tbody>
@@ -127,8 +128,8 @@
                 $('#Id').val(id);
                 $('#Code').val(data.Code);
                 $('#Name').val(data.Name);
-                $('#Status').val(data.Status);
-                $('#IsPublic').val(data.IsPublic);
+                $('#Status').val(data.Status.toString());
+                $('#IsPublic').val(data.IsPublic.toString());
                 $('#action').val("edit");
                 $('#exampleModal').modal('show');
             },

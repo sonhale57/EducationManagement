@@ -27,15 +27,12 @@ namespace SuperbrainManagement.Controllers
             string str = "";
             var cum = db.BranchGroups.Where(x=>x.Enable==true).ToList();
             int count = 0;
-            int countcum = 0;
             foreach(var c in cum)
             {
-                countcum++;
                 str += "<tr>" 
-                    +"<td  class='text-success fw-bolder text-center'>"+countcum+"</td>" 
-                    +"<td colspan=7 class='text-success fw-bolder'>"+c.Name+"" 
-                        +"<a href=\"/productcategories/edit/" + c.Id + "\" class=\"ms-2\"><i class=\"ti ti-edit text-primary fw-bolder\"></i></a>"
-                        + "<a href=\"javascript:Delete_category(" + c.Id + ")\" class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a>"
+                    +"<td colspan=8 class='text-success fw-bolder'>"+c.Name+"" 
+                        +"<a href=\"/productcategories/edit/" + c.Id + "\" class=\"ms-1\"><i class=\"ti ti-edit text-primary fw-bolder\"></i></a>"
+                        + "<a href=\"javascript:Delete_category(" + c.Id + ")\" class=\"ms-1\"><i class=\"ti ti-trash text-danger\"></i></a>"
                     +"</td>" 
                     +"</tr>";
                 var cn = db.Branches.Where(x => x.IdGroup == c.Id);

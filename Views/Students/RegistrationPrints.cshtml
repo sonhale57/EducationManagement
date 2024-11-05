@@ -1,96 +1,133 @@
-﻿@{ 
+﻿@{
     Layout = null;
 }
-<style>
-    @@media print{
-        a:after {
-            content: none !important;
-        }
-        /* Ẩn thời gian khi in */
-        time {
-            display: none !important;
-        }
-    }
-</style>
-<main class="no-print">
-    <h3 class="text-center">PHIẾU THU</h3>
-    <p class="text-center">[ngayphieuthu]</p>
-    <div class="card rounded-0">
-        <div class="card-body">
-            <table class=" w-100 fs-3">
-                <tr>
-                    <td class="w-75">Họ và tên học viên:</td>
-                    <td class="w-25">Số phiếu thu:</td>
-                </tr>
-                <tr>
-                    <td class="w-75">Số điện thoại:</td>
-                    <td class="w-25">Liên  1: Giao cho PH</td>
-                </tr>
-                <tr>
-                    <td class="w-75">Ghi chú:</td>
-                    <td class="w-25">Lần thu:</td>
-                </tr>
-            </table>
-            <table class="table w-100 fs-3 mt-3">
-                <thead class="bg-primary text-white">
-                    <tr class="text-center">
-                        <th>Stt</th>
-                        <th>Nội dung</th>
-                        <th colspan="2">Thành tiền</th>
-                    </tr>
-                </thead>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td rowspan="4" colspan="2">
-                        Viết bằng chữ:<br />
-                        <b>ba triệu ba trăm tám mươi nghìn đồng chẵn</b>
-                    </td>
-                    <td>Tổng tiền:</td>
-                    <td>0</td>
-                </tr>
-                <tr>
-                    <td>Chiết khấu:</td>
-                    <td>0 </td>
-                </tr>
-                <tr>
-                    <td>Đã thanh toán:</td>
-                    <td>0</td>
-                </tr>
-                <tr>
-                    <td>Còn lại:</td>
-                    <td>0</td>
-                </tr>
-            </table>
-            <table class="text-center w-100 mt-3 mb-3">
-                <tr>
-                    <td class="w-25">
-                        <h6>Giám đốc</h6>
-                        <i class="fs-2">(Ký & ghi rõ họ tên)</i>
-                    </td>
-                    <td class="w-25">
-                        <h6>Thủ quỹ</h6>
-                        <i class="fs-2">(Ký & ghi rõ họ tên)</i>
-                    </td>
-                    <td class="w-25">
-                        <h6>Người lập</h6>
-                        <i class="fs-2">(Ký & ghi rõ họ tên)</i> 
-                    </td>
-                    <td class="w-25">
-                        <h6>Người nộp tiền</h6>
-                        <i class="fs-2">(Ký & ghi rõ họ tên)</i>
-                    </td>
-                </tr>
-            </table>
-            <p class="text-center fs-2 mt-5">
-                (Cần đối chiếu khi <strong>lập, giao, nhận</strong> hoá đơn)<br />
-                Thời gian in: @DateTime.Now
-            </p>
+<!DOCTYPE html>
+<html lang="vn">
+<head>
+    <title>Phiếu đăng ký khóa học - Phần mềm Quản lý đào tạo Superbrain</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+
+    <!-- External CSS libraries -->
+    <link type="text/css" rel="stylesheet" href="~/assets/invoice/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="~/assets/invoice/fonts/font-awesome/css/font-awesome.min.css">
+
+    <!-- Favicon icon -->
+
+    <!-- Google fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Custom Stylesheet -->
+    <link type="text/css" rel="stylesheet" href="~/assets/invoice/css/style.css">
+
+</head>
+<body>
+
+    <!-- Invoice 8 start -->
+    <div class="invoice-8 invoice-content">
+        <div class="row">
+    <div class="col-lg-12">
+        <div class="invoice-inner clearfix">
+            <div class="invoice-info clearfix" id="invoice_wrapper">
+                <div class="invoice-top border-shadow-bg mb-1">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h2 class="name mb-10">@TempData["ten_coso"]</h2>
+                            <p class="invo-addr-1">
+                                <i class="fa fa-phone me-2"></i>@TempData["dienthoai"] <br />
+                                <i class="fa fa-envelope me-2"></i>@TempData["email"] <br />
+                                <i class="fa fa-map-marker me-2"></i>@TempData["diachi"] <br />
+                            </p>
+                        </div>
+                        <div class="col-sm-6 mb-30">    
+                        </div>
+                        <div class="col-sm-6 mb-30">
+                            <div class="invoice-number">
+                                <h4 class="inv-title-1">@TempData["ten_hocvien"]</h4>
+                                <p class="invo-addr-1 mb-0">
+                                    @TempData["info_hocvien"]
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 mb-30">
+                            <div class="invoice-number">
+                                <div class="invoice-number-inner">
+                                    <h4 class="inv-title-1">Invoice No: @TempData["ma_hoadon"]</h4>
+                                    <p class="mb-0">
+                                        Ngày lập: @TempData["date_hoadon"]
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="invoice-center border-shadow-bg mb-0">
+                    <div class="order-summary">
+                        <div class="table-outer">
+                            <table class="default-table invoice-table">
+                                <thead>
+                                    <tr>
+                                        <th>STT</th>
+                                        <th>Nội dung</th>
+                                        <th>Số lượng</th>
+                                        <th>Đơn giá</th>
+                                        <th>Chiết khấu</th>
+                                        <th>Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="showlist">
+                                    @TempData["showlist"]
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="invoice-bottom border-shadow-bg bsb2">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-3 col-sm-3">
+                            <div class="terms-conditions mb-30 text-center">
+                                <h3 class="inv-title-1 mb-10">Giám đốc</h3>
+                                <p class="fst-italic">(Ký, họ tên)</p>
+                            </div>
+                         </div>
+                        <div class="col-lg-3 col-md-3 col-sm-3">
+                            <div class="terms-conditions mb-30 text-center">
+                                <h3 class="inv-title-1 mb-10">Thủ quỷ</h3>
+                                <p class="fst-italic">(Ký, họ tên)</p>
+                            </div>
+                         </div>
+                        <div class="col-lg-3 col-md-3 col-sm-3">
+                            <div class="terms-conditions mb-30 text-center">
+                                <h3 class="inv-title-1 mb-10">Người lập</h3>
+                                <p class="fst-italic">(Ký, họ tên)</p>
+                             </div>
+                        </div>
+                        <div class="col-lg-3 col-md-3 col-sm-3">
+                            <div class="terms-conditions mb-30 text-center">
+                                <h3 class="inv-title-1 mb-10">Người nộp tiền</h3>
+                                <p class="fst-italic">(Ký, họ tên)</p>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="invoice-btn-section clearfix d-print-none">
+                <a href="javascript:window.print()" class="btn btn-lg btn-print">
+                    <i class="fa fa-print"></i> In phiếu
+                </a>
+                <a id="invoice_download_btn" class="btn btn-lg btn-download btn-theme">
+                    <i class="fa fa-download"></i> Tải xuống
+                </a>
+            </div>
         </div>
     </div>
-</main>
+</div>
+    </div>
+    <script src="~/assets/invoice/js/jquery.min.js"></script>
+    <script src="~/assets/invoice/js/jspdf.min.js"></script>
+    <script src="~/assets/invoice/js/html2canvas.js"></script>
+    <script src="~/assets/invoice/js/app.js"></script>
+</body>
+</html>
 

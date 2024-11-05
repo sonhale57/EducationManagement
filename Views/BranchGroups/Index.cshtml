@@ -19,13 +19,13 @@
         <a href="/branchgroups/create" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>
     </div>
 </div>
-<table class="table fs-3 mt-2">
-    <thead class="bg-success text-white rounded-1">
+<table class="table table-bordered fs-3 mt-2">
+    <thead>
         <tr>
             <th class="text-center">STT</th>
             <th>Tên cụm</th>
             <th>Chủ đầu tư</th>
-            <th>Số điện thoại</th>
+            <th class="text-center">Số điện thoại</th>
             <th>Địa chỉ email</th>
             <th class="text-center">Số lượng</th>
             <th class="text-end">Thao tác</th>
@@ -44,7 +44,7 @@
             <td class="align-content-center">
                 @Html.DisplayFor(modelItem => item.NameInvestor)
             </td>
-            <td class="align-content-center">
+            <td class="align-content-center text-center">
                 @Html.DisplayFor(modelItem => item.PhoneInvestor)
             </td>
             <td class="align-content-center">
@@ -52,16 +52,10 @@
             </td>
             <td class="text-center align-content-center"><span class="btn btn-sm btn-outline-success">@item.Branches.Count()</span></td>
             <td class="text-end align-content-center">
-                <a href="/branchgroups/edit/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
-                <a href="/branchgroups/delete/@item.Id" class="me-1"><i class="ti ti-trash text-danger"></i></a>
+                <a href="/branchgroups/edit/@item.Id" class="ms-1"><i class="ti ti-edit text-primary"></i></a>
+                <a href="/branchgroups/delete/@item.Id" class="ms-1"><i class="ti ti-trash text-danger"></i></a>
             </td>
         </tr>
         stt += 1;
     }
 </table>
-<script>
-    function onchange_active() {
-        //Script Onchange
-        showSuccess("Onchange", 2000);
-    }
-</script>

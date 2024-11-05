@@ -7,9 +7,13 @@
     int idbranch = Convert.ToInt32(SuperbrainManagement.Controllers.CheckUsers.idBranch());
 }
 <div class="row">
-    <div class="col col-md-3 col-sm-12">
+    <div class="col col-md-4 col-sm-12">
+        <div class="input-group">
+            <input type="text" class="form-control ms-1 rounded-1" id="searchString" name="searchString" placeholder="Tìm kiếm" value="">
+            <button class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" type="submit" onclick="Loadlist()"><i class="ti ti-search text-white"></i></button>
+        </div>
     </div>
-    <div class="col col-md-9 col-sm-12 text-end">
+    <div class="col col-md-8 col-sm-12 text-end">
         <a href="/trainingcourses/create" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>
     </div>
 </div>
@@ -26,7 +30,8 @@
             <th class="text-end">Thao tác</th>
         </tr>
     </thead>
-        <tbody id="showlist"></tbody>
+    <tbody id="showlist"></tbody>
+    <tr class="loader"></tr>
 </table>
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel2" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
@@ -38,7 +43,7 @@
                         <i class="ti ti-x"></i>
                     </button>
                 </div>
-                <hr style="width:90%;margin:0 auto;" />
+                <hr class="m-auto" />
                 <div class="modal-body">
                     <div class="row">
                         <div class="col col-6 col-md-6 col-sm-12">
@@ -79,15 +84,15 @@
                             </select>
                         </div>
                     </div>
-                    <div class="text-center mt-4">
-                        <span class="loader"></span>
-                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="closeModal()">
-                            <i class="ti ti-door-exit"></i> Thoát
-                        </button>
-                        <button type="button" class="btn btn-sm btn-success" onclick="Submit_registration()">
-                            <i class="ti ti-registered"></i> Đăng ký tham gia
-                        </button>
-                    </div>
+                </div>
+                <div class="modal-footer">
+                    <span class="loader"></span>
+                    <button type="button" class="btn btn-sm btn-success" onclick="Submit_registration()">
+                        <i class="ti ti-checks"></i> Đăng ký tham gia
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="closeModal()">
+                        <i class="ti ti-door-exit"></i> Hủy
+                    </button>
                 </div>
             </form>
         </div>
@@ -103,15 +108,15 @@
                         <i class="ti ti-x"></i>
                     </button>
                 </div>
-                <hr style="width:90%;margin:0 auto;" />
+                <hr class="m-auto" />
                 <div class="modal-body">
                     <input type="hidden" name="IdTraining" id="IdTraining" value="" />
                     <div class="row">
-                        <div class="col col-md-6 mt-3">
+                        <div class="col col-md-6">
                             <label class="text-success">Tên khóa đào tạo</label>
                             <input type="text" id="NameTraining" value="" class="form-control" readonly />
                         </div>
-                        <div class="col col-md-6 mt-3">
+                        <div class="col col-md-6">
                             <label class="text-success">Phí đào tạo</label>
                             <input type="text" id="PriceTraining" value="" class="form-control" readonly />
                         </div>
@@ -132,16 +137,18 @@
                             <input type="text" id="TodateTraining" value="" class="form-control" readonly />
                         </div>
                     </div>
+                    <div class="row showinfo"></div>
+
                     <p class="text-muted fw-light mt-3 text-decoration-underline"><i class="ti ti-file-analytics"></i> Danh sách đính kèm</p>
                     <table class="table table-bordered">
                         <tr class="bg-success text-white">
                             <th class="text-center">STT</th>
                             <th class="text-left">Họ tên</th>
                             <th class="text-center">Số điện thoại</th>
-                            <th class="text-left">Email</th>
                             <th class="text-center">Cơ sở</th>
-                            <th class="text-center">Trạng thái</th>
                             <th class="text-center">Đăng ký lưu trú</th>
+                            <th class="text-center">Trạng thái</th>
+                            <th class="text-center">Kết quả</th>
                             <th class="text-center">Thao tác</th>
                         </tr>
                         <tbody id="showlist_dangky"></tbody>
@@ -151,9 +158,6 @@
                     <button type="button" class="btn btn-sm btn-outline-danger" onclick="closeModal()">
                         <i class="ti ti-door-exit"></i> Hủy
                     </button>
-                    <a href="javascript:Load_paymentFee()" class="btn btn-sm btn-success">
-                        <i class="ti ti-credit-card"></i> Thanh toán phí tham gia
-                    </a>
                 </div>
             </form>
         </div>
@@ -170,29 +174,29 @@
                         <i class="ti ti-x"></i>
                     </button>
                 </div>
-                <hr style="width:90%;margin:0 auto;" />
+                <hr class="m-auto" />
                 <div class="modal-body">
                     <input type="hidden" name="IdTraining" id="IdTrainingPayment" value="" />
                     <div class="row" id="showinfo_payment">
 
-                        <div class="col-md-4 mt-3">
+                        <div class="col-md-4">
                             <label>Khóa đào tạo</label>
                             <div class="col-md-12">
-                                <input type="text" name="NameCourse" id="NameCourse" class="form-control" value="" />
+                                <input type="text" name="NameCourse" id="NameCourse" class="form-control" value="" readonly/>
                             </div>
                         </div>
-                        <div class="col-md-4 mt-3">
+                        <div class="col-md-4">
                             <label>Phí đào tạo</label>
                             <div class="col-md-12">
                                 <input type="hidden" name="NumberPayment" id="NumberPayment" class="form-control" value="" />
                                 <input type="hidden" name="NumberDiscount" id="NumberDiscount" class="form-control" value="" />
-                                <input type="text" name="PriceCourse" id="PriceCourse" class="form-control" value="" />
+                                <input type="text" name="PriceCourse" id="PriceCourse" class="form-control" value="" readonly/>
                             </div>
                         </div>
-                        <div class="col-md-4 mt-3">
+                        <div class="col-md-4">
                             <label>Số tiền cần thanh toán</label>
                             <div class="col-md-12">
-                                <input type="text" name="TotalAmount" id="TotalAmount" class="form-control" value="" />
+                                <input type="text" name="TotalAmount" id="TotalAmount" class="form-control" value="" readonly/>
                                 <span id="statusDiscount"></span>
                             </div>
                         </div>
@@ -240,8 +244,6 @@
                         </table>
                     </blockquote>
                     <p class="text-muted fw-bold">Tình trạng: <span id="statusPayment"></span></p>
-                    <a href="javascript:Submit_paymentFee()" class="btn btn-success"><i class="ti ti-credit-card"></i> Cập nhật thanh toán</a>
-                    <span class="loader"></span>
                     <p class="text-muted fw-bold mt-3 text-decoration-underline"><i class="ti ti-file-analytics"></i> Danh sách đính kèm</p>
                     <table class="table ">
                         <tr class="bg-success text-white">
@@ -254,6 +256,13 @@
                         </tr>
                         <tbody id="showlist_payment"></tbody>
                     </table>
+                </div>
+                <div class="modal-footer">
+                    <span class="loader"></span>
+                    <a href="javascript:Submit_paymentFee()" class="btn btn-success btn-sm"><i class="ti ti-credit-card"></i> Cập nhật thanh toán</a>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="closeModal()">
+                        <i class="ti ti-door-exit"></i> Hủy
+                    </button>
                 </div>
             </form>
         </div>
@@ -270,11 +279,10 @@
                         <i class="ti ti-x"></i>
                     </button>
                 </div>
-                <hr style="width:90%;margin:0 auto;" />
+                <hr class="m-auto" />
                 <div class="modal-body">
                     <input type="hidden" name="IdTraining" id="IdTraining" value="" />
-                    <div class="row" id="showinfo">
-                    </div>
+                    <div class="row" id="showinfo"></div>
                     <p class="text-muted fw-light mt-3 text-decoration-underline"><i class="ti ti-file-analytics"></i> Danh sách đính kèm</p>
                     <table class="table ">
                         <tr class="bg-success text-white">
@@ -297,7 +305,6 @@
         </div>
     </div>
 </div>
-
 <div class="modal fade" id="modalRatingEmployees" tabindex="-1" aria-labelledby="modalRatingEmployeesLabel2" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
         <div class="modal-content" style="">
@@ -308,15 +315,15 @@
                         <i class="ti ti-x"></i>
                     </button>
                 </div>
-                <hr style="width:90%;margin:0 auto;" />
+                <hr class="m-auto" />
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col col-md-6 mt-3">
+                        <div class="col col-md-6">
                             <label>Khóa đào tạo</label>
                             <input type="hidden" name="rateIdTrainning" value="" id="rateIdTrainning" />
                             <input type="text" name="rateNameTrainning" id="rateNameTrainning" value="" class="form-control disabled" />
                         </div>
-                        <div class="col col-md-6 mt-3">
+                        <div class="col col-md-6">
                             <label>Giáo viên tham gia</label>
                             <input type="hidden" name="rateIdEmployee" value="" id="rateIdEmployee" />
                             <input type="text" name="rateNameEmployee" id="rateNameEmployee" value="" class="form-control disabled" />
@@ -395,11 +402,11 @@
                 </div>
                 <div class="modal-footer">
                     <span class="loader"></span>
-                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="closeModal()">
-                        <i class="ti ti-door-exit"></i> Hủy
-                    </button>
                     <button type="button" class="btn btn-sm btn-success" onclick="Submit_rating()">
                         <i class="ti ti-device-floppy"></i> Cập nhật đánh giá
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="closeModal()">
+                        <i class="ti ti-door-exit"></i> Hủy
                     </button>
                 </div>
             </form>
@@ -410,13 +417,16 @@
     var isProcessing = false;
     Loadlist();
     function Loadlist() {
+        $(".loader").html("<td colspan=8 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
+        $('#showlist').html("");
         $.ajax({
             url: '@Url.Action("Loadlist", "TrainingCourses")',
             type: "GET",
             data: {
+                searchString: $("#searchString").val()
             },
             success: function (data) {
-                console.log(data);
+                $(".loader").html("");
                 $('#showlist').html(data.str);
             },
             error: function (xhr, error) {
@@ -446,11 +456,6 @@
             }
         });
     }
-    function close_modal() {
-        $("#exampleModal").modal('hide');
-        $("#modalRegistration").modal('hide');
-        $('#showlist_dangky').html("");
-    }
     function View_registration(id) {
         Load_registration(id);
         $("#IdTraining").val(id);
@@ -477,12 +482,12 @@
         });
     }
 
-    function Load_paymentFee() {
+    function Load_paymentFee(id) {
         $.ajax({
             url: '@Url.Action("Load_payment", "TrainingCourses")',
             type: "GET",
             data: {
-                id: $("#IdTraining").val(),
+                id: id,
             },
             success: function (data) {
                 $('#IdTrainingPayment').val($("#IdTraining").val());
@@ -551,52 +556,57 @@
     }
 
 
-    function loadRatingModal(IdTrainingCourse, IdEmployee) {
-        $.ajax({
-            url: '@Url.Action("LoadRating", "TrainingCourses")',
-            type: "POST",
-            data: {
-                IdTrainingCourse: IdTrainingCourse,
-                IdEmployee: IdEmployee
-            },
-            dataType: "json",
-            success: function (data) {
-                if (data.status === "ok") {
-                    var rating = data.data;
+    function loadRatingModal(IdTrainingCourse, IdEmployee, type) {
+        if (type == 1) {
+            $(".modal").modal('hide');
+            $.ajax({
+                url: '@Url.Action("LoadRating", "TrainingCourses")',
+                type: "POST",
+                data: {
+                    IdTrainingCourse: IdTrainingCourse,
+                    IdEmployee: IdEmployee
+                },
+                dataType: "json",
+                success: function (data) {
+                    if (data.status === "ok") {
+                        var rating = data.data;
+                        $("#rateNameEmployee").val(data.nameEmployee);
+                        $("#rateNameTrainning").val(data.nameCourse);
+                        // Điền dữ liệu vào các trường trong modal với giá trị mặc định nếu chưa có kết quả
+                        $("#rateIdTrainning").val(rating.IdTrainingCourse);
+                        $("#rateIdEmployee").val(rating.IdEmployee);
+                        $("#rateResult").val(rating.Result);
+                        $("#rateNumberofCertificate").val(rating.NumberCertification || "");
+                        $("#rateTotalScore").val(rating.TotalScore || 0);
+                        $("#rateSuperbrainScore").val(rating.SuperbrainScore || "");
+                        $("#rateBrandScore").val(rating.BrandScore || "");
+                        $("#rateTeachScore").val(rating.TeachScore || "");
+                        $("#rateSaleScore").val(rating.SaleScore || "");
+                        $("#rateMindsetScore").val(rating.MindsetScore || "");
+                        $("#rateSorobanScore").val(rating.SorobanScore || "");
+                        $("#rateOnlineScore").val(rating.OnlineScore || "");
+                        $("#rateCompleteScore").val(rating.CompleteScore || "");
+                        $("#rateParticipationScore").val(rating.ParticipationScore || "");
+                        $("#rateDemeanorScore").val(rating.DemeanorScore || "");
+                        $("#rateProactiveScore").val(rating.ProactiveScore || "");
+                        $("#rateDescription").val(rating.Description || "");
 
-                    // Điền dữ liệu vào các trường trong modal với giá trị mặc định nếu chưa có kết quả
-                    $("#rateIdTrainning").val(rating.IdTrainingCourse);
-                    $("#rateIdEmployee").val(rating.IdEmployee);
-                    $("#rateNameEmployee").val(rating.nameEmployee);
-                    $("#rateNameTrainning").val(rating.nameCourse);
-                    $("#rateResult").val(rating.Result);
-                    $("#rateNumberofCertificate").val(rating.NumberCertification || "");
-                    $("#rateTotalScore").val(rating.TotalScore || 0);
-                    $("#rateSuperbrainScore").val(rating.SuperbrainScore || "");
-                    $("#rateBrandScore").val(rating.BrandScore || "");
-                    $("#rateTeachScore").val(rating.TeachScore || "");
-                    $("#rateSaleScore").val(rating.SaleScore || "");
-                    $("#rateMindsetScore").val(rating.MindsetScore || "");
-                    $("#rateSorobanScore").val(rating.SorobanScore || "");
-                    $("#rateOnlineScore").val(rating.OnlineScore || "");
-                    $("#rateCompleteScore").val(rating.CompleteScore || "");
-                    $("#rateParticipationScore").val(rating.ParticipationScore || "");
-                    $("#rateDemeanorScore").val(rating.DemeanorScore || "");
-                    $("#rateProactiveScore").val(rating.ProactiveScore || "");
-                    $("#rateDescription").val(rating.Description || "");
-
-                    // Hiển thị modal
-                    $('#modalRating').modal('hide');
-                    $('#modalRatingEmployees').modal('show');
-                    loadResultSelect(rating.Result);
-                } else {
-                    showError(data.message, 3000);
+                        // Hiển thị modal
+                        $('#modalRating').modal('hide');
+                        $('#modalRatingEmployees').modal('show');
+                        loadResultSelect(rating.Result);
+                    } else {
+                        showError(data.message, 3000);
+                    }
+                },
+                error: function () {
+                    showError('Lỗi trong quá trình tải dữ liệu!', 3000);
                 }
-            },
-            error: function () {
-                showError('Lỗi trong quá trình tải dữ liệu!', 3000);
-            }
-        });
+            });
+        }
+        else {
+
+        }
     }
     function loadResultSelect(result) {
         if (result === true) {
@@ -704,11 +714,10 @@
         success: function (data) {
             if (data.status == "ok") {
                 $('#exampleModal').modal('hide');
-                location.reload();
-                showSuccess("Đã đăng ký tham gia thành công!", 3000);
+                showSuccess(data.message, 3000);
             }
             else {
-                showError(data.status, 3000);
+                showError(data.message, 3000);
             }
         },
         error: function () { showError('Lỗi!', 3000); }
