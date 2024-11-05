@@ -1,0 +1,30 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 5px 10px 5px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Thông báo từ hệ thống</h2>
+    </div>
+    <div class="content">
+        <p>Xin chào, @Model.TenNguoiNhan!</p>
+        <p>Cảm ơn bạn đã đăng ký tài khoản tại website của chúng tôi. Vui lòng xác nhận email của bạn bằng cách nhấn vào liên kết bên dưới.</p>
+        <a href="@Model.LinkXacNhan">Xác nhận tài khoản</a>
+        <p>Trân trọng,</p>
+        <p>Đội ngũ hỗ trợ</p>
+    </div>
+</body>
+</html>

@@ -97,6 +97,7 @@
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     <li><a class="dropdown-item" href="@Url.Action("AddCourseProgramOfStudents","Students",new {IdStudent = item.Id})"><i class="ti ti-script-plus"></i> Đăng ký khóa học</a></li>
                     <li><a class="dropdown-item" href="javascript:exchangeBranch(@item.Id)"><i class="ti ti-exchange"></i> Chuyển cơ sở</a></li>
+                    <li><a class="dropdown-item" href="@Url.Action("Sendemail", "Students", new {id=item.Id})"><i class="ti ti-mail-forward"></i> Gửi email</a></li>
                 </ul>
             </td>
         </tr>

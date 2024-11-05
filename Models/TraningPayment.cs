@@ -39,6 +39,8 @@ namespace SuperbrainManagement.Models
         [StringLength(10)]
         public string Descript { get; set; }
 
+        public int? NumberSupport { get; set; }
+
         public virtual Branch Branch { get; set; }
 
         public virtual TrainingCourse TrainingCourse { get; set; }

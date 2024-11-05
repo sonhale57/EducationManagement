@@ -7,7 +7,7 @@
 
 <div class="row">
     <div class="col col-md-6 col-sm-12">
-        <div class="input-group mb-3">
+        <div class="input-group">
             @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
             {
                 @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", @onchange = "Loadlist()" })
@@ -18,12 +18,12 @@
     </div>
     <div class="col col-md-6 col-sm-12 text-end">
         <button id="exportButton" class="btn btn-success">
-            <i class="ti ti-file-download"></i> Xuất file
+            <i class="ti ti-download"></i> Xuất file
         </button>
     </div>
 </div>
-<table class="table fs-3" id="tableToPrint">
-    <thead class="bg-success text-white rounded-1">
+<table class="table table-bordered mt-2 fs-3" id="tableToPrint">
+    <thead>
         <tr>
             <th class="text-center">STT</th>
             <th>Mã đơn hàng</th>

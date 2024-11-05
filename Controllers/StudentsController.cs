@@ -125,27 +125,42 @@ namespace SuperbrainManagement.Controllers
             return View(student);
         }
        
-        public ActionResult RegistrationPrints()
+        public ActionResult RegistrationPrints(int? IdRegistration)
         {
-            Student student = Session["infoUser"] as Student;
-            int idregistration = Convert.ToInt32(Session["IdRegistration"]);
-           
-            Registration registration = Connect.SelectSingle<Registration>("Select * from Registration where Id = '" + idregistration + "'");
-            DataTable datatable = Connect.SelectAll("select course.Name,course.Price,rescourse.TotalAmount from Registration  res\r\ninner join RegistrationCourse rescourse\r\non rescourse.IdRegistration = res.Id\r\ninner join Course course \r\non course.Id = rescourse.IdCourse\r\nwhere res.Id = '" + idregistration+"'");
-            var model = new
+            if (IdRegistration == null)
             {
-                DataTableLoad = datatable
-            };
-            if (student != null)
-            {
-                Session["Name"] = student.Name;
-                Session["code"] = registration.Code;
-                Session["Datecreate"] = registration.DateCreate;
-                Session["totalamount"] = registration.TotalAmount;
-                Session["datatable"] = datatable;
+                return Redirect("/Error/E404");
             }
-          
-            return View(model);
+            var linq = (from reg in db.Registrations
+                       join s in db.Students on reg.IdStudent equals s.Id
+                       join b in db.Branches on s.IdBranch equals b.Id
+                       where reg.Id == IdRegistration
+                       select new { 
+                            Name = s.Name,
+                            dienthoai = s.Phone,
+                            email = s.Email,
+                            NameBranch = b.Name,
+                            PhoneB = b.Phone,
+                            EmailB = b.Email,
+                            AddressB = b.Address,
+                            CodeInvoice = reg.Code,
+                            DateInvoice = reg.DateCreate
+                       }).FirstOrDefault();
+            TempData["ma_hoadon"] = linq.CodeInvoice;
+            TempData["date_hoadon"] = linq.DateInvoice.Value.ToString("dd/MM/yyyy");
+            TempData["ten_hocvien"] = linq.Name;
+            TempData["info_hocvien "] = "Số điện thoại: " + linq.dienthoai + "<br/> Email:" + linq.email;
+            TempData["ten_coso"] = linq.NameBranch;
+            TempData["dienthoai"] = linq.PhoneB;
+            TempData["diachi"] = linq.AddressB;
+            TempData["email"] = linq.EmailB;
+            var rec = (from reg in db.Registrations
+                       join rc in db.RegistrationCourses on reg.Id equals rc.IdRegistration
+                       where reg.Id == IdRegistration
+                       select new{
+
+                       }).ToList();
+            return View();
         }
         [HttpPost] // Use POST for actions that modify data
         public ActionResult Deletes(int IdCourse, int IdRegistration)
@@ -2714,7 +2729,19 @@ namespace SuperbrainManagement.Controllers
             return View();
         }
 
+        public ActionResult SendEmail(int id)
+        {
+            // Tạo model với dữ liệu cần thiết cho template
+            var model = new
+            {
+                TenNguoiNhan = "Nguyen Van A + id:"+ id,
+                LinkXacNhan = "https://yourwebsite.com/confirm?token=12345"
+            };
 
+            SendEmailHelper help = new SendEmailHelper();
+            help.SendEmailWithTemplate("recipient@example.com", "Xác nhận tài khoản của bạn", model, "EmailTemplate_newStudent.html");
+            return Content("Email đã được gửi!");
+        }
         protected override void Dispose(bool disposing)
         {
             if (disposing)

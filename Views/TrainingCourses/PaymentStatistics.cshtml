@@ -4,13 +4,12 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div class="row">
-    <div class="col col-md-6 col-sm-12">
+    <div class="col col-md-4 col-sm-12">
         <div class="input-group">
-            <input type="text" class="form-control ms-1 rounded-1" name="fromdate" id="fromdate" value="" onchange="Loadlist()">
-            <input type="text" class="form-control ms-1 rounded-1" name="todate" id="todate" value="" onchange="Loadlist()">
+            @Html.DropDownList("IdTrainingCourse", null, htmlAttributes: new { @class = "form-control select2", @onchange = "Loadlist()" })
         </div>
     </div>
-    <div class="col col-md-6 col-sm-12 text-end">
+    <div class="col col-md-8 col-sm-12 text-end">
         <a href="javascript:tableToPrint()" class="btn btn-success">
             <i class="ti ti-download"></i> Xuất danh sách
         </a>
@@ -24,27 +23,30 @@
             <th class="text-center">Cơ sở</th>
             <th class="text-center">Số lượng đăng ký</th>
             <th class="text-center">Số lượng hỗ trợ</th>
-            <th class="text-center">Tổng tiền</th>
-            <th class="text-center">Trạng thái</th>
-            <th class="text-center">Kế toán xác nhận</th>
+            <th class="text-center">Đã thanh toán</th>
+            <th class="text-center">Đã xác nhận</th>
         </tr>
     </thead>
     <tbody id="showlist"></tbody>
     <tr class="loader"></tr>
 </table>
 <script>
-    $(function () {
-        $("#fromdate").datepicker({ dateFormat: "dd/mm/yy" });
-        $("#todate").datepicker({ dateFormat: "dd/mm/yy", maxDate: 1 });
-        if ($("#fromdate").val() == "") {
-            $("#fromdate").datepicker("setDate", -30);
-        }
-        if ($("#todate").val() == "") {
-            $("#todate").datepicker("setDate", 1);
-        }
-        Loadlist();
-    });
+    Loadlist();
     function Loadlist() {
-
+        $(".loader").html("<td colspan=7 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
+            $.ajax({
+           url: '@Url.Action("Loadlist_paymentstatistic", "TrainingCourses")',
+            type: "GET",
+            data: {
+                IdTraining: $("#IdTrainingCourse").val()
+            },
+            success: function (data) {
+                $(".loader").html("");
+                $('#showlist').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
     }
 </script>

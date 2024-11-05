@@ -3,4 +3,50 @@
     ViewBag.Title = "Thống kê kết quả";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
+<div class="row">
+    <div class="col col-md-4 col-sm-12">
+        <div class="input-group">
+            @Html.DropDownList("IdTrainingCourse", null, htmlAttributes: new { @class = "form-control select2", @onchange = "Loadlist()" })
+        </div>
+    </div>
+    <div class="col col-md-8 col-sm-12 text-end">
+        <a href="javascript:tableToPrint()" class="btn btn-success">
+            <i class="ti ti-download"></i> Xuất danh sách
+        </a>
+    </div>
+</div>
+<table class="table table-bordered fs-3 mt-2">
+    <thead>
+        <tr>
+            <th class="text-center">STT</th>
+            <th class="text-start">Họ tên</th>
+            <th class="text-center">Số điện thoại</th>
+            <th class="text-center">Kết quả</th>
+            <th class="text-center">Số GCN</th>
+            <th class="text-center">Ngày hết hạn</th>
+            <th class="text-start">Cơ sở</th>
+        </tr>
+    </thead>
+    <tbody id="showlist"></tbody>
+    <tr class="loader"></tr>
+</table>
+<script>
+    Loadlist();
+    function Loadlist() {
+        $(".loader").html("<td colspan=7 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
+            $.ajax({
+           url: '@Url.Action("Loadlist_statistic", "TrainingCourses")',
+            type: "GET",
+            data: {
+                IdTrainingCourse: $("#IdTrainingCourse").val()
+            },
+            success: function (data) {
+                $(".loader").html("");
+                $('#showlist').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+</script>
