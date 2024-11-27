@@ -77,7 +77,7 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
                         +"<a href=\"javascript:Delete_category(" + readerCat["Id"] +")\" class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a>"
                         + "</td>"
                         + "</tr>";
-                    string query = "SELECT p.Id,p.Name,p.Image,p.Unit,p.Price,p.Code,p.UnitOfPackage,NumberOfPackage,p.Active,p.Quota,COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '1' AND re.IdBranch = " + IdBrand_HQ + "), 0) -"
+                    string query = "SELECT p.Id,p.Name,p.Description,p.Image,p.Unit,p.Price,p.Code,p.UnitOfPackage,NumberOfPackage,p.Active,p.Quota,COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '1' AND re.IdBranch = " + IdBrand_HQ + "), 0) -"
                                         + " COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '0' AND re.IdBranch = " + IdBrand_HQ + "), 0) AS Tonkho"
                                         + " FROM product p"
                                         + " where p.enable=1 and p.IdCategory=" + readerCat["Id"]
@@ -92,7 +92,7 @@ namespace SuperbrainManagement.Controllers.RegistrationStudent
                         str += "<tr>"
                                 + "<td class='text-center'>" + count + "</td>"
                                 + "<td>" + reader["code"].ToString() + "</td>"
-                                + "<td><img src='" + reader["Image"] + "' all='" + reader["Name"] + "' class=\"rounded-2 me-2\" height=\"40\"/>" + reader["Name"].ToString() + "</td>"
+                                + "<td><img src='" + reader["Image"] + "' alt='' class=\"rounded-2 me-2\" height=\"40\"/>" + reader["Name"].ToString() + "<br/><i class='text-muted ms-1'>Ghi chú: "+ reader["Description"].ToString() + "</i></td>"
                                 + "<td>" + string.Format("{0:N0} đ", amount) + "</td>"
                                 + "<td>" + reader["Unit"].ToString() + "</td>"
                                 + "<td class='text-center'>" + reader["Tonkho"].ToString() + "</td>"

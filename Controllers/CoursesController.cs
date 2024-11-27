@@ -28,62 +28,88 @@ namespace SuperbrainManagement.Controllers
             ViewBag.IdCourse = new SelectList(db.Courses, "Id", "Name");
             return View();
         }
-        public ActionResult Loadlist(int? IdBranch,string searchString)
+        public ActionResult Loadlist(int? IdBranch, string searchString)
         {
-            string str = "",strquery="";
-            if (IdBranch==null)
+            try
             {
-                IdBranch = Convert.ToInt32(CheckUsers.idBranch());
-            }
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                strquery = " and (c.Name like N'%"+searchString+"%' or c.Code like N'%"+searchString+"%')";
-            }
-            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                string queryCat = "SELECT * from Program where enable=1 order by DisplayOrder";
-                SqlCommand commandCat = new SqlCommand(queryCat, connection);
-                connection.Open();
-                SqlDataReader readerCat = commandCat.ExecuteReader();
-                int count = 0;
-                while (readerCat.Read())
+                // Lấy IdBranch hiện tại nếu không được truyền vào
+                if (IdBranch == null)
                 {
-                    str += "<tr>"
-                            + "<td class='text-center text-success fw-bolder'>" + readerCat["Code"].ToString() + "</td>"
-                            + "<td class='text-success fw-bolder' colspan=7>" + readerCat["Name"].ToString() + "</td>"
-                            + "</tr>";
-                    string query = "select c.Id,c.Code,c.Name,cb.Hour,cb.Sessons,cb.PriceCourse,cb.PriceTest,cb.PriceAccount,DiscountPrice,cb.StatusDiscount"
-                                        + " from Course c inner join CourseBranch cb on c.Id = cb.IdCourse" 
-                                        +" where c.IdProgram=" + readerCat["Id"] +" and cb.IdBranch="+IdBranch +strquery+ " order by c.DisplayOrder";
-                    SqlCommand command = new SqlCommand(query, connection);
-                    SqlDataReader reader = command.ExecuteReader();
-                    while (reader.Read())
+                    IdBranch = Convert.ToInt32(CheckUsers.idBranch());
+                }
+
+                // Khởi tạo biến để lưu HTML kết quả
+                string str = "";
+                int count = 0;
+
+                // Lấy danh sách chương trình
+                var programs = db.Programs
+                    .Where(p => p.Courses.Any(c => c.CourseBranches.Any(cb => cb.IdBranch == IdBranch && p.Enable == true)))
+                    .ToList();
+
+                if (!programs.Any())
+                {
+                    str = "<tr><td colspan=7>Không tìm thấy chương trình nào</td></tr>";
+                    return Json(new { str }, JsonRequestBehavior.AllowGet);
+                }
+
+                foreach (var program in programs)
+                {
+                    // Thêm hàng chương trình
+                    str += $"<tr><td class='text-center text-success fw-bolder'>{program.Code}</td>"
+                        + $"<td class='text-success fw-bolder' colspan=7>{program.Name}</td></tr>";
+
+                    // Lấy danh sách khóa học thuộc chương trình
+                    var courses = program.Courses
+                        .Where(c => c.CourseBranches.Any(cb => cb.IdBranch == IdBranch))
+                        .SelectMany(c => c.CourseBranches  
+                            .Where(cb => cb.IdBranch == IdBranch)
+                            .Select(cb => new
+                            {
+                                cb.IdCourse,
+                                c.Code,
+                                c.Name,
+                                cb.Hour,
+                                cb.Sessons,
+                                cb.PriceCourse,
+                                cb.PriceTest,
+                                cb.PriceAccount,
+                                cb.DiscountPrice,
+                                cb.StatusDiscount
+                            })
+                        )
+                        .ToList();
+
+                    if (!courses.Any())
                     {
-                        double amount = Double.Parse(reader["PriceCourse"].ToString(), 0);
-                        double amountTest = Double.Parse(reader["PriceTest"].ToString(),0);
-                        double amountAccount = Double.Parse(reader["PriceAccount"].ToString(),0);
+                        str += "<tr><td colspan=7>Không có khóa học</td></tr>";
+                        continue;
+                    }
+
+                    // Duyệt qua từng khóa học
+                    foreach (var course in courses)
+                    {
                         count++;
-                        str += "<tr>"
-                            + "<td class='text-center'>" + reader["Code"].ToString() + "</td>"
-                            + "<td class=''>" + reader["Name"].ToString() + "</td>"
-                            + "<td class='text-end'>" + string.Format("{0:N0} đ", amount) + "</td>"
-                            + "<td class='text-end'>" + string.Format("{0:N0} đ", amountAccount) + "</td>"
-                            + "<td class='text-center'>" + reader["Sessons"].ToString() + "</td>"
-                            + "<td class='text-center'>" + reader["Hour"].ToString() + "</td>"
-                            + "<td class='text-end'>" 
-                            + "<a href='javascript:Edit_CourseBranch(" + IdBranch + "," + reader["Id"] +")' class=\"me-1\"><i class=\"ti ti-edit text-primary\"></i></a>"
-                            + "<a href='javascript:Delete_CourseBranch(" + IdBranch + "," + reader["Id"] + ")' class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a>"
-                            + "</td>"
-                            + "</tr>";
+                        str += $"<tr>"
+                            + $"<td class='text-center'>{course.Code}</td>"
+                            + $"<td>{course.Name}</td>"
+                            + $"<td class='text-end'>{string.Format("{0:N0} đ", course.PriceCourse)}</td>"
+                            + $"<td class='text-end'>{string.Format("{0:N0} đ", course.PriceAccount)}</td>"
+                            + $"<td class='text-center'>{course.Sessons}</td>"
+                            + $"<td class='text-center'>{course.Hour}</td>"
+                            + $"<td class='text-end'>"
+                            + $"<a href='javascript:Edit_CourseBranch({IdBranch},{course.IdCourse})' class=\"me-1\"><i class=\"ti ti-edit text-primary\"></i></a>"
+                            + $"<a href='javascript:Delete_CourseBranch({IdBranch},{course.IdCourse})' class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a>"
+                            + $"</td></tr>";
                     }
                 }
-                readerCat.Close();
+
+                return Json(new { str }, JsonRequestBehavior.AllowGet);
             }
-            var item = new {
-            str
-            };
-            return Json(item,JsonRequestBehavior.AllowGet);
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
 
@@ -210,6 +236,7 @@ namespace SuperbrainManagement.Controllers
             db.SaveChanges();
             return Json(new { status="ok",message = "Đã xóa khóa học thành công!" },JsonRequestBehavior.AllowGet);
         }
+        /*
         public ActionResult Loadlist_Statistics(int? IdBranch, string month)
         {
             int idbranch = Convert.ToInt32(CheckUsers.idBranch());
@@ -223,39 +250,146 @@ namespace SuperbrainManagement.Controllers
             int yearValue = int.Parse(monthYear[1]);
 
             string str = "";
-            var query = from c in db.Courses
-                        join cb in db.CourseBranches on c.Id equals cb.IdCourse
-                        where cb.IdBranch==IdBranch
-                        let countOnClass = db.StudentJoinClasses.Count(x => x.IdCourse == c.Id
-                                 && x.Registration.IdBranch == IdBranch
-                                 && x.Todate.Value.Month >= monthValue
-                                 && x.Todate.Value.Year >= yearValue)
-                        let countRegistration = db.RegistrationCourses.Count(x=>x.IdCourse==c.Id && x.Registration.IdBranch == IdBranch && x.Registration.DateCreate.Value.Month==monthValue&&x.Registration.DateCreate.Value.Year==yearValue)
-                        orderby c.Program.DisplayOrder,c.DisplayOrder
-                        select new{
-                            NameProgram = c.Program.Name,
-                            NameCourse = c.Name,
-                            CountRegistration = countRegistration,
-                            CountOnClass = countOnClass
-                        };
+            var data=new List<object>(); ;
+            var program = from p in db.Programs
+                          join c in db.Courses on p.Id equals c.IdProgram
+                          join cb in db.CourseBranches on c.Id equals cb.IdCourse
+                          where cb.IdBranch == idbranch && p.Enable == true
+                          select p;
+            foreach (var item in program)
+            {
+                str += "<tr><td colspan=6>" + item.Name + "</td></tr>";
+                var query = from c in db.Courses
+                            join cb in db.CourseBranches on c.Id equals cb.IdCourse
+                            where c.IdProgram == item.Id && cb.IdBranch == IdBranch
+                            let countOnClass = db.StudentJoinClasses.Count(x => x.IdCourse == c.Id
+                                     && x.Registration.IdBranch == IdBranch
+                                     && x.Todate.Value.Month >= monthValue
+                                     && x.Todate.Value.Year >= yearValue)
+                            let countRegistration = db.RegistrationCourses.Count(x => x.IdCourse == c.Id && x.Registration.IdBranch == IdBranch && x.Registration.DateCreate.Value.Month == monthValue && x.Registration.DateCreate.Value.Year == yearValue)
+                            orderby c.Program.DisplayOrder, c.DisplayOrder
+                            select new
+                            {
+                                NameProgram = c.Program.Name,
+                                NameCourse = c.Name,
+                                CountRegistration = countRegistration,
+                                CountOnClass = countOnClass
+                            };
 
-            // Tạo một đối tượng để trả về kết quả
-            if(query == null)
-            {
-                str = "<tr><td colspan=6>Không tìm thấy dữ liệu</td></tr>";
+                // Tạo một đối tượng để trả về kết quả
+                if (query == null)
+                {
+                    str = "<tr><td colspan=6>Không tìm thấy dữ liệu</td></tr>";
+                }
+                int stt = 0;
+                foreach (var s in query)
+                {
+                    stt++;
+                    str += "<tr>"
+                        + "<td class='text-center'>" + stt + "</td>"
+                        + "<td class='text-center'>" + s.NameCourse + "</td>"
+                        + "<td class='text-center'>" + s.CountRegistration + "</td>"
+                        + "<td class='text-center'>" + s.CountOnClass + "</td>"
+                        + "</tr>"; 
+                    data.Add(item);
+                }
             }
-            int stt = 0;
-            foreach(var s in query)
+
+            return Json(new { str, data = data }, JsonRequestBehavior.AllowGet);
+        }
+        */
+        public ActionResult Loadlist_Statistics(int? IdBranch, string month)
+        {
+            try
             {
-                stt++;
-                str += "<tr>"
-                    +"<td class='text-center'>"+stt + "</td>"
-                    +"<td class='text-center'>"+s.NameCourse + "</td>"
-                    +"<td class='text-center'>"+s.CountRegistration + "</td>"
-                    +"<td class='text-center'>"+s.CountOnClass + "</td>"
-                    + "</tr>";
+                // Lấy IdBranch từ người dùng nếu không có
+                int idbranch = Convert.ToInt32(CheckUsers.idBranch());
+                if (IdBranch == null)
+                {
+                    IdBranch = idbranch;
+                }
+
+                // Tách tháng và năm từ chuỗi 'month'
+                if (string.IsNullOrWhiteSpace(month) || !month.Contains("/"))
+                {
+                    return Json(new { message = "Tháng không hợp lệ." }, JsonRequestBehavior.AllowGet);
+                }
+
+                var monthYear = month.Split('/');
+                if (!int.TryParse(monthYear[0], out int monthValue) || !int.TryParse(monthYear[1], out int yearValue))
+                {
+                    return Json(new { message = "Tháng hoặc năm không hợp lệ." }, JsonRequestBehavior.AllowGet);
+                }
+
+                // Khởi tạo biến kết quả
+                string str = "";
+                var resultData = new List<object>();
+
+                // Lấy danh sách chương trình
+                var programs = (from p in db.Programs
+                               join c in db.Courses on p.Id equals c.IdProgram
+                               join cb in db.CourseBranches on c.Id equals cb.IdCourse
+                               where cb.IdBranch == idbranch && p.Enable == true
+                               select p).Distinct().ToList();
+
+                if (!programs.Any())
+                {
+                    str = "<tr><td colspan=6>Không tìm thấy chương trình nào</td></tr>";
+                    return Json(new { str, data = resultData }, JsonRequestBehavior.AllowGet);
+                }
+
+                // Duyệt qua từng chương trình và tạo bảng dữ liệu
+                foreach (var program in programs)
+                {
+                    str += $"<tr><td class='text-success text-center'>{program.Code}</td><td colspan=3 class='text-success'>{program.Name}</td></tr>";
+
+                    var query = from c in db.Courses
+                                join cb in db.CourseBranches on c.Id equals cb.IdCourse
+                                where c.IdProgram == program.Id && cb.IdBranch == IdBranch
+                                let countOnClass = db.StudentJoinClasses.Count(x => x.IdCourse == c.Id
+                                            && x.Registration.IdBranch == IdBranch
+                                            && x.Todate.Value.Month >= monthValue
+                                            && x.Todate.Value.Year >= yearValue)
+                                let countRegistration = db.RegistrationCourses.Count(x => x.IdCourse == c.Id
+                                            && x.Registration.IdBranch == IdBranch
+                                            && x.Registration.DateCreate.Value.Month == monthValue
+                                            && x.Registration.DateCreate.Value.Year == yearValue)
+                                orderby c.Program.DisplayOrder, c.DisplayOrder
+                                select new
+                                {
+                                    NameProgram = c.Program.Name,
+                                    NameCourse = c.Name,
+                                    CountRegistration = countRegistration,
+                                    CountOnClass = countOnClass
+                                };
+
+                    if (!query.Any())
+                    {
+                        str += "<tr><td colspan=6>Không có dữ liệu</td></tr>";
+                        continue;
+                    }
+
+                    int stt = 0;
+                    foreach (var item in query)
+                    {
+                        stt++;
+                        str += "<tr>"
+                            + $"<td class='text-center'>{stt}</td>"
+                            + $"<td class='text-center'>{item.NameCourse}</td>"
+                            + $"<td class='text-center'>{item.CountRegistration}</td>"
+                            + $"<td class='text-center'>{item.CountOnClass}</td>"
+                            + "</tr>";
+
+                        resultData.Add(item);
+                    }
+                }
+
+                return Json(new { str, data = resultData }, JsonRequestBehavior.AllowGet);
             }
-            return Json(new {str, data = query.ToList() }, JsonRequestBehavior.AllowGet);
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         public ActionResult Statistics()

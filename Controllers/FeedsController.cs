@@ -26,7 +26,7 @@ namespace SuperbrainManagement.Controllers
             var list = db.Feeds.Where(x=>x.Enable==true).OrderByDescending(x=>x.Id).ToList();
             foreach (var item in list)
             {
-                str += "<li class=\"list-group-item border-0 d-flex justify-content-between mb-3 border-radius-lg\">" +
+                str += "<li class=\"list-group-item d-flex justify-content-between mb-3 border-radius-lg border-bottom border-2 mt-1\">" +
                             "<div class=\"d-flex align-items-center\">" +
                                 "<div class=\"me-3 text-center\">" +
                                     "<img src=\"" + (item.User.Employee.Image == null ? "/Assets/images/profile/user-1.jpg" : item.User.Employee.Image) + "\" alt=\"\" width=\"35\" height=\"35\" class=\"rounded-circle\">" +

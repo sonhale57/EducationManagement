@@ -405,7 +405,7 @@ namespace SuperbrainManagement.Controllers
                                     Amount = amount,
                                     TotalAmount = totalamount,
                                     Discount = Discount,
-                                    IdPromotion = promotionProductId
+                                    IdPromotion = (promotionProductId !=0 ? promotionProductId:null)
                                 };
                                 db.RegistrationProducts.Add(NewregistrationProduct);
                                 db.SaveChanges();
@@ -433,7 +433,7 @@ namespace SuperbrainManagement.Controllers
                                     StatusExtend = false,
                                     StatusJoinClass = false,    
                                     StatusReserve = false,
-                                    IdPromotion = promotionId
+                                    IdPromotion = (promotionId!=0 ? promotionId:null)
                                 };
                                 db.RegistrationCourses.Add(NewregistrationCourse);
                                 db.SaveChanges();

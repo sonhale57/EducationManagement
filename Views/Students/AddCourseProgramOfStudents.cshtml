@@ -15,8 +15,8 @@
                         <i class="ti ti-dots text-success"></i>
                     </a>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <a class="dropdown-item" href="@Url.Action("RegistrationPrints","Students")"><i class="ti ti-printer"></i> In phiếu đăng ký tổng</a>
-                        <a class="dropdown-item" href="javascript:PrintDetails()"><i class="ti ti-printer"></i> In phiếu đăng ký chi tiết</a>
+                        <a class="dropdown-item" href="javascript:PrintTotal()"><i class="ti ti-printer"></i> In phiếu đăng ký tổng</a>
+                        <a class="dropdown-item" href="javascript:PrintDetail()"><i class="ti ti-printer"></i> In phiếu đăng ký chi tiết</a>
                     </div>
                 </div>
             </th>
@@ -423,7 +423,6 @@
         var isProcessing = false;
         $(document).ready(function () {
             const urlParams = new URLSearchParams(window.location.search);
-
             const idRegistration = urlParams.get('IdRegistration');
             const modalPayment = urlParams.get('modalPayment');
 
@@ -442,6 +441,12 @@
                 $("#examplePayment").modal('show');
             }
         });
+        function PrintTotal() {
+            window.open('/students/RegistrationPrints?IdRegistration=' + $("#IdRegistration").val());
+        }
+        function PrintDetail() {
+
+        }
         function Read_text() {
             var tongtien = parseFloat($("#TongtienRegis").val().replace(/,/g, '')); // Remove all commas
             var voucher = parseFloat($("#TaikhoanRegis").val().replace(/,/g, '')); // Remove all commas
@@ -837,8 +842,8 @@
             var amount = 0;
             var discount = 0;
             var isChecked = [];
-            var promotionId = $('#promotionSelect').val();
-            var promotionProductId = $('#promotionProductSelect').val();
+            var promotionId = parseInt($('#promotionSelect').val());
+            var promotionProductId = parseInt($('#promotionProductSelect').val());
             var IdRegistration = document.getElementById("IdRegistration").value;
             var description = $('#description').val();
             $(".listproduct").each(function () {
