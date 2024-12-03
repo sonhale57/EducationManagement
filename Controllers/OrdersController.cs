@@ -16,6 +16,7 @@ using System.Xml.Linq;
 using static System.Runtime.CompilerServices.RuntimeHelpers;
 using System.Transactions;
 using Transaction = SuperbrainManagement.Models.Transaction;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace SuperbrainManagement.Controllers
 {
@@ -122,7 +123,7 @@ namespace SuperbrainManagement.Controllers
             }
             if (!string.IsNullOrEmpty(searchString))
             {
-                querysearch = " and o.Code like N'" + searchString + "'";
+                querysearch = " and o.Code like N'%" + searchString + "%'";
             }
             else
             {
@@ -182,7 +183,7 @@ namespace SuperbrainManagement.Controllers
                     }
                     else if (reader["status"].ToString() == "0")
                     {
-                        badgeStatus = "<span class='badge text-white bg-light'>Đơn hàng hủy</span>";
+                        badgeStatus = "<span class='badge text-danger bg-light'>Đơn hàng hủy</span>";
                         strbtn = "";
                     }
                     double tongtien = Double.Parse(reader["tongtien"].ToString());
@@ -358,40 +359,52 @@ namespace SuperbrainManagement.Controllers
             string str = ""; int count = 0;
             int idBranch = int.Parse(CheckUsers.idBranch());
             var cn = db.Branches.Find(idBranch);
-            string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                string query = "SELECT p.Id,p.Image, p.Name,p.Unit,p.Description,p.Price,p.NumberOfPackage,p.UnitOfPackage,p.Code,p.Quota,COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '1' AND re.IdBranch =" + idbranch_hq + "), 0) -"
-                                        + " COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '0' AND re.IdBranch =" + idbranch_hq + "), 0) AS Tonkho"
-                                        + " FROM product p"
-                                        + " where p.enable=1 "
-                                        + " order by p.Name";
-                SqlCommand command = new SqlCommand(query, connection);
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
 
-                while (reader.Read())
+            var category = db.ProductCategories.Where(x => x.Enable == true && x.Active == true);
+            foreach (var cat in category)
+            {
+                str += "<tr><td class='text-center text-success'>"+cat.Code+"</td><td class='text-success' colspan=6>"+cat.Name+"</td></tr>";
+                string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
+                using (SqlConnection connection = new SqlConnection(connectionString))
                 {
-                    count++;
-                    int tonkho = int.Parse(reader["Tonkho"].ToString());
-                    double dongia = Double.Parse(reader["Price"].ToString());
-                    double heso = int.Parse(reader["NumberOfPackage"].ToString());
-                    double dongiaban = dongia * heso;
-                    str += "<tr>"
-                            + "<td class='text-center align-content-center'>" + count + "</td>"
-                            + "<td class='w-25 align-content-center'> <img src='" + (reader["Image"].ToString() == "" ? "/assets/images/logos/icon web.png" : reader["Image"].ToString()) + "' alt='" + reader["Name"].ToString() + "' class='rounded-2 me-2' height='40'><span class='text-success'>" + reader["Name"].ToString() + "<br/><small class='fst-italic text-muted'>Ghi chú: " + reader["Description"].ToString() + "</small></td>"
-                            + "<td class='w-25 text-center'>" + reader["UnitOfPackage"].ToString() + "</td>"
-                            + "<td class='w-10 align-content-center'>"
-                            + "<input type='hidden' name='NumberOfPackage_" + count + "' id='NumberOfPackage_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + reader["NumberOfPackage"].ToString() + "' class='form-control'>"
-                            + "<input type='hidden' name='IdProduct_" + count + "' id='idproduct_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + reader["Id"].ToString() + "' class='form-control' onchange='javascript:update_thanhtien(" + count + ")'>"
-                            + "<input type='text' name='Price_" + count + "' id='dongia_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + string.Format("{0:N0}", dongiaban) + "' class='form-control text-end' onchange='javascript:update_thanhtien(" + count + ")' readonly>"
-                            + "</td>"
-                            + "<td class='text-center w-5 align-content-center'><input type='text' name='Amount_" + count + "'  id='soluong_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' max='" + reader["Tonkho"].ToString() + "' class='form-control soluong text-center' onchange='javascript:update_thanhtien(" + count + ")' ></td>"
-                            + "<td class='text-center w-10 align-content-center'><input type='text' name='TotalAmount_" + count + "'  id='thanhtien_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' class='form-control text-end' readonly></td>"
-                            + "</tr>";
+                    string query = "SELECT p.Id,p.Image,p.Code, p.Name,p.Unit,p.Description,p.Price,p.NumberOfPackage,p.UnitOfPackage,p.Code,p.Quota,COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '1' AND re.IdBranch =" + idbranch_hq + "), 0) -"
+                                            + " COALESCE((SELECT SUM(Amount) FROM ProductReceiptionDetail d INNER JOIN WarehouseReceiption re ON re.id = d.IdReceiption WHERE d.IdProduct = p.Id AND d.Type = '0' AND re.IdBranch =" + idbranch_hq + "), 0) AS Tonkho"
+                                            + " FROM product p"
+                                            + " where p.enable=1 and p.IdCategory="+cat.Id
+                                            + " order by p.Name";
+                    SqlCommand command = new SqlCommand(query, connection);
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        count++;
+                        int tonkho = int.Parse(reader["Tonkho"].ToString());
+                        double dongia = Double.Parse(reader["Price"].ToString());
+                        double heso = int.Parse(reader["NumberOfPackage"].ToString());
+                        double dongiaban = dongia * heso;
+                        str += "<tr>"
+                                + "<td class=\"align-content-center white-space-nowrap text-center\">"
+                                + "<img class='rounded-3' src=\"" + (reader["Image"].ToString() == "" ? "/assets/images/logos/icon web.png" : reader["Image"].ToString()) + "\" alt=\"\" width=\"53\">"
+                                + "</td>"
+                                + "<td class='text-center align-content-center'>" + reader["Code"] + "</td>"
+                                + "<td class='w-25 align-content-center'><span class='fw-bolder'>" + reader["Name"].ToString() + "</span>"
+                                + (reader["Description"].ToString() == "" ? "" : "<br/><small class='text-muted'><i class=\"ti ti-corner-down-right\"></i>" + reader["Description"].ToString() + "</small>")
+                                + "</td>"
+                                + "<td class='text-center align-content-center'>" + reader["UnitOfPackage"].ToString() + "</td>"
+                                + "<td class='w-10 align-content-center'>"
+                                + "<input type='hidden' name='NumberOfPackage_" + count + "' id='NumberOfPackage_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + reader["NumberOfPackage"].ToString() + "' class='form-control'>"
+                                + "<input type='hidden' name='IdProduct_" + count + "' id='idproduct_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + reader["Id"].ToString() + "' class='form-control' onchange='javascript:update_thanhtien(" + count + ")'>"
+                                + "<input type='text' name='Price_" + count + "' id='dongia_" + count + "' data-id='" + reader["Id"].ToString() + "' value='" + string.Format("{0:N0}", dongiaban) + "' class='form-control text-end' onchange='javascript:update_thanhtien(" + count + ")' readonly>"
+                                + "</td>"
+                                + "<td class='text-center w-5 align-content-center'><input type='text' name='Amount_" + count + "'  id='soluong_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' max='" + reader["Tonkho"].ToString() + "' class='form-control soluong text-center' onchange='javascript:update_thanhtien(" + count + ")' ></td>"
+                                + "<td class='text-center w-10 align-content-center'><input type='text' name='TotalAmount_" + count + "'  id='thanhtien_" + count + "' data-id='" + reader["Id"].ToString() + "' value='0' class='form-control text-end' readonly></td>"
+                                + "</tr>";
+                    }
+                    reader.Close();
                 }
-                reader.Close();
-            }
+            } 
+          
             var item = new
             {
                 str,
@@ -410,7 +423,7 @@ namespace SuperbrainManagement.Controllers
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "select p.Code as CodeProduct,p.Name,p.Unit,p.Image,od.Amount,od.Price,od.TotalAmount,o.Code as CodeOrder,o.Address,o.Phone,o.Description,o.Status,us.Name as Username,o.DateCreate,(select sum(TotalAmount) from OrderDetail where IdOrder=o.Id) as tongtien "
+                string query = "select p.Code as CodeProduct,p.Description,p.Name,p.Unit,p.Image,od.Amount,od.Price,od.TotalAmount,o.Code as CodeOrder,o.Address,o.Phone,o.Description,o.Status,us.Name as Username,o.DateCreate,(select sum(TotalAmount) from OrderDetail where IdOrder=o.Id) as tongtien "
                                     + " from OrderDetail od inner join [Order] o on o.id = od.IdOrder, Product p,[User] us"
                                     + " where p.id=od.IdProduct and us.Id=o.IdUser and o.Id=" + id;
                 SqlCommand command = new SqlCommand(query, connection);
@@ -424,17 +437,19 @@ namespace SuperbrainManagement.Controllers
                     double thanhtien = Double.Parse(reader["TotalAmount"].ToString());
                     tongtien += thanhtien;
                     str += "<tr>"
-                            + "<td class='text-center'>" + count + "</td>"
-                            + "<td class=''> <img src='" + (reader["Image"].ToString() == "" ? "/assets/images/logos/icon web.png" : reader["Image"].ToString()) + "' alt='" + reader["Name"].ToString() + "' class='rounded-2 me-2' height='40'><span class='text-success'>" + reader["Name"].ToString() + "<br/><small class='fst-italic text-muted'>Ghi chú: " + reader["Description"].ToString() + "</small></td>"
-                            + "<td class='text-center'>" + reader["Unit"].ToString() + "</td>"
-                            + "<td class='text-end'>" + string.Format("{0:N0}", dongia) + "</td>"
-                            + "<td class='text-center'>" + reader["Amount"].ToString() + "</td>"
-                            + "<td class='text-end'>" + string.Format("{0:N0}", thanhtien) + "</td>"
+                            + "<td class='align-content-center text-center'><img class='rounded-3' src=\"" + (reader["Image"].ToString() == "" ? "/assets/images/logos/icon web.png" : reader["Image"].ToString()) + "\" alt=\"\" width=\"53\">"
+                            + "<td class='text-center align-content-center'>" + reader["CodeProduct"].ToString() + "</td>"
+                            + "<td class='text-start align-content-center'><span class='fw-bolder'>" + reader["Name"].ToString() 
+                            + (reader["Description"].ToString() =="" ?"" : "<br/><small class='text-muted'><i class='ti ti-corner-down-right'></i>" + reader["Description"].ToString() + "</small>")+"</td>"
+                            + "<td class='text-center align-content-center'>" + reader["Unit"].ToString() + "</td>"
+                            + "<td class='text-end align-content-center'>" + string.Format("{0:N0}", dongia) + "</td>"
+                            + "<td class='text-center align-content-center'>" + reader["Amount"].ToString() + "</td>"
+                            + "<td class='text-end align-content-center'>" + string.Format("{0:N0}", thanhtien) + "</td>"
                            + "</tr>";
                     strCode = reader["CodeOrder"].ToString();
                     strTongtien = reader["tongtien"].ToString();
                 }
-                str += "<tr><td colspan=5 class='text-end'>Tổng tiền: </td><td class='text-end'>" + string.Format("{0:N0}", tongtien) + "</td></tr>";
+                str += "<tr><td colspan=6 class='text-end'>Tổng tiền: </td><td class='text-end'>" + string.Format("{0:N0}", tongtien) + "</td></tr>";
                 reader.Close();
             }
             string strSelect = "";
@@ -1041,7 +1056,7 @@ namespace SuperbrainManagement.Controllers
                 var sum = db.OrderDetails.Where(x => x.IdOrder == i.Id).Sum(x=>x.TotalAmount);
                 str += "<tr>"
                     +"<td class='text-center'>" +count+"</td>"
-                    +"<td>"+i.Code+"</td>"
+                    +"<td class='text-center'>"+i.Code+"</td>"
                     +"<td>"+i.Branch.Name+"</td>"
                     +"<td class='text-center'>"+i.DateCreate.Value.ToString("dd/MM/yyyy")+"</td>"
                     +"<td class='text-center'>"+trangthai+"</td>"
@@ -1090,7 +1105,7 @@ namespace SuperbrainManagement.Controllers
             string connectionString = ConfigurationManager.ConnectionStrings["ModelDbContext"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "select o.Code,p.Name as NameProduct,od.Price,p.Unit,od.Amount,od.TotalAmount,b.Name as NameBranch,o.DateCreate,o.Status"
+                string query = "select o.Code,p.Code as CodeProduct,p.Description,p.NumberOfPackage,p.Name as NameProduct,od.Price,p.UnitOfPackage,od.Amount,od.TotalAmount,b.Name as NameBranch,o.DateCreate,o.Status"
                                     + " from[Order] o"
                                     + " join OrderDetail od on od.IdOrder = o.Id"
                                     + " join Product p on p.Id = od.IdProduct"
@@ -1101,17 +1116,21 @@ namespace SuperbrainManagement.Controllers
                 SqlDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
+                    double soluong = Double.Parse(reader["Amount"].ToString());
+                    double heso = Double.Parse(reader["NumberOfPackage"].ToString());
                     count++;
                     str += "<tr>"
-                        + "<td class='text-center'>" + count + "</td>"
-                        + "<td class='text-center'>" + reader["Code"] + "</td>"
-                        + "<td class='text-center'>" + reader["NameProduct"] + "</td>"
-                        + "<td class='text-center'>" + reader["Unit"] + "</td>"
-                        + "<td class='text-end'>" + reader["Price"] + "</td>"
-                        + "<td class='text-center'>" + reader["Amount"] + "</td>"
-                        + "<td class='text-end'>" + reader["TotalAmount"] + "</td>"
-                        + "<td class='text-center'>" + reader["NameBranch"] + "</td>"
-                        + "<td class='text-center'>" + DateTime.Parse(reader["DateCreate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
+                        + "<td class='text-center align-content-center'>" + count + "</td>"
+                        + "<td class='text-center align-content-center'>" + reader["Code"] + "</td>"
+                        + "<td class='text-start align-content-center'>" + reader["NameBranch"] + "</td>"
+                        + "<td class='text-center align-content-center'>" + DateTime.Parse(reader["DateCreate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
+                        + "<td class='text-center align-content-center'>" + reader["CodeProduct"] + "</td>"
+                        + "<td class='text-start align-content-center'><span class='fw-bolder'>" + reader["NameProduct"] +"</span>"
+                        + "<small class='text-muted'>"+(reader["Description"].ToString() == "" ? "" : "<br/><i class='ti ti-corner-down-right'></i>" + reader["Description"])+"</i></small>"
+                        +"</td>"
+                        + "<td class='text-center align-content-center'>" + reader["UnitOfPackage"] + "</td>"
+                        + "<td class='text-center align-content-center'>" + reader["Amount"] + "</td>"
+                        + "<td class='text-center align-content-center'>" + soluong * heso + "</td>"
                         + "</tr>";
                 }
                 reader.Close();
@@ -1122,6 +1141,76 @@ namespace SuperbrainManagement.Controllers
                 str
             };
             return Json(item, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult StatisticOrder()
+        {
+            if (CheckUsers.iduser() == "")
+            {
+                return Redirect("/authentication");
+            }
+            else
+            {
+                var branches = db.Branches.ToList();
+                int idbranch = int.Parse(CheckUsers.idBranch());
+                if (!CheckUsers.CheckHQ())
+                {
+                    branches = db.Branches.Where(x => x.Id == idbranch).ToList();
+                }
+                ViewBag.IdBranch = new SelectList(branches, "Id", "Name");
+                return View();
+            }
+        }
+        public ActionResult Loadlist_statisticOrder(DateTime Fromdate, DateTime Todate, int? IdBranch)
+        {
+            string str = "", querycn = "";
+            int IdBranchHQ = db.Branches.SingleOrDefault(x => x.Code.ToLower() == "hq" && x.Enable == true).Id;
+            if (IdBranch == null)
+            {
+                IdBranch = Convert.ToInt32(CheckUsers.idBranch());
+            }
+                // Lọc danh sách vật tư được đặt
+                var result = db.OrderDetails
+                    .Where(od => od.Order.DateCreate >= Fromdate &&
+                                 od.Order.DateCreate <= Todate &&
+                                 (IdBranch == IdBranchHQ || od.Order.IdBranch == IdBranch))
+                    .GroupBy(od => od.IdProduct) // Nhóm theo vật tư
+                    .Select(g => new
+                    {
+                        ProductID = g.Key,
+                        Price = g.Average(od => od.Price), // Tổng số lượng đặt
+                        TotalQuantity = g.Sum(od => od.Amount), // Tổng số lượng đặt
+                        TotalAmount = g.Sum(od => od.TotalAmount) // Tổng tiền
+                    })
+                    .OrderByDescending(x => x.TotalQuantity) // Sắp xếp theo số lượng nhiều nhất
+                    .ToList();
+            try
+            {
+                int count = 0;
+                foreach (var item in result)
+                {
+                    count++;
+                    str += "<tr>"
+                        + "<td class='text-center align-content-center'>" + count + "</td>"
+                        + "<td class='text-center align-content-center'>" + db.Products.Find(item.ProductID).Code + "</td>"
+                        + "<td class='text-start align-content-center'>"
+                        + "<span class='fw-bolder'>"+ db.Products.Find(item.ProductID).Name+ "</span>" 
+                        + (db.Products.Find(item.ProductID).Description == null ? "": "<br/><small class='text-muted'><i class=\"ti ti-corner-down-right\"></i> "+ db.Products.Find(item.ProductID).Description + "</small>")  
+                        + "</td>"
+                        + "<td class='text-center align-content-center'>" +  db.Products.Find(item.ProductID).UnitOfPackage + "</td>"
+                        + "<td class='text-end align-content-center'>" + string.Format("{0:N0}", item.Price) + " đ</td>"
+                        + "<td class='text-center align-content-center'>" + item.TotalQuantity + "</td>"
+                        + "<td class='text-end align-content-center'>" + string.Format("{0:N0}", item.TotalAmount) + " đ</td>"
+                        + "</tr>";
+                }
+                // Trả kết quả
+                return Json(new { success = true, data = result, str }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                // Trả lỗi nếu có
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
     }
 }

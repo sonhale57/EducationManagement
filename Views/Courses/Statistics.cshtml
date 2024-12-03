@@ -17,10 +17,10 @@
     </div>
     <div class="col col-md-7 col-sm-12 text-end">
         <button id="exportButton" class="btn btn-success">
-            <i class="ti ti-download"></i> Download
+            <i class="ti ti-download"></i> Xuất danh sách
         </button>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-6 mt-2">
         <div class="table-responsive mx-n1 px-1">
             <table class="table table-bordered fs-3 mt-2" id="tableToPrint">
                 <thead>
@@ -36,8 +36,12 @@
             </table>
         </div>
     </div>
-    <div class="col-md-6">
-        <div id="doughnut-chart" style="min-height:320px" class="echart-doughnut-rounded-chart-example mt-5"></div>
+    <div class="col-md-6 mt-2">
+        <div class="card">
+            <div class="card-body">
+                <div id="doughnut-chart" style="min-height:320px" class="echart-doughnut-rounded-chart-example mt-3"></div>
+            </div>
+        </div>
     </div>
 </div>
 <script>
@@ -82,11 +86,11 @@
         var doughnutChart = echarts.init(document.getElementById('doughnut-chart'));
         var doughnutOption = {
             title: {
-                text: 'Thống kê khóa học đăng ký',
+                text: 'Biểu đồ thống kê khóa học đăng ký',
                 left: 'center',
                 textStyle: {
                     fontFamily: 'Libre Franklin',
-                    fontSize: 20
+                    fontSize: 18
                 }
             },
             tooltip: {
@@ -106,6 +110,7 @@
             legend: {
                 orient: 'vertical',
                 right: '0',
+                top:50,
                 data: chartData.map(item => item.name)
             },
             series: [

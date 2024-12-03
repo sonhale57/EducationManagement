@@ -621,6 +621,7 @@
     <Content Include="assets\libs\simplebar\src\scrollbar-width.js" />
     <Content Include="assets\libs\simplebar\src\simplebar.css" />
     <Content Include="assets\libs\simplebar\src\simplebar.js" />
+    <Content Include="Content\email.html" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="assets\css\icons\tabler-icons\fonts\tabler-icons.eot" />
@@ -1036,6 +1037,7 @@
     <Content Include="Views\Settings\_Sidebar.cshtml" />
     <Content Include="Views\Settings\_Config.cshtml" />
     <Content Include="Content\EmailTemplate_newStudent.html" />
+    <Content Include="Views\Orders\StatisticOrder.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Authentication\Index.cshtml" />

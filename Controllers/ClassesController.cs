@@ -67,7 +67,7 @@ namespace SuperbrainManagement.Controllers
                     + "<td class='align-content-center text-center'>" + c.Code+"</td>"
                     + "<td class='align-content-center'>" + c.Name+ "</td>"
                     + "<td class='align-content-center'>" + c.Description+ "</td>"
-                    + "<td class='text-center align-content-center'>" + TKB(c.Id) +"</td>"
+                    + "<td class='text-start align-content-center'>" + TKB(c.Id) +"</td>"
                     + "<td class='text-center align-content-center'>" + GetTeacher(c.Id)+"</td>"
                     + "<td class='text-center align-content-center'><span class='btn btn-sm btn-outline-success'>" + db.StudentJoinClasses.Count(x=>x.IdClass==c.Id && x.Todate>DateTime.Now)+ "</td>"
                     + "<td class='text-end align-content-center'>"
@@ -553,7 +553,7 @@ namespace SuperbrainManagement.Controllers
                                       .Where(vs => vs.IdBranch == idBranch)
                                       .ToList();
 
-            str += "<thead><tr>"
+            str += "<thead class=\"border-2 border-bottom border-muted\"><tr>"
                 + "<th class='text-center'>STT</th>"
                 + "<th style='min-width:200px;'>TÊN</th>"
                 + "<th style='min-width:200px;'>KHÓA HỌC</th>"

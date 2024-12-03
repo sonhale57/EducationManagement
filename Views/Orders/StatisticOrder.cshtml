@@ -1,0 +1,80 @@
+﻿@{
+    ViewBag.Controller = "Đơn hàng";
+    ViewBag.Title = "Thống kê đơn hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col col-md-6 col-sm-12">
+        <div class="input-group">
+            @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
+            {
+                @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", @onchange = "Loadlist()" })
+            }
+            <input type="text" class="form-control ms-1 rounded-1" name="fromdate" id="fromdate" placeholder="Tìm kiếm" value="" onchange="return Loadlist()">
+            <input type="text" class="form-control ms-1 rounded-1" name="todate" id="todate" placeholder="Tìm kiếm" value="" onchange="return Loadlist()">
+        </div>
+    </div>
+    <div class="col col-md-6 col-sm-12 text-end">
+        <button id="exportButton" class="btn btn-success">
+            <i class="ti ti-download"></i> Xuất file
+        </button>
+    </div>
+</div>
+
+<table class="table table-bordered mt-2 fs-3" id="tableToPrint">
+    <thead>
+        <tr>
+            <th class="text-center">STT</th>
+            <th class="text-start">Tên vật tư</th>
+            <th class="text-center">Số lượng</th>
+            <th class="text-end">Tổng tiền</th>
+        </tr>
+    </thead>
+    <tbody id="showlist"></tbody>
+    <tr id="loading">
+    </tr>
+</table>
+<script>
+    $(function () {
+        $("#fromdate").datepicker({ dateFormat: "dd/mm/yy" });
+        $("#todate").datepicker({ dateFormat: "dd/mm/yy", maxDate: 1 });
+        if ($("#fromdate").val() == "") {
+            $("#fromdate").datepicker("setDate", -30);
+        }
+        if ($("#todate").val() == "") {
+            $("#todate").datepicker("setDate", 1);
+        }
+        Loadlist();
+    });
+    function Loadlist() {
+        $("#loading").html("<td colspan=6 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
+        var fromDate = $("#fromdate").val().split("/").reverse().join("-");
+        var toDate = $("#todate").val().split("/").reverse().join("-");
+        $.ajax({
+            url: '@Url.Action("Loadlist_statisticOrder", "Orders")',
+            type: "GET",
+            data: {
+                IdBranch: $("#IdBranch").val(),
+                Fromdate: fromDate,
+                Todate: toDate
+            },
+            success: function (data) {
+                $("#loading").html("");
+                $('#showlist').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+    }
+    document.getElementById('exportButton').addEventListener('click', function () {
+        var wb = XLSX.utils.table_to_book(document.getElementById('tableToPrint'), { sheet: "Sheet1" });
+        var wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+
+        var blob = new Blob([wbout], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        var link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "ThongKeDonHang.xlsx";
+        link.click();
+    });
+</script>

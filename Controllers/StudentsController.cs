@@ -118,6 +118,109 @@ namespace SuperbrainManagement.Controllers
             return View(pagedData);
         }
 
+        public ActionResult Loadlist(string sortOrder, string searchString, int? idBranch, bool? status = true)
+        {
+            string str = "",trangthai="";
+            if (idBranch == null)
+            {
+                idBranch = Convert.ToInt32(CheckUsers.idBranch());
+            }
+            // Lấy danh sách học viên
+            var students = db.Students
+                .Where(s => s.Enable == true && s.IdBranch == idBranch);
+
+            // Tìm kiếm học viên theo tên nếu có searchString
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                students = students.Where(s => s.Name.Contains(searchString));
+            }
+
+            // Phân loại học viên chính thức và tiềm năng
+            if (status == true || status == null)
+            {
+                // Lọc học viên chính thức (có đăng ký trong Registration)
+                students = students.Where(s => db.Registrations.Any(r => r.IdStudent == s.Id));
+            }
+            else
+            {
+                // Lọc học viên tiềm năng (không có đăng ký trong Registration)
+                students = students.Where(s => !db.Registrations.Any(r => r.IdStudent == s.Id));
+            }
+
+            // Sắp xếp danh sách học viên
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    students = students.OrderByDescending(s => s.Name);
+                    break;
+                case "name":
+                    students = students.OrderBy(s => s.Name);
+                    break;
+                case "date_desc":
+                    students = students.OrderByDescending(s => s.Id);
+                    break;
+                case "date":
+                    students = students.OrderBy(s => s.Id);
+                    break;
+                default:
+                    students = students.OrderByDescending(s => s.Id);
+                    break;
+            }
+            if (!students.Any())
+            {
+                str = "<tr><td colspan=8 class='text-center'>Không tìm thấy dữ liệu học viên!</td></tr>";
+                return Json(new { str }, JsonRequestBehavior.AllowGet);
+            }
+            int count = 0;
+            foreach (var item in students)
+            {
+                if (!db.Registrations.Any(x => x.IdStudent == item.Id))
+                {
+                    trangthai = "<span class=\"badge text-success bg-light\">Tiềm năng</span>";
+                }
+                else
+                {
+                    // Xác định trạng thái học viên
+                    if (db.StudentJoinClasses.Any(jc => jc.IdStudent == item.Id && jc.Todate > DateTime.Today))
+                    {
+                        trangthai = "<span class=\"badge text-white bg-success\">Đang học</span>";
+                    }
+                    else if (db.RegistrationCourses.Any(rc => rc.Registration.IdStudent == item.Id &&
+                                                              (rc.StatusJoinClass == null || rc.StatusJoinClass == false)))
+                    {
+                        trangthai = "<span class=\"badge text-white bg-info\">Đang đợi xét lớp</span>";
+                    }
+                    else
+                    {
+                        trangthai = "<span class=\"badge text-white bg-danger\">Đã kết khóa</span>";
+                    }
+                }
+                
+
+                count++;
+                str += "<tr>"
+                    + "<td class='text-center'><a href=\"/students/details/"+item.Id+"\" class='text-muted'>" + count + "</a></td>"
+                    + "<td class='text-center'><a href=\"/students/details/"+item.Id+ "\" class='text-muted'>" + item.Code + "</a></td>"
+                    + "<td class='text-start'><a href=\"/students/details/"+item.Id+ "\" class='text-muted'>" + item.Name + "</a></td>"
+                    + "<td class='text-center'><a href=\"/students/details/"+item.Id+ "\" class='text-muted'>" + item.DateOfBirth.Value.ToString("dd/MM/yyyy") + "</a></td>"
+                    + "<td class='text-center'><a href=\"/students/details/"+item.Id+ "\" class='text-muted'>" + item.Phone + "</a></td>"
+                    + "<td class='text-start'><a href=\"/students/details/"+item.Id+ "\" class='text-muted'>" + item.User.Name + "</a></td>"
+                    + "<td class='text-center'><a href=\"/students/details/"+item.Id+ "\" class='text-muted'>" + trangthai + "</a></td>"
+                    + "<td class='text-end'>"
+                    + "<a href=\"/students/details/"+item.Id+"\" class=\"me-1\"><i class=\"ti ti-edit text-primary\"></i></a>"
+                    + "<a href=\"javascript:Submit_Delete("+item.Id+")\" class=\"me-1\"><i class=\"ti ti-trash text-danger\"></i></a>"
+                    + "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\"><i class=\"ti ti-dots-vertical\"></i></a>"
+                    + "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuButton\">"
+                    + "<li><a class=\"dropdown-item\" href=\"/Students/AddCourseProgramOfStudents?IdStudent="+item.Id+"\"><i class=\"ti ti-script-plus\"></i> Đăng ký khóa học</a></li>"
+                    + "<li><a class=\"dropdown-item\" href=\"javascript:exchangeBranch("+item.Id+")\"><i class=\"ti ti-exchange\"></i> Chuyển cơ sở</a></li>"
+                    + "<li><a class=\"dropdown-item\" href=\"/Students/Sendemail/"+item.Id+"\"><i class=\"ti ti-mail-forward\"></i> Gửi email</a></li>"
+                    + "</ul>"
+                    + "</td>"
+                    + "</tr>";
+            }
+            return Json(new {str},JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult AddCourseProgramOfStudents(int IdStudent)
         {
             Student student = Connect.SelectSingle<Student>("select * from Student where Id='" + IdStudent + "'");
@@ -276,7 +379,7 @@ namespace SuperbrainManagement.Controllers
                     chietkhau += Convert.ToInt32(row["Discount"]);
 
                     idobject = Convert.ToInt32(row["IdCourse"]);
-                    name = row["NameProgram"].ToString() + "<hr>" + row["NameCourse"].ToString();
+                    name = row["NameProgram"].ToString() + "<br/><i class='ti ti-corner-down-right'></i> Khóa học: <b>" + row["NameCourse"].ToString()+"</b>";
                 }
                 else if (row.Table == dataTableProduct)
                 {
@@ -594,11 +697,11 @@ namespace SuperbrainManagement.Controllers
                     string StatusStudent = "";
                     if (todate > DateTime.Now)
                     {
-                        StatusStudent = "<span class='badge bg-success rounded-3'>Đang học</span>";
+                        StatusStudent = "<span class='badge bg-success'>Đang học</span>";
                     }
                     else
                     {
-                        StatusStudent = "<span class='badge bg-danger rounded-3'>Đã kết thúc</span>";
+                        StatusStudent = "<span class='badge bg-danger'>Đã kết thúc</span>";
                     }
                     count++;
                     str +="<tr>"
@@ -732,13 +835,13 @@ namespace SuperbrainManagement.Controllers
                         }
                         count++;
                         str += "<tr>"
-                             + "<td class='text-center'>" + count + "</td>"
-                             + "<td>" + reader["Code"].ToString() + "</td>"
-                             + "<td>" + reader["NameCourse"].ToString() + "</td>"
-                             + "<td class='text-end'>" + string.Format("{0:N0} đ", amount) + "</td>"
-                             + "<td class='text-center'>" + Convert.ToDateTime(reader["DateCreate"]).ToString("dd/MM/yyyy") + "</td>"
-                             + "<td class='text-center'>" + (status ? "<i class='ti ti-circle-check text-success'></i>" : "Chưa thanh toán") + "</td>"
-                             + "<td class='text-center'>" + strStatusJoinClass + "</td>"
+                             + "<td class='text-center'><a class='text-muted' target='_blank' href='/students/AddCourseProgramOfStudents?IdStudent=" + idStudent + "&IdRegistration=" + reader["IdRegistration"] + "'>" + count + "</a></td>"
+                             + "<td><a class='text-muted' target='_blank' href='/students/AddCourseProgramOfStudents?IdStudent=" + idStudent + "&IdRegistration=" + reader["IdRegistration"] + "'>" + reader["Code"].ToString() + "</a></td>"
+                             + "<td><a class='text-muted' target='_blank' href='/students/AddCourseProgramOfStudents?IdStudent=" + idStudent + "&IdRegistration=" + reader["IdRegistration"] + "'>" + reader["NameCourse"].ToString() + "</a></td>"
+                             + "<td class='text-end'><a class='text-muted' target='_blank' href='/students/AddCourseProgramOfStudents?IdStudent=" + idStudent + "&IdRegistration=" + reader["IdRegistration"] + "'>" + string.Format("{0:N0} đ", amount) + "</a></td>"
+                             + "<td class='text-center'><a class='text-muted' target='_blank' href='/students/AddCourseProgramOfStudents?IdStudent=" + idStudent + "&IdRegistration=" + reader["IdRegistration"] + "'>" + Convert.ToDateTime(reader["DateCreate"]).ToString("dd/MM/yyyy") + "</a></td>"
+                             + "<td class='text-center'><a class='text-muted' target='_blank' href='/students/AddCourseProgramOfStudents?IdStudent=" + idStudent + "&IdRegistration=" + reader["IdRegistration"] + "'>" + (status ? "<i class='ti ti-circle-check text-success'></i>" : "Chưa thanh toán") + "</a></td>"
+                             + "<td class='text-center'><a class='text-muted' target='_blank' href='/students/AddCourseProgramOfStudents?IdStudent=" + idStudent + "&IdRegistration=" + reader["IdRegistration"] + "'>" + strStatusJoinClass + "</a></td>"
                              + "<td class='text-end'>"
                              + "<a target='_blank' href='/students/AddCourseProgramOfStudents?IdStudent=" + idStudent + "&IdRegistration=" + reader["IdRegistration"] + "' class=\"text-warning\"><i class='ti ti-edit text-primary'></i></a>"
                              + "<a class=\"text-warning\" id=\"dropdownMenuButton\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">"

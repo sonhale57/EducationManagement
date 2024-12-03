@@ -99,7 +99,7 @@ namespace SuperbrainManagement.Controllers
                                         + "</ul>";
                     str += "<tr>"
                             + "<td class='text-center align-content-center'>" + count + "</td>"
-                            + "<td class='align-content-center'>" + reader["name"].ToString() + "<br/> <small class='fst-italic text-primary'>" + reader["NameCat"] + "</small></td>"
+                            + "<td class='align-content-center'><b>" + reader["name"].ToString() + "</b><br/><i class='ti ti-corner-down-right'></i><small class='fst-italic text-muted'> " + reader["NameCat"] + "</small></td>"
                             + "<td class='text-center align-content-center'>" + DateTime.Parse(reader["ResgistrationDeadline"].ToString()).ToString("dd/MM/yyyy") + "</td>"
                             + "<td class='text-center align-content-center'>" + DateTime.Parse(reader["Fromdate"].ToString()).ToString("dd/MM/yyyy") + "</td>"
                             + "<td class='text-center align-content-center'>" + DateTime.Parse(reader["Todate"].ToString()).ToString("dd/MM/yyyy") + "</td>"

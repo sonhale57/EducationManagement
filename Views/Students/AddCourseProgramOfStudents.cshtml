@@ -46,18 +46,20 @@
         <input class="form-control text-box single-line" id="description" placeholder="Ghi chú dành cho phiếu đăng ký" name="description" type="text" value="">
     </div>
 </div>
-<table class="table table-rounded table-bordered" style="">
-    <tr class="bg-success text-white">
-        <th class="text-center">STT</th>
-        <th class="text-center">Tên khoản thu</th>
-        <th class="text-center">Đơn giá</th>
-        <th class="text-center">Số lượng</th>
-        <th class="text-center">Chiết khấu</th>
-        <th class="text-center">Thành tiền</th>
-        <th class="text-center">.</th>
-    </tr>
-    <tbody id="dataBody">
-    </tbody>
+<table class="table table-striped">
+    <thead class="border-2 border-bottom border-muted">
+        <tr>
+            <th class="text-center fw-bolder">STT</th>
+            <th class="text-center fw-bolder">Tên khoản thu</th>
+            <th class="text-center fw-bolder">Đơn giá</th>
+            <th class="text-center fw-bolder">Số lượng</th>
+            <th class="text-center fw-bolder">Chiết khấu</th>
+            <th class="text-center fw-bolder">Thành tiền</th>
+            <th class="text-center fw-bolder">Thao tác</th>
+        </tr>
+    </thead>
+    <tbody id="dataBody"></tbody>
+    <tr class="loader"></tr>
     <tr>
         <td colspan="5" class="text-end">Tổng tiền:</td>
         <td class="text-end">

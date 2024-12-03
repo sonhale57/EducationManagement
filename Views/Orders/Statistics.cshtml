@@ -18,25 +18,79 @@
     </div>
     <div class="col col-md-6 col-sm-12 text-end">
         <button id="exportButton" class="btn btn-success">
-            <i class="ti ti-download"></i> Xuất file
+            <i class="ti ti-download"></i> Xuất danh sách
         </button>
     </div>
 </div>
-<table class="table table-bordered mt-2 fs-3" id="tableToPrint">
-    <thead>
-        <tr>
-            <th class="text-center">STT</th>
-            <th>Mã đơn hàng</th>
-            <th>Cơ sở</th>
-            <th class="text-center">Thời gian đặt hàng</th>
-            <th class="text-center">Trạng thái</th>
-            <th class="text-end">Tổng tiền</th>
-        </tr>
-    </thead>
-    <tbody id="showlist"></tbody>
-    <tr id="loading">
-    </tr>
-</table>
+<div class="mt-3">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active border-0 ms-5 fw-bold" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true"><i class="ti ti-chart-line"></i> Thống kê đặt hàng</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link border-0 ms-5 fw-bold" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false"><i class="ti ti-chart-line"></i> Thống kê đơn hàng</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link border-0 ms-5 fw-bold" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false"><i class="ti ti-chart-line"></i> Thống kê chi tiết đơn hàng</button>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+            <table class="table table-striped mt-2 fs-3" id="tableToPrint">
+                <thead class="border-2 border-bottom border-muted">
+                    <tr>
+                        <th class="text-center fw-bolder">STT</th>
+                        <th class="text-center fw-bolder">Mã vật tư</th>
+                        <th class="text-start fw-bolder">Tên vật tư</th>
+                        <th class="text-center fw-bolder">Đơn vị</th>
+                        <th class="text-end fw-bolder">Đơn giá</th>
+                        <th class="text-center fw-bolder">Số lượng</th>
+                        <th class="text-end fw-bolder">Tổng tiền</th>
+                    </tr>
+                </thead>
+                <tbody id="showlist"></tbody>
+                <tr id="loading"></tr>
+            </table>
+        </div>
+        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+            <table class="table table-striped mt-2 fs-3" id="tableToPrint">
+                <thead class="border-2 border-bottom border-muted">
+                    <tr>
+                        <th class="text-center fw-bolder">STT</th>
+                        <th class="text-center fw-bolder">Mã đơn hàng</th>
+                        <th class="text-start fw-bolder">Cơ sở</th>
+                        <th class="text-center fw-bolder">Thời gian đặt hàng</th>
+                        <th class="text-center fw-bolder">Trạng thái</th>
+                        <th class="text-end fw-bolder">Tổng tiền</th>
+                    </tr>
+                </thead>
+                <tbody id="showlist_order"></tbody>
+                <tr id="loading"></tr>
+            </table>
+        </div>
+        <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+            <table class="table table-striped fs-3 mt-2" id="tableToPrint">
+                <thead class="border-2 border-bottom border-muted">
+                    <tr>
+                        <th class="text-center fw-bolder">STT</th>
+                        <th class="text-center fw-bolder">Mã đơn hàng</th>
+                        <th class="text-start fw-bolder">Cơ sở</th>
+                        <th class="text-center fw-bolder">Thời gian đặt hàng</th>
+                        <th class="text-center fw-bolder">Mã Vật tư</th>
+                        <th class="text-start fw-bolder">Tên Vật tư</th>
+                        <th class="text-center fw-bolder">Đơn vị</th>
+                        <th class="text-center fw-bolder">Số lượng</th>
+                        <th class="text-center fw-bolder">Số lượng tổng</th>
+                    </tr>
+                </thead>
+                <tbody id="showlist_detail"></tbody>
+                <tr id="loading"></tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+
 <script>
     $(function () {
         $("#fromdate").datepicker({ dateFormat: "dd/mm/yy" });
@@ -54,7 +108,7 @@
         var fromDate = $("#fromdate").val().split("/").reverse().join("-");
         var toDate = $("#todate").val().split("/").reverse().join("-");
         $.ajax({
-            url: '@Url.Action("Load_Statistics", "Orders")',
+            url: '@Url.Action("Loadlist_statisticOrder", "Orders")',
             type: "GET",
             data: {
                 IdBranch: $("#IdBranch").val(),
@@ -64,6 +118,38 @@
             success: function (data) {
                 $("#loading").html("");
                 $('#showlist').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+        $.ajax({
+            url: '@Url.Action("Load_Statistics", "Orders")',
+            type: "GET",
+            data: {
+                IdBranch: $("#IdBranch").val(),
+                Fromdate: fromDate,
+                Todate: toDate
+            },
+            success: function (data) {
+                $("#loading").html("");
+                $('#showlist_order').html(data.str);
+            },
+            error: function (xhr, error) {
+                console.log(error);
+            }
+        });
+        $.ajax({
+            url: '@Url.Action("Load_DetailStatistics", "Orders")',
+            type: "GET",
+            data: {
+                IdBranch: $("#IdBranch").val(),
+                Fromdate: fromDate,
+                Todate: toDate
+            },
+            success: function (data) {
+                $("#loading").html("");
+                $('#showlist_detail').html(data.str);
             },
             error: function (xhr, error) {
                 console.log(error);

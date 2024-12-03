@@ -7,28 +7,27 @@
     int stt = 1;
 }
 <div class="row">
-    <div class="col col-md-3 col-sm-12">
+    <div class="col col-md-4 col-sm-12">
         <form action="/branchgroups" method="get">
             <div class="input-group">
-                <input type="text" class="form-control rounded-1" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter ">
-                <button class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
+                <input type="text" class="form-control rounded-1" name="searchString" placeholder="Tìm kiếm" value="" onblur="Loadlist()">
             </div>
         </form>
     </div>
-    <div class="col col-md-9 col-sm-12 text-end">
+    <div class="col col-md-8 col-sm-12 text-end">
         <a href="/branchgroups/create" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>
     </div>
 </div>
-<table class="table table-bordered fs-3 mt-2">
-    <thead>
+<table class="table table-striped fs-3 mt-2">
+    <thead class="border-2 border-bottom border-muted">
         <tr>
-            <th class="text-center">STT</th>
-            <th>Tên cụm</th>
-            <th>Chủ đầu tư</th>
-            <th class="text-center">Số điện thoại</th>
-            <th>Địa chỉ email</th>
-            <th class="text-center">Số lượng</th>
-            <th class="text-end">Thao tác</th>
+            <th class="text-center fw-bolder">STT</th>
+            <th class="text-start fw-bolder">Tên cụm</th>
+            <th class="text-start fw-bolder">Chủ đầu tư</th>
+            <th class="text-center fw-bolder">Số điện thoại</th>
+            <th class="text-start fw-bolder">Địa chỉ email</th>
+            <th class="text-center fw-bolder">Số lượng</th>
+            <th class="text-end fw-bolder">Thao tác</th>
         </tr>
     </thead>
 

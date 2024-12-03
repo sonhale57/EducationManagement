@@ -6,109 +6,47 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     int stt = 1;
 }
-
-<div class="row">
-    <div class="col col-md-4 col-sm-12">
+<div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+    <div>
         <form action="/students" method="get">
-            <div class="input-group mb-3">
+            <div class="input-group">
                 @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
                 {
-                    @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", onchange = "this.form.submit();" })
+                    @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", onchange = "Loadlist()" })
                 }
-                <input type="text" class="form-control ms-1 rounded-1" name="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
-                <button class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" type="submit"><i class="ti ti-search text-white"></i></button>
+                <input type="text" class="form-control ms-1 rounded-1" id="searchString" name="searchString" placeholder="Tìm kiếm" value="" onblur="Loadlist()">
             </div>
         </form>
     </div>
-    <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
-        <div class="me-0 btn btn-md p-0">
-            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="ti ti-filter"></i> @{
-                    if (Convert.ToString(ViewBag.SelectedFilter) == "Potential")
-                    {
-                        <span> Tiềm năng</span>
-                    }
-                    else
-                    {
-                        <span> Chính thức</span>
-                    }
-                }
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { IdBranch=ViewBag.CurrentBranch,filterEnum = "Official", currentFilter = ViewBag.CurrentFilter })"> Chính thức</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { IdBranch=ViewBag.CurrentBranch, filterEnum = "Potential", currentFilter = ViewBag.CurrentFilter })"> Tiềm năng</a></li>
-            </ul>
-        </div>
-        <div class="me-0 btn btn-md p-0">
-            <button class="btn btn-md btn-outline-dark dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="ti ti-arrows-sort"></i> Sắp xếp theo
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { IdBranch=ViewBag.CurrentBranch, filterEnum = ViewBag.SelectedFilter, sortOrder = "name", currentFilter = ViewBag.CurrentFilter })"><i class="ti ti-sort-a-z"></i> Tên A-Z</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { IdBranch=ViewBag.CurrentBranch, filterEnum = ViewBag.SelectedFilter, sortOrder = "name_desc", currentFilter = ViewBag.CurrentFilter })"><i class="ti ti-sort-z-a"></i> Tên Z-A</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { IdBranch=ViewBag.CurrentBranch, filterEnum = ViewBag.SelectedFilter, sortOrder = "date", currentFilter = ViewBag.CurrentFilter })"><i class="ti ti-sort-ascending"></i> Mới nhất</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", new { IdBranch=ViewBag.CurrentBranch, filterEnum = ViewBag.SelectedFilter, sortOrder = "date_desc", currentFilter = ViewBag.CurrentFilter })"><i class="ti ti-sort-descending"></i> Cũ nhất</a></li>
-            </ul>
-        </div>
-        <a href="/students/create" class="btn btn-md btn-success ms-0"><i class="ti ti-circle-plus"></i> Thêm mới</a>
+    <div>
+        <select class="btn btn-md btn-outline-muted text-start" id="Status" onchange="Loadlist()">
+            <option value="True">Chính thức</option>
+            <option value="False">Tiềm năng</option>
+        </select>
+        <select class="btn btn-md btn-outline-muted text-start" id="sortOrder" onchange="Loadlist()">
+            <option value="date_desc">Mới nhất</option>
+            <option value="date">Cũ nhất</option>
+            <option value="name">Tên A-Z</option>
+            <option value="name_desc">Tên Z-A</option>
+        </select>
+        <a href="/students/create" class="btn btn-md btn-success ms-0"><i class="ti ti-plus"></i> Thêm mới</a>
     </div>
 </div>
-<table class="table fs-3">
-    <thead class="bg-success text-white rounded-1">
+<table class="table table-striped mt-2">
+    <thead class="border-2 border-bottom border-muted">
         <tr>
-            <th class="text-center">STT</th>
-            <th>Mã học viên</th>
-            <th>Họ tên</th>
-            <th class="text-center">Ngày sinh</th>
-            <th class="text-center">Trạng thái</th>
-            <th>Quản lý</th>
-            <th class="text-end">Thao tác</th>
+            <th class="text-center fw-bolder">STT</th>
+            <th class="text-center fw-bolder">Mã học viên</th>
+            <th class="text-start fw-bolder">Họ tên</th>
+            <th class="text-center fw-bolder">Ngày sinh</th>
+            <th class="text-center fw-bolder">Số điện thoại</th>
+            <th class="text-start fw-bolder">Quản lý</th>
+            <th class="text-center fw-bolder">Trạng thái</th>
+            <th class="text-end fw-bolder">Thao tác</th>
         </tr>
     </thead>
-
-    @foreach (var item in Model)
-    {
-        <tr>
-            <td class="text-center fw-bold">
-                @stt
-            </td>
-            <td class="fw-bold">
-                <a href="/students/details/@item.Id" class="text-muted me-1">@Html.DisplayFor(modelItem => item.Code)</a>
-                
-            </td>
-            <td class="fw-bold">
-                <a href="/students/details/@item.Id" class="text-muted me-1">@Html.DisplayFor(modelItem => item.Name)</a>
-            </td>
-            <td class="text-center">
-                @(item.DateOfBirth==null?"":item.DateOfBirth.Value.ToString("dd/MM/yyyy"))
-            </td>
-            <td class="text-center">
-                @Html.Raw(item.Status)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NameOfUser)
-            </td>
-            <td class="text-end">
-                <a href="/students/details/@item.Id" class="me-1"><i class="ti ti-edit text-primary"></i></a>
-                <a href="javascript:Submit_Delete(@item.Id)" class="me-1"><i class="ti ti-trash text-danger"></i></a>
-                <a class="text-warning" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="ti ti-dots-vertical"></i>
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <li><a class="dropdown-item" href="@Url.Action("AddCourseProgramOfStudents","Students",new {IdStudent = item.Id})"><i class="ti ti-script-plus"></i> Đăng ký khóa học</a></li>
-                    <li><a class="dropdown-item" href="javascript:exchangeBranch(@item.Id)"><i class="ti ti-exchange"></i> Chuyển cơ sở</a></li>
-                    <li><a class="dropdown-item" href="@Url.Action("Sendemail", "Students", new {id=item.Id})"><i class="ti ti-mail-forward"></i> Gửi email</a></li>
-                </ul>
-            </td>
-        </tr>
-        stt += 1;
-    }
+    <tbody id="showlist"></tbody>
 </table>
-<nav aria-label="Page navigation">
-    <ul class="pagination justify-content-center">
-        @Html.PagedListPager(Model, page => Url.Action("Index", new { page }), new PagedListRenderOptions { LiElementClasses = new string[] { "page-item" } })
-    </ul>
-</nav>
 <div class="modal fade" id="exchangeBranchModal" tabindex="-1" aria-labelledby="exchangeBranchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content" style="width: 600px;">
@@ -141,6 +79,28 @@
     </div>
 </div>
 <script>
+    Loadlist();
+    function Loadlist() {
+        $("#loading").html("<td colspan=8 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='50' alt='loading...'></td>");
+         $.ajax({
+             url: '@Url.Action("Loadlist", "Students")',
+             type: "GET",
+             data: {
+                 idBranch : $("#IdBranch").val(),
+                 sortOrder: $("#sortOrder").val(),
+                 status: $("#Status").val(),
+                 searchString: $("#searchString").val()
+             },
+             success: function (data) {
+                 console.log(data);
+                $("#loading").html("");
+                 $('#showlist').html(data.str);
+             },
+             error: function (xhr, error) {
+                 console.log(error);
+             }
+         });
+    }
     function Submit_Delete(Id) {
         if (confirm('Bạn có muốn xóa học viên này?')) {
             $.ajax({
