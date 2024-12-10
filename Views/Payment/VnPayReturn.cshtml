@@ -3,11 +3,13 @@
     ViewBag.Title = "VnPayReturn";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div class="card">
-    <div class="card-body h-25">
-        <div class="text-center">
-            <h2>Kết quả thanh toán</h2>
-            <p>@ViewBag.Message</p>
-        </div>
+<div class="container">
+    <h2 class="text-center">Kết quả Thanh Toán</h2>
+    <div class="alert alert-info text-center">
+        <p>@ViewBag.Message</p>
+        <p>Mã giao dịch: @Request.QueryString["vnp_TxnRef"]</p>
+    </div>
+    <div class="text-center">
+        <a href="/" class="btn btn-primary">Quay về trang chủ</a>
     </div>
 </div>

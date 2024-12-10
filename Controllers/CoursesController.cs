@@ -56,7 +56,7 @@ namespace SuperbrainManagement.Controllers
                 foreach (var program in programs)
                 {
                     // Thêm hàng chương trình
-                    str += $"<tr><td class='text-center text-success fw-bolder'>{program.Code}</td>"
+                    str += $"<tr class='bg-light'><td class='text-center text-success fw-bolder'>{program.Code}</td>"
                         + $"<td class='text-success fw-bolder' colspan=7>{program.Name}</td></tr>";
 
                     // Lấy danh sách khóa học thuộc chương trình
@@ -236,69 +236,8 @@ namespace SuperbrainManagement.Controllers
             db.SaveChanges();
             return Json(new { status="ok",message = "Đã xóa khóa học thành công!" },JsonRequestBehavior.AllowGet);
         }
-        /*
-        public ActionResult Loadlist_Statistics(int? IdBranch, string month)
-        {
-            int idbranch = Convert.ToInt32(CheckUsers.idBranch());
-            if (IdBranch == null)
-            {
-                IdBranch = idbranch;
-            }
-            // Tách tháng và năm từ chuỗi tháng
-            var monthYear = month.Split('/');
-            int monthValue = int.Parse(monthYear[0]);
-            int yearValue = int.Parse(monthYear[1]);
-
-            string str = "";
-            var data=new List<object>(); ;
-            var program = from p in db.Programs
-                          join c in db.Courses on p.Id equals c.IdProgram
-                          join cb in db.CourseBranches on c.Id equals cb.IdCourse
-                          where cb.IdBranch == idbranch && p.Enable == true
-                          select p;
-            foreach (var item in program)
-            {
-                str += "<tr><td colspan=6>" + item.Name + "</td></tr>";
-                var query = from c in db.Courses
-                            join cb in db.CourseBranches on c.Id equals cb.IdCourse
-                            where c.IdProgram == item.Id && cb.IdBranch == IdBranch
-                            let countOnClass = db.StudentJoinClasses.Count(x => x.IdCourse == c.Id
-                                     && x.Registration.IdBranch == IdBranch
-                                     && x.Todate.Value.Month >= monthValue
-                                     && x.Todate.Value.Year >= yearValue)
-                            let countRegistration = db.RegistrationCourses.Count(x => x.IdCourse == c.Id && x.Registration.IdBranch == IdBranch && x.Registration.DateCreate.Value.Month == monthValue && x.Registration.DateCreate.Value.Year == yearValue)
-                            orderby c.Program.DisplayOrder, c.DisplayOrder
-                            select new
-                            {
-                                NameProgram = c.Program.Name,
-                                NameCourse = c.Name,
-                                CountRegistration = countRegistration,
-                                CountOnClass = countOnClass
-                            };
-
-                // Tạo một đối tượng để trả về kết quả
-                if (query == null)
-                {
-                    str = "<tr><td colspan=6>Không tìm thấy dữ liệu</td></tr>";
-                }
-                int stt = 0;
-                foreach (var s in query)
-                {
-                    stt++;
-                    str += "<tr>"
-                        + "<td class='text-center'>" + stt + "</td>"
-                        + "<td class='text-center'>" + s.NameCourse + "</td>"
-                        + "<td class='text-center'>" + s.CountRegistration + "</td>"
-                        + "<td class='text-center'>" + s.CountOnClass + "</td>"
-                        + "</tr>"; 
-                    data.Add(item);
-                }
-            }
-
-            return Json(new { str, data = data }, JsonRequestBehavior.AllowGet);
-        }
-        */
-        public ActionResult Loadlist_Statistics(int? IdBranch, string month)
+        
+        public ActionResult Loadlist_Statistics(int? IdBranch, DateTime Fromdate, DateTime Todate)
         {
             try
             {
@@ -309,17 +248,6 @@ namespace SuperbrainManagement.Controllers
                     IdBranch = idbranch;
                 }
 
-                // Tách tháng và năm từ chuỗi 'month'
-                if (string.IsNullOrWhiteSpace(month) || !month.Contains("/"))
-                {
-                    return Json(new { message = "Tháng không hợp lệ." }, JsonRequestBehavior.AllowGet);
-                }
-
-                var monthYear = month.Split('/');
-                if (!int.TryParse(monthYear[0], out int monthValue) || !int.TryParse(monthYear[1], out int yearValue))
-                {
-                    return Json(new { message = "Tháng hoặc năm không hợp lệ." }, JsonRequestBehavior.AllowGet);
-                }
 
                 // Khởi tạo biến kết quả
                 string str = "";
@@ -348,12 +276,11 @@ namespace SuperbrainManagement.Controllers
                                 where c.IdProgram == program.Id && cb.IdBranch == IdBranch
                                 let countOnClass = db.StudentJoinClasses.Count(x => x.IdCourse == c.Id
                                             && x.Registration.IdBranch == IdBranch
-                                            && x.Todate.Value.Month >= monthValue
-                                            && x.Todate.Value.Year >= yearValue)
+                                            && x.Todate >= Fromdate
+                                            && x.Fromdate <= Todate)
                                 let countRegistration = db.RegistrationCourses.Count(x => x.IdCourse == c.Id
                                             && x.Registration.IdBranch == IdBranch
-                                            && x.Registration.DateCreate.Value.Month == monthValue
-                                            && x.Registration.DateCreate.Value.Year == yearValue)
+                                            && x.Registration.DateCreate >= Fromdate && x.Registration.DateCreate <= Todate)
                                 orderby c.Program.DisplayOrder, c.DisplayOrder
                                 select new
                                 {
@@ -394,16 +321,6 @@ namespace SuperbrainManagement.Controllers
 
         public ActionResult Statistics()
         {
-            var config = db.Configurations;
-            var list = new List<string>();
-            if(config != null)
-            {
-                foreach(var c in config)
-                {
-                    list.Add(c.TimePayment.Value.ToString("MM/yyyy"));
-                }    
-            }
-            ViewBag.Month = new SelectList(list);
             ViewBag.IdBranch = new SelectList(db.Branches.Where(x=>x.Enable==true), "Id", "Name");
             return View();
         }

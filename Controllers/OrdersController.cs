@@ -145,6 +145,12 @@ namespace SuperbrainManagement.Controllers
                     string badgeStatus = "";
                     string strbtn = "";
                     string strbtnprint = "";
+                    decimal tongtien = 0;
+                    if (reader["tongtien"] != DBNull.Value)
+                    {
+                        decimal.TryParse(reader["tongtien"].ToString(), out tongtien);
+                    }
+
                     if (reader["status"].ToString() == "1")
                     {
                         badgeStatus = "<span class='badge text-success bg-light'>Đơn hàng mới</span>";
@@ -152,7 +158,8 @@ namespace SuperbrainManagement.Controllers
                                 + "<a href=\"/Orders/PrintOrder?IdOrder=" + reader["Id"] +"\" class=\"btn btn-success btn-sm ms-1\"><i class=\"ti ti-printer\"></i></a>";
                         if (CheckUsers.CheckHQ())
                         {
-                            strbtnprint= "<a href=\"/Orders/PrintOrderDelivery?IdOrder=" + reader["Id"] + "\" class=\"btn btn-success btn-sm ms-1\"><i class=\"ti ti-printer\"></i> In phiếu</a>";
+                            strbtnprint= "<a href=\"/Orders/PrintOrderDelivery?IdOrder=" + reader["Id"] + "\" class=\"btn btn-success btn-sm ms-1\"><i class=\"ti ti-printer\"></i> In phiếu</a>"
+                                + "<a href=\"/Payment/CreatePayment?orderId=" + reader["Id"] + "&amount="+tongtien+"\" class=\"btn btn-success btn-sm ms-1\"><i class=\"ti ti-printer\"></i> Thanh toán</a>";
 
                         }
                     }
@@ -186,7 +193,6 @@ namespace SuperbrainManagement.Controllers
                         badgeStatus = "<span class='badge text-danger bg-light'>Đơn hàng hủy</span>";
                         strbtn = "";
                     }
-                    double tongtien = Double.Parse(reader["tongtien"].ToString());
                     str += "<div class='card mb-2'><div class=\"card-header\" style='padding:5px 20px!important;'>"
                                     + "<div class=\"d-flex w-100 justify-content-between\">"
                                         + "<p class=\"mb-1\"><i class=\"ti ti-shopping-cart\"></i> <a href='javascript:Status_Order(" + reader["Id"] + ")' class='text-dark fw-bolder'>" + reader["Code"] + "</a> " + badgeStatus + "</p>"
