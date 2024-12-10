@@ -1,0 +1,21 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container text-center">
+    <h2>Thanh toán</h2>
+    <p>Nhập thông tin thanh toán của bạn.</p>
+    <form action="/Payment/CreatePayment" method="post">
+        <div class="form-group">
+            <label for="amount">Số tiền (VNĐ):</label>
+            <input type="number" name="amount" id="amount" class="form-control" placeholder="Nhập số tiền" required />
+        </div>
+        <div class="form-group">
+            <label for="orderId">Mã đơn hàng:</label>
+            <input type="text" name="orderId" id="orderId" class="form-control" value="DH123456" readonly />
+        </div>
+        <button type="submit" class="btn btn-success mt-3">Gọi Thanh Toán</button>
+    </form>
+</div>

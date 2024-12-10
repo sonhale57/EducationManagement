@@ -12,7 +12,8 @@
             {
                 @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", @onchange = "Loadlist()" })
             }
-            @Html.DropDownList("Month", null, htmlAttributes: new { @class = "form-control ms-1 rounded-1", @onchange = "Loadlist()" })
+            <input type="text" class="form-control ms-1 rounded-1" name="fromdate" id="fromdate" placeholder="Tìm kiếm" value="" onchange="return Loadlist()">
+            <input type="text" class="form-control ms-1 rounded-1" name="todate" id="todate" placeholder="Tìm kiếm" value="" onchange="return Loadlist()">
         </div>
     </div>
     <div class="col col-md-7 col-sm-12 text-end">
@@ -45,15 +46,29 @@
     </div>
 </div>
 <script>
-    Loadlist();
+    $(function () {
+        $("#fromdate").datepicker({ dateFormat: "dd/mm/yy" });
+        $("#todate").datepicker({ dateFormat: "dd/mm/yy", maxDate: 1 });
+        if ($("#fromdate").val() == "") {
+            $("#fromdate").datepicker("setDate", -30);
+        }
+        if ($("#todate").val() == "") {
+            $("#todate").datepicker("setDate", 1);
+        }
+        Loadlist();
+    });
     function Loadlist() {
         $(".loader").html("<td colspan=6 class='text-center'>Đang tải dữ liệu, vui lòng đợi <img src='/assets/images/loading.gif' height='35' alt='loading...'></td>");
+        var fromDate = $("#fromdate").val().split("/").reverse().join("-");
+        var toDate = $("#todate").val().split("/").reverse().join("-");
         $.ajax({
             url: '@Url.Action("Loadlist_Statistics", "Courses")',
             type: "GET",
             data: {
                 IdBranch: $("#IdBranch").val(),
-                month: $("#Month").val()
+                month: $("#Month").val(),
+                Fromdate: fromDate,
+                Todate: toDate
             },
             success: function (data) {
                 $(".loader").html("");
