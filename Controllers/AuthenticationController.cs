@@ -62,6 +62,7 @@ namespace SuperbrainManagement.Controllers
                 return View();
             }
             login["iduser"] = md5.Encrypt(user.Id.ToString());
+            login["username"] = md5.Encrypt(user.Username.ToString());
             login["login"] = md5.Encrypt("Yvaphatco" + user.Id.ToString());
             login["browser"] = Request.Browser.Browser;
             login["IPAddress "] = Request.UserHostAddress;
@@ -100,6 +101,7 @@ namespace SuperbrainManagement.Controllers
         public ActionResult Logout()
         {
             HttpCookie login = new HttpCookie("check");
+            login["username"] = "";
             login["iduser"] = "";
             login["login"] = "";
             Response.Cookies.Add(login);

@@ -7,7 +7,7 @@
                 </a>
             </li>
         </ul>
-        <ul class="navbar-nav">
+        <ul class="navbar-nav d-none d-lg-block d-sm-none">
             <li class="nav-item">
                 <a class="nav-link fs-3" href="javascript:void(0)">
                     <i class="ti ti-home text-primary"></i> <i class="ti ti-arrow-right fs-1 ms-2 me-2"></i> @ViewBag.Controller <i class="ti ti-arrow-right fs-1 ms-2 me-2"></i> @ViewBag.Title
@@ -25,7 +25,7 @@
                         <div class="message-body">
                             <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
                                 <i class="ti ti-user fs-6"></i>
-                                <p class="mb-0 fs-3">Hồ sơ cá nhân</p>
+                                <p class="mb-0 fs-3">Xin chào, @SuperbrainManagement.Controllers.CheckUsers.getUsername()!</p>
                             </a>
                             <a href="javascript:ChangePassword()" class="d-flex align-items-center gap-2 dropdown-item">
                                 <i class="ti ti-lock-access fs-6"></i>

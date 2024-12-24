@@ -281,6 +281,7 @@
     <Compile Include="Controllers\PaymentController.cs" />
     <Compile Include="Controllers\ProductCategoriesController.cs" />
     <Compile Include="Controllers\ProductReceiptionDetailsController.cs" />
+    <Compile Include="Controllers\Profile\ProfileController.cs" />
     <Compile Include="Controllers\ProgramsController.cs" />
     <Compile Include="Controllers\MarketingCampaignsController.cs" />
     <Compile Include="Controllers\PromotionsController.cs" />
@@ -1038,6 +1039,7 @@
     <Content Include="Views\Settings\_Config.cshtml" />
     <Content Include="Content\EmailTemplate_newStudent.html" />
     <Content Include="Views\Orders\StatisticOrder.cshtml" />
+    <Content Include="Views\Profile\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Authentication\Index.cshtml" />

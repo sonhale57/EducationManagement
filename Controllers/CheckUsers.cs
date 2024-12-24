@@ -61,6 +61,20 @@ namespace SuperbrainManagement.Controllers
             }
             catch { return ""; }
         }
+        public static string getUsername()
+        {
+            try
+            {
+                MD5Hash md5 = new MD5Hash();
+                string idlogin = "";
+                if (System.Web.HttpContext.Current.Request.Cookies["check"] != null && System.Web.HttpContext.Current.Request.Cookies["check"]["iduser"] != null)
+                {
+                    idlogin = md5.Decrypt(System.Web.HttpContext.Current.Request.Cookies["check"]["username"].ToString());
+                }
+                return idlogin;
+            }
+            catch { return ""; }
+        }
 
         /// <summary>
         /// Lấy IdUser đăng nhập
