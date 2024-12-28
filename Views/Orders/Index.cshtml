@@ -3,19 +3,29 @@
     ViewBag.Title = "Quản lý đơn hàng";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div class="row">
-    <div class="col col-md-4 col-sm-12">
-        <div class="input-group">
-            @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
-            {
-                @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control select2", @onchange = "Loadlist(1)" })
-            }
-            <input type="text" class="form-control ms-1 rounded-1" name="searchString" id="searchString" placeholder="Tìm kiếm" value="@ViewBag.CurrentFilter">
-            <a class="input-group-text bg-success ms-1 rounded-1" id="basic-addon2" href="javascript:Loadlist()"><i class="ti ti-search text-white"></i></a>
+<div class="row gy-1">
+    <div class="col-xl-3 col-md-4 p-1">
+        @if (SuperbrainManagement.Controllers.CheckUsers.CheckHQ())
+        {
+            @Html.DropDownList("IdBranch", null, htmlAttributes: new { @class = "form-control form-control-sm select2", @onchange = "Loadlist(1)" })
+        }
+    </div>
+    <div class="col-xl-3 p-1">
+        <div class="search-box">
+            <input type="text" name="searchString" id="searchString" class="form-control search" placeholder="Search customer, email etc...">
+            <i class="ri-search-line search-icon"></i>
         </div>
     </div>
-    <div class="col col-md-8 col-sm-12 text-right" style="text-align:right;">
-        <a href="javascript:Loadlist_orders()" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    <div class="col-xl-2 col-md-4 p-1">
+        <input type="text" class="form-control flatpickr-input" id="datepicker-range" data-provider="flatpickr" data-date-format="d M, Y" data-range-date="true" placeholder="Select date" readonly="readonly">
+    </div>
+
+    <div class="col-xl-2 col-md-4 p-1">
+        <button class="btn btn-primary w-100" onclick="Loadlist();"><i class="ti ti-filter me-1"></i> Filter</button>
+
+    </div>
+    <div class="col-xl-2 col-md-4 p-1">
+        <a href="javascript:Loadlist_orders()" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#exampleModal">
             <i class="ti ti-shopping-cart-plus fst-italic"></i> Đặt hàng
         </a>
     </div>
