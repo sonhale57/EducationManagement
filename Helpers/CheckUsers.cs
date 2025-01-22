@@ -250,7 +250,7 @@ namespace SuperbrainManagement.Controllers
                     }
                     return "";
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     // Log exception nếu cần thiết
                     return "";
